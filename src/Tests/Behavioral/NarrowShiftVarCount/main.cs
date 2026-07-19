@@ -21,20 +21,20 @@ internal static void Main() {
     int8 s8 = -100;
     int16 s16 = -30000;
     nb n = 200;
-    fmt.Println(b + (byte)(cb << (int)(k)));
-    fmt.Println((byte)(cb << (int)(k)));
-    fmt.Println((byte)(tcb << (int)(k)));
-    fmt.Println(b + (byte)(ucb << (int)(k)));
+    fmt.Println(b + cb.Lsh(k));
+    fmt.Println(cb.Lsh(k));
+    fmt.Println(tcb.Lsh(k));
+    fmt.Println(b + ((byte)ucb).Lsh(k));
     fmt.Println((byte)(cb << (int)(3)));
-    fmt.Println((byte)(cb << (int)(ki)));
-    fmt.Println((uint16)(w << (int)(k)));
-    fmt.Println((uint16)(tcw << (int)(k)));
-    fmt.Println((int8)(s8 << (int)(k)));
-    fmt.Println((int16)(s16 << (int)(k)));
+    fmt.Println(cb.Lsh((uint64)(ki)));
+    fmt.Println(w.Lsh(k));
+    fmt.Println(tcw.Lsh(k));
+    fmt.Println(s8.Lsh(k));
+    fmt.Println(s16.Lsh(k));
     fmt.Println((nb)(byte)(n << (int)(k)));
-    fmt.Println((cb >> (int)(k)));
-    fmt.Println((s8 >> (int)(k)));
-    var x = (byte)(cb << (int)(k));
+    fmt.Println(cb.Rsh(k));
+    fmt.Println(s8.Rsh(k));
+    var x = (byte)(cb.Lsh(k));
     fmt.Println(x + b);
 }
 

@@ -457,6 +457,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
 
     [TestMethod]
+    public void CheckGoShiftSemantics() => CheckTarget("GoShiftSemantics");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]

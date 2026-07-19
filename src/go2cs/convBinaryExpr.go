@@ -201,6 +201,215 @@ func isWideShiftType(csType string) bool {
 	return false
 }
 
+// shiftGuardWidth reports the bit width of a shift whose LEFT operand is a BASIC integer type — the
+// scope in which the converter applies its Go-semantics shift guard (GoShift.Rsh/Lsh). It returns
+// (basic, width, true) for an unnamed basic-integer left operand (8/16/32/64; native int/uint/uintptr
+// → 64 on this target), or (nil, 0, false) otherwise. The shift's result type equals its left operand's
+// type in Go, so it is read from the whole shift node. A NAMED [GoType] wrapper left operand yields a
+// *types.Named (not *types.Basic) here and is deliberately OUT of scope: those keep their existing
+// generated-operator emission (the current, untouched path).
+func (v *Visitor) shiftGuardWidth(binaryExpr *ast.BinaryExpr) (*types.Basic, int, bool) {
+	tv, ok := v.info.Types[binaryExpr]
+
+	if !ok || tv.Type == nil {
+		return nil, 0, false
+	}
+
+	basic, ok := tv.Type.(*types.Basic)
+
+	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUntyped != 0 {
+		return nil, 0, false
+	}
+
+	switch basic.Kind() {
+	case types.Int8, types.Uint8:
+		return basic, 8, true
+	case types.Int16, types.Uint16:
+		return basic, 16, true
+	case types.Int32, types.Uint32:
+		return basic, 32, true
+	case types.Int64, types.Uint64:
+		return basic, 64, true
+	case types.Int, types.Uint, types.Uintptr:
+		return basic, 64, true
+	}
+
+	return nil, 0, false
+}
+
+// shiftLeftRendersAsUntypedWrapper reports whether the shift's left operand renders as a golib Untyped*
+// wrapper — a COMPUTED constant that references a named untyped constant (`bias - 1`, emitted as
+// UntypedInt arithmetic). Such an operand shifts through UntypedInt.operator<< / >> on its own 64-bit
+// backing, so it is left on that existing path rather than routed to the basic-width guard (UntypedInt
+// has no Rsh/Lsh overload, and its operators are the intended emission — see the UntypedIntWideShift
+// behavioral test). A bare named-const reference or literal is NOT a computed operand, so it stays
+// guardable: emitGuardedShift casts it to the shift's resolved basic type first.
+func (v *Visitor) shiftLeftRendersAsUntypedWrapper(expr ast.Expr) bool {
+	return v.isComputedConstOperand(expr) && v.containsUntypedNamedConstRef(expr)
+}
+
+// shiftCountGuarded reports whether the shift COUNT may reach or exceed `width` at runtime and so needs
+// the Go-semantics guard. It returns false (→ native emission, unchanged) when the count is PROVABLY in
+// [0, width): a constant in range (R1), a mask `y & M` whose constant `M` satisfies 0 <= M <= width-1
+// (R2), or a modulo `y % M` whose constant `M` satisfies 1 <= M <= width (R3, bounding the count to
+// [0, width-1]). A constant count >= width IS guarded (native masking would produce the wrong value); a
+// NEGATIVE constant count is Go-illegal (a runtime panic) and left native — out of scope.
+func (v *Visitor) shiftCountGuarded(right ast.Expr, width int) bool {
+	// R1 — a constant count.
+	if c, ok := v.constIntShiftValue(right); ok {
+		if c < 0 {
+			return false
+		}
+
+		return c >= int64(width)
+	}
+
+	// R2 / R3 — a masked or modulo'd count is bounded below the width. Unwrap parentheses so the
+	// structural match sees `y & M` / `y % M` even when the source parenthesized the count.
+	inner := right
+
+	for {
+		paren, ok := inner.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		inner = paren.X
+	}
+
+	if bin, ok := inner.(*ast.BinaryExpr); ok {
+		switch bin.Op {
+		case token.AND:
+			// EITHER operand a constant mask in [0, width-1] bounds the count.
+			if m, ok := v.constIntShiftValue(bin.X); ok && m >= 0 && m <= int64(width)-1 {
+				return false
+			}
+
+			if m, ok := v.constIntShiftValue(bin.Y); ok && m >= 0 && m <= int64(width)-1 {
+				return false
+			}
+		case token.REM:
+			// A modulo by a constant in [1, width] bounds the count to [0, width-1].
+			if m, ok := v.constIntShiftValue(bin.Y); ok && m >= 1 && m <= int64(width) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+// constIntShiftValue returns the exact int64 value of an integer-constant expression, or (0, false).
+// A constant too large for int64 returns false — the caller treats an out-of-range shift count as a
+// large (guarded) value, which is the correct outcome.
+func (v *Visitor) constIntShiftValue(expr ast.Expr) (int64, bool) {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil {
+		return 0, false
+	}
+
+	val := constant.ToInt(tv.Value)
+
+	if val.Kind() != constant.Int {
+		return 0, false
+	}
+
+	return constant.Int64Val(val)
+}
+
+// emitGuardedShift renders a shift as golib's Go-semantics guard (`left.Rsh(count)` for `>>`,
+// `left.Lsh(count)` for `<<`) for a count that is not provably within `basic`'s width. `leftOperand` is
+// the already-converted left operand; `rawCount` is the already-converted count WITHOUT the `(int)`
+// truncation the native path adds — the guard needs the count's full magnitude widened to uint64.
+func (v *Visitor) emitGuardedShift(binaryExpr *ast.BinaryExpr, leftOperand, rawCount, binaryOp string, basic *types.Basic) string {
+	method := "Lsh"
+
+	if binaryOp == ">>" {
+		method = "Rsh"
+	}
+
+	// LEFT operand → the method receiver. A TYPED operand already carries its width, so its natural C#
+	// type selects the width-matching overload; parenthesize it only when its render is not a bare
+	// primary. An UNTYPED-const (or tightened narrow-const) left operand renders as a bare C# literal
+	// whose default type would bind the WRONG-width overload (`1` → int32's `Lsh`), so cast it to the
+	// shift's resolved basic type first — the same width the native path's retype logic would apply.
+	var receiver string
+
+	if v.isUntypedNumericConstArg(binaryExpr.X) || v.tightenedNarrowConstRef(binaryExpr.X) {
+		underlyingCS := v.getCSTypeName(basic)
+
+		if v.needsParentheses(binaryExpr.X) {
+			receiver = fmt.Sprintf("((%s)(%s))", underlyingCS, leftOperand)
+		} else {
+			receiver = fmt.Sprintf("((%s)%s)", underlyingCS, leftOperand)
+		}
+	} else if v.needsParentheses(binaryExpr.X) || v.shiftReceiverRendersAsCast(binaryExpr.X) {
+		// A compound expression, or a Go type CONVERSION whose render is a low-precedence C# cast
+		// (`uint64(1)` → `(uint64)1`), on which a trailing `.Lsh(…)` would mis-bind to the inner
+		// operand — parenthesize so the method binds to the whole converted value.
+		receiver = "(" + leftOperand + ")"
+	} else {
+		receiver = leftOperand
+	}
+
+	return fmt.Sprintf("%s.%s(%s)", receiver, method, v.shiftCountUint64Operand(binaryExpr.Y, rawCount))
+}
+
+// shiftReceiverRendersAsCast reports whether a shift's left operand renders as a leading C# cast — a Go
+// type CONVERSION (`T(x)` → `(T)x`) — so it needs parenthesizing before a trailing `.Rsh`/`.Lsh` (a cast
+// binds looser than member access, so `(T)x.Rsh(…)` would apply to `x`, not `(T)x`).
+func (v *Visitor) shiftReceiverRendersAsCast(expr ast.Expr) bool {
+	call, ok := expr.(*ast.CallExpr)
+	return ok && v.callExprIsTypeConversion(call)
+}
+
+// shiftCountUint64Operand renders the shift count widened to the guard's uint64 parameter, so its FULL
+// magnitude is seen before the width comparison (a computed count such as `64 - n` that unsigned-wraps
+// stays huge; a narrower negative count reads as huge → 0, matching the out-of-scope negative-count
+// behavior). A count already typed uint64 or native uint widens implicitly and is passed through
+// unwrapped; a NAMED numeric count converts only to its own underlying basic, so it is routed through it
+// (`(uint64)(nint)(sh)`) and a numeric TYPE PARAMETER through the ConvertToUInt64 bridge — both mirroring
+// intCastOperand. Every other integer count takes a plain `(uint64)(…)` wrap.
+func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) string {
+	if !v.shiftCountNeedsWiden(expr) {
+		return converted
+	}
+
+	if named, ok := v.getType(expr, false).(*types.Named); ok {
+		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
+			return fmt.Sprintf("(uint64)(%s)(%s)", v.getCSTypeName(basic), converted)
+		}
+	}
+
+	if tp, ok := types.Unalias(v.getType(expr, false)).(*types.TypeParam); ok && typeParamIsInteger(tp) {
+		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSTypeName(tp), converted)
+	}
+
+	return fmt.Sprintf("(uint64)(%s)", converted)
+}
+
+// shiftCountNeedsWiden reports whether a shift count needs widening for the guard — true unless the count
+// is already typed uint64 or native uint, which convert to the uint64 parameter implicitly (so their
+// emitted form is passed through unwrapped).
+func (v *Visitor) shiftCountNeedsWiden(expr ast.Expr) bool {
+	t := v.getExprType(expr)
+
+	if t == nil {
+		return true
+	}
+
+	if basic, ok := t.Underlying().(*types.Basic); ok {
+		switch basic.Kind() {
+		case types.Uint64, types.Uint:
+			return false
+		}
+	}
+
+	return true
+}
+
 // concreteNumericCSType returns the C# name of a concrete (non-untyped) numeric type's UNDERLYING
 // basic type, or "". The underlying (e.g. `uint8` for a named `Tag uint8`) is used so an
 // untyped-const cast is `(uint8)c`, not `(Tag)c`: an UntypedInt wrapper converts to the basic type
@@ -722,6 +931,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				return fmt.Sprintf("!AreEqual(%s, %s)", leftOperand, rightOperand)
 			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {
+			// Go zeroes (or, for a signed right shift, sign-extends) a shift whose count reaches or
+			// exceeds the operand's width, but C#'s native shift MASKS the count (`n & 63`/`n & 31`,
+			// and sub-int operands promote to `int` → `& 31`). So when the count is NOT provably in
+			// [0, width) the shift must route through golib's Go-semantics guard (GoShift.Rsh/Lsh)
+			// rather than the native operator. In scope only for a basic-integer left operand (a
+			// NAMED [GoType] wrapper keeps its existing generated-operator emission); a constant,
+			// masked, or modulo'd count that is provably bounded stays native (unchanged, ~zero churn).
+			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X) {
+				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
+			}
+
 			rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
 
 			// Go's shift operators bind at the multiplicative level (tighter than `+`/`-`),

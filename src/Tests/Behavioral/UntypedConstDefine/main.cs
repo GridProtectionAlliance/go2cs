@@ -43,7 +43,7 @@ internal static void tightenGuards() => func((defer, recover) => {
     fmt.Println((v2 << (int)(sh)));
     const nint shifted = 3;
     nuint k = 2;
-    fmt.Println((shifted << (int)(k)));
+    fmt.Println(shifted.Lsh(k));
     const uint16 localMarker = 0xFFFD;
     slice<uint16> u16 = default!;
     u16 = append(u16, localMarker);
@@ -51,13 +51,13 @@ internal static void tightenGuards() => func((defer, recover) => {
     const byte cb = 200;
     nuint sh1 = 1;
     byte b = 1;
-    fmt.Println(b + (byte)(cb << (int)(sh1)));
+    fmt.Println(b + ((byte)cb).Lsh(sh1));
     const int16 c16 = 30000;
     int16 i16 = 1;
-    fmt.Println(i16 + (int16)(c16 << (int)(sh1)));
+    fmt.Println(i16 + ((int16)c16).Lsh(sh1));
     const uint16 cu16 = 60000;
     uint16 w16 = 1;
-    fmt.Println(w16 + (uint16)(cu16 << (int)(sh1)));
+    fmt.Println(w16 + ((uint16)cu16).Lsh(sh1));
     const nint infinity = 1000000;
     nint lineCount = 3;
     if (lineCount < infinity) {
