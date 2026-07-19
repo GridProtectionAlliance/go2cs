@@ -109,7 +109,7 @@ internal static float64 log(float64 x) {
 
     // reduce
     var (f1, ki) = Frexp(x);
-    if (f1 < Sqrt2 / 2) {
+    if (f1 < Sqrt2 / 2D) {
         f1 *= 2;
         ki--;
     }

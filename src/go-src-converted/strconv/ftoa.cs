@@ -76,11 +76,11 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
         break;
     }}
 
-    var neg = (bits >> (int)(((~flt).expbits + (~flt).mantbits))) != 0;
-    nint exp = (nint)((nint)((bits >> (int)((~flt).mantbits))) & ((1 << (int)((~flt).expbits)) - 1));
-    var mant = (uint64)(bits & (((uint64)1 << (int)((~flt).mantbits)) - 1));
+    var neg = bits.Rsh(((~flt).expbits + (~flt).mantbits)) != 0;
+    nint exp = (nint)((nint)(bits.Rsh((~flt).mantbits)) & (((nint)1).Lsh((~flt).expbits) - 1));
+    var mant = (uint64)(bits & (((uint64)1).Lsh((~flt).mantbits) - 1));
     var exprᴛ1 = exp;
-    if (exprᴛ1 == (1 << (int)((~flt).expbits)) - 1) {
+    if (exprᴛ1 == ((nint)1).Lsh((~flt).expbits) - 1) {
         // Inf, NaN
         @string s = default!;
         switch (ᐧ) {
@@ -103,7 +103,7 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
         exp++;
     }
     else { /* default: */
-        mant |= (uint64)(((uint64)1 << (int)((~flt).mantbits)));
+        mant |= (uint64)(((uint64)1).Lsh((~flt).mantbits));
     }
 
     // denormalized
@@ -316,7 +316,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ж<
     // Our lower bound is halfway between, mantlo*2+1 << explo-mantbits-1.
     uint64 mantlo = default!;
     nint explo = default!;
-    if (mant > ((uint64)1 << (int)(flt.mantbits)) || exp == minexp){
+    if (mant > ((uint64)1).Lsh(flt.mantbits) || exp == minexp){
         mantlo = mant - 1;
         explo = exp;
     } else {
@@ -373,7 +373,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ж<
         // down (i.e., and we have reached the final digit of lower).
         var okdown = l != m || inclusive && li + 1 == (~lower).nd;
         switch (ᐧ) {
-        case {} when upperdelta == 0 && m + 1 < u: {
+        case {} when upperdelta == 0 && (byte)(m + 1) < u: {
             upperdelta = 2;
             break;
         }
@@ -548,7 +548,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
     // Round if requested.
     if (prec >= 0 && prec < 15) {
         nuint shift = (nuint)(prec * 4);
-        var extra = (uint64)(((mant << (int)(shift))) & (1152921504606846976L - 1));
+        var extra = (uint64)((mant.Lsh(shift)) & (1152921504606846976L - 1));
         mant >>= (int)(60 - shift);
         if ((uint64)(extra | ((uint64)(mant & 1))) > ((uint64)1 << (int)(59))) {
             mant++;

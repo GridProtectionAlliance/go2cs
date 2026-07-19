@@ -106,7 +106,7 @@ public static float64 J0(float64 x) {
         var ss = sΔ1 - c;
         var cc = sΔ1 + c;
         // make sure x+x does not overflow
-        if (x < MaxFloat64 / 2) {
+        if (x < MaxFloat64 / 2D) {
             var zΔ1 = -Cos(x + x);
             if (sΔ1 * c < 0){
                 cc = zΔ1 / ss;
@@ -119,11 +119,11 @@ public static float64 J0(float64 x) {
         float64 zΔ2 = default!;
         if (x > (float64)Two129){
             // |x| > ~6.8056e+38
-            zΔ2 = (float64)(1 / SqrtPi) * cc / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * cc / Sqrt(x);
         } else {
             var uΔ1 = pzero(x);
             var v = qzero(x);
-            zΔ2 = (float64)(1 / SqrtPi) * (uΔ1 * cc - v * ss) / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * (uΔ1 * cc - v * ss) / Sqrt(x);
         }
         return zΔ2;
     }
@@ -203,7 +203,7 @@ public static float64 Y0(float64 x) {
         // j0(x) = 1/sqrt(pi) * (P(0,x)*cc - Q(0,x)*ss) / sqrt(x)
         // y0(x) = 1/sqrt(pi) * (P(0,x)*ss + Q(0,x)*cc) / sqrt(x)
         // make sure x+x does not overflow
-        if (x < MaxFloat64 / 2) {
+        if (x < MaxFloat64 / 2D) {
             var zΔ1 = -Cos(x + x);
             if (s * c < 0){
                 cc = zΔ1 / ss;
@@ -214,23 +214,23 @@ public static float64 Y0(float64 x) {
         float64 zΔ2 = default!;
         if (x > (float64)Two129){
             // |x| > ~6.8056e+38
-            zΔ2 = (float64)(1 / SqrtPi) * ss / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * ss / Sqrt(x);
         } else {
             var uΔ1 = pzero(x);
             var vΔ1 = qzero(x);
-            zΔ2 = (float64)(1 / SqrtPi) * (uΔ1 * ss + vΔ1 * cc) / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * (uΔ1 * ss + vΔ1 * cc) / Sqrt(x);
         }
         return zΔ2;
     }
     // |x| >= 2.0
     if (x <= TwoM27) {
-        return U00 + (float64)(2 / Pi) * Log(x);
+        return U00 + /* (2 / Pi) */ 0.6366197723675814D * Log(x);
     }
     // |x| < ~7.4506e-9
     var z = x * x;
     var u = U00 + z * (U01 + z * (U02 + z * (U03 + z * (U04 + z * (U05 + z * U06)))));
     var v = 1 + z * (V01 + z * (V02 + z * (V03 + z * V04)));
-    return u / v + (float64)(2 / Pi) * J0(x) * Log(x);
+    return u / v + /* (2 / Pi) */ 0.6366197723675814D * J0(x) * Log(x);
 }
 
 // ~7.4506e-9 < |x| < 2.0

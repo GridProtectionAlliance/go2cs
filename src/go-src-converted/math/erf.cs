@@ -198,7 +198,7 @@ internal static float64 erf(float64 x) {
         return 1;
     }
     case {} when IsInf(x, -1): {
-        return -1;
+        return -1D;
     }}
 
     var sign = false;
@@ -235,21 +235,21 @@ internal static float64 erf(float64 x) {
         var P = (float64)pa0 + sΔ2 * ((float64)pa1 + sΔ2 * ((float64)pa2 + sΔ2 * ((float64)pa3 + sΔ2 * ((float64)pa4 + sΔ2 * ((float64)pa5 + sΔ2 * (float64)pa6)))));
         var Q = 1 + sΔ2 * ((float64)qa1 + sΔ2 * ((float64)qa2 + sΔ2 * ((float64)qa3 + sΔ2 * ((float64)qa4 + sΔ2 * ((float64)qa5 + sΔ2 * (float64)qa6)))));
         if (sign) {
-            return (float64)(-erx) - P / Q;
+            return /* -erx */ -0.8450629115104675D - P / Q;
         }
         return (float64)erx + P / Q;
     }
     if (x >= 6) {
         // inf > |x| >= 6
         if (sign) {
-            return -1;
+            return -1D;
         }
         return 1;
     }
     var s = 1 / (x * x);
     float64 R = default!;
     float64 S = default!;
-    if (x < 1 / 0.35D){
+    if (x < 1D / 0.35D){
         // |x| < 1 / 0.35  ~ 2.857143
         R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
         S = 1 + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
@@ -329,16 +329,16 @@ internal static float64 erfc(float64 x) {
         var P = (float64)pa0 + s * ((float64)pa1 + s * ((float64)pa2 + s * ((float64)pa3 + s * ((float64)pa4 + s * ((float64)pa5 + s * (float64)pa6)))));
         var Q = 1 + s * ((float64)qa1 + s * ((float64)qa2 + s * ((float64)qa3 + s * ((float64)qa4 + s * ((float64)qa5 + s * (float64)qa6)))));
         if (sign) {
-            return (float64)(1 + erx) + P / Q;
+            return /* 1 + erx */ 1.8450629115104675D + P / Q;
         }
-        return (float64)(1 - erx) - P / Q;
+        return /* 1 - erx */ 0.15493708848953247D - P / Q;
     }
     if (x < 28) {
         // |x| < 28
         var s = 1 / (x * x);
         float64 R = default!;
         float64 S = default!;
-        if (x < 1 / 0.35D){
+        if (x < 1D / 0.35D){
             // |x| < 1 / 0.35 ~ 2.857143
             R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
             S = 1 + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));

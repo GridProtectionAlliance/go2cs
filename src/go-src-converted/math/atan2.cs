@@ -48,13 +48,13 @@ internal static float64 atan2(float64 y, float64 x) {
         return Copysign(Pi, y);
     }
     case {} when x is 0: {
-        return Copysign(Pi / 2, y);
+        return Copysign(Pi / 2D, y);
     }
     case {} when IsInf(x, 0): {
         if (IsInf(x, 1)) {
             switch (ᐧ) {
             case {} when IsInf(y, 0): {
-                return Copysign(Pi / 4, y);
+                return Copysign(Pi / 4D, y);
             }
             default: {
                 return Copysign(0, y);
@@ -63,7 +63,7 @@ internal static float64 atan2(float64 y, float64 x) {
         }
         switch (ᐧ) {
         case {} when IsInf(y, 0): {
-            return Copysign(3 * Pi / 4, y);
+            return Copysign(3D * Pi / 4D, y);
         }
         default: {
             return Copysign(Pi, y);
@@ -72,7 +72,7 @@ internal static float64 atan2(float64 y, float64 x) {
         break;
     }
     case {} when IsInf(y, 0): {
-        return Copysign(Pi / 2, y);
+        return Copysign(Pi / 2D, y);
     }}
 
     // Call atan and determine the quadrant.

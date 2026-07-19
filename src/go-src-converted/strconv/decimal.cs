@@ -122,14 +122,14 @@ internal static void rightShift(ж<@decimal> Ꮡa, nuint k) {
     // write pointer
     // Pick up enough leading digits to cover first shift.
     nuint n = default!;
-    for (; (n >> (int)(k)) == 0; r++) {
+    for (; n.Rsh(k) == 0; r++) {
         if (r >= a.nd) {
             if (n == 0) {
                 // a == 0; shouldn't get here, but handle anyway.
                 a.nd = 0;
                 return;
             }
-            while ((n >> (int)(k)) == 0) {
+            while (n.Rsh(k) == 0) {
                 n = n * 10;
                 r++;
             }
@@ -139,11 +139,11 @@ internal static void rightShift(ж<@decimal> Ꮡa, nuint k) {
         n = n * 10 + c - (rune)'0';
     }
     a.dp -= r - 1;
-    nuint mask = (((nuint)1 << (int)(k))) - 1;
+    nuint mask = (((nuint)1).Lsh(k)) - 1;
     // Pick up a digit, put down a digit.
     for (; r < a.nd; r++) {
         nuint c = (nuint)a.d[r];
-        nuint dig = (n >> (int)(k));
+        nuint dig = n.Rsh(k);
         n &= (nuint)(mask);
         a.d[w] = (byte)(dig + (rune)'0');
         w++;
@@ -151,7 +151,7 @@ internal static void rightShift(ж<@decimal> Ꮡa, nuint k) {
     }
     // Put down extra digits.
     while (n > 0) {
-        nuint dig = (n >> (int)(k));
+        nuint dig = n.Rsh(k);
         n &= (nuint)(mask);
         if (w < len(a.d)){
             a.d[w] = (byte)(dig + (rune)'0');
@@ -345,7 +345,7 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
     // Pick up a digit, put down a digit.
     nuint n = default!;
     for (r--; r >= 0; r--) {
-        n += (((nuint)a.d[r] - (rune)'0') << (int)(k));
+        n += ((nuint)a.d[r] - (rune)'0').Lsh(k);
         nuint quo = n / 10;
         nuint rem = n - 10 * quo;
         w--;
@@ -419,7 +419,7 @@ internal static bool shouldRoundUp(ж<@decimal> Ꮡa, nint nd) {
         if (a.trunc) {
             return true;
         }
-        return nd > 0 && (a.d[nd - 1] - (rune)'0') % 2 != 0;
+        return nd > 0 && (byte)((a.d[nd - 1] - (rune)'0') % 2) != 0;
     }
     // not halfway - digit tells all
     return a.d[nd] >= (rune)'5';

@@ -151,7 +151,7 @@ internal static float64 expm1(float64 x) {
         return x;
     }
     case {} when IsInf(x, -1): {
-        return -1;
+        return -1D;
     }}
 
     var absx = x;
@@ -164,7 +164,7 @@ internal static float64 expm1(float64 x) {
     if (absx >= Ln2X56) {
         // if |x| >= 56 * ln2
         if (sign) {
-            return -1;
+            return -1D;
         }
         // x < -56*ln2, return -1
         if (absx >= Othreshold) {
@@ -228,7 +228,7 @@ internal static float64 expm1(float64 x) {
     }
     case {} when k is 1: {
         if (x < -0.25D) {
-            return -2 * (e - (x + 0.5D));
+            return -2D * (e - (x + 0.5D));
         }
         return 1 + 2 * (x - e);
     }
@@ -241,7 +241,7 @@ internal static float64 expm1(float64 x) {
     // suffice to return exp(x)-1
     // add k to y's exponent
     if (k < 20) {
-        var tΔ2 = Float64frombits(0x3ff0000000000000UL - (((uint64)0x20000000000000UL >> (int)((nuint)k))));
+        var tΔ2 = Float64frombits(0x3ff0000000000000UL - (((uint64)0x20000000000000UL).Rsh((nuint)k)));
         // t=1-2**-k
         var yΔ3 = tΔ2 - (e - x);
         yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << (int)(52)));

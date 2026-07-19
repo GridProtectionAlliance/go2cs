@@ -104,7 +104,7 @@ public static float64 J1(float64 x) {
         var ss = -sΔ1 - c;
         var cc = sΔ1 - c;
         // make sure x+x does not overflow
-        if (x < MaxFloat64 / 2) {
+        if (x < MaxFloat64 / 2D) {
             var zΔ1 = Cos(x + x);
             if (sΔ1 * c > 0){
                 cc = zΔ1 / ss;
@@ -116,11 +116,11 @@ public static float64 J1(float64 x) {
         // y1(x) = 1/sqrt(pi) * (P(1,x)*ss + Q(1,x)*cc) / sqrt(x)
         float64 zΔ2 = default!;
         if (x > (float64)Two129){
-            zΔ2 = (float64)(1 / SqrtPi) * cc / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * cc / Sqrt(x);
         } else {
             var u = pone(x);
             var v = qone(x);
-            zΔ2 = (float64)(1 / SqrtPi) * (u * cc - v * ss) / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * (u * cc - v * ss) / Sqrt(x);
         }
         if (sign) {
             return -zΔ2;
@@ -182,7 +182,7 @@ public static float64 Y1(float64 x) {
         var ss = -s - c;
         var cc = s - c;
         // make sure x+x does not overflow
-        if (x < MaxFloat64 / 2) {
+        if (x < MaxFloat64 / 2D) {
             var zΔ1 = Cos(x + x);
             if (s * c > 0){
                 cc = zΔ1 / ss;
@@ -202,22 +202,22 @@ public static float64 Y1(float64 x) {
         // to compute the worse one.
         float64 zΔ2 = default!;
         if (x > (float64)Two129){
-            zΔ2 = (float64)(1 / SqrtPi) * ss / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * ss / Sqrt(x);
         } else {
             var uΔ1 = pone(x);
             var vΔ1 = qone(x);
-            zΔ2 = (float64)(1 / SqrtPi) * (uΔ1 * ss + vΔ1 * cc) / Sqrt(x);
+            zΔ2 = /* (1 / SqrtPi) */ 0.5641895835477563D * (uΔ1 * ss + vΔ1 * cc) / Sqrt(x);
         }
         return zΔ2;
     }
     if (x <= TwoM54) {
         // x < 2**-54
-        return (float64)(-(2 / Pi)) / x;
+        return /* -(2 / Pi) */ -0.6366197723675814D / x;
     }
     var z = x * x;
     var u = U00 + z * (U01 + z * (U02 + z * (U03 + z * U04)));
     var v = 1 + z * (V00 + z * (V01 + z * (V02 + z * (V03 + z * V04))));
-    return x * (u / v) + (float64)(2 / Pi) * (J1(x) * Log(x) - 1 / x);
+    return x * (u / v) + /* (2 / Pi) */ 0.6366197723675814D * (J1(x) * Log(x) - 1 / x);
 }
 
 // For x >= 8, the asymptotic expansions of pone is

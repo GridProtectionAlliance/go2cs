@@ -121,13 +121,13 @@ internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quot
         if (fallthrough || !matchᴛ1 && r is < 0x10000) {
             buf = append(buf, ((@string)@"\u"u8).ꓸꓸꓸ);
             for (nint s = 12; s >= 0; s -= 4) {
-                buf = append(buf, lowerhex[(rune)((r >> (int)((nuint)s)) & 0xF)]);
+                buf = append(buf, lowerhex[(rune)(r.Rsh((nuint)s) & 0xF)]);
             }
         }
         else if (!matchᴛ1) { /* default: */
             buf = append(buf, ((@string)@"\U"u8).ꓸꓸꓸ);
             for (nint s = 28; s >= 0; s -= 4) {
-                buf = append(buf, lowerhex[(rune)((r >> (int)((nuint)s)) & 0xF)]);
+                buf = append(buf, lowerhex[(rune)(r.Rsh((nuint)s) & 0xF)]);
             }
         }
 

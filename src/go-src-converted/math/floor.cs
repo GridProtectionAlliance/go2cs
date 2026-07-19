@@ -109,8 +109,8 @@ public static float64 Round(float64 x) {
         // must be either an integer, infinity, or NaN.
         const uint64 half = /* 1 << (shift - 1) */ 2251799813685248;
         e -= bias;
-        bits += (half >> (int)(e));
-        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
+        bits += half.Rsh(e);
+        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask).Rsh(e)));
     }
     return Float64frombits(bits);
 }
@@ -142,8 +142,8 @@ public static float64 RoundToEven(float64 x) {
         //   number is even or odd (respectively).
         const uint64 halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
         e -= bias;
-        bits += ((halfMinusULP + (uint64)(((bits >> (int)(((nuint)shift - e)))) & 1)) >> (int)(e));
-        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
+        bits += (halfMinusULP + (uint64)((bits.Rsh(((nuint)shift - e))) & 1)).Rsh(e);
+        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask).Rsh(e)));
     } else 
     if (e == bias - 1 && (uint64)(bits & (uint64)fracMask) != 0){
         // Round 0.5 < abs(x) < 1.

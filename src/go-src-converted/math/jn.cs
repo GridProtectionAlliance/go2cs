@@ -125,7 +125,7 @@ public static float64 Jn(nint n, float64 x) {
                 }}
             }
 
-            b = (float64)(1 / SqrtPi) * temp / Sqrt(x);
+            b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
         } else {
             b = J1(x);
             for ((nint i, var a) = (1, J0(x)); i < n; i++) {
@@ -317,7 +317,7 @@ public static float64 Yn(nint n, float64 x) {
             }}
         }
 
-        b = (float64)(1 / SqrtPi) * temp / Sqrt(x);
+        b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
     } else {
         var a = Y0(x);
         b = Y1(x);

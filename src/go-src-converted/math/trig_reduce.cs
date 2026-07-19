@@ -47,9 +47,9 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     // Note, exp >= -53 since x >= PI4 and exp < 971 for maximum float64.
     nuint digit = (nuint)(exp + 61) / 64;
     nuint bitshift = (nuint)(exp + 61) % 64;
-    var z0 = (uint64)(((mPi4[(nint)(digit)] << (int)(bitshift))) | ((mPi4[(nint)(digit + 1)] >> (int)((64 - bitshift)))));
-    var z1 = (uint64)(((mPi4[(nint)(digit + 1)] << (int)(bitshift))) | ((mPi4[(nint)(digit + 2)] >> (int)((64 - bitshift)))));
-    var z2 = (uint64)(((mPi4[(nint)(digit + 2)] << (int)(bitshift))) | ((mPi4[(nint)(digit + 3)] >> (int)((64 - bitshift)))));
+    var z0 = (uint64)((mPi4[(nint)(digit)].Lsh(bitshift)) | (mPi4[(nint)(digit + 1)].Rsh((64 - bitshift))));
+    var z1 = (uint64)((mPi4[(nint)(digit + 1)].Lsh(bitshift)) | (mPi4[(nint)(digit + 2)].Rsh((64 - bitshift))));
+    var z2 = (uint64)((mPi4[(nint)(digit + 2)].Lsh(bitshift)) | (mPi4[(nint)(digit + 3)].Rsh((64 - bitshift))));
     // Multiply mantissa by the digits and extract the upper two digits (hi, lo).
     var (z2hi, _) = bits.Mul64(z2, ix);
     var (z1hi, z1lo) = bits.Mul64(z1, ix);
@@ -63,7 +63,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     nuint lz = (nuint)bits.LeadingZeros64(hi);
     var e = (uint64)((nuint)bias - (lz + 1));
     // Clear implicit mantissa bit and shift into place.
-    hi = (uint64)(((hi << (int)((lz + 1)))) | ((lo >> (int)((64 - (lz + 1))))));
+    hi = (uint64)((hi.Lsh((lz + 1))) | (lo.Rsh((64 - (lz + 1)))));
     hi >>= (int)(64 - shift);
     // Include the exponent and convert to a float.
     hi |= (uint64)((e << (int)(shift)));

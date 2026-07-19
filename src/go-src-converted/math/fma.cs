@@ -30,8 +30,8 @@ internal static (uint64 r1, uint64 r2) shl(uint64 u1, uint64 u2, nuint n) {
     uint64 r1 = default!;
     uint64 r2 = default!;
 
-    r1 = (uint64)((uint64)((u1 << (int)(n)) | (u2 >> (int)((64 - n)))) | (u2 << (int)((n - 64))));
-    r2 = (u2 << (int)(n));
+    r1 = (uint64)((uint64)(u1.Lsh(n) | u2.Rsh((64 - n))) | u2.Lsh((n - 64)));
+    r2 = u2.Lsh(n);
     return (r1, r2);
 }
 
@@ -39,8 +39,8 @@ internal static (uint64 r1, uint64 r2) shr(uint64 u1, uint64 u2, nuint n) {
     uint64 r1 = default!;
     uint64 r2 = default!;
 
-    r2 = (uint64)((uint64)((u2 >> (int)(n)) | (u1 << (int)((64 - n)))) | (u1 >> (int)((n - 64))));
-    r1 = (u1 >> (int)(n));
+    r2 = (uint64)((uint64)(u2.Rsh(n) | u1.Lsh((64 - n))) | u1.Rsh((n - 64)));
+    r1 = u1.Rsh(n);
     return (r1, r2);
 }
 
@@ -68,12 +68,12 @@ internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n
     }
     case {} when n is < 64: {
         (r1, r2) = shr(u1, u2, n);
-        r2 |= (uint64)(nonzero((uint64)(u2 & (((uint64)1 << (int)(n)) - 1))));
+        r2 |= (uint64)(nonzero((uint64)(u2 & (((uint64)1).Lsh(n) - 1))));
         break;
     }
     case {} when n is < 128: {
         (r1, r2) = shr(u1, u2, n);
-        r2 |= (uint64)(nonzero((uint64)((uint64)(u1 & (((uint64)1 << (int)((n - 64))) - 1)) | u2)));
+        r2 |= (uint64)(nonzero((uint64)((uint64)(u1 & (((uint64)1).Lsh((n - 64)) - 1)) | u2)));
         break;
     }}
 
@@ -181,7 +181,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     }
     if (pe < 0) {
         nuint n = (nuint)(-pe);
-        m = (uint64)((m >> (int)(n)) | nonzero((uint64)(m & (((uint64)1 << (int)(n)) - 1))));
+        m = (uint64)(m.Rsh(n) | nonzero((uint64)(m & (((uint64)1).Lsh(n) - 1))));
         pe = 0;
     }
     m = (uint64)((((m + ((uint64)1 << (int)(9))) >> (int)(10))) & ~zero((uint64)(((uint64)(m & ((1 << (int)(10)) - 1))) ^ ((uint64)1 << (int)(9)))));

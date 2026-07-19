@@ -15,7 +15,7 @@ public static float64 Log10(float64 x) {
 }
 
 internal static float64 log10(float64 x) {
-    return Log(x) * (float64)(1 / Ln10);
+    return Log(x) * /* (1 / Ln10) */ 0.4342944819032518D;
 }
 
 // Log2 returns the binary logarithm of x.
@@ -34,7 +34,7 @@ internal static float64 log2(float64 x) {
     if (frac == 0.5D) {
         return (float64)(exp - 1);
     }
-    return Log(frac) * (float64)(1 / Ln2) + (float64)exp;
+    return Log(frac) * /* (1 / Ln2) */ 1.4426950408889634D + (float64)exp;
 }
 
 } // end math_package

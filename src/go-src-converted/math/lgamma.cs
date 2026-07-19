@@ -308,13 +308,13 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         if (x <= 0.9D){
             lgamma = -Log(x);
             switch (ᐧ) {
-            case {} when x >= (Ymin - 1 + 0.27D): {
+            case {} when x >= (Ymin - 1D + 0.27D): {
                 y = 1 - x;
                 i = 0;
                 break;
             }
-            case {} when x >= (Ymin - 1 - 0.27D): {
-                y = x - (float64)(Tc - 1);
+            case {} when x >= (Ymin - 1D - 0.27D): {
+                y = x - /* (Tc - 1) */ 0.46163214496836225D;
                 i = 1;
                 break;
             }

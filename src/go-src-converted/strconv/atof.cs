@@ -407,36 +407,36 @@ internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<f
         Ꮡd.Shift(-n);
         exp += n;
     }
-    if (exp - flt.bias >= (1 << (int)(flt.expbits)) - 1) {
+    if (exp - flt.bias >= ((nint)1).Lsh(flt.expbits) - 1) {
         goto overflow;
     }
     // Extract 1+flt.mantbits bits.
     Ꮡd.Shift((nint)(1 + flt.mantbits));
     mant = Ꮡd.RoundedInteger();
     // Rounding might have added a bit; shift down.
-    if (mant == ((uint64)2 << (int)(flt.mantbits))) {
+    if (mant == ((uint64)2).Lsh(flt.mantbits)) {
         mant >>= (int)(1);
         exp++;
-        if (exp - flt.bias >= (1 << (int)(flt.expbits)) - 1) {
+        if (exp - flt.bias >= ((nint)1).Lsh(flt.expbits) - 1) {
             goto overflow;
         }
     }
     // Denormalized?
-    if ((uint64)(mant & (((uint64)1 << (int)(flt.mantbits)))) == 0) {
+    if ((uint64)(mant & (((uint64)1).Lsh(flt.mantbits))) == 0) {
         exp = flt.bias;
     }
     goto @out;
 overflow:
     mant = 0;
     // ±Inf
-    exp = (1 << (int)(flt.expbits)) - 1 + flt.bias;
+    exp = ((nint)1).Lsh(flt.expbits) - 1 + flt.bias;
     overflow = true;
 @out:
-    var bits = (uint64)(mant & (((uint64)1 << (int)(flt.mantbits)) - 1));
+    var bits = (uint64)(mant & (((uint64)1).Lsh(flt.mantbits) - 1));
     // Assemble bits.
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & ((1 << (int)(flt.expbits)) - 1))) << (int)(flt.mantbits)));
+    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1)))).Lsh(flt.mantbits));
     if (d.neg) {
-        bits |= (uint64)((((uint64)1 << (int)(flt.mantbits)) << (int)(flt.expbits)));
+        bits |= (uint64)((((uint64)1).Lsh(flt.mantbits)).Lsh(flt.expbits));
     }
     return (bits, overflow);
 }
@@ -463,7 +463,7 @@ internal static (float64 f, bool ok) atof64exact(uint64 mantissa, nint exp, bool
     float64 f = default!;
     bool ok = default!;
 
-    if ((mantissa >> (int)(float64info.mantbits)) != 0) {
+    if (mantissa.Rsh(float64info.mantbits) != 0) {
         return (f, ok);
     }
     f = (float64)mantissa;
@@ -505,7 +505,7 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
     float32 f = default!;
     bool ok = default!;
 
-    if ((mantissa >> (int)(float32info.mantbits)) != 0) {
+    if (mantissa.Rsh(float32info.mantbits) != 0) {
         return (f, ok);
     }
     f = (float32)mantissa;
@@ -548,7 +548,7 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
 internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64 mantissa, nint exp, bool neg, bool trunc) {
     ref var flt = ref Ꮡflt.DerefOrNil();
 
-    nint maxExp = (1 << (int)(flt.expbits)) + flt.bias - 2;
+    nint maxExp = ((nint)1).Lsh(flt.expbits) + flt.bias - 2;
     nint minExp = flt.bias + 1;
     exp += (nint)flt.mantbits;
     // mantissa now implicitly divided by 2^mantbits.
@@ -558,14 +558,14 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     // whether that bit or any later bit was non-zero.
     // (If the mantissa has already lost non-zero bits, trunc is true,
     // and we OR in a 1 below after shifting left appropriately.)
-    while (mantissa != 0 && (mantissa >> (int)((flt.mantbits + 2))) == 0) {
+    while (mantissa != 0 && mantissa.Rsh((flt.mantbits + 2)) == 0) {
         mantissa <<= (int)(1);
         exp--;
     }
     if (trunc) {
         mantissa |= (uint64)(1);
     }
-    while ((mantissa >> (int)((1 + flt.mantbits + 2))) != 0) {
+    while (mantissa.Rsh((1 + flt.mantbits + 2)) != 0) {
         mantissa = (uint64)((mantissa >> (int)(1)) | (uint64)(mantissa & 1));
         exp++;
     }
@@ -584,26 +584,26 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     exp += 2;
     if (round == 3) {
         mantissa++;
-        if (mantissa == ((uint64)1 << (int)((1 + flt.mantbits)))) {
+        if (mantissa == ((uint64)1).Lsh((1 + flt.mantbits))) {
             mantissa >>= (int)(1);
             exp++;
         }
     }
-    if ((mantissa >> (int)(flt.mantbits)) == 0) {
+    if (mantissa.Rsh(flt.mantbits) == 0) {
         // Denormal or zero.
         exp = flt.bias;
     }
     error err = default!;
     if (exp > maxExp) {
         // infinity and range error
-        mantissa = ((uint64)1 << (int)(flt.mantbits));
+        mantissa = ((uint64)1).Lsh(flt.mantbits);
         exp = maxExp + 1;
         err = new NumErrorжerror(rangeError(fnParseFloat, s));
     }
-    var bits = (uint64)(mantissa & (((uint64)1 << (int)(flt.mantbits)) - 1));
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & ((1 << (int)(flt.expbits)) - 1))) << (int)(flt.mantbits)));
+    var bits = (uint64)(mantissa & (((uint64)1).Lsh(flt.mantbits) - 1));
+    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1)))).Lsh(flt.mantbits));
     if (neg) {
-        bits |= (uint64)((((uint64)1 << (int)(flt.mantbits)) << (int)(flt.expbits)));
+        bits |= (uint64)((((uint64)1).Lsh(flt.mantbits)).Lsh(flt.expbits));
     }
     if (Ꮡflt == Ꮡfloat32info) {
         return ((float64)Δmath.Float32frombits((uint32)bits), err);

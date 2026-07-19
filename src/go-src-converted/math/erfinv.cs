@@ -70,8 +70,8 @@ internal static readonly UntypedFloat f7 = 2.891024605872965461538222e-15;
 //	Erfinv(NaN) = NaN
 public static float64 Erfinv(float64 x) {
     // special cases
-    if (IsNaN(x) || x <= -1 || x >= 1) {
-        if (x == -1 || x == 1) {
+    if (IsNaN(x) || x <= -1D || x >= 1) {
+        if (x == -1D || x == 1) {
             return Inf((nint)x);
         }
         return NaN();

@@ -120,7 +120,7 @@ internal static float64 tan(float64 x) {
     if (x >= reduceThreshold){
         (j, z) = trigReduce(x);
     } else {
-        j = (uint64)(x * (float64)(4 / Pi));
+        j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D);
         // integer part of x/(Pi/4), as integer for tests on the phase angle
         y = (float64)j;
         // integer part of x/(Pi/4), as float
@@ -138,7 +138,7 @@ internal static float64 tan(float64 x) {
         y = z;
     }
     if ((uint64)(j & 2) == 2) {
-        y = -1 / y;
+        y = -1D / y;
     }
     if (sign) {
         y = -y;

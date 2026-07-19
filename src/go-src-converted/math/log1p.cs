@@ -118,10 +118,10 @@ internal static float64 log1p(float64 x) {
     const float64 Lp7 = 1.479819860511658591e-01; // 3FC2F112DF3E5244
     // special cases
     switch (ᐧ) {
-    case {} when x < -1 || IsNaN(x): {
+    case {} when x < -1D || IsNaN(x): {
         return NaN();
     }
-    case {} when x == -1: {
+    case {} when x == -1D: {
         return Inf(-1);
     }
     case {} when IsInf(x, // includes -Inf

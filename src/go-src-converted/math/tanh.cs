@@ -86,7 +86,7 @@ internal static float64 tanh(float64 x) {
     switch (ᐧ) {
     case {} when z > 0.5D * MAXLOG: {
         if (x < 0) {
-            return -1;
+            return -1D;
         }
         return 1;
     }

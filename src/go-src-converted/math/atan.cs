@@ -78,9 +78,9 @@ internal static float64 satan(float64 x) {
         return xatan(x);
     }
     if (x > Tan3pio8) {
-        return (float64)(Pi / 2) - xatan(1 / x) + (float64)Morebits;
+        return /* Pi / 2 */ 1.5707963267948966D - xatan(1 / x) + (float64)Morebits;
     }
-    return (float64)(Pi / 4) + xatan((x - 1) / (x + 1)) + (float64)(0.5D * Morebits);
+    return /* Pi / 4 */ 0.7853981633974483D + xatan((x - 1) / (x + 1)) + /* 0.5 * Morebits */ 3.061616997868383e-17D;
 }
 
 // Atan returns the arctangent, in radians, of x.

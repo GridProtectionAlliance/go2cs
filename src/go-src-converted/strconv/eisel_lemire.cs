@@ -59,7 +59,7 @@ internal static (float64 f, bool ok) eiselLemire64(uint64 man, nint exp10, bool 
     }
     // Shifting to 54 Bits.
     var msb = (xHi >> (int)(63));
-    var retMantissa = (xHi >> (int)((msb + 9)));
+    var retMantissa = xHi.Rsh((msb + 9));
     retExp2 -= (uint64)(1 ^ msb);
     // Half-way Ambiguity.
     if (xLo == 0 && (uint64)(xHi & 0x1FF) == 0 && (uint64)(retMantissa & 3) == 1) {
@@ -131,7 +131,7 @@ internal static (float32 f, bool ok) eiselLemire32(uint64 man, nint exp10, bool 
     }
     // Shifting to 54 Bits (and for float32, it's shifting to 25 bits).
     var msb = (xHi >> (int)(63));
-    var retMantissa = (xHi >> (int)((msb + 38)));
+    var retMantissa = xHi.Rsh((msb + 38));
     retExp2 -= (uint64)(1 ^ msb);
     // Half-way Ambiguity.
     if (xLo == 0 && (uint64)(xHi & 0x3FFFFFFFFFUL) == 0 && (uint64)(retMantissa & 3) == 1) {

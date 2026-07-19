@@ -1,0 +1,239 @@
+<Project>
+
+  <!-- The test project shares its directory with the production project, and NuGet writes each
+       project's restore artifacts (project.assets.json) to MSBuildProjectExtensionsPath — which
+       defaults to obj\ for BOTH. Shared, the two projects overwrite each other's assets, and a
+       production project pulled into the test build graph (bytes -> unicode/utf8) then READS the
+       test project's assets and appears to reference ITSELF through the test closure — MSB4006
+       "circular dependency involving ResolveProjectReferences". Distinct obj\tests\ / bin\tests\
+       roots end the fight; the paths must be set BEFORE Sdk.props, hence the explicit SDK
+       imports instead of the Sdk attribute. -->
+  <PropertyGroup>
+    <MSBuildProjectExtensionsPath>obj\tests\</MSBuildProjectExtensionsPath>
+    <BaseIntermediateOutputPath>obj\tests\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\tests\</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>math.tests</AssemblyName>
+    <Product>go2cs</Product>
+    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Company>Grid Protection Alliance</Company>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS0282;CS0660;CS0661;CS8618;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IsPackable>false</IsPackable>
+    <!-- The compile view must be EXACTLY the direct references the test converter computed: a
+         transitive project reference that contributes a child `go.<pkg>` namespace (e.g.
+         internal/testenv dragging io/fs, namespace go.io) collides with the converter's
+         in-namespace `using io = io_package;` alias emission (CS0576) — the alias machinery is
+         computed against the direct import closure only. -->
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(USERPROFILE)'==''">
+    <USERPROFILE>$(HOME)</USERPROFILE>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug' and '$(SolutionDir)'!=''">$(SolutionDir)</go2csPath>
+    <go2csPath Condition="'$(go2csPath)'==''">$(MSBuildThisFileDirectory)../../</go2csPath>
+  </PropertyGroup>
+
+  <!-- Expose output of source generators as local files -->
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are
+       recompiled into the test assembly alongside the converted test sources; nothing else in the
+       shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
+       can leak in because it is never listed. -->
+  <ItemGroup>
+    <Compile Include="abs.cs" />
+    <Compile Include="acosh.cs" />
+    <Compile Include="all_test.cs" />
+    <Compile Include="asin.cs" />
+    <Compile Include="asinh.cs" />
+    <Compile Include="atan.cs" />
+    <Compile Include="atan2.cs" />
+    <Compile Include="atanh.cs" />
+    <Compile Include="bits.cs" />
+    <Compile Include="cbrt.cs" />
+    <Compile Include="const.cs" />
+    <Compile Include="const_test.cs" />
+    <Compile Include="copysign.cs" />
+    <Compile Include="dim.cs" />
+    <Compile Include="dim_asm.cs" />
+    <Compile Include="erf.cs" />
+    <Compile Include="erfinv.cs" />
+    <Compile Include="example_test.cs" />
+    <Compile Include="exp.cs" />
+    <Compile Include="exp2_noasm.cs" />
+    <Compile Include="exp_amd64.cs" />
+    <Compile Include="exp_asm.cs" />
+    <Compile Include="expm1.cs" />
+    <Compile Include="export_test.cs" />
+    <Compile Include="floor.cs" />
+    <Compile Include="floor_asm.cs" />
+    <Compile Include="fma.cs" />
+    <Compile Include="frexp.cs" />
+    <Compile Include="gamma.cs" />
+    <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="huge_test.cs" />
+    <Compile Include="hypot.cs" />
+    <Compile Include="hypot_asm.cs" />
+    <Compile Include="j0.cs" />
+    <Compile Include="j1.cs" />
+    <Compile Include="jn.cs" />
+    <Compile Include="ldexp.cs" />
+    <Compile Include="lgamma.cs" />
+    <Compile Include="log.cs" />
+    <Compile Include="log10.cs" />
+    <Compile Include="log1p.cs" />
+    <Compile Include="log_asm.cs" />
+    <Compile Include="logb.cs" />
+    <Compile Include="math_impl.cs" />
+    <Compile Include="mod.cs" />
+    <Compile Include="modf.cs" />
+    <Compile Include="modf_noasm.cs" />
+    <Compile Include="nextafter.cs" />
+    <Compile Include="package_test_info.cs" />
+    <Compile Include="pow.cs" />
+    <Compile Include="pow10.cs" />
+    <Compile Include="remainder.cs" />
+    <Compile Include="signbit.cs" />
+    <Compile Include="sin.cs" />
+    <Compile Include="sincos.cs" />
+    <Compile Include="sinh.cs" />
+    <Compile Include="sqrt.cs" />
+    <Compile Include="stubs.cs" />
+    <Compile Include="tan.cs" />
+    <Compile Include="tanh.cs" />
+    <Compile Include="trig_reduce.cs" />
+    <Compile Include="unsafe.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="abs.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="acosh.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="all_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="arith_s390x.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="arith_s390x_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="asin.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="asinh.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="atan.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="atan2.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="atanh.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="bits.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="cbrt.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="const.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="const_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="copysign.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="dim.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="dim_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="dim_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="erf.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="erfinv.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="example_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp2_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp2_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp_amd64.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="exp_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="expm1.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="export_s390x_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="export_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="floor.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="floor_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="floor_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fma.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="frexp.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="gamma.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="huge_test.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="hypot.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="hypot_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="hypot_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="j0.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="j1.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="jn.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="ldexp.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="lgamma.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="log.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="log10.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="log1p.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="log_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="log_stub.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="logb.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="mod.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="modf.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="modf_asm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="modf_noasm.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="nextafter.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="pow.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="pow10.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="remainder.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="signbit.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="sin.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="sincos.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="sinh.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="sqrt.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="stubs.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="tan.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="tanh.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="trig_reduce.go" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="unsafe.go" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core\testing\testing.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\internal\cpu\internal.cpu.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\math\bits\math.bits.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
+    <ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Define Go type aliases -->
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Object" Alias="any" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>

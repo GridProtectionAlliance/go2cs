@@ -65,18 +65,17 @@ internal static void ryuFtoaFixed32(ж<decimalSlice> Ꮡd, uint32 mant, nint exp
     }
     // Remove extra lower bits and keep rounding info.
     nuint extra = (nuint)(-dexp2);
-    var extraMask = (uint32)(((uint32)1 << (int)(extra)) - 1);
-    di = (di >> (int)(extra));
-    var dfrac = (uint32)(di & extraMask);
+    var extraMask = (uint32)(((uint32)1).Lsh(extra) - 1);
+    (di, var dfrac) = (di.Rsh(extra), (uint32)(di & extraMask));
     var roundUp = false;
     if (exact){
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
-        roundUp = dfrac > ((uint32)1 << (int)((extra - 1))) || (dfrac == ((uint32)1 << (int)((extra - 1))) && !d0) || (dfrac == ((uint32)1 << (int)((extra - 1))) && d0 && (uint32)(di & 1) == 1);
+        roundUp = dfrac > ((uint32)1).Lsh((extra - 1)) || (dfrac == ((uint32)1).Lsh((extra - 1)) && !d0) || (dfrac == ((uint32)1).Lsh((extra - 1)) && d0 && (uint32)(di & 1) == 1);
     } else {
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
-        roundUp = (dfrac >> (int)((extra - 1))) == 1;
+        roundUp = dfrac.Rsh((extra - 1)) == 1;
     }
     if (dfrac != 0) {
         d0 = false;
@@ -104,7 +103,7 @@ internal static void ryuFtoaFixed64(ж<decimalSlice> Ꮡd, uint64 mant, nint exp
     nint e2 = exp;
     {
         nint b = bits.Len64(mant); if (b < 55) {
-            mant = (mant << (int)((nuint)(55 - b)));
+            mant = mant.Lsh((nuint)(55 - b));
             e2 += b - 55;
         }
     }
@@ -136,18 +135,17 @@ internal static void ryuFtoaFixed64(ж<decimalSlice> Ꮡd, uint64 mant, nint exp
     }
     // Remove extra lower bits and keep rounding info.
     nuint extra = (nuint)(-dexp2);
-    var extraMask = (uint64)(((uint64)1 << (int)(extra)) - 1);
-    di = (di >> (int)(extra));
-    var dfrac = (uint64)(di & extraMask);
+    var extraMask = (uint64)(((uint64)1).Lsh(extra) - 1);
+    (di, var dfrac) = (di.Rsh(extra), (uint64)(di & extraMask));
     var roundUp = false;
     if (exact){
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
-        roundUp = dfrac > ((uint64)1 << (int)((extra - 1))) || (dfrac == ((uint64)1 << (int)((extra - 1))) && !d0) || (dfrac == ((uint64)1 << (int)((extra - 1))) && d0 && (uint64)(di & 1) == 1);
+        roundUp = dfrac > ((uint64)1).Lsh((extra - 1)) || (dfrac == ((uint64)1).Lsh((extra - 1)) && !d0) || (dfrac == ((uint64)1).Lsh((extra - 1)) && d0 && (uint64)(di & 1) == 1);
     } else {
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
-        roundUp = (dfrac >> (int)((extra - 1))) == 1;
+        roundUp = dfrac.Rsh((extra - 1)) == 1;
     }
     if (dfrac != 0) {
         d0 = false;
@@ -298,14 +296,11 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
     // Express the results (dl, dc, du)*2^e2 as integers.
     // Extra bits must be removed and rounding hints computed.
     nuint extra = (nuint)(-e2);
-    var extraMask = (uint64)(((uint64)1 << (int)(extra)) - 1);
+    var extraMask = (uint64)(((uint64)1).Lsh(extra) - 1);
     // Now compute the floored, integral base 10 mantissas.
-    dl = (dl >> (int)(extra));
-    var fracl = (uint64)(dl & extraMask);
-    dc = (dc >> (int)(extra));
-    var fracc = (uint64)(dc & extraMask);
-    du = (du >> (int)(extra));
-    var fracu = (uint64)(du & extraMask);
+    (dl, var fracl) = (dl.Rsh(extra), (uint64)(dl & extraMask));
+    (dc, var fracc) = (dc.Rsh(extra), (uint64)(dc & extraMask));
+    (du, var fracu) = (du.Rsh(extra), (uint64)(du & extraMask));
     // Is it allowed to use 'du' as a result?
     // It is always allowed when it is truncated, but also
     // if it is exact and the original binary mantissa is even
@@ -324,11 +319,11 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
     if (dc0){
         // If we computed an exact product, the half integer
         // should round to next (even) integer if 'dc' is odd.
-        cup = fracc > ((uint64)1 << (int)((extra - 1))) || (fracc == ((uint64)1 << (int)((extra - 1))) && (uint64)(dc & 1) == 1);
+        cup = fracc > ((uint64)1).Lsh((extra - 1)) || (fracc == ((uint64)1).Lsh((extra - 1)) && (uint64)(dc & 1) == 1);
     } else {
         // otherwise, the result is a lower truncation of the ideal
         // result.
-        cup = (fracc >> (int)((extra - 1))) == 1;
+        cup = fracc.Rsh((extra - 1)) == 1;
     }
     // Is 'dl' an allowed representation?
     // Only if it is an exact value, and if the original binary mantissa
@@ -374,7 +369,7 @@ internal static (uint64 lower, uint64 central, uint64 upper, nint e2) computeBou
     nint e2 = default!;
 
     ref var flt = ref Ꮡflt.Value;
-    if (mant != ((uint64)1 << (int)(flt.mantbits)) || exp == flt.bias + 1 - (nint)flt.mantbits){
+    if (mant != ((uint64)1).Lsh(flt.mantbits) || exp == flt.bias + 1 - (nint)flt.mantbits){
         // regular case (or denormals)
         (lower, central, upper) = (2 * mant - 1, 2 * mant, 2 * mant + 1);
         e2 = exp - 1;
@@ -561,7 +556,7 @@ internal static (uint64 resM, nint resE, bool exact) mult128bitPow10(uint64 m, n
         // This never happens due to the range of float32/float64 exponent
         throw panic("mult128bitPow10: power of 10 is out of range");
     }
-    var pow = detailedPowersOfTen[q - (nint)detailedPowersOfTenMinExp10];
+    var pow = detailedPowersOfTen[q - (nint)detailedPowersOfTenMinExp10].Clone();
     if (q < 0) {
         // Inverse powers of ten must be rounded up.
         pow[0] += 1;

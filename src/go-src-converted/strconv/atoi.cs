@@ -139,7 +139,7 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         break;
     }}
 
-    var maxVal = ((uint64)1 << (int)((nuint)bitSize)) - 1;
+    var maxVal = ((uint64)1).Lsh((nuint)bitSize) - 1;
     var underscores = false;
     uint64 n = default!;
     foreach (var (_, c) in slice<byte>(s)) {
@@ -237,7 +237,7 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
     if (bitSize == 0) {
         bitSize = IntSize;
     }
-    var cutoff = (uint64)(((uint64)1 << (int)((nuint)(bitSize - 1))));
+    var cutoff = (uint64)(((uint64)1).Lsh((nuint)(bitSize - 1)));
     if (!neg && un >= cutoff) {
         return ((int64)(cutoff - 1), new NumErrorжerror(rangeError(fnParseInt, s0)));
     }
