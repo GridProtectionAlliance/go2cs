@@ -73,7 +73,7 @@ internal static ж<gclink> ptr(this gclinkptr Δp) {
 }
 
 // dummy mspan that contains no free objects.
-internal static ж<mspan> Ꮡemptymspan = new(default(mspan));
+internal static ж<mspan> Ꮡemptymspan = new(new mspan());
 internal static ref mspan emptymspan => ref Ꮡemptymspan.Value;
 
 internal static ж<mcache> allocmcache() {

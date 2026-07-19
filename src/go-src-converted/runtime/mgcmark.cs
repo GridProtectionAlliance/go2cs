@@ -314,7 +314,7 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
             continue;
         }
         for (nuint j = (nuint)0; j < 8; j++) {
-            if ((uint8)(specials & ((uint8)(1 << (int)(j)))) == 0) {
+            if ((uint8)(specials & (((uint8)1).Lsh(j))) == 0) {
                 continue;
             }
             // Find the span for this bit.

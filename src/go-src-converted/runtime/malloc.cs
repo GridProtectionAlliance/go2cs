@@ -217,7 +217,7 @@ internal static void mallocinit() {
     if (physHugePageSize != 0) {
         // Since physHugePageSize is a power of 2, it suffices to increase
         // physHugePageShift until 1<<physHugePageShift == physHugePageSize.
-        while ((uintptr)(1 << (int)(physHugePageShift)) != physHugePageSize) {
+        while (((uintptr)1).Lsh(physHugePageShift) != physHugePageSize) {
             physHugePageShift++;
         }
     }
@@ -732,7 +732,7 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
         var result = (uint16)(s.freeindex + (uint16)theBit);
         if (result < s.nelems) {
             var freeidx = (uint16)(result + 1);
-            if (freeidx % 64 == 0 && freeidx != s.nelems) {
+            if ((uint16)(freeidx % 64) == 0 && freeidx != s.nelems) {
                 return 0;
             }
             s.allocCache >>= (int)((nuint)(theBit + 1));

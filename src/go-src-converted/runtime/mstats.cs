@@ -38,7 +38,7 @@ partial class runtime_package {
     internal bool enablegc;
 }
 
-internal static ж<mstats> Ꮡmemstats = new(default(mstats));
+internal static ж<mstats> Ꮡmemstats = new(new mstats());
 internal static ref mstats memstats => ref Ꮡmemstats.Value;
 
 [GoType("dyn")] partial struct MemStats_BySize {
@@ -500,8 +500,8 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
     stats.NextGC = heapGoal;
     stats.LastGC = memstats.last_gc_unix;
     stats.PauseTotalNs = memstats.pause_total_ns;
-    stats.PauseNs = memstats.pause_ns;
-    stats.PauseEnd = memstats.pause_end;
+    stats.PauseNs = memstats.pause_ns.Clone();
+    stats.PauseEnd = memstats.pause_end.Clone();
     stats.NumGC = memstats.numgc;
     stats.NumForcedGC = memstats.numforcedgc;
     stats.GCCPUFraction = memstats.gc_cpu_fraction;

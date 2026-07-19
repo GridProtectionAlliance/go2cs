@@ -108,7 +108,7 @@ internal static @string pkgpath(this Δrtype t) {
     internal map<int32, @unsafe.Pointer> m;
     internal map<@unsafe.Pointer, int32> minv;
 }
-internal static ж<reflectOffsᴛ1> ᏑreflectOffs = new(default(reflectOffsᴛ1));
+internal static ж<reflectOffsᴛ1> ᏑreflectOffs = new(new reflectOffsᴛ1());
 internal static ref reflectOffsᴛ1 reflectOffs => ref ᏑreflectOffs.Value;
 
 internal static void reflectOffsLock() {

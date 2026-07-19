@@ -48,7 +48,15 @@ using static go.runtime_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<errorString, error>]
+[assembly: GoImplement<PanicNilError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TypeAssertionError, ΔError>(Pointer = true)]
+[assembly: GoImplement<boundsError, ΔError>]
+[assembly: GoImplement<errorAddressString, ΔError>]
+[assembly: GoImplement<errorString, ΔError>]
+[assembly: GoImplement<lockRank, stringer>]
+[assembly: GoImplement<plainError, ΔError>]
+[assembly: GoImplement<stwReason, stringer>]
+[assembly: GoImplement<waitReason, stringer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

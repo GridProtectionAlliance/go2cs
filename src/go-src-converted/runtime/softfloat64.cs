@@ -246,7 +246,7 @@ internal static uint64 fadd64(uint64 f, uint64 g) {
     nuint shift = (nuint)(fe - ge);
     fm <<= (int)(2);
     gm <<= (int)(2);
-    var trunc = (uint64)(gm & (((uint64)1 << (int)(shift)) - 1));
+    var trunc = (uint64)(gm & (((uint64)1).Lsh(shift) - 1));
     gm >>= (int)(shift);
     if (fs == gs){
         fm += gm;
@@ -299,8 +299,8 @@ internal static uint64 fmul64(uint64 f, uint64 g) {
     // 53-bit * 53-bit = 107- or 108-bit
     var (lo, hi) = mullu(fm, gm);
     nuint shift = mantbits64 - 1;
-    var trunc = (uint64)(lo & (((uint64)1 << (int)(shift)) - 1));
-    var mant = (uint64)((hi << (int)((64 - shift))) | (lo >> (int)(shift)));
+    var trunc = (uint64)(lo & (((uint64)1).Lsh(shift) - 1));
+    var mant = (uint64)(hi.Lsh((64 - shift)) | lo.Rsh(shift));
     return fpack64((uint64)(fs ^ gs), mant, fe + ge - 1, trunc);
 }
 
@@ -336,7 +336,7 @@ internal static uint64 fdiv64(uint64 f, uint64 g) {
     _ = gn;
     // 53-bit<<54 / 53-bit = 53- or 54-bit.
     nuint shift = mantbits64 + 2;
-    var (q, r) = divlu((fm >> (int)((64 - shift))), (fm << (int)(shift)), gm);
+    var (q, r) = divlu(fm.Rsh((64 - shift)), fm.Lsh(shift), gm);
     return fpack64((uint64)(fs ^ gs), q, fe - ge - 2, r);
 }
 
@@ -514,8 +514,8 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     }
     var vn1 = (v >> (int)(32));
     var vn0 = (uint64)(v & (4294967296L - 1));
-    var un32 = (uint64)((u1 << (int)(s)) | (u0 >> (int)((64 - s))));
-    var un10 = (u0 << (int)(s));
+    var un32 = (uint64)(u1.Lsh(s) | u0.Rsh((64 - s)));
+    var un10 = u0.Lsh(s);
     var un1 = (un10 >> (int)(32));
     var un0 = (uint64)(un10 & (4294967296L - 1));
     var q1 = un32 / vn1;
@@ -539,7 +539,7 @@ again2:
             goto again2;
         }
     }
-    return (q1 * b + q0, ((un21 * b + un0 - q0 * v) >> (int)(s)));
+    return (q1 * b + q0, (un21 * b + un0 - q0 * v).Rsh(s));
 }
 
 internal static uint32 fadd32(uint32 x, uint32 y) {

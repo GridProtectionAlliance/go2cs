@@ -187,7 +187,7 @@ internal const bool physPageAlignedStacks = /* GOOS == "openbsd" */ false;
     internal ж<specialfinalizer> unused; // never set, just here to force the specialfinalizer type into DWARF
 }
 
-internal static ж<mheap> Ꮡmheap_ = new(default(mheap));
+internal static ж<mheap> Ꮡmheap_ = new(new mheap());
 internal static ref mheap mheap_ => ref Ꮡmheap_.Value;
 
 // A heapArena stores metadata for a heap arena. heapArenas are stored
@@ -797,7 +797,7 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
                 continue;
             }
             for (nuint j = (nuint)0; j < 8; j++) {
-                if ((uint8)(inUseUnmarked & ((uint8)(1 << (int)(j)))) != 0) {
+                if ((uint8)(inUseUnmarked & (((uint8)1).Lsh(j))) != 0) {
                     var s = (~ha).spans[(nint)(arenaPage + (nuint)i * 8 + j)];
                     {
                         var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
@@ -1633,7 +1633,7 @@ internal static void init(this ж<mspan> Ꮡspan, uintptr @base, uintptr npages)
 }
 
 internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
-    ref var list = ref Ꮡlist.Value;
+    ref var list = ref Ꮡlist.DerefOrNil();
     ref var span = ref Ꮡspan.DerefOrNil();
 
     if (span.list != Ꮡlist) {
@@ -2211,13 +2211,13 @@ internal static readonly uintptr gcBitsHeaderBytes = /* unsafe.Sizeof(gcBitsHead
     internal ж<gcBitsArena> current;
     internal ж<gcBitsArena> previous;
 }
-internal static ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new(default(gcBitsArenasᴛ1));
+internal static ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new(new gcBitsArenasᴛ1());
 internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ᏑgcBitsArenas.Value;
 
 // tryAlloc allocates from b or returns nil if b does not have enough room.
 // This is safe to call concurrently.
 internal static ж<gcBits> tryAlloc(this ж<gcBitsArena> Ꮡb, uintptr bytes) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     if (Ꮡb == nil || atomic.Loaduintptr(Ꮡb.of(gcBitsArena.Ꮡfree)) + bytes > (uintptr)len(b.bits)) {
         return default!;

@@ -57,7 +57,7 @@ partial class runtime_package {
     internal atomic.Uint32 delivering;
     internal bool inuse;
 }
-internal static ж<sigᴛ1> Ꮡsig = new(default(sigᴛ1));
+internal static ж<sigᴛ1> Ꮡsig = new(new sigᴛ1());
 internal static ref sigᴛ1 sig => ref Ꮡsig.Value;
 
 internal static readonly UntypedInt sigIdle = iota;
@@ -68,7 +68,7 @@ internal static readonly UntypedInt sigSending = 2;
 // It reports whether the signal was sent. If not, the caller typically crashes the program.
 // It runs from the signal handler, so it's limited in what it can do.
 internal static bool sigsend(uint32 s) {
-    var bit = ((uint32)1 << (int)((nuint)((uint32)(s & 31))));
+    var bit = ((uint32)1).Lsh((nuint)((uint32)(s & 31)));
     if (s >= (uint32)(32 * len(sig.wanted))) {
         return false;
     }

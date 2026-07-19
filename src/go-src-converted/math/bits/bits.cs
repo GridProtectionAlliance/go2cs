@@ -201,7 +201,7 @@ public static nuint RotateLeft(nuint x, nint k) {
 public static uint8 RotateLeft8(uint8 x, nint k) {
     UntypedInt n = 8;
     nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint8)((uint8)(x << (int)(s)) | (x >> (int)(((nuint)n - s))));
+    return (uint8)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
 // RotateLeft16 returns the value of x rotated left by (k mod 16) bits.
@@ -211,7 +211,7 @@ public static uint8 RotateLeft8(uint8 x, nint k) {
 public static uint16 RotateLeft16(uint16 x, nint k) {
     UntypedInt n = 16;
     nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint16)((uint16)(x << (int)(s)) | (x >> (int)(((nuint)n - s))));
+    return (uint16)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
 // RotateLeft32 returns the value of x rotated left by (k mod 32) bits.
@@ -221,7 +221,7 @@ public static uint16 RotateLeft16(uint16 x, nint k) {
 public static uint32 RotateLeft32(uint32 x, nint k) {
     UntypedInt n = 32;
     nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint32)((x << (int)(s)) | (x >> (int)(((nuint)n - s))));
+    return (uint32)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
 // RotateLeft64 returns the value of x rotated left by (k mod 64) bits.
@@ -231,7 +231,7 @@ public static uint32 RotateLeft32(uint32 x, nint k) {
 public static uint64 RotateLeft64(uint64 x, nint k) {
     UntypedInt n = 64;
     nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint64)((x << (int)(s)) | (x >> (int)(((nuint)n - s))));
+    return (uint64)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
 // --- Reverse ---
@@ -588,8 +588,8 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
     const uint64 mask32 = /* two32 - 1 */ 4294967295;
     var yn1 = (y >> (int)(32));
     var yn0 = (uint64)(y & mask32);
-    var un32 = (uint64)((hi << (int)(s)) | (lo >> (int)((64 - s))));
-    var un10 = (lo << (int)(s));
+    var un32 = (uint64)(hi.Lsh(s) | lo.Rsh((64 - s)));
+    var un10 = lo.Lsh(s);
     var un1 = (un10 >> (int)(32));
     var un0 = (uint64)(un10 & mask32);
     var q1 = un32 / yn1;
@@ -611,7 +611,7 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
             break;
         }
     }
-    return (q1 * (uint64)two32 + q0, ((un21 * (uint64)two32 + un0 - q0 * y) >> (int)(s)));
+    return (q1 * (uint64)two32 + q0, (un21 * (uint64)two32 + un0 - q0 * y).Rsh(s));
 }
 
 // Rem returns the remainder of (hi, lo) divided by y. Rem panics for

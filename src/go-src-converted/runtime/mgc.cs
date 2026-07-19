@@ -218,7 +218,7 @@ internal static ref uint32 gcphase => ref Ꮡgcphase.Value;
     internal array<byte> pad = new(3); // compiler uses 32-bit load for "enabled" field
     internal uint64 alignme;  // guarantee alignment so that compiler can use a 32 or 64-bit load
 }
-internal static writeBarrierᴛ1 writeBarrier;
+internal static writeBarrierᴛ1 writeBarrier = new();
 
 // gcBlackenEnabled is 1 if mutator assists and background mark
 // workers are allowed to blacken objects. This must only be set when
@@ -1717,7 +1717,7 @@ internal static uint64 /*mask*/ gcTestIsReachable(params Span<@unsafe.Pointer> p
             @throw("IsReachable failed"u8);
         }
         if ((~s).reachable) {
-            mask |= (uint64)(((uint64)1 << (int)(i)));
+            mask |= (uint64)(((uint64)1).Lsh((uint64)(i)));
         }
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.ᏑspecialReachableAlloc).free(new @unsafe.Pointer(s));

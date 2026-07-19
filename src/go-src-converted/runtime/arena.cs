@@ -433,7 +433,7 @@ internal static void free(this ж<userArena> Ꮡa) {
     // Protected by lock.
     internal slice<liveUserArenaChunk> fault;
 }
-internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new(default(userArenaStateᴛ1));
+internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ᏑuserArenaState.Value;
 
 // userArenaNextFree reserves space in the user arena for an item of the specified
@@ -622,21 +622,21 @@ internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, 
 
     if (h.valid + valid <= ptrBits) {
         // Fast path - just accumulate the bits.
-        h.mask |= (bits << (int)(h.valid));
+        h.mask |= bits.Lsh((uint64)(h.valid));
         h.valid += valid;
         return h;
     }
     // Too many bits to fit in this word. Write the current word
     // out and move on to the next word.
-    var data = (uintptr)(h.mask | (bits << (int)(h.valid)));
+    var data = (uintptr)(h.mask | bits.Lsh((uint64)(h.valid)));
     // mask for this word
-    h.mask = (bits >> (int)(((uintptr)ptrBits - h.valid)));
+    h.mask = bits.Rsh((uint64)(((uintptr)ptrBits - h.valid)));
     // leftover for next word
     h.valid += valid - (uintptr)ptrBits;
     // have h.valid+valid bits, writing ptrBits of them
     // Flush mask to the memory bitmap.
     var idx = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
-    var m = ((uintptr)1 << (int)(h.low)) - 1;
+    var m = ((uintptr)1).Lsh((uint64)(h.low)) - 1;
     var bitmap = s.heapBits();
     bitmap[(nint)(idx)] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[(nint)(idx)]) & m) | data));
     // Note: no synchronization required for this write because
@@ -686,9 +686,9 @@ internal static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uint
     var idx = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
     // Write remaining bits.
     if (h.valid != h.low) {
-        var m = ((uintptr)1 << (int)(h.low)) - 1;
+        var m = ((uintptr)1).Lsh((uint64)(h.low)) - 1;
         // don't clear existing bits below "low"
-        m |= (uintptr)(~(((uintptr)1 << (int)(h.valid)) - 1));
+        m |= (uintptr)(~(((uintptr)1).Lsh((uint64)(h.valid)) - 1));
         // don't clear existing bits above "valid"
         bitmap[(nint)(idx)] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[(nint)(idx)]) & m) | h.mask));
     }
@@ -706,7 +706,7 @@ internal static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uint
         // Write zero bits.
         var idxΔ1 = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
         if (zeros < ptrBits){
-            bitmap[(nint)(idxΔ1)] = bswapIfBigEndian((uintptr)(bswapIfBigEndian(bitmap[(nint)(idxΔ1)]) & ~(((uintptr)1 << (int)(zeros)) - 1)));
+            bitmap[(nint)(idxΔ1)] = bswapIfBigEndian((uintptr)(bswapIfBigEndian(bitmap[(nint)(idxΔ1)]) & ~(((uintptr)1).Lsh((uint64)(zeros)) - 1)));
             break;
         } else 
         if (zeros == ptrBits){

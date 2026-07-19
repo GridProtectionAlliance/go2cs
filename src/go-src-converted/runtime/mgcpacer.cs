@@ -36,7 +36,7 @@ internal static readonly UntypedInt memoryLimitHeapGoalHeadroomPercent = 3;
 // GOMAXPROCS. The high-level design of this algorithm is documented
 // at https://github.com/golang/proposal/blob/master/design/44167-gc-pacer-redesign.md.
 // See https://golang.org/s/go15gcpacing for additional historical context.
-internal static ж<gcControllerState> ᏑgcController = new(default(gcControllerState));
+internal static ж<gcControllerState> ᏑgcController = new(new gcControllerState());
 internal static ref gcControllerState gcController => ref ᏑgcController.Value;
 
 [GoType] partial struct gcControllerState {
@@ -586,7 +586,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     c.lastConsMark[len(c.lastConsMark) - 1] = currentConsMark;
     if (debug.gcpacertrace > 0) {
         printlock();
-        var goal = gcGoalUtilization * 100;
+        var goal = gcGoalUtilization * 100D;
         print("pacer: ", (nint)(utilization * 100), "% CPU (", (nint)goal, " exp.) for ");
         print(Ꮡc.of(gcControllerState.ᏑheapScanWork).Load(), "+", Ꮡc.of(gcControllerState.ᏑstackScanWork).Load(), "+", Ꮡc.of(gcControllerState.ᏑglobalsScanWork).Load(), " B work (", c.lastHeapScan + Ꮡc.of(gcControllerState.ᏑlastStackScan).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScan).Load(), " B exp.) ");
         var live = Ꮡc.of(gcControllerState.ᏑheapLive).Load();
@@ -1132,7 +1132,7 @@ internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) {
     // Furthermore, by setting the runway so that CPU resources are divided
     // this way, assuming that the cons/mark ratio is correct, we make that
     // division a reality.
-    Ꮡc.of(gcControllerState.Ꮡrunway).Store((uint64)((c.consMark * (float64)(1 - gcGoalUtilization) / (float64)(gcGoalUtilization)) * (float64)(c.lastHeapScan + Ꮡc.of(gcControllerState.ᏑlastStackScan).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScan).Load())));
+    Ꮡc.of(gcControllerState.Ꮡrunway).Store((uint64)((c.consMark * /* (1 - gcGoalUtilization) */ 0.75D / /* (gcGoalUtilization) */ 0.25D) * (float64)(c.lastHeapScan + Ꮡc.of(gcControllerState.ᏑlastStackScan).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScan).Load())));
 }
 
 // setGCPercent updates gcPercent. commit must be called after.

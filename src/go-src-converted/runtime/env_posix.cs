@@ -53,7 +53,7 @@ internal static byte lowerASCII(byte c) {
 // See go.dev/issue/67401.
 //
 //go:linkname _cgo_setenv
-internal static @unsafe.Pointer _cgo_setenv;     // pointer to C function
+public static @unsafe.Pointer _cgo_setenv;       // pointer to C function
 
 // _cgo_unsetenv should be an internal detail,
 // but widely used packages access it using linkname.
@@ -64,7 +64,7 @@ internal static @unsafe.Pointer _cgo_setenv;     // pointer to C function
 // See go.dev/issue/67401.
 //
 //go:linkname _cgo_unsetenv
-internal static @unsafe.Pointer _cgo_unsetenv;   // pointer to C function
+public static @unsafe.Pointer _cgo_unsetenv;     // pointer to C function
 
 // Update the C environment if cgo is loaded.
 internal static void setenv_c(@string k, @string v) {

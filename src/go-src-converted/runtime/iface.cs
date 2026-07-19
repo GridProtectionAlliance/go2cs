@@ -551,7 +551,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     // so that we are guaranteed an empty slot (for termination).
     nint newN = n * 2;
     // make it at most 50% full
-    newN = (1 << (int)(sys.Len64((uint64)(newN - 1))));
+    newN = ((nint)1).Lsh((uint64)(sys.Len64((uint64)(newN - 1))));
     // round up to a power of 2
     // Allocate the new table.
     var newSize = @unsafe.Sizeof(new abi.TypeAssertCache(nil)) + (uintptr)(newN - 1) * @unsafe.Sizeof(new abi.TypeAssertCacheEntry(nil));
@@ -652,7 +652,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     // so that we are guaranteed an empty slot (for termination).
     nint newN = n * 2;
     // make it at most 50% full
-    newN = (1 << (int)(sys.Len64((uint64)(newN - 1))));
+    newN = ((nint)1).Lsh((uint64)(sys.Len64((uint64)(newN - 1))));
     // round up to a power of 2
     // Allocate the new table.
     var newSize = @unsafe.Sizeof(new abi.InterfaceSwitchCache(nil)) + (uintptr)(newN - 1) * @unsafe.Sizeof(new abi.InterfaceSwitchCacheEntry(nil));

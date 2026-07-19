@@ -230,12 +230,12 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         } else {
             shift = (uintptr)((uintptr)sys.TrailingZeros32((uint32)et.Size_) & 31);
         }
-        lenmem = ((uintptr)oldLen << (int)(shift));
-        newlenmem = ((uintptr)newLen << (int)(shift));
-        capmem = roundupsize(((uintptr)newcap << (int)(shift)), noscan);
-        overflow = (uintptr)newcap > ((uintptr)(maxAlloc >> (int)(shift)));
-        newcap = (nint)((capmem >> (int)(shift)));
-        capmem = ((uintptr)newcap << (int)(shift));
+        lenmem = ((uintptr)oldLen).Lsh((uint64)(shift));
+        newlenmem = ((uintptr)newLen).Lsh((uint64)(shift));
+        capmem = roundupsize(((uintptr)newcap).Lsh((uint64)(shift)), noscan);
+        overflow = (uintptr)newcap > (((uintptr)maxAlloc).Rsh((uint64)(shift)));
+        newcap = (nint)(capmem.Rsh((uint64)(shift)));
+        capmem = ((uintptr)newcap).Lsh((uint64)(shift));
         break;
     }
     default: {

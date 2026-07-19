@@ -319,7 +319,7 @@ internal static int32 getproccount() {
         nint n = 0;
         nint maskbits = (nint)(@unsafe.Sizeof(mask) * 8);
         for (nint i = 0; i < maskbits; i++) {
-            if ((uintptr)(mask & ((uintptr)(1 << (int)((nuint)i)))) != 0) {
+            if ((uintptr)(mask & (((uintptr)1).Lsh((nuint)i))) != 0) {
                 n++;
             }
         }
@@ -386,7 +386,7 @@ internal static bool haveHighResTimer = false;
 // NtCreateWaitCompletionPacket has been available since Windows 10,
 // but has just been publicly documented, so some platforms, like Wine,
 // doesn't support it yet.
-internal static bool haveHighResSleep = false;
+public static bool haveHighResSleep = false;
 
 // createHighResTimer calls CreateWaitableTimerEx with
 // CREATE_WAITABLE_TIMER_HIGH_RESOLUTION flag to create high

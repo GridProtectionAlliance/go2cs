@@ -303,7 +303,7 @@ internal static bool canWriteTwoRecords(this ж<profBuf> Ꮡb, nint nstk1, nint 
 // and a single tag pointer *tagPtr (or nil if tagPtr is nil).
 // No write barriers allowed because this might be called from a signal handler.
 internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr, int64 now, slice<uint64> hdr, slice<uintptr> stk) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
     ref var tagPtr = ref ᏑtagPtr.DerefOrNil();
 
     if (Ꮡb == nil) {
@@ -433,7 +433,7 @@ internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read
     slice<@unsafe.Pointer> tags = default!;
     bool eof = default!;
 
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
     if (Ꮡb == nil) {
         return (default!, default!, true);
     }

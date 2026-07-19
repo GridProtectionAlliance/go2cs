@@ -22,7 +22,7 @@ internal static readonly UntypedInt tracebackCrash = /* 1 << iota */ 1;
 
 internal static readonly UntypedInt tracebackAll = 2;
 
-internal static readonly UntypedInt tracebackShift = iota;
+internal static readonly UntypedInt tracebackShift = /* iota */ 2;
 
 internal static ж<uint32> Ꮡtraceback_cache = new(((uint32)2 << (int)(tracebackShift)));
 internal static ref uint32 traceback_cache => ref Ꮡtraceback_cache.Value;
@@ -587,11 +587,11 @@ internal static int32 timediv(int64 v, int32 div, ж<int32> Ꮡrem) {
 
     var res = (int32)0;
     for (nint bit = 30; bit >= 0; bit--) {
-        if (v >= ((int64)div << (int)((nuint)bit))) {
-            v = v - (((int64)div << (int)((nuint)bit)));
+        if (v >= ((int64)div).Lsh((nuint)bit)) {
+            v = v - (((int64)div).Lsh((nuint)bit));
             // Before this for loop, res was 0, thus all these
             // power of 2 increments are now just bitsets.
-            res |= (int32)((int32)(1 << (int)((nuint)bit)));
+            res |= (int32)(((int32)1).Lsh((nuint)bit));
         }
     }
     if (v >= (int64)div) {

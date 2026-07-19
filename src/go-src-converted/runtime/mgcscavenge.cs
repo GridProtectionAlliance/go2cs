@@ -130,7 +130,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // for gcPercent and one for memoryLimit. Let's handle the latter first because
     // it's simpler.
     // We want to target retaining (100-reduceExtraPercent)% of the heap.
-    var memoryLimitGoal = (uint64)((float64)memoryLimit * (float64)(1 - reduceExtraPercent / 100.0D));
+    var memoryLimitGoal = (uint64)((float64)memoryLimit * /* (1 - reduceExtraPercent/100.0) */ 0.95D);
     // mappedReady is comparable to memoryLimit, and represents how much total memory
     // the Go runtime has committed now (estimated).
     var mappedReady = ᏑgcController.of(gcControllerState.ᏑmappedReady).Load();
@@ -215,7 +215,7 @@ internal static readonly UntypedFloat startingScavSleepRatio = 0.001;
 internal static readonly UntypedFloat minScavWorkTime = 1e6;
 
 // Sleep/wait state of the background scavenger.
-internal static ж<scavengerState> Ꮡscavenger = new(default(scavengerState));
+internal static ж<scavengerState> Ꮡscavenger = new(new scavengerState());
 internal static ref scavengerState scavenger => ref Ꮡscavenger.Value;
 
 [GoType] partial struct scavengerState {
@@ -414,7 +414,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     // of time and scavenging less frequently. More concretely, we avoid situations
     // where we end up scavenging so often that we hurt allocation performance
     // because of the additional overheads of using scavenged memory.
-    worked *= 1 + scavengeCostRatio;
+    worked *= 1D + scavengeCostRatio;
     // sleepTime is the amount of time we're going to sleep, based on the amount
     // of time we worked, and the sleepRatio.
     var sleepTime = (int64)(worked / s.sleepRatio);
@@ -793,7 +793,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     // set each group to have all the bits set except
     // the top bit, so just OR with the original
     // result to set all the bits.
-    return ~((uint64)((x - ((x >> (int)((m - 1))))) | x));
+    return ~((uint64)((x - (x.Rsh((m - 1)))) | x));
 }
 
 // findScavengeCandidate returns a start index and a size for this pallocData
@@ -855,10 +855,10 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     nuint z1 = (nuint)sys.LeadingZeros64(~x);
     nuint run = (nuint)0;
     nuint end = (nuint)i * 64 + (64 - z1);
-    if ((x << (int)(z1)) != 0){
+    if (x.Lsh(z1) != 0){
         // After shifting out z1 bits, we still have 1s,
         // so the run ends inside this word.
-        run = (nuint)sys.LeadingZeros64((x << (int)(z1)));
+        run = (nuint)sys.LeadingZeros64(x.Lsh(z1));
     } else {
         // After shifting out z1 bits, we have no more 1s.
         // This means the run extends to the bottom of the

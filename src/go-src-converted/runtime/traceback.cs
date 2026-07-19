@@ -635,9 +635,9 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
         if (sz < 8) {
             var shift = (uint8)(64 - sz * 8);
             if (goarch.BigEndian){
-                x = (x >> (int)(shift));
+                x = x.Rsh((uint64)(shift));
             } else {
-                x = ((x << (int)(shift)) >> (int)(shift));
+                x = (x.Lsh((uint64)(shift))).Rsh((uint64)(shift));
             }
         }
         print(((Δhex)x));
@@ -798,7 +798,7 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
         // in the middle of our copy.
         gp.m.of(m.ᏑcgoCallersUse).Store(1);
         ref var ΔcgoCallers = ref heap<ΔcgoCallers>(out var ᏑcgoCallers);
-        ΔcgoCallers = (~gp.m).cgoCallers.Value;
+        ΔcgoCallers = (~gp.m).cgoCallers.Value.Clone();
         gp.m.Value.cgoCallers.Value[0] = 0;
         gp.m.of(m.ᏑcgoCallersUse).Store(0);
         printCgoTraceback(ᏑcgoCallers);

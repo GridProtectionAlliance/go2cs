@@ -67,7 +67,7 @@ internal static uint64 traceClockUnitsPerSecond() {
     }
     // Our clock is nanotime, so it's just the constant time division.
     // (trace clock units / nanoseconds) * (1e9 nanoseconds / 1 second)
-    return (uint64)((float64)(1.0D / (float64)traceTimeDiv) * 1e9D);
+    return (uint64)(/* 1.0 / float64(traceTimeDiv) */ 0.00390625D * 1e9D);
 }
 
 // traceFrequency writes a batch with a single EvFrequency event.

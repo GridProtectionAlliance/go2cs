@@ -257,7 +257,7 @@ internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit
         tp.mask = readUintptr(addb((~tp.typ).GCData, (tp.addr - tp.elem) / (uintptr)goarch.PtrSize / 8));
         if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
             var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
-            tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
+            tp.mask &= unchecked((uintptr)~((((uintptr)1).Lsh((uint64)((bits)))) - 1).Lsh((uint64)(((uintptr)ptrBits - bits))));
         }
     }
 }
@@ -278,11 +278,11 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
     if (tp.typ == nil) {
         // Handle small objects.
         // Clear any bits before the target address.
-        tp.mask &= unchecked((uintptr)~((uintptr)(1 << (int)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
+        tp.mask &= unchecked((uintptr)~(((uintptr)1).Lsh((uint64)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
         // Clear any bits past the limit.
         if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
             var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
-            tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
+            tp.mask &= unchecked((uintptr)~((((uintptr)1).Lsh((uint64)((bits)))) - 1).Lsh((uint64)(((uintptr)ptrBits - bits))));
         }
         return tp;
     }
@@ -311,11 +311,11 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
         // Grab the mask, but then clear any bits before the target address and any
         // bits over the limit.
         tp.mask = readUintptr(addb((~tp.typ).GCData, (tp.addr - tp.elem) / (uintptr)goarch.PtrSize / 8));
-        tp.mask &= unchecked((uintptr)~((uintptr)(1 << (int)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
+        tp.mask &= unchecked((uintptr)~(((uintptr)1).Lsh((uint64)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
     }
     if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
         var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
-        tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
+        tp.mask &= unchecked((uintptr)~((((uintptr)1).Lsh((uint64)((bits)))) - 1).Lsh((uint64)(((uintptr)ptrBits - bits))));
     }
     return tp;
 }
@@ -582,11 +582,11 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
         // Two reads.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        read = (word0.Value >> (int)(j));
-        read |= (uintptr)((((uintptr)(word1.Value & (((uintptr)(1 << (int)(bits1))) - 1))) << (int)(bits0)));
+        read = (word0.Value).Rsh((uint64)(j));
+        read |= (uintptr)(((uintptr)(word1.Value & ((((uintptr)1).Lsh((uint64)(bits1))) - 1))).Lsh((uint64)(bits0)));
     } else {
         // One read.
-        read = (uintptr)(((word0.Value >> (int)(j))) & (((uintptr)(1 << (int)(bits))) - 1));
+        read = (uintptr)(((word0.Value).Rsh((uint64)(j))) & ((((uintptr)1).Lsh((uint64)(bits))) - 1));
     }
     return read;
 }
@@ -610,11 +610,11 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
     var src = src0;
     var exprᴛ1 = typ.Size_;
     if (exprᴛ1 == goarch.PtrSize) {
-        src = ((uintptr)(1 << (int)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+        src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
     }
     else { /* default: */
         for (var iΔ2 = typ.Size_; iΔ2 < dataSize; iΔ2 += typ.Size_) {
-            src |= (uintptr)((src0 << (int)((iΔ2 / (uintptr)goarch.PtrSize))));
+            src |= (uintptr)(src0.Lsh((uint64)((iΔ2 / (uintptr)goarch.PtrSize))));
             scanSize += typ.Size_;
         }
     }
@@ -629,11 +629,11 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
         // Two writes.
         var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        dst[(nint)(i + 0)] = (uintptr)((uintptr)(dst[(nint)(i + 0)] & ((~(uintptr)0 >> (int)(bits0)))) | ((src << (int)(j))));
-        dst[(nint)(i + 1)] = (uintptr)((uintptr)(dst[(nint)(i + 1)] & ~(((uintptr)(1 << (int)(bits1))) - 1)) | ((src >> (int)(bits0))));
+        dst[(nint)(i + 0)] = (uintptr)((uintptr)(dst[(nint)(i + 0)] & ((~(uintptr)0).Rsh((uint64)(bits0)))) | (src.Lsh((uint64)(j))));
+        dst[(nint)(i + 1)] = (uintptr)((uintptr)(dst[(nint)(i + 1)] & ~((((uintptr)1).Lsh((uint64)(bits1))) - 1)) | (src.Rsh((uint64)(bits0))));
     } else {
         // One write.
-        dst[(nint)(i)] = (uintptr)(((uintptr)(dst[(nint)(i)] & ~(((((uintptr)(1 << (int)(bits))) - 1) << (int)(j))))) | ((src << (int)(j))));
+        dst[(nint)(i)] = (uintptr)(((uintptr)(dst[(nint)(i)] & ~(((((uintptr)1).Lsh((uint64)(bits))) - 1).Lsh((uint64)(j))))) | (src.Lsh((uint64)(j))));
     }
     const bool doubleCheck = false;
     if (doubleCheck) {
@@ -938,7 +938,7 @@ internal static void dumpTypePointers(typePointers tp) {
     print("runtime: tp.elem=", ((Δhex)(uint64)tp.elem), " tp.typ=", new @unsafe.Pointer(tp.typ), "\n");
     print("runtime: tp.addr=", ((Δhex)(uint64)tp.addr), " tp.mask=");
     for (var i = (uintptr)0; i < ptrBits; i++) {
-        if ((uintptr)(tp.mask & (((uintptr)1 << (int)(i)))) != 0){
+        if ((uintptr)(tp.mask & (((uintptr)1).Lsh((uint64)(i)))) != 0){
             print("1");
         } else {
             print("0");
@@ -1069,7 +1069,7 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
     }
     s.allocCache >>= (int)((nuint)(bitIndex + 1));
     sfreeindex = (uint16)(result + 1);
-    if (sfreeindex % 64 == 0 && sfreeindex != snelems) {
+    if ((uint16)(sfreeindex % 64) == 0 && sfreeindex != snelems) {
         // We just incremented s.freeindex so it isn't 0.
         // As each 1 in s.allocCache was encountered and used for allocation
         // it was shifted away. At this point s.allocCache contains all 0s.
@@ -1429,7 +1429,7 @@ internal static uintptr readUintptr(ж<byte> Ꮡp) {
     internal mutex @lock;
     internal ж<byte> data;
 }
-internal static debugPtrmaskᴛ1 debugPtrmask;
+internal static debugPtrmaskᴛ1 debugPtrmask = new();
 
 // progToPointerMask returns the 1-bit pointer mask output by the GC program prog.
 // size the size of the region described by prog, in bytes.
@@ -1490,7 +1490,7 @@ Run:
             }
             var nbyte = n / 8;
             for (var i = (uintptr)0; i < nbyte; i++) {
-                bits |= (uintptr)(((uintptr)(Δp.Value) << (int)(nbits)));
+                bits |= (uintptr)(((uintptr)(Δp.Value)).Lsh((uint64)(nbits)));
                 Δp = add1(Δp);
                 dst = (uint8)bits;
                 Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
@@ -1498,7 +1498,7 @@ Run:
             }
             {
                 n %= 8; if (n > 0) {
-                    bits |= (uintptr)(((uintptr)(Δp.Value) << (int)(nbits)));
+                    bits |= (uintptr)(((uintptr)(Δp.Value)).Lsh((uint64)(nbits)));
                     Δp = add1(Δp);
                     nbits += n;
                 }
@@ -1510,7 +1510,7 @@ Run:
             for (nuint offΔ1 = (nuint)0; ᐧ ; offΔ1 += 7) {
                 var x = (uintptr)(Δp.Value);
                 Δp = add1(Δp);
-                n |= (uintptr)((((uintptr)(x & 0x7F)) << (int)(offΔ1)));
+                n |= (uintptr)(((uintptr)(x & 0x7F)).Lsh(offΔ1));
                 if ((uintptr)(x & 0x80) == 0) {
                     break;
                 }
@@ -1521,7 +1521,7 @@ Run:
         for (nuint offΔ2 = (nuint)0; ᐧ ; offΔ2 += 7) {
             var x = (uintptr)(Δp.Value);
             Δp = add1(Δp);
-            c |= (uintptr)((((uintptr)(x & 0x7F)) << (int)(offΔ2)));
+            c |= (uintptr)(((uintptr)(x & 0x7F)).Lsh(offΔ2));
             if ((uintptr)(x & 0x80) == 0) {
                 break;
             }
@@ -1577,13 +1577,13 @@ Run:
                 if (nb + nb <= maxBits) {
                     // Double pattern until the whole uintptr is filled.
                     while (nb <= goarch.PtrSize * 8) {
-                        b |= (uintptr)((b << (int)(nb)));
+                        b |= (uintptr)(b.Lsh((uint64)(nb)));
                         nb += nb;
                     }
                     // Trim away incomplete copy of original pattern in high bits.
                     // TODO(rsc): Replace with table lookup or loop on systems without divide?
                     nb = (uintptr)maxBits / npattern * npattern;
-                    b &= (uintptr)((uintptr)(1 << (int)(nb)) - 1);
+                    b &= (uintptr)(((uintptr)1).Lsh((uint64)(nb)) - 1);
                     pattern = b;
                     npattern = nb;
                 }
@@ -1592,7 +1592,7 @@ Run:
             // Since pattern contains >8 bits, there will be full bytes to flush
             // on each iteration.
             for (; c >= npattern; c -= npattern) {
-                bits |= (uintptr)((pattern << (int)(nbits)));
+                bits |= (uintptr)(pattern.Lsh((uint64)(nbits)));
                 nbits += npattern;
                 while (nbits >= 8) {
                     dst = (uint8)bits;
@@ -1603,8 +1603,8 @@ Run:
             }
             // Add final fragment to bit buffer.
             if (c > 0) {
-                pattern &= (uintptr)((uintptr)(1 << (int)(c)) - 1);
-                bits |= (uintptr)((pattern << (int)(nbits)));
+                pattern &= (uintptr)(((uintptr)1).Lsh((uint64)(c)) - 1);
+                bits |= (uintptr)(pattern.Lsh((uint64)(nbits)));
                 nbits += c;
             }
             goto continue_Run;
@@ -1618,7 +1618,7 @@ Run:
         src = subtractb(src, (off + 7) / 8);
         {
             var frag = (uintptr)(off & 7); if (frag != 0) {
-                bits |= (uintptr)((((uintptr)(src.Value) >> (int)((8 - frag))) << (int)(nbits)));
+                bits |= (uintptr)((((uintptr)(src.Value)).Rsh((uint64)((8 - frag)))).Lsh((uint64)(nbits)));
                 src = add1(src);
                 nbits += frag;
                 c -= frag;
@@ -1627,7 +1627,7 @@ Run:
         // Main loop: load one byte, write another.
         // The bits are rotating through the bit buffer.
         for (var i = c / 8; i > 0; i--) {
-            bits |= (uintptr)(((uintptr)(src.Value) << (int)(nbits)));
+            bits |= (uintptr)(((uintptr)(src.Value)).Lsh((uint64)(nbits)));
             src = add1(src);
             dst = (uint8)bits;
             Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
@@ -1636,7 +1636,7 @@ Run:
         // Final src fragment.
         {
             c %= 8; if (c > 0) {
-                bits |= (uintptr)((((uintptr)((uintptr)(src.Value) & ((uintptr)(1 << (int)(c)) - 1))) << (int)(nbits)));
+                bits |= (uintptr)(((uintptr)((uintptr)(src.Value) & (((uintptr)1).Lsh((uint64)(c)) - 1))).Lsh((uint64)(nbits)));
                 nbits += c;
             }
         }
@@ -1699,7 +1699,7 @@ internal static void dumpGCProg(ж<byte> Ꮡp) {
                 for (nuint nb = (nuint)0; ᐧ ; nb += 7) {
                     var xΔ1 = Δp;
                     Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
-                    nbit |= (nint)(((nint)((byte)(xΔ1 & 0x7f)) << (int)(nb)));
+                    nbit |= (nint)(((nint)((byte)(xΔ1 & 0x7f))).Lsh(nb));
                     if ((byte)(xΔ1 & 0x80) == 0) {
                         break;
                     }
@@ -1709,7 +1709,7 @@ internal static void dumpGCProg(ж<byte> Ꮡp) {
             for (nuint nb = (nuint)0; ᐧ ; nb += 7) {
                 var xΔ2 = Δp;
                 Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
-                count |= (nint)(((nint)((byte)(xΔ2 & 0x7f)) << (int)(nb)));
+                count |= (nint)(((nint)((byte)(xΔ2 & 0x7f))).Lsh(nb));
                 if ((byte)(xΔ2 & 0x80) == 0) {
                     break;
                 }

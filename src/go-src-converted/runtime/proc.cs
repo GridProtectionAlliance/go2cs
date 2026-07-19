@@ -115,7 +115,7 @@ internal static @string modinfo;
 //   workers.
 internal static ж<m> Ꮡm0 = new(new m(nil));
 internal static ref m m0 => ref Ꮡm0.Value;
-internal static g g0;
+internal static g g0 = new();
 internal static ж<mcache> mcache0;
 internal static uintptr raceprocctx0;
 internal static mutex raceFiniLock = new(nil);
@@ -563,7 +563,7 @@ internal static void badctxt() {
 
 // gcrash is a fake g that can be used when crashing due to bad
 // stack conditions.
-internal static g gcrash;
+internal static g gcrash = new();
 
 internal static ж<atomic.Pointer<g>> ᏑcrashingG = new(default(atomic.Pointer<g>));
 internal static ref atomic.Pointer<g> crashingG => ref ᏑcrashingG.Value;
@@ -1161,7 +1161,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     }
     if (oldval == _Grunning) {
         // Track every gTrackingPeriod time a goroutine transitions out of running.
-        if (casgstatusAlwaysTrack || gp.trackingSeq % (uint8)gTrackingPeriod == 0) {
+        if (casgstatusAlwaysTrack || (uint8)(gp.trackingSeq % (uint8)gTrackingPeriod) == 0) {
             gp.tracking = true;
         }
         gp.trackingSeq++;
@@ -2526,8 +2526,8 @@ internal static ж<atomic.Uint32> ᏑextraMLength = new(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMLength => ref ᏑextraMLength.Value;
 internal static ж<atomic.Uint32> ᏑextraMWaiters = new(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMWaiters => ref ᏑextraMWaiters.Value;
-internal static ж<atomic.Uint32> ᏑextraMInUse = new(default(atomic.Uint32));
-internal static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
+public static ж<atomic.Uint32> ᏑextraMInUse = new(default(atomic.Uint32));
+public static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
 
 // lockextra locks the extra list and returns the list head.
 // The caller must unlock the list by storing a new list head
@@ -2607,9 +2607,9 @@ internal static void addExtraM(ж<m> Ꮡmp) {
     unlockextra(Ꮡmp, 1);
 }
 
-internal static ж<rwmutex> ᏑallocmLock = new(default(rwmutex));
+internal static ж<rwmutex> ᏑallocmLock = new(new rwmutex());
 internal static ref rwmutex allocmLock => ref ᏑallocmLock.Value;
-internal static ж<rwmutex> ᏑexecLock = new(default(rwmutex));
+internal static ж<rwmutex> ᏑexecLock = new(new rwmutex());
 internal static ref rwmutex execLock => ref ᏑexecLock.Value;
 
 // These errors are reported (via writeErrStr) by some OS-specific
@@ -2636,7 +2636,7 @@ internal static readonly @string failallocatestack = "runtime: failed to allocat
     // to 1.
     internal uint32 haveTemplateThread;
 }
-internal static ж<newmHandoffᴛ1> ᏑnewmHandoff = new(default(newmHandoffᴛ1));
+internal static ж<newmHandoffᴛ1> ᏑnewmHandoff = new(new newmHandoffᴛ1());
 internal static ref newmHandoffᴛ1 newmHandoff => ref ᏑnewmHandoff.Value;
 
 // Create a new m. It will start off with a call to fn, or else the scheduler.
@@ -4927,7 +4927,7 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     }
     // Track initial transition?
     newg.Value.trackingSeq = (uint8)cheaprand();
-    if ((~newg).trackingSeq % (uint8)gTrackingPeriod == 0) {
+    if ((uint8)((~newg).trackingSeq % (uint8)gTrackingPeriod) == 0) {
         newg.Value.tracking = true;
     }
     ᏑgcController.addScannableStack(pp, (int64)((~newg).stack.hi - (~newg).stack.lo));

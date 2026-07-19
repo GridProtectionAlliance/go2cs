@@ -42,7 +42,7 @@ internal static @unsafe.Pointer _cgo_getstackbound;
 // See go.dev/issue/67401.
 //
 //go:linkname iscgo
-internal static bool iscgo;
+public static bool iscgo;
 
 // set_crosscall2 is set by the runtime/cgo package
 // set_crosscall2 should be an internal detail,
@@ -76,7 +76,7 @@ internal static void cgoUse(any _) {
 // The compiler cannot see that cgoAlwaysFalse is always false,
 // so it emits the test and keeps the call, giving the desired
 // escape analysis result. The test is cheaper than the call.
-internal static bool cgoAlwaysFalse;
+public static bool cgoAlwaysFalse;
 
 internal static ж<@unsafe.Pointer> cgo_yield = Ꮡ_cgo_yield;
 

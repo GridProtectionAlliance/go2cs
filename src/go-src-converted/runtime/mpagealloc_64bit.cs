@@ -60,7 +60,7 @@ internal static array<nuint> levelLogPages = new nuint[]{
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
     foreach (var (l, shift) in levelShift) {
-        nint entries = (1 << (int)(((nuint)heapAddrBits - shift)));
+        nint entries = ((nint)1).Lsh(((nuint)heapAddrBits - shift));
         // Reserve b bytes of memory anywhere in the address space.
         var b = alignUp((uintptr)entries * pallocSumBytes, physPageSize);
         @unsafe.Pointer r = (uintptr)sysReserve(nil, b);

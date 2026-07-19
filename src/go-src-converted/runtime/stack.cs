@@ -121,7 +121,7 @@ internal static ref array<stackpoolᴛ1> stackpool => ref Ꮡstackpool.Value;
     internal mutex @lock;
     internal array<mSpanList> free = new(heapAddrBits - pageShift); // free lists by log_2(s.npages)
 }
-internal static ж<stackLargeᴛ1> ᏑstackLarge = new(default(stackLargeᴛ1));
+internal static ж<stackLargeᴛ1> ᏑstackLarge = new(new stackLargeᴛ1());
 internal static ref stackLargeᴛ1 stackLarge => ref ᏑstackLarge.Value;
 
 internal static void stackinit() {
@@ -167,7 +167,7 @@ internal static gclinkptr stackpoolalloc(uint8 order) {
             @throw("bad manualFreeList"u8);
         }
         osStackAlloc(s);
-        s.Value.elemsize = (uintptr)(fixedStack << (int)(order));
+        s.Value.elemsize = ((uintptr)fixedStack).Lsh((uint64)(order));
         for (var i = (uintptr)0; i < _StackCacheSize; i += s.Value.elemsize) {
             var xΔ1 = ((gclinkptr)(s.@base() + i));
             xΔ1.ptr().Value.next = s.Value.manualFreeList;
@@ -243,7 +243,7 @@ internal static void stackcacherefill(ж<mcache> Ꮡc, uint8 order) {
         var x = stackpoolalloc(order);
         x.ptr().Value.next = list;
         list = x;
-        size += (uintptr)(fixedStack << (int)(order));
+        size += ((uintptr)fixedStack).Lsh((uint64)(order));
     }
     unlock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     c.stackcache[order].list = list;
@@ -264,7 +264,7 @@ internal static void stackcacherelease(ж<mcache> Ꮡc, uint8 order) {
         var y = x.ptr().Value.next;
         stackpoolfree(x, order);
         x = y;
-        size -= (uintptr)(fixedStack << (int)(order));
+        size -= ((uintptr)fixedStack).Lsh((uint64)(order));
     }
     unlock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     c.stackcache[order].list = x;
@@ -921,10 +921,10 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
 // round x up to a power of 2.
 internal static int32 round2(int32 x) {
     nuint s = (nuint)0;
-    while ((int32)(1 << (int)(s)) < x) {
+    while (((int32)1).Lsh(s) < x) {
         s++;
     }
-    return (int32)(1 << (int)(s));
+    return ((int32)1).Lsh(s);
 }
 
 // Called from runtime·morestack when more stack is needed.

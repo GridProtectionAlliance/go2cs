@@ -9,9 +9,9 @@ namespace go.math;
 partial class bits_package {
 
 //go:linkname overflowError runtime.overflowError
-internal static error overflowError;
+internal static error overflowError { get => go.runtime_package.overflowError; set => go.runtime_package.overflowError = value; }
 
 //go:linkname divideError runtime.divideError
-internal static error divideError;
+internal static error divideError { get => go.runtime_package.divideError; set => go.runtime_package.divideError = value; }
 
 } // end bits_package

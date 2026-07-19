@@ -557,7 +557,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
     for (nuint i = (nuint)0; ᐧ ; i += 7) {
         var b = (~r.data).b[(nint)(pos % (uint64)len((~r.data).b))];
         pos++;
-        u |= (uint64)(((uint64)((byte)(b & ~0x80)) << (int)(i)));
+        u |= (uint64)(((uint64)((byte)(b & ~0x80))).Lsh(i));
         if ((byte)(b & 0x80) == 0) {
             break;
         }
@@ -591,7 +591,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
     for (nuint i = (nuint)0; ᐧ ; i += 7) {
         var b = (~r.data).b[(nint)(r.begin % (uint64)len((~r.data).b))];
         r.begin++;
-        u |= (uint64)(((uint64)((byte)(b & ~0x80)) << (int)(i)));
+        u |= (uint64)(((uint64)((byte)(b & ~0x80))).Lsh(i));
         if ((byte)(b & 0x80) == 0) {
             break;
         }

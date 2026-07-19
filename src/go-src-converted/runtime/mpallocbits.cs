@@ -37,7 +37,7 @@ partial struct pageBits;
     // Set bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b.Value[i / 64] |= (uint64)((((((uint64)1 << (int)(n))) - 1) << (int)((i % 64))));
+        b.Value[i / 64] |= (uint64)((((((uint64)1).Lsh(n)) - 1) << (int)((i % 64))));
         return;
     }
     _ = b.Value[j / 64];
@@ -47,7 +47,7 @@ partial struct pageBits;
         b.Value[k] = ~(uint64)0;
     }
     // Set trailing bits.
-    b.Value[j / 64] |= (uint64)((((uint64)1 << (int)((j % 64 + 1)))) - 1);
+    b.Value[j / 64] |= (uint64)((((uint64)1).Lsh((j % 64 + 1))) - 1);
 }
 
 // setAll sets all the bits of b.
@@ -79,7 +79,7 @@ partial struct pageBits;
     // Clear bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b.Value[i / 64] &= unchecked((uint64)~(uint64)((((((uint64)1 << (int)(n))) - 1) << (int)((i % 64)))));
+        b.Value[i / 64] &= unchecked((uint64)~(uint64)((((((uint64)1).Lsh(n)) - 1) << (int)((i % 64)))));
         return;
     }
     _ = b.Value[j / 64];
@@ -87,7 +87,7 @@ partial struct pageBits;
     b.Value[i / 64] &= unchecked((uint64)~(uint64)((~(uint64)0 << (int)((i % 64)))));
     builtin.clear(b.Value[(int)(i / 64 + 1)..(int)(j / 64)]);
     // Clear trailing bits.
-    b.Value[j / 64] &= unchecked((uint64)~(uint64)((((uint64)1 << (int)((j % 64 + 1)))) - 1));
+    b.Value[j / 64] &= unchecked((uint64)~(uint64)((((uint64)1).Lsh((j % 64 + 1))) - 1));
 }
 
 // clearAll frees all the bits of b.
@@ -112,14 +112,14 @@ partial struct pageBits;
     _ = b.Value[i / 64];
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        return (nuint)sys.OnesCount64((uint64)(((b.Value[i / 64] >> (int)((i % 64)))) & ((((uint64)1 << (int)(n))) - 1)));
+        return (nuint)sys.OnesCount64((uint64)(((b.Value[i / 64] >> (int)((i % 64)))) & ((((uint64)1).Lsh(n)) - 1)));
     }
     _ = b.Value[j / 64];
     s += (nuint)sys.OnesCount64((b.Value[i / 64] >> (int)((i % 64))));
     for (nuint k = i / 64 + 1; k < j / 64; k++) {
         s += (nuint)sys.OnesCount64(b.Value[k]);
     }
-    s += (nuint)sys.OnesCount64((uint64)(b.Value[j / 64] & ((((uint64)1 << (int)((j % 64 + 1)))) - 1)));
+    s += (nuint)sys.OnesCount64((uint64)(b.Value[j / 64] & ((((uint64)1).Lsh((j % 64 + 1))) - 1)));
     return s;
 }
 

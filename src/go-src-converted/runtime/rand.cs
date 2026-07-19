@@ -30,7 +30,7 @@ internal static slice<byte> startupRand;
     internal chacha8rand.State state;
     internal bool init;
 }
-internal static ж<globalRandᴛ1> ᏑglobalRand = new(default(globalRandᴛ1));
+internal static ж<globalRandᴛ1> ᏑglobalRand = new(new globalRandᴛ1());
 internal static ref globalRandᴛ1 globalRand => ref ᏑglobalRand.Value;
 
 internal static bool readRandomFailed;
@@ -83,7 +83,7 @@ internal static void readTimeRandom(slice<byte> r) {
             size = len(r);
         }
         for (nint i = 0; i < size; i++) {
-            r[i] ^= (byte)((byte)((v >> (int)((8 * i)))));
+            r[i] ^= (byte)((byte)(v.Rsh((uint64)((8 * i)))));
         }
         r = r[(int)(size)..];
         v = (uint64)((v >> (int)(32)) | (v << (int)(32)));

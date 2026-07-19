@@ -19,7 +19,7 @@ partial class runtime_package {
     internal map<winCallbackKey, nint> index;
     internal nint n;
 }
-internal static ж<cbsᴛ1> Ꮡcbs = new(default(cbsᴛ1));
+internal static ж<cbsᴛ1> Ꮡcbs = new(new cbsᴛ1());
 internal static ref cbsᴛ1 cbs => ref Ꮡcbs.Value;
 
 internal static void cbsLock() {

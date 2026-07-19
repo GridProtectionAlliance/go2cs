@@ -15,7 +15,7 @@ partial class runtime_package {
 //go:generate go run mkduff.go
 //go:generate go run mkfastlog2table.go
 //go:generate go run mklockrank.go -o lockrank.go
-internal static ж<ticksType> Ꮡticks = new(default(ticksType));
+internal static ж<ticksType> Ꮡticks = new(new ticksType());
 internal static ref ticksType ticks => ref Ꮡticks.Value;
 
 [GoType] partial struct ticksType {
@@ -337,7 +337,7 @@ internal static slice<uintptr> getAuxv() {
 // See go.dev/issue/67401.
 //
 //go:linkname zeroVal
-internal static ж<array<byte>> ᏑzeroVal = new(new array<byte>(1024));
-internal static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
+public static ж<array<byte>> ᏑzeroVal = new(new array<byte>(1024));
+public static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
 
 } // end runtime_package

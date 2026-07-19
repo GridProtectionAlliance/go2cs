@@ -152,7 +152,7 @@ internal static void trace1(this ж<timer> Ꮡt, @string op) {
     }
     var bits = new @string[]{"h", "m", "z", "c"}.array();
     foreach (var i in range(3)) {
-        if ((uint8)(t.state & ((uint8)(1 << (int)(i)))) == 0) {
+        if ((uint8)(t.state & (((uint8)1).Lsh((uint64)(i)))) == 0) {
             bits[i] = "-"u8;
         }
     }
@@ -209,7 +209,7 @@ internal static ж<Δhchan> hchan(this ж<timer> Ꮡt) {
 internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
     bool updated = default!;
 
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
     assertWorldStoppedOrLockHeld(Ꮡt.of(timer.Ꮡmu));
     Ꮡt.trace("updateHeap"u8);
     var ts = t.ts;
@@ -440,7 +440,7 @@ internal static bool stop(this ж<timer> Ꮡt) {
 // deleteMin removes timer 0 from ts.
 // ts must be locked.
 internal static void deleteMin(this ж<timers> Ꮡts) {
-    ref var ts = ref Ꮡts.Value;
+    ref var ts = ref Ꮡts.DerefOrNil();
 
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));
     var t = ts.heap[0].timer;
@@ -617,7 +617,7 @@ internal static bool reset(this ж<timer> Ꮡt, int64 when, int64 period) {
 // slows down heap operations.
 // The caller must have locked ts.
 internal static void cleanHead(this ж<timers> Ꮡts) {
-    ref var ts = ref Ꮡts.Value;
+    ref var ts = ref Ꮡts.DerefOrNil();
 
     Ꮡts.trace("cleanHead"u8);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));
@@ -710,7 +710,7 @@ internal static void take(this ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
 // it also moves timers that have been modified to run later,
 // and removes deleted timers. The caller must have locked ts.
 internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
-    ref var ts = ref Ꮡts.Value;
+    ref var ts = ref Ꮡts.DerefOrNil();
 
     Ꮡts.trace("adjust"u8);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));
@@ -862,7 +862,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
     int64 pollUntil = default!;
     bool ran = default!;
 
-    ref var ts = ref Ꮡts.Value;
+    ref var ts = ref Ꮡts.DerefOrNil();
     Ꮡts.trace("check"u8);
     // If it's not yet time for the first timer, or the first adjusted
     // timer, then there is nothing to do.
@@ -924,7 +924,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
 //
 //go:systemstack
 internal static int64 run(this ж<timers> Ꮡts, int64 now) {
-    ref var ts = ref Ꮡts.Value;
+    ref var ts = ref Ꮡts.DerefOrNil();
 
     Ꮡts.trace("run"u8);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu));

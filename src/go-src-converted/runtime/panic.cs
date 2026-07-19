@@ -240,7 +240,7 @@ internal static void panicshift() {
     throw panic(shiftError);
 }
 
-internal static error divideError = ((error)((errorString)(@string)"integer divide by zero"u8));
+public static error divideError = ((error)((errorString)(@string)"integer divide by zero"u8));
 
 //go:yeswritebarrierrec
 internal static void panicdivide() {
@@ -248,7 +248,7 @@ internal static void panicdivide() {
     throw panic(divideError);
 }
 
-internal static error overflowError = ((error)((errorString)(@string)"integer overflow"u8));
+public static error overflowError = ((error)((errorString)(@string)"integer overflow"u8));
 
 internal static void panicoverflow() {
     panicCheck2("integer overflow"u8);
@@ -710,7 +710,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
         var b = ~(ж<uint8>)(uintptr)(fd);
         fd.Value = (uintptr)add(fd, @unsafe.Sizeof(b));
         if (b < 128) {
-            return (r + ((uint32)b << (int)(shift)), fd);
+            return (r + ((uint32)b).Lsh((uint64)(shift)), fd);
         }
         r += ((uint32)((uint8)(b & 0x7F)) << (int)(((nint)(shift & 31))));
         shift += 7;
@@ -871,7 +871,7 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
 // Note: The "ok bool" result is necessary to correctly handle when
 // the deferred function itself was nil (e.g., "defer (func())(nil)").
 internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
+    ref var Δp = ref Ꮡp.DerefOrNil();
 
     var gp = getg();
     if (!Δp.deferreturn) {
@@ -905,7 +905,7 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
             // Find index of top bit set.
             var i = 7 - (uintptr)sys.LeadingZeros8(bits);
             // Clear bit and store it back.
-            bits &= unchecked((uint8)~(uint8)((uint8)(1 << (int)(i))));
+            bits &= unchecked((uint8)~(uint8)(((uint8)1).Lsh((uint64)(i))));
             Δp.deferBitsPtr.Value = bits;
             return (((ж<Action>)(uintptr)(add(Δp.slotsPtr, i * (uintptr)goarch.PtrSize))).ValueSlot, true);
         }

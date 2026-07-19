@@ -484,7 +484,7 @@ public static void SetBlockProfileRate(nint rate) {
     } else {
         // profile everything
         // convert ns to cycles, use float64 to prevent overflow during multiplication
-        r = (int64)((float64)rate * (float64)ticksPerSecond() / (1000 * 1000 * 1000));
+        r = (int64)((float64)rate * (float64)ticksPerSecond() / (1000D * 1000D * 1000D));
         if (r == 0) {
             r = 1;
         }

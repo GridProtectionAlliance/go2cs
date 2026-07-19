@@ -216,7 +216,7 @@ internal static @unsafe.Pointer keys(this ж<bmap> Ꮡb) {
     // Increment with probability 1/(1<<(h.B-15)).
     // When we reach 1<<15 - 1, we will have approximately
     // as many overflow buckets as buckets.
-    var mask = ((uint32)1 << (int)((h.B - 15))) - 1;
+    var mask = ((uint32)1).Lsh((uint64)((h.B - 15))) - 1;
     // Example: if h.B == 18, then mask == 7,
     // and rand() & 7 == 0 with probability 1/8.
     if ((uint32)((uint32)rand() & mask) == 0) {
@@ -930,7 +930,7 @@ internal static void mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡi
     // decide where to start
     var r = (uintptr)rand();
     it.startBucket = (uintptr)(r & bucketMask(h.B));
-    it.offset = (uint8)((uintptr)((r >> (int)(h.B)) & (uintptr)(abi.MapBucketCount - 1)));
+    it.offset = (uint8)((uintptr)(r.Rsh((uint64)(h.B)) & (uintptr)(abi.MapBucketCount - 1)));
     // iterator state
     it.bucket = it.startBucket;
     // Remember we have an iterator.
@@ -1040,7 +1040,7 @@ next:
                 // NOTE: this case is why we need two evacuate tophash
                 // values, evacuatedX and evacuatedY, that differ in
                 // their low bit.
-                if ((checkBucket >> (int)((it.B - 1))) != (uintptr)((uint8)((~b).tophash[offi] & 1))) {
+                if (checkBucket.Rsh((uint64)((it.B - 1))) != (uintptr)((uint8)((~b).tophash[offi] & 1))) {
                     continue;
                 }
             }
@@ -1811,7 +1811,7 @@ internal static void keys(any m, @unsafe.Pointer Δp) {
     }
     var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
     nint r = (nint)rand();
-    var offset = (uint8)((nint)((r >> (int)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
+    var offset = (uint8)((nint)(r.Rsh((uint64)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
     if ((~h).B == 0) {
         copyKeys(t, h, (ж<bmap>)(uintptr)((~h).buckets), s, offset);
         return;
@@ -1878,7 +1878,7 @@ internal static void values(any m, @unsafe.Pointer Δp) {
     }
     var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
     nint r = (nint)rand();
-    var offset = (uint8)((nint)((r >> (int)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
+    var offset = (uint8)((nint)(r.Rsh((uint64)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
     if ((~h).B == 0) {
         copyValues(t, h, (ж<bmap>)(uintptr)((~h).buckets), s, offset);
         return;

@@ -123,7 +123,7 @@ partial class runtime_package {
     // debugMalloc is the value of debug.malloc before tracing began.
     internal bool debugMalloc;
 }
-internal static ж<Δtraceᴛ1> ᏑΔtrace = new(default(Δtraceᴛ1));
+internal static ж<Δtraceᴛ1> ᏑΔtrace = new(new Δtraceᴛ1());
 internal static ref Δtraceᴛ1 Δtrace => ref ᏑΔtrace.Value;
 
 // Trace public API.

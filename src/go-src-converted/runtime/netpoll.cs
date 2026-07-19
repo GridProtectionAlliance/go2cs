@@ -205,10 +205,10 @@ internal static ж<mutex> ᏑnetpollInitLock = new(new mutex(nil));
 internal static ref mutex netpollInitLock => ref ᏑnetpollInitLock.Value;
 internal static ж<atomic.Uint32> ᏑnetpollInited = new(default(atomic.Uint32));
 internal static ref atomic.Uint32 netpollInited => ref ᏑnetpollInited.Value;
-internal static ж<pollCache> Ꮡpollcache = new(default(pollCache));
+internal static ж<pollCache> Ꮡpollcache = new(new pollCache());
 internal static ref pollCache pollcache => ref Ꮡpollcache.Value;
-internal static ж<atomic.Uint32> ᏑnetpollWaiters = new(default(atomic.Uint32));
-internal static ref atomic.Uint32 netpollWaiters => ref ᏑnetpollWaiters.Value;
+public static ж<atomic.Uint32> ᏑnetpollWaiters = new(default(atomic.Uint32));
+public static ref atomic.Uint32 netpollWaiters => ref ᏑnetpollWaiters.Value;
 
 // netpollWaiters is accessed in tests
 //go:linkname netpollWaiters

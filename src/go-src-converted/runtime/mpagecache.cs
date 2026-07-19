@@ -40,10 +40,10 @@ internal static readonly uintptr pageCachePages = /* 8 * unsafe.Sizeof(pageCache
     }
     if (npages == 1) {
         var i = (uintptr)sys.TrailingZeros64(c.cache);
-        var scav = (uint64)(((c.scav >> (int)(i))) & 1);
-        c.cache &= unchecked((uint64)~((uint64)1 << (int)(i)));
+        var scav = (uint64)((c.scav.Rsh((uint64)(i))) & 1);
+        c.cache &= unchecked((uint64)~((uint64)1).Lsh((uint64)(i)));
         // set bit to mark in-use
-        c.scav &= unchecked((uint64)~((uint64)1 << (int)(i)));
+        c.scav &= unchecked((uint64)~((uint64)1).Lsh((uint64)(i)));
         // clear bit to mark unscavenged
         return (c.@base + i * (uintptr)pageSize, (uintptr)scav * (uintptr)pageSize);
     }
@@ -61,7 +61,7 @@ internal static readonly uintptr pageCachePages = /* 8 * unsafe.Sizeof(pageCache
     if (i >= 64) {
         return (0, 0);
     }
-    var mask = (((((uint64)1 << (int)(npages))) - 1) << (int)(i));
+    var mask = ((((uint64)1).Lsh((uint64)(npages))) - 1).Lsh(i);
     nint scav = sys.OnesCount64((uint64)(c.scav & mask));
     c.cache &= unchecked((uint64)~mask);
     // mark in-use bits
@@ -91,12 +91,12 @@ internal static readonly uintptr pageCachePages = /* 8 * unsafe.Sizeof(pageCache
     // This method is called very infrequently, so just do the
     // slower, safer thing by iterating over each bit individually.
     for (nuint i = (nuint)0; i < 64; i++) {
-        if ((uint64)(c.cache & (((uint64)1 << (int)(i)))) != 0) {
+        if ((uint64)(c.cache & (((uint64)1).Lsh(i))) != 0) {
             Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
             // Update density statistics.
             Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
         }
-        if ((uint64)(c.scav & (((uint64)1 << (int)(i)))) != 0) {
+        if ((uint64)(c.scav & (((uint64)1).Lsh(i))) != 0) {
             Δp.chunkOf(ci).of(pallocData.Ꮡscavenged).setRange(pi + i, 1);
         }
     }

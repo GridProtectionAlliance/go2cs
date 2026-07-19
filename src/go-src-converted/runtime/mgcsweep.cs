@@ -29,7 +29,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-internal static ж<sweepdata> ᏑΔsweep = new(default(sweepdata));
+internal static ж<sweepdata> ᏑΔsweep = new(new sweepdata());
 internal static ref sweepdata Δsweep => ref ᏑΔsweep.Value;
 
 // State of background sweep.
@@ -637,7 +637,7 @@ internal static void ensureSwept(this ж<mspan> Ꮡs) {
         // Check the first bitmap byte, where we have to be
         // careful with freeindex.
         var obj = (uintptr)(~s).freeindex;
-        if ((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)((obj % 8))) != 0) {
+        if ((uint8)((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)((obj % 8)))) != 0) {
             s.reportZombies();
         }
         // Check remaining bytes.

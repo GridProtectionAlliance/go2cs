@@ -115,13 +115,13 @@ internal static nuint l2(this chunkIdx i) {
 // offAddrToLevelIndex converts an address in the offset address space
 // to the index into summary[level] containing addr.
 internal static nint offAddrToLevelIndex(nint level, offAddr addr) {
-    return (nint)(((addr.a - (uintptr)arenaBaseOffset) >> (int)(levelShift[level])));
+    return (nint)((addr.a - (uintptr)arenaBaseOffset).Rsh(levelShift[level]));
 }
 
 // levelIndexToOffAddr converts an index into summary[level] into
 // the corresponding address in the offset address space.
 internal static offAddr levelIndexToOffAddr(nint level, nint idx) {
-    return new offAddr((((uintptr)idx << (int)(levelShift[level]))) + (uintptr)arenaBaseOffset);
+    return new offAddr((((uintptr)idx).Lsh(levelShift[level])) + (uintptr)arenaBaseOffset);
 }
 
 // addrsToSummaryRange converts base and limit pointers into a range
@@ -141,8 +141,8 @@ internal static (nint lo, nint hi) addrsToSummaryRange(nint level, uintptr @base
     // of a summary's max page count boundary for this level
     // (1 << levelLogPages[level]). So, make limit an inclusive upper bound
     // then shift, then add 1, so we get an exclusive upper bound at the end.
-    lo = (nint)(((@base - (uintptr)arenaBaseOffset) >> (int)(levelShift[level])));
-    hi = (nint)((((limit - 1) - (uintptr)arenaBaseOffset) >> (int)(levelShift[level]))) + 1;
+    lo = (nint)((@base - (uintptr)arenaBaseOffset).Rsh(levelShift[level]));
+    hi = (nint)(((limit - 1) - (uintptr)arenaBaseOffset).Rsh(levelShift[level])) + 1;
     return (lo, hi);
 }
 
@@ -150,7 +150,7 @@ internal static (nint lo, nint hi) addrsToSummaryRange(nint level, uintptr @base
 // level's block width (1 << levelBits[level]). It assumes lo is inclusive
 // and hi is exclusive, and so aligns them down and up respectively.
 internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi) {
-    var e = ((uintptr)1 << (int)(levelBits[level]));
+    var e = ((uintptr)1).Lsh(levelBits[level]);
     return ((nint)alignDown((uintptr)lo, e), (nint)alignUp((uintptr)hi, e));
 }
 
@@ -278,7 +278,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
         // We can't represent 1<<levelLogPages[0] pages, the maximum number
         // of pages we need to represent at the root level, in a summary, which
         // is a big problem. Throw.
-        print("runtime: root level max pages = ", (1 << (int)(levelLogPages[0])), "\n");
+        print("runtime: root level max pages = ", ((nint)1).Lsh(levelLogPages[0]), "\n");
         print("runtime: summary max pages = ", (nint)(maxPackedValue), "\n");
         @throw("root level max pages doesn't fit in summary"u8);
     }
@@ -503,7 +503,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         var (lo, hi) = addrsToSummaryRange(l, @base, limit + 1);
         // Iterate over each block, updating the corresponding summary in the less-granular level.
         for (nint i = lo; i < hi; i++) {
-            var children = Δp.summary[l + 1][(int)((i << (int)(logEntriesPerBlock)))..(int)(((i + 1) << (int)(logEntriesPerBlock)))];
+            var children = Δp.summary[l + 1][(int)(i.Lsh(logEntriesPerBlock))..(int)((i + 1).Lsh(logEntriesPerBlock))];
             var sum = mergeSummaries(children, logMaxPages);
             var old = Δp.summary[l][i];
             if (old != sum) {
@@ -681,7 +681,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 nextLevel:
     for (nint l = 0; l < len(Δp.summary); l++) {
         // For the root level, entriesPerBlock is the whole level.
-        nint entriesPerBlock = (1 << (int)(levelBits[l]));
+        nint entriesPerBlock = ((nint)1).Lsh(levelBits[l]);
         nuint logMaxPages = levelLogPages[l];
         // We've moved into a new level, so let's update i to our new
         // starting index. This is a no-op for level 0.
@@ -720,14 +720,14 @@ nextLevel:
             }
             // We've encountered a non-zero summary which means
             // free memory, so update firstFree.
-            foundFree(levelIndexToOffAddr(l, i + jΔ1), (((uintptr)1 << (int)(logMaxPages))) * (uintptr)pageSize);
+            foundFree(levelIndexToOffAddr(l, i + jΔ1), (((uintptr)1).Lsh(logMaxPages)) * (uintptr)pageSize);
             nuint s = sum.start();
             if (size + s >= (nuint)npages) {
                 // If size == 0 we don't have a run yet,
                 // which means base isn't valid. So, set
                 // base to the first page in this block.
                 if (size == 0) {
-                    @base = ((nuint)jΔ1 << (int)(logMaxPages));
+                    @base = ((nuint)jΔ1).Lsh(logMaxPages);
                 }
                 // We hit npages; we're done!
                 size += s;
@@ -742,17 +742,17 @@ nextLevel:
                 lastSum = sum;
                 goto continue_nextLevel;
             }
-            if (size == 0 || s < ((nuint)1 << (int)(logMaxPages))) {
+            if (size == 0 || s < ((nuint)1).Lsh(logMaxPages)) {
                 // We either don't have a current run started, or this entry
                 // isn't totally free (meaning we can't continue the current
                 // one), so try to begin a new run by setting size and base
                 // based on sum.end.
                 size = sum.end();
-                @base = ((nuint)(jΔ1 + 1) << (int)(logMaxPages)) - size;
+                @base = ((nuint)(jΔ1 + 1)).Lsh(logMaxPages) - size;
                 continue;
             }
             // The entry is completely free, so continue the run.
-            size += ((nuint)1 << (int)(logMaxPages));
+            size += ((nuint)1).Lsh(logMaxPages);
         }
         if (size >= (nuint)npages) {
             // We found a sufficiently large run of free pages straddling
@@ -986,7 +986,7 @@ internal static pallocSum mergeSummaries(slice<pallocSum> sums, nuint logMaxPage
         // Merge in sums[i].start only if the running summary is
         // completely free, otherwise this summary's start
         // plays no role in the combined sum.
-        if (start == ((nuint)i << (int)(logMaxPagesPerSum))) {
+        if (start == ((nuint)i).Lsh(logMaxPagesPerSum)) {
             start += si;
         }
         // Recompute the max value of the running sum by looking
@@ -999,8 +999,8 @@ internal static pallocSum mergeSummaries(slice<pallocSum> sums, nuint logMaxPage
         // end by the new summary. If not, then we have some alloc'd
         // pages in there and we just want to take the end value in
         // sums[i].
-        if (ei == ((nuint)1 << (int)(logMaxPagesPerSum))){
-            end += ((nuint)1 << (int)(logMaxPagesPerSum));
+        if (ei == ((nuint)1).Lsh(logMaxPagesPerSum)){
+            end += ((nuint)1).Lsh(logMaxPagesPerSum);
         } else {
             end = ei;
         }

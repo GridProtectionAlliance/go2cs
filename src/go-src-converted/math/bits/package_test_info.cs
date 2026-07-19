@@ -15,6 +15,7 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 
 using go;
 using static go.math.bits_package;
+using static go.math.bits_test_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -48,5 +49,10 @@ namespace go.math;
 
 [GoPackage("bits")]
 public static partial class bits_package
+{
+}
+
+[GoPackage("bits_test")]
+public static partial class bits_test_package
 {
 }

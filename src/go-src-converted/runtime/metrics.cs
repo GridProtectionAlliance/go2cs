@@ -514,25 +514,31 @@ internal static statDepSet makeStatDepSet(params Span<runtime_package.statDep> d
     foreach (var (_, d) in deps) {
         s[d / 64] |= (uint64)(((uint64)1 << (int)(nuint)((d % 64))));
     }
-    return s;
+    return s.Clone();
 }
 
 // difference returns set difference of s from b as a new set.
 internal static statDepSet difference(this statDepSet s, statDepSet b) {
+    s = s.Clone();
+    b = b.Clone();
+
     statDepSet c = default!;
     foreach (var (i, _) in s) {
         c[i] = (uint64)(s[i] & ~b[i]);
     }
-    return c;
+    return c.Clone();
 }
 
 // union returns the union of the two sets as a new set.
 internal static statDepSet union(this statDepSet s, statDepSet b) {
+    s = s.Clone();
+    b = b.Clone();
+
     statDepSet c = default!;
     foreach (var (i, _) in s) {
         c[i] = (uint64)(s[i] | b[i]);
     }
-    return c;
+    return c.Clone();
 }
 
 // empty returns true if there are no dependencies in the set.
@@ -779,7 +785,7 @@ internal static readonly metricKind metricKindFloat64Histogram = 3;
 // Managed as a global variable because its pointer will be
 // an argument to a dynamically-defined function, and we'd
 // like to avoid it escaping to the heap.
-internal static ж<statAggregate> Ꮡagg = new(default(statAggregate));
+internal static ж<statAggregate> Ꮡagg = new(new statAggregate());
 internal static ref statAggregate agg => ref Ꮡagg.Value;
 
 [GoType] partial struct metricName {

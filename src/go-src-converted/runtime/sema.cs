@@ -320,7 +320,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
                     s.waittail = t;
                 }
                 s.waiters = t.Value.waiters;
-                if (s.waiters + 1 != 0) {
+                if ((uint16)(s.waiters + 1) != 0) {
                     s.waiters++;
                 }
                 t.Value.parent = default!;
@@ -336,7 +336,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
                 }
                 t.Value.waittail = Ꮡs;
                 s.waitlink = default!;
-                if ((~t).waiters + 1 != 0) {
+                if ((uint16)((~t).waiters + 1) != 0) {
                     t.Value.waiters++;
                 }
             }

@@ -81,7 +81,7 @@ internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
         return;
     }
     // The sub-bucket index is just next timeHistSubBucketBits after the bucketBit.
-    nuint subBucket = (nuint)((duration >> (int)((bucketBit - 1 - (nuint)timeHistSubBucketBits)))) % (nuint)timeHistNumSubBuckets;
+    nuint subBucket = (nuint)(duration.Rsh((bucketBit - 1 - (nuint)timeHistSubBucketBits))) % (nuint)timeHistNumSubBuckets;
     Ꮡ(h.counts[bucket * (nuint)timeHistNumSubBuckets + subBucket]).Add(1);
 }
 
@@ -136,9 +136,9 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint i = timeHistMinBucketBits; i < timeHistMaxBucketBits; i++) {
         for (nint j = 0; j < timeHistNumSubBuckets; j++) {
             // Set the bucket bit.
-            var bucketNanos = ((uint64)1 << (int)((i - 1)));
+            var bucketNanos = ((uint64)1).Lsh((uint64)((i - 1)));
             // Set the sub-bucket bits.
-            bucketNanos |= (uint64)(((uint64)j << (int)((i - 1 - (nint)timeHistSubBucketBits))));
+            bucketNanos |= (uint64)(((uint64)j).Lsh((uint64)((i - 1 - (nint)timeHistSubBucketBits))));
             // The index for this bucket is going to be the (i+1)'th bucket
             // (note that we're starting from zero, but handled the first bucket
             // earlier, so we need to compensate), and the j'th sub bucket.
