@@ -2741,6 +2741,38 @@ machine-specific goroutine stack trace, so only the first line is compared. (Gua
 channel receive; both binaries must exit 2 with `panic: goroutine boom` as the first stderr line and a
 clean stdout.)
 
+### An IMPLICIT divide-by-zero panics with the runtime's OWN value, so it satisfies `runtime.Error`
+
+Go's compiler lowers an integer division to a zero check plus `runtime.panicdivide()`, which panics
+with `runtime.divideError` — a value whose dynamic type is the unexported `runtime.errorString`, and
+which therefore satisfies the `runtime.Error` interface. go2cs instead lets the CLR raise
+`DivideByZeroException` and maps it to a Go panic at the recover boundary
+(`RuntimeErrorPanic.TryAsPanic`), so the panic carried only the message TEXT. That is invisible to
+code which merely prints the recovered value, but it fails a type assertion — math/bits'
+`TestDiv32PanicZero` asserts exactly that:
+
+```go
+} else if e, ok := err.(runtime.Error); !ok || e.Error() != divZeroError {
+```
+
+`Div32` divides without an explicit zero guard (unlike `Div`/`Div64`, which `panic(divideError)`
+themselves), so its panic came from the hardware trap: `ok` was false, `e` was nil, and the test's
+`e.Error()` then NRE'd.
+
+golib sits UNDER the converted `runtime` package and so cannot name `divideError`, so the dependency
+is **inverted**: golib exposes `RuntimeErrorPanic.IntegerDivideByZeroValue` and the runtime package
+registers its own canonical value through a `[ModuleInitializer]` in the hand-owned
+`runtime/panicvalues_impl.cs` bridge. An implicit (trapped) divide-by-zero then carries the *same*
+value an explicit `panicdivide()` would — which is precisely Go's own invariant — and
+`err.(runtime.Error)` resolves through the generated `errorString`→`ΔError` adapter. A converted
+program that never links `runtime` keeps the plain-message fallback, which reads and prints
+identically and loses only the assertion.
+
+(The fallback path is guarded by the `DivideByZeroPanic` behavioral test, which prints the recovered
+value; the `runtime.Error`-typed path is guarded by the committed math/bits Go test suite itself —
+behavioral tests build against the baseline `src/core`, which has no `runtime` package, so the typed
+form cannot be exercised there.)
+
 ### `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
 
 Go's `makeslice` panics recoverably for a negative or over-allocatable length/capacity — the

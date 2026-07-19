@@ -64,9 +64,26 @@ public static class RuntimeErrorPanic
     }
 
     private const string IntegerDivideByZeroMessage = $"{RuntimeErrorMessage}integer divide by zero";
+
+    /// <summary>
+    /// Supplies the Go runtime's OWN divide-by-zero panic value (<c>runtime.divideError</c>, whose
+    /// dynamic type is the unexported <c>runtime.errorString</c>).
+    /// </summary>
+    /// <remarks>
+    /// Go's compiler lowers an integer division to a zero check plus <c>runtime.panicdivide()</c>, so
+    /// <c>recover()</c> yields a value satisfying <c>runtime.Error</c> — math/bits' TestDiv32PanicZero
+    /// asserts exactly that (<c>err.(runtime.Error)</c>) on the panic raised by the IMPLICIT hardware
+    /// division in <c>Div32</c>, unlike Div/Div64 which panic explicitly. golib sits UNDER the converted
+    /// <c>runtime</c> package and so cannot name that value; the runtime package registers it here
+    /// (see its <c>panicvalues_impl.cs</c> bridge), leaving this layer dependency-free. When nothing has
+    /// registered — a converted program that never links <c>runtime</c> — the panic falls back to the
+    /// plain message below, which still reads and prints identically and only loses the type assertion.
+    /// </remarks>
+    public static Func<object>? IntegerDivideByZeroValue { get; set; }
+
     public static PanicException IntegerDivideByZero()
     {
-        return new PanicException(IntegerDivideByZeroMessage);
+        return new PanicException(IntegerDivideByZeroValue?.Invoke() ?? IntegerDivideByZeroMessage);
     }
 
     private const string MakeSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: len out of range";
