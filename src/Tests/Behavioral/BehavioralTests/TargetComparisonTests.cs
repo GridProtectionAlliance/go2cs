@@ -78,6 +78,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
+    public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
+
+    [TestMethod]
     public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
 
     [TestMethod]

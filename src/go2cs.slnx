@@ -82,6 +82,7 @@
     <Project Path="Tests/Behavioral/BoxedMapFieldWrite/BoxedMapFieldWrite.csproj" />
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ByteTableStringConst/ByteTableStringConst.csproj" />
+    <Project Path="Tests/Behavioral/ArrayCastDerefClone/ArrayCastDerefClone.csproj" />
     <Project Path="Tests/Behavioral/ArrayOfCrossPackageType/ArrayOfCrossPackageType.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
     <Project Path="Tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />

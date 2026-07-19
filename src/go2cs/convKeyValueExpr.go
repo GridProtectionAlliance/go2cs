@@ -130,7 +130,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	// emitted struct copy would alias its backing (see exprReadsArrayValueFromStorage). Applied
 	// before the interface wraps below so an interface-typed slot boxes the clone.
 	if v.exprReadsArrayValueFromStorage(keyValueExpr.Value) {
-		valueExpr += ".Clone()"
+		valueExpr = appendArrayValueClone(valueExpr)
 	}
 
 	// Box an untyped `int` constant VALUE in an EMPTY-interface slot through nint — a struct `any`
@@ -260,7 +260,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		// cannot mutate the stored key's backing out from under the dictionary. A sparse-array
 		// key is an int index and never matches the type gate.
 		if v.exprReadsArrayValueFromStorage(keyValueExpr.Key) {
-			keyExpr += ".Clone()"
+			keyExpr = appendArrayValueClone(keyExpr)
 		}
 
 		return fmt.Sprintf("[%s] = %s", keyExpr, valueExpr)

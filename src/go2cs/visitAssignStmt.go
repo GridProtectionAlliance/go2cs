@@ -77,7 +77,7 @@ func (v *Visitor) cloneArrayValueCopy(lhs ast.Expr, rhs ast.Expr, rhsExpr string
 		return rhsExpr
 	}
 
-	return rhsExpr + ".Clone()"
+	return appendArrayValueClone(rhsExpr)
 }
 
 // lhsIsEmptyInterface reports whether the assignment target's static type is an EMPTY

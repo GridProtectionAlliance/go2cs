@@ -84,7 +84,7 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 	// element is dequeued exactly once, so the received struct copy is already unaliased.
 	// Applied before the interface wrap below so an interface-element channel boxes the clone.
 	if v.exprReadsArrayValueFromStorage(sendStmt.Value) {
-		sendExpr += ".Clone()"
+		sendExpr = appendArrayValueClone(sendExpr)
 	}
 
 	if elemIsNonEmptyIface {

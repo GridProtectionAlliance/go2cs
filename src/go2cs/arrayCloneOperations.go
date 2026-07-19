@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 // typeIsArrayValue reports whether t's underlying type is a fixed-size Go array — a direct
@@ -47,6 +49,24 @@ func (v *Visitor) exprReadsArrayValueFromStorage(expr ast.Expr) bool {
 	}
 
 	return typeIsArrayValue(v.getExprType(expr))
+}
+
+// appendArrayValueClone appends the strongly-typed `.Clone()` to an already-rendered array
+// expression, WRAPPING it first when the rendering is prefixed by the unary deref operator.
+// C# postfix binds tighter than unary, so a naked suffix on a `~`-prefixed rendering re-binds
+// onto the operand instead of the dereferenced array — reflect InterfaceData's
+// `return *(*[2]uintptr)(v.ptr)` emitted `~(ж<array<uintptr>>)(uintptr)(v.ptr).Clone()`, whose
+// `.Clone()` reads the inner @unsafe.Pointer (CS1061), blocking the whole corpus through
+// fmt→reflect. Mirrors the same precedence guard convStarExpr applies when IT appends the
+// postfix `.Value` to a cast/deref rendering. Every other shape exprReadsArrayValueFromStorage
+// admits (ident, selector, index, and the postfix `.Value` deref form) is already a C# primary
+// expression, so this is byte-neutral everywhere the suffix was correct.
+func appendArrayValueClone(rendered string) string {
+	if strings.HasPrefix(rendered, PointerDerefOp) {
+		return fmt.Sprintf("(%s).Clone()", rendered)
+	}
+
+	return rendered + ".Clone()"
 }
 
 // withArrayValueCloneArgs flags every POSITIONAL composite-literal element that reads an ARRAY

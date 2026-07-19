@@ -380,7 +380,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				// exprReadsArrayValueFromStorage). Applied before any interface conversion below,
 				// so a boxed array result (`func f() any { return arr }`) boxes the clone.
 				if v.exprReadsArrayValueFromStorage(expr) {
-					resultExpr += ".Clone()"
+					resultExpr = appendArrayValueClone(resultExpr)
 				}
 
 				// Box an untyped `int` constant returned as an EMPTY interface through nint (the

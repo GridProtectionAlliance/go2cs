@@ -1533,8 +1533,33 @@ Three deeper repairs make the single `.Clone()` correct everywhere:
   `IStructuralEquatable` calls them per boxed element — throwing on the first equal-length
   distinct-backing comparison. Element-typed comparers fix both and recurse through nested arrays.
 
+**The suffix must be WRAPPED on a `~`-prefixed rendering.** A deref whose operand is a pointer CAST
+(`*(*T)(p)`, `convStarExpr`'s casted-pointer-deref path) renders with the PREFIX `~` operator, and C#
+postfix binds tighter than unary — so a naked `.Clone()` re-binds onto the cast's inner operand
+instead of the dereferenced array. reflect's `InterfaceData` is the real-world case:
+
+```go
+return *(*[2]uintptr)(v.ptr)   // reflect/value.go
+```
+```csharp
+return ~(ж<array<uintptr>>)(uintptr)(v.ptr).Clone();    // WRONG — .Clone() reads v.ptr (CS1061)
+return (~(ж<array<uintptr>>)(uintptr)(v.ptr)).Clone();  // emitted — clone the dereferenced array
+```
+
+Every clone-append site therefore routes its rendering through `appendArrayValueClone`
+(`arrayCloneOperations.go`), which wraps only when the rendering starts with the deref operator —
+the same precedence guard `convStarExpr` already applies when IT appends the postfix `.Value` to a
+cast/deref rendering. Every other shape `exprReadsArrayValueFromStorage` admits (ident, selector,
+index, and the postfix `.Value` deref form) is already a C# primary expression, so the change is
+byte-neutral wherever the suffix was correct — the corpus-wide A/B footprint was exactly this one
+reflect line, whose CS1061 had blocked the whole converted stdlib through `fmt`→`reflect`.
+
 (All guarded by the `ArrayValueCopySites` behavioral test — one output-compared section per site
-class, including multidimensional deep-copy through range and parameter passing.)
+class, including multidimensional deep-copy through range and parameter passing — plus
+`ArrayCastDerefClone`, a compile-shape guard for the wrapped cast-deref form above. That one is
+deliberately NOT output-compared: reconstructing an array through an `unsafe.Pointer` round trip
+cannot RUN under the managed model, so the guard asserts the emitted C# compiles and matches its
+golden, and the copy SEMANTICS stay covered by `ArrayValueCopySites`.)
 
 **Known remaining gaps (documented, not yet emitted):** (1) STRUCT-typed copies whose fields embed
 arrays (`s2 := s1` memberwise-copies the `array<T>` field reference — needs a deep-copy strategy

@@ -192,10 +192,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// storage appends the strongly-typed `.Clone()` (Go copies the array into the slot; the
 		// emitted struct copy would alias its backing) — applied to the element's own rendering,
 		// BEFORE any interface conversion, so an `any`/interface slot boxes the clone.
-		cloneSuffix := ""
+		cloneArrayElement := callContext != nil && callContext.cloneArrayArg != nil && callContext.cloneArrayArg[i]
 
-		if callContext != nil && callContext.cloneArrayArg != nil && callContext.cloneArrayArg[i] {
-			cloneSuffix = ".Clone()"
+		// Routed through appendArrayValueClone so a `~`-prefixed deref rendering is wrapped
+		// before the suffix binds (C# postfix beats unary); byte-neutral for every other shape.
+		clonedElement := func(rendered string) string {
+			if !cloneArrayElement {
+				return rendered
+			}
+
+			return appendArrayValueClone(rendered)
 		}
 
 		if tupleExpanded {
@@ -210,9 +216,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 				contexts = []ExprContext{basicLitContext, identContext, keyValueContext, lambdaContext, callContext}
 			}
 
-			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)+cloneSuffix)
+			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), clonedElement(v.convExpr(expr, contexts)))
 		} else {
-			resultExpr = v.convExpr(expr, contexts) + cloneSuffix
+			resultExpr = clonedElement(v.convExpr(expr, contexts))
 		}
 
 		if replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {
