@@ -302,6 +302,40 @@ func TestResolveTestProjectReferenceRewritesStdLibToConvertedTree(t *testing.T) 
 	}
 }
 
+// F15 alias-load guard: under -tests a stdlib import's exported-type-alias metadata (package_info.cs)
+// must load from the SAME overlaid go-src-converted tree the test compiles against, not the baseline
+// core stub — which for most packages (runtime = impl-stubs only) has no package_info.cs, so the alias
+// map was empty and `err.(runtime.Error)` rendered the raw, undefined `runtime.Error` (CS0426) instead
+// of `runtimeꓸError` => `runtime_package.ΔError`. `testing` stays on the core shim; non-test and
+// non-stdlib pass through. This keeps the alias-load tree consistent with resolveTestProjectReference.
+func TestResolveAliasLoadTargetDirTracksConvertedTree(t *testing.T) {
+	// -tests stdlib: the alias load follows the project ref onto the overlaid go-src-converted tree.
+	const runtimeDir, runtimeRef = `$(go2csPath)core\runtime`, `$(go2csPath)core\runtime\runtime.csproj`
+
+	if got, want := resolveAliasLoadTargetDir(runtimeDir, runtimeRef, "runtime", true, Options{convertTests: true}), `$(go2csPath)go-src-converted\runtime`; got != want {
+		t.Fatalf("-tests stdlib alias-load dir = %q, want %q", got, want)
+	}
+
+	// Non-test: pass through — a normal -stdlib build's stdlib IS the baseline tree.
+	if got := resolveAliasLoadTargetDir(runtimeDir, runtimeRef, "runtime", true, Options{}); got != runtimeDir {
+		t.Fatalf("non-test alias-load dir must pass through, got %q", got)
+	}
+
+	// `testing` stays on the hand-owned core shim (mirrors resolveTestProjectReference's sole exception).
+	const shimDir, shimRef = `$(go2csPath)core\testing`, `$(go2csPath)core\testing\testing.csproj`
+
+	if got := resolveAliasLoadTargetDir(shimDir, shimRef, "testing", true, Options{convertTests: true}); got != shimDir {
+		t.Fatalf("testing alias-load dir must stay on the core shim, got %q", got)
+	}
+
+	// Non-stdlib passes through untouched.
+	const thirdPartyDir = `$(go2csPath)pkg\example.com\mod`
+
+	if got := resolveAliasLoadTargetDir(thirdPartyDir, thirdPartyDir+`\example.com.mod.csproj`, "example.com.mod", false, Options{convertTests: true}); got != thirdPartyDir {
+		t.Fatalf("non-stdlib alias-load dir must pass through, got %q", got)
+	}
+}
+
 // B1 guard: under -tests the regenerated PRODUCTION csproj resolves its stdlib references
 // through the same F15 mapping as the colocated test project — raw `$(go2csPath)core\<pkg>`
 // refs clobbered the committed go-src-converted production csprojs and pulled the baseline

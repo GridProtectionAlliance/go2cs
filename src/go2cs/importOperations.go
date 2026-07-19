@@ -191,6 +191,35 @@ func hasGoFiles(dirPath string) bool {
 
 // ImportInfo returns information about whether the packages are from the standard
 // library and their physical directories
+// resolveAliasLoadTargetDir points a stdlib import's package_info.cs (exported-type-alias) load at the
+// SAME tree its converted assembly is compiled from. Under -tests that assembly is built from the overlaid
+// go-src-converted tree, not the baseline core stub (which for most packages has NO package_info.cs at all —
+// runtime is impl-stubs only), so the alias map came back empty and a test's cross-package reference to a
+// collision-renamed stdlib type rendered the raw, undefined qualified name (`runtime.Error`, CS0426) instead
+// of `runtimeꓸError` => `runtime_package.ΔError`. Rather than re-encode the tree paths, derive the directory
+// from resolveTestProjectReference — the single authority for the -tests stdlib mapping (stdlib ->
+// go-src-converted; `testing` stays on the hand-owned core shim; golib untouched) — by resolving this
+// package's own project reference and dropping its `\<name>.csproj` leaf, so the alias-load tree and the
+// compile tree can never drift. Non-test conversions and non-stdlib packages pass through unchanged.
+//
+// TODO(transitional): this remap — and resolveTestProjectReference itself — exists only because the full
+// stdlib conversion lives in a SEPARATE go-src-converted tree from the baseline core stub the behavioral
+// suite builds against. When the full conversion is promoted into core and the two trees unify, the -tests
+// project-ref remap and this alias-load remap both disappear (stdlib deps resolve from one tree).
+func resolveAliasLoadTargetDir(targetDir, projectReference, packageName string, isStdLib bool, options Options) string {
+	if !options.convertTests || !isStdLib {
+		return targetDir
+	}
+
+	resolvedRef := resolveTestProjectReference(PackageInfo{IsStdLib: true, PackageName: packageName, ProjectReference: projectReference})
+
+	if idx := strings.LastIndex(resolvedRef, `\`); idx != -1 {
+		return resolvedRef[:idx]
+	}
+
+	return targetDir
+}
+
 func getImportPackageInfo(importPaths []string, options Options) map[string]PackageInfo {
 	result := make(map[string]PackageInfo, len(importPaths))
 
@@ -236,6 +265,11 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		importPathParts := strings.Split(importPath, "/")
 		packageName := strings.Join(importPathParts, ".")
 		projectReference := filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")
+
+		// Under -tests, point the alias-load TargetDir at the SAME tree the converted assembly compiles
+		// from (resolveTestProjectReference) so exported-type-alias metadata resolves; see the helper.
+		targetDir = resolveAliasLoadTargetDir(targetDir, projectReference, packageName, isStdLib, options)
+
 		targetDir = strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator))
 
 		result[importPath] = PackageInfo{
