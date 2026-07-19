@@ -1075,6 +1075,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
 		collectPublicizedTypes(packageTypes)
 
+		// Find this package's definition-side one-arg //go:linkname handles (Go 1.23's opt-in that
+		// authorizes cross-package linkname pulls) so the handled vars emit `public` — letting a
+		// puller in another assembly reach them through its forwarding property (see linknameOperations).
+		collectLinknameHandles(pkg.Syntax)
+
 		// Preload the imported type aliases of every package these files import, BEFORE converting any
 		// file, so a foreign renamed type reached transitively (through a value whose package this file
 		// does not itself import) resolves through its recorded alias regardless of file order (see

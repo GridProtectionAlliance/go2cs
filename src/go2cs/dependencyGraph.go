@@ -58,6 +58,43 @@ func (g *DependencyGraph) Contains(path string) bool {
 	return exists
 }
 
+// DependsOn reports whether package `from` transitively depends on package `to` within the
+// convert-set (following the intra-set Dependencies edges). Used to detect a linkname pull that
+// would add a CYCLIC C# project reference — `from` is the linkname target, `to` the pulling package;
+// if the target already depends on the puller, referencing it back cannot compile (a project-ref
+// cycle), so the pull keeps its null-field form instead of a forwarding property.
+func (g *DependencyGraph) DependsOn(from, to string) bool {
+	seen := map[string]bool{}
+	stack := []string{from}
+
+	for len(stack) > 0 {
+		path := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if seen[path] {
+			continue
+		}
+
+		seen[path] = true
+
+		node, ok := g.packages[path]
+
+		if !ok {
+			continue
+		}
+
+		for _, dep := range node.Dependencies {
+			if dep == to {
+				return true
+			}
+
+			stack = append(stack, dep)
+		}
+	}
+
+	return false
+}
+
 // addImportEdges wires intra-convert-set dependency edges for one package: for each of pkgPath's
 // raw import paths it resolves a GOROOT-vendored key, then records an edge ONLY when the resolved
 // dependency is itself a node in the graph. Dependencies/Dependents are deduped here and sorted

@@ -597,6 +597,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
 
     [TestMethod]
+    public void CheckLinknameVarPull() => CheckTarget("LinknameVarPull");
+
+    [TestMethod]
+    public void CheckLinknameVarPullLib() => CheckTarget("LinknameVarPullLib");
+
+    [TestMethod]
     public void CheckLocalStructFieldAddr() => CheckTarget("LocalStructFieldAddr");
 
     [TestMethod]

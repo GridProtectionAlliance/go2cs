@@ -87,6 +87,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	m.graph.sortAdjacency()
 	m.graph.topologicalSort()
 
+	// Expose the convert-set graph so a linkname var-pull whose forwarding project reference would
+	// cycle is rejected in an END-USER module too, not only under -stdlib (see linknamePullWouldCycle).
+	// A pull to the pre-converted stdlib (not a node here) resolves as acyclic — correct, since the
+	// stdlib never depends back on app/third-party code.
+	conversionGraph = m.graph
+
 	// 4. Convert app + third-party packages in dependency order.
 	m.convertAll()
 

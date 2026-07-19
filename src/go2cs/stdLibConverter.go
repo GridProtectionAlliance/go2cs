@@ -68,6 +68,11 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 		return fmt.Errorf("failed to sort packages: %w", err)
 	}
 
+	// Expose the completed convert-set graph so linkname var-pull forwarding can reject a pull whose
+	// project reference would cycle (see linknamePullWouldCycle). Only the -stdlib graph can form
+	// such a cross-package cycle; single-package / -tests conversions leave it nil.
+	conversionGraph = c.graph
+
 	// Generate conversion report
 	if err := c.GenerateConversionReport(); err != nil {
 		fmt.Printf("WARNING: Failed to generate conversion report: %v\n", err)

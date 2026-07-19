@@ -166,6 +166,28 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				def := v.info.Defs[ident]
 
 				if def != nil {
+					// A package var carrying a two-arg //go:linkname PULL (`//go:linkname overflowError
+					// runtime.overflowError`, math/bits) is emitted as a forwarding PROPERTY to the remote
+					// symbol — Go's linkname aliases their storage, so reads and writes both hit the remote —
+					// not the null field this bodyless var would otherwise become. The remote is public via
+					// its definition-side one-arg handle (packageVarAccess), and its package is queued for a
+					// project reference; the fully-qualified `go.<pkg>_package.<remote>` resolves inside
+					// `namespace go;` without a using. See linknameOperations.
+					// An ADDRESS-TAKEN pull keeps its heap-box form below: a forwarding property has no
+					// address, so `&zeroVal[0]` (reflect, pulling runtime.zeroVal) would reference a
+					// nonexistent `ᏑzeroVal` box (CS0103). Such a pull falls through to the addressed-
+					// global emission — the pre-feature behavior, which compiles.
+					if ref, pkgPath, ok := varLinknamePull(goIDName, doc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
+						if i > 0 {
+							v.targetFile.WriteString(v.newline)
+						}
+
+						v.importQueue.Add(pkgPath)
+						csTypeName := convertToCSTypeName(v.getTypeName(def.Type(), false))
+						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
+						continue
+					}
+
 					if i > 0 {
 						v.targetFile.WriteString(v.newline)
 					}
@@ -267,7 +289,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							}
 						}
 					} else {
-						access := getAccess(goIDName)
+						access := packageVarAccess(goIDName, v.getIdentType(ident))
 						typeLenDeviation += token.Pos(len(access) + 6)
 
 						// A fixed-size array global must be allocated (`new(N)`); the default
@@ -426,7 +448,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					} else {
 						csTypeName = v.getCSTypeName(def.Type())
 
-						access := getAccess(goIDName)
+						access := packageVarAccess(goIDName, v.getIdentType(ident))
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
 						// A multi-value inner call spread in the initializer (`var debug =
@@ -561,7 +583,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					}
 				}
 			} else {
-				access := getAccess(goIDName)
+				access := packageVarAccess(goIDName, v.getIdentType(ident))
 				typeLenDeviation += token.Pos(len(access) + 4)
 				if v.isAddressedGlobal(ident) {
 					// An addressed package var must be heap-boxed even when its initializer folds to
