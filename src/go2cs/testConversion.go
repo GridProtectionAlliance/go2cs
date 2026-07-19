@@ -660,9 +660,10 @@ func (r conversionRecordSet) isEmpty() bool {
 //     class — the adapter must be its member;
 //   - a BARE impl name is a type declared in the external test package itself — its generated
 //     partial struct must merge with that declaration in the test package class;
-//   - a PRODUCTION-qualified record (`sort_package.IntSlice`, or its rooted form) generates a
-//     partial/adapter on the production class — it stays with the production-anchored
-//     package_test_info.cs, whose first class is the production class.
+//   - a PRODUCTION-qualified record (`sort_package.IntSlice`, its rooted form, or its
+//     namespace-relative form `math.rand_package.Rand`) generates a partial/adapter on the
+//     production class — it stays with the production-anchored package_test_info.cs, whose first
+//     class is the production class.
 func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName string) bool {
 	if adapterClassImplementations.Contains(ifaceName + "|" + implName) {
 		return true
@@ -683,8 +684,21 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 	if pointerForm {
 		inner = strings.TrimPrefix(inner, "global::")
 
-		return !strings.HasPrefix(inner, productionClassName+".") &&
-			!strings.HasPrefix(inner, packageNamespace+"."+productionClassName+".")
+		if strings.HasPrefix(inner, productionClassName+".") ||
+			strings.HasPrefix(inner, packageNamespace+"."+productionClassName+".") {
+			return false
+		}
+
+		// The live records qualify the implementer NAMESPACE-RELATIVE — without the `go.` root —
+		// so a NESTED package's production type arrives as `math.rand_package.Rand`, matching
+		// neither form above and landing in the wrong anchor. (A TOP-LEVEL package worked by
+		// accident: its relative qualifier IS the bare `sort_package.` form.) Recognize the
+		// relative qualifier so nested packages keep production types production-anchored.
+		if relative, ok := strings.CutPrefix(packageNamespace, RootNamespace+"."); ok {
+			return !strings.HasPrefix(inner, relative+"."+productionClassName+".")
+		}
+
+		return true
 	}
 
 	return false
