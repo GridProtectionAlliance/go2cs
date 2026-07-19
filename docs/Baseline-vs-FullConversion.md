@@ -148,7 +148,9 @@ There are **two** ways a package carries hand-owned C#, and they are NOT interch
 
    Complete inventory of whole-file replacements (every non-`*_impl` file carrying a real module-level
    marker in `src/go-src-converted`; grep-verified 2026-07-16): sync `mutex.cs` / `waitgroup.cs` /
-   `rwmutex.cs` / `pool.cs`; runtime `runtime2.cs` / `mfinal.cs`; syscall `dll_windows.cs`; internal/godebug
+   `rwmutex.cs` / `pool.cs`; runtime `runtime2.cs` / `mfinal.cs`; syscall `dll_windows.cs` /
+   `exec_windows.cs` (2026-07-19 — `StartProcess` only; see *Child-process creation* below);
+   internal/godebug
    `godebug.cs` (2026-07-17, blocker R2 — parses $GODEBUG once on first use instead of the Go runtime's
    update-hook cache; the literal conversion's embedded `*setting` promotion faults at runtime because the
    generated promoted-field box treats its held nil pointer as a nil dereference even for the assignment
@@ -158,9 +160,10 @@ There are **two** ways a package carries hand-owned C#, and they are NOT interch
    bits/frombits as direct `BitConverter` bit-cast intrinsics, replacing the literal conversion's
    `ж<T>`/`uintptr` round-trip that compiles but cannot reinterpret bits at runtime; canonical in
    `src/core/math`, byte-identical copy in `go-src-converted/math`; guarded by the `MathFloatBits`
-   behavioral test). Seven `*_impl.cs` companions also carry the marker (documentation only, per
+   behavioral test). Several `*_impl.cs` companions also carry the marker (documentation only, per
    pattern 1): internal/abi `type_impl.cs`, reflect `value_impl.cs`, runtime `lock_sema_impl.cs` /
-   `runtime2_impl.cs`, sync `runtime_impl.cs`, and math/rand + math/rand/v2 `rand_impl.cs` (2026-07-17,
+   `runtime2_impl.cs`, sync `runtime_impl.cs`, internal/poll `runtime_sema_impl.cs`, syscall
+   `syscall_impl.cs` (2026-07-19), and math/rand + math/rand/v2 `rand_impl.cs` (2026-07-17,
    blocker R3 — `runtime.rand` linkname bodies on `Random.Shared`: OS-entropy seeded, thread-safe,
    non-deterministic run to run exactly like Go's runtime generator; the os / net / hash/maphash
    `runtime_rand` declarations still carry throwing stubs).
@@ -207,6 +210,56 @@ marker gate is not effective there to begin with.
 The rule from *§5* still holds: canonical hand-owned files live under `src/core/<pkg>` and are overlaid into
 `src/go-src-converted/<pkg>` (`overlay.sh`) — with the marker, an overlaid whole-file override then survives
 the next reconvert instead of being clobbered.
+
+### Child-process creation (`os/exec`) — what had to be hand-owned, and what did not
+
+Re-executing the current binary is how `os`, `os/exec`, `runtime`, `flag`, `log` and a large number of
+stdlib **test** suites exercise subprocess behavior, so this path gates a lot of Phase 4. Four distinct
+layers were broken; only one of them warranted hand-owning.
+
+1. **golib** — the reinterpret seam boxed a copy instead of aliasing the address, so `os.Environ()` walked
+   the GC heap and freed it (`STATUS_HEAP_CORRUPTION`). Fixed generally in `ж<T>` (see
+   *A reinterpreted raw address ALIASES native memory* in `ConversionStrategies-Reference.md`).
+2. **Converter** — `unsafe.Pointer(p)` on a pointer parameter dereferenced it, so the nil out-pointer in
+   `StartProcess`'s deferred `DuplicateHandle` panicked; and a switch `default:` clause could be emitted
+   unchained, so **every** `(*Process).wait` returned "os: unexpected result from WaitForSingleObject".
+   Both fixed in the converter with behavioral guards.
+3. **Bodyless runtime-provided partials** — `syscall.Exit` / `Getpagesize` / `runtimeSetenv` /
+   `runtimeUnsetenv` and `os.runtime_beforeExit` are provided by Go's runtime, so go2cs emits throwing
+   stubs. Supplied as `*_impl.cs` companions (pattern 1). Without them no converted program could exit
+   deliberately, and a child reported the stub panic instead of its own status.
+4. **`syscall.StartProcess`** — the genuine hand-own (pattern 2). Go hands `CreateProcessW` a
+   `*_STARTUPINFOEXW` whose fields are pointers into native memory; the converted struct holds them as
+   golib `ж<T>` boxes — managed class references that are neither the right bytes at the right offsets nor
+   marshalable at all (`unsafe.Sizeof(*si)` throws "cannot be marshaled as an unmanaged structure"). Same
+   for `_PROC_THREAD_ATTRIBUTE_LIST` over an `array<byte>`. This is the memory-layout / raw-metal case, so
+   `StartProcess` is transcribed against blittable `[StructLayout(LayoutKind.Sequential)]` mirrors and
+   direct P/Invokes. **Every other declaration in `exec_windows.cs` is the converted output verbatim** —
+   argument escaping, command-line building, environment-block building and path normalization are pure
+   Go logic that converts faithfully — and the native code reuses those helpers plus the scalar-only
+   converted wrappers (`GetCurrentProcess`, `DuplicateHandle`, `CloseHandle`).
+
+Note what did **not** need hand-owning: `SecurityAttributes` is fully blittable (two `uint32`s and a
+`uintptr`), so `CreatePipe` — and therefore `os.Pipe`, which `CombinedOutput` relies on — works through the
+ordinary converted wrapper. The struct-passing seam only breaks for structs holding `ж<T>` fields.
+
+The hand-owned implementation also copies every buffer handed to `CreateProcessW` (application name,
+command line, environment block, working directory, handle list, attribute list) into **unmanaged** memory
+for the duration of the call, freeing it in a `finally`. That closes the transient-pinned-address window
+documented in `dll_windows.cs`, where golib's `ж`→`uintptr` conversion can only produce an address a
+compacting GC might invalidate mid-call.
+
+**Verified capability:** a converted program re-executes itself, passes argv and a modified environment,
+has stdout *and* stderr captured through `CombinedOutput`, waits, and surfaces the child's exit code —
+byte-identical to `go run` on the same program.
+
+**Known limits.** Windows only (`StartProcess` is the Windows implementation; the POSIX
+`fork`/`exec` path is untouched). Go's `SysProcAttr` surface is honored — `HideWindow`, `CmdLine`,
+`CreationFlags`, `Token` (via `CreateProcessAsUserW`), `ProcessAttributes`/`ThreadAttributes`,
+`NoInheritHandles`, `AdditionalInheritedHandles`, `ParentProcess` — but only the plain
+`CreateProcessW`/`CreateProcessAsUserW` paths are exercised by tests so far. `syscall.Exec` remains
+`EWINDOWS`, as in Go. Signals and process groups are unaddressed; `Process.Kill`/`Signal` route through
+the ordinary converted `os` code and were not exercised here.
 
 ## Regenerating the full conversion
 

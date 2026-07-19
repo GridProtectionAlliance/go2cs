@@ -517,11 +517,19 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		guardedTerminalDefault := false
 		allCasesTerminal := true
 
+		// A LEADING/MIDDLE `default` with no fallthrough guard emits as a BARE BLOCK
+		// (`{ /* default: */ … }`) rather than an `if`, so nothing follows it that an `else` could
+		// attach to — `} else if (…)` after a plain block is CS8641 ("'else' cannot start a
+		// statement"), which is why the chain is broken there in the first place (regexp/syntax
+		// parseEscape leads with `default:`). Track it so the else-chaining below skips such a clause.
+		prevClauseIsBareBlock := false
+
 		// Write "if" statements for each case clause
 		for i, caseClause := range caseClauses {
 			v.writeOutput("")
 
 			caseFallsThrough := false
+			thisClauseIsBareBlock := false
 
 			// Case falls through if the previous case clause has a fallthrough statement
 			if i > 0 && caseHasFallthroughStmt[i-1] {
@@ -542,8 +550,9 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// it; allCasesTerminal is the accumulated check the trailing-return logic below already relies
 			// on (see its note that the shallow flag is wrong for this purpose). Keeping the original
 			// condition as one arm makes this strictly ADD an `else` where one was missing — never remove
-			// one — so no already-correct emission changes.
-			if i > 0 && !caseFallsThrough && (!v.lastStatementWasReturn || !allCasesTerminal) {
+			// one — so no already-correct emission changes. A preceding BARE-BLOCK default takes no
+			// `else` at all (see prevClauseIsBareBlock).
+			if i > 0 && !caseFallsThrough && !prevClauseIsBareBlock && (!v.lastStatementWasReturn || !allCasesTerminal) {
 				v.targetFile.WriteString("else ")
 			}
 
@@ -574,6 +583,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					guardedTerminalDefault = true
 				} else {
 					v.targetFile.WriteString("{ /* default: */")
+					thisClauseIsBareBlock = true
 				}
 			} else {
 				caseClauseCount := len(caseClause.List)
@@ -661,6 +671,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 			v.indentLevel--
 			v.writeOutputLn("}")
+
+			prevClauseIsBareBlock = thisClauseIsBareBlock
 		}
 
 		// A trailing `default:` in the guarded (fallthrough) form is a runtime-conditional `if` that C#

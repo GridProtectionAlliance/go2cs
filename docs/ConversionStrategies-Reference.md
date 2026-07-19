@@ -3175,6 +3175,45 @@ form leaves C# unable to prove exhaustiveness, so a value-returning terminal swi
 trailing `return default!;`. Guarded by `SwitchFallthroughDefault` (a `fallthrough`+`default` switch
 where a matched non-fallthrough case must NOT run the default, output-compared vs Go).
 
+### A clause's `else` may only be dropped when EVERY preceding clause terminates
+In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
+ended in a `return` — the chain is then unnecessary, since control cannot reach the later clause
+anyway. That decision was driven by a *shallow* "the last statement emitted was a return" flag, which
+reports only the **immediately** preceding clause. Dropping the `else` is sound only when **every**
+preceding clause terminates.
+
+For a `case` the mistake is invisible: its condition cannot match a value an earlier case already
+matched, so the unchained `if` simply evaluates to false. For `default:` it is silently fatal —
+`default` has no condition and therefore *always* runs. os's `(*Process).wait` is exactly this shape:
+
+```go
+switch s {
+case syscall.WAIT_OBJECT_0:      // a bare `break` — falls OUT of the switch
+	break
+case syscall.WAIT_FAILED:
+	return nil, NewSyscallError("WaitForSingleObject", e)
+default:
+	return nil, errors.New("os: unexpected result from WaitForSingleObject")
+}
+```
+
+The `break` case is not a Go terminating statement, but the returning `WAIT_FAILED` case set the flag,
+so the default emitted as an **unguarded** block that ran straight after the success path:
+
+```csharp
+if (exprᴛ2 == syscall.WAIT_OBJECT_0) { do { break; } while (false); }
+else if (exprᴛ2 == syscall.WAIT_FAILED) { … return; }
+{ /* default: */ … return errors.New("os: unexpected result from WaitForSingleObject"); }
+```
+
+Every child-process wait therefore failed — and it compiled cleanly the whole time. The decision now
+uses the accumulated `allCasesTerminal` check that the trailing-`return default!;` logic already
+relies on (genuine Go terminating-statement analysis, so an `if { return }` with no `else` is
+correctly non-terminating). The original condition is kept as one arm of the test, making the change
+strictly *add* an `else` where one was missing and never remove one, so no already-correct emission
+changes. Guarded by `SwitchFallthroughDefaultReturn`'s `waitShape` (non-constant case labels force the
+if-chain; verified to fail without the fix).
+
 ## Type Switch Statements
 For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
 
@@ -5335,6 +5374,73 @@ instead of raising Go's nil-deref panic — observable only by a program already
 (Guarded by the `PointerReceiverNilCompare` extension — `isNil`/`notNil`/guard-first `describe`
 called through actually-nil `*box` and `*embedder` pointers beside the original non-nil probes,
 output-compared vs Go; bytes' `TestNil` exercises the stdlib shape.)
+
+### A reinterpreted raw address ALIASES native memory instead of boxing a copy
+`(ж<T>)(uintptr)` is the reinterpret seam: it turns a raw address back into a pointer. It used to
+box a **copy** of the pointed-at value —
+
+```csharp
+public static unsafe explicit operator ж<T>(uintptr value) => new ж<T>(*(T*)value.Value);
+```
+
+— which silently discarded the address. That is fine only for an immediate single read. It makes
+three things impossible: pointer arithmetic (there is no address left to advance), observing writes
+that native code makes afterward, and — worst — handing the pointer **back** to the OS, which then
+operates on the address of a *managed box field* instead of the native block.
+
+`syscall.Environ` does all three. It walks the `GetEnvironmentStringsW` block and frees it:
+
+```go
+envp, e := GetEnvironmentStrings()
+defer FreeEnvironmentStrings(envp)
+for *envp != 0 { … end = unsafe.Add(end, size) … }
+```
+
+Converted, the walk scanned the GC heap and the deferred `FreeEnvironmentStringsW` asked Windows to
+free GC memory — an outright `STATUS_HEAP_CORRUPTION` (0xC0000374) process kill. `os.Environ()`
+alone reproduced it, so nothing that reads the environment could run.
+
+`ж<T>` now has a fourth reference kind alongside the standard value, struct-field and array-element
+refs: a box that **aliases a native address**. `Value`/`ValueSlot` read that memory through
+`Unsafe.AsRef`, `IsNull` is address-based (address 0 is the nil pointer, matching Go's
+`(*T)(unsafe.Pointer(uintptr(0))) == nil`), and the `uintptr`/`void*` operators round-trip the
+address **exactly** — which is what Go's `uintptr(unsafe.Pointer(p))` guarantees. `unsafe.Add`,
+`unsafe.Slice` and `unsafe.String` honor the kind.
+
+`unsafe.Add` also gained an `unsafe.Pointer` overload. Go's `unsafe.Add` is **byte** arithmetic and
+its argument is always an `unsafe.Pointer`, but golib models `unsafe.Pointer` as `ж<uintptr>` whose
+*value* is the address — so the generic `ж<T>` overload, which resolves a managed array-element
+reference, found none and returned a **nil** pointer. Stepping through a native block dereferenced
+address 0 on the very first step.
+
+**Known limit:** `unsafe.Slice`/`unsafe.String` over a native address *snapshot* the memory into a
+managed buffer rather than aliasing it the way Go does, so writes through the result do not reach the
+native memory. That is sufficient for reading a block a syscall returned (the `Environ` shape) and is
+where the seam still differs from Go.
+
+### `unsafe.Pointer(p)` on a pointer PARAMETER renders the box, never a deref
+A pointer parameter is emitted as the box `ж<T> Ꮡp` plus a deref'd VALUE alias
+(`ref var p = ref Ꮡp.Value`). Taking its address through that alias —
+`@unsafe.Pointer.FromRef(ref p)` — forces the alias to be materialized, so the entry-time deref
+raises a nil-pointer panic for a **nil** argument, even though Go never touches the pointee and
+`uintptr(unsafe.Pointer(nil))` is defined to be `0`.
+
+Nil out-pointers are idiomatic in the syscall wrappers. `DuplicateHandle` takes `lpTargetHandle
+*Handle` as nil together with `DUPLICATE_CLOSE_SOURCE` to close a handle *without* receiving a
+duplicate, and `syscall.StartProcess` does exactly that in a deferred call — so spawning any child
+process panicked there.
+
+The address now comes from the **box**: `new @unsafe.Pointer(Ꮡp)`. golib's
+`implicit operator uintptr(ж<T>)` already yields precisely the address Go wants — `0` for a nil box,
+the aliased address for a native pointer (above), the pinned storage otherwise. Rendering the box
+also removes the bare value reference from the body, so an otherwise-unused alias is dropped as dead
+by the scan described under *A pointer parameter used only through its box gets no deref VALUE alias*
+and the entry deref disappears with it. Parameters whose pointee is a basic or struct type already
+took this form; a named-numeric pointee (`*Handle`) and a pointer-to-pointer (`**uint16`) did not.
+
+A pointer **receiver** keeps the `FromRef` form — a `this ref T` receiver has no box to address.
+Guarded by `NilPointerParamUnsafePointer` (nil and non-nil arguments across all three pointee shapes,
+plus a case where the value alias stays genuinely live so the box rendering must not drop it).
 
 ## Implicit Pointer Dereferencing
 **Deciding whether a selector base is *already* dereferenced.** A field selector on a pointer-valued base auto-derefs in Go, so the converter must insert the deref (`(~x).field` / `x.Value.field`) — *unless* the base is itself an explicit dereference (`(*p).field`) or a pointer conversion whose dedicated branch appends its own `.Value`. That "is the base already deref'd" test was a whole-subtree scan for **any** `StarExpr`, which mistook a conversion star buried in a call **argument** for a dereferenced base — `stringStructOf((*string)(unsafe.Pointer(p))).n` (runtime `arena.go`): the `(*string)` star belongs to the argument's conversion, the *call result* (`ж<stringStruct>`) is not deref'd, and skipping the auto-deref left `.n` on the box (CS1061). The test now inspects only the base's own outermost shape (unwrapping parens; a pointer-conversion base still routes to the conversion branch), and the conversion-branch dispatch also unwraps **enclosing parens**, so an extra-paren conversion base — `((*specialWeakHandle)(unsafe.Pointer(…))).handle` (runtime `mheap.go`) — reaches it (the same extra-paren blind spot the reinterpret routing had). Reads through a conversion base are faithful; a **write** through one hits the copy box, the documented reinterpret-seam limitation shared by the whole `(ж<T>)(uintptr)` family (the runtime sites are reads). The corpus was byte-identical across all behavioral projects after the change — only previously-non-compiling shapes gained emissions. (Guarded by the `PointerSelectorDeref` behavioral test — both shapes, read values vs Go; cleared 3 runtime CS1061, 74 → 71.)
