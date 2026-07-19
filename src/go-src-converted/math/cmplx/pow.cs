@@ -72,7 +72,7 @@ public static complex128 Pow(complex128 x, complex128 y) {
     }
     var modulus = Abs(x);
     if (modulus == 0) {
-        return complex(0, 0);
+        return complex(0D, 0D);
     }
     var r = math.Pow(modulus, real(y));
     var arg = Phase(x);

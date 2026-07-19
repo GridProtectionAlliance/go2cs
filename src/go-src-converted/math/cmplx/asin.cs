@@ -78,7 +78,7 @@ public static complex128 Asin(complex128 x) {
                 return x;
             }
             case {} when math.IsInf(re, 0): {
-                return complex(math.Copysign(math.Pi / 4, re), im);
+                return complex(math.Copysign(math.Pi / 4D, re), im);
             }
             default: {
                 return complex(math.Copysign(0, re), im);
@@ -87,7 +87,7 @@ public static complex128 Asin(complex128 x) {
             break;
         }
         case {} when math.IsInf(re, 0): {
-            return complex(math.Copysign(math.Pi / 2, re), math.Copysign(re, im));
+            return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(re, im));
         }}
     }
 
@@ -118,7 +118,7 @@ public static complex128 Asinh(complex128 x) {
         case {} when math.IsInf(re, 0): {
             switch (ᐧ) {
             case {} when math.IsInf(im, 0): {
-                return complex(re, math.Copysign(math.Pi / 4, im));
+                return complex(re, math.Copysign(math.Pi / 4D, im));
             }
             case {} when math.IsNaN(im): {
                 return x;
@@ -144,7 +144,7 @@ public static complex128 Asinh(complex128 x) {
             break;
         }
         case {} when math.IsInf(im, 0): {
-            return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2, im));
+            return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2D, im));
         }}
     }
 
@@ -171,13 +171,13 @@ public static complex128 Asinh(complex128 x) {
 // Acos returns the inverse cosine of x.
 public static complex128 Acos(complex128 x) {
     var w = Asin(x);
-    return complex((float64)(math.Pi / 2) - real(w), -imag(w));
+    return complex((float64)(math.Pi / 2D) - real(w), -imag(w));
 }
 
 // Acosh returns the inverse hyperbolic cosine of x.
 public static complex128 Acosh(complex128 x) {
     if (x == 0) {
-        return complex(0, math.Copysign(math.Pi / 2, imag(x)));
+        return complex(0, math.Copysign(math.Pi / 2D, imag(x)));
     }
     var w = Acos(x);
     if (imag(w) <= 0) {
@@ -236,7 +236,7 @@ public static complex128 Atan(complex128 x) {
             if (math.IsNaN(re)) {
                 return complex(math.NaN(), math.Copysign(0, im));
             }
-            return complex(math.Copysign(math.Pi / 2, re), math.Copysign(0, im));
+            return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(0, im));
         }
         case {} when math.IsNaN(re) || math.IsNaN(im): {
             return NaN();
