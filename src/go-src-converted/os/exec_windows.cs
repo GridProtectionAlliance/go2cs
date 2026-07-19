@@ -40,7 +40,7 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         else if (exprᴛ2 == syscall.WAIT_FAILED) {
             (ps, err) = (default!, NewSyscallError("WaitForSingleObject"u8, e)); return;
         }
-        { /* default: */
+        else { /* default: */
             (ps, err) = (default!, errors.New("os: unexpected result from WaitForSingleObject"u8)); return;
         }
 

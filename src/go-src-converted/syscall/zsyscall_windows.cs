@@ -195,8 +195,7 @@ internal static ж<LazyProc> procsocket = modws2_32.NewProc("socket"u8);
 public static error /*err*/ ConvertSidToStringSid(ж<SID> Ꮡsid, ж<ж<uint16>> ᏑstringSid) {
     error err = default!;
 
-    ref var stringSid = ref ᏑstringSid.Value;
-    var (r1, _, e1) = Syscall(procConvertSidToStringSidW.Addr(), 2, (uintptr)new @unsafe.Pointer(Ꮡsid), (uintptr)@unsafe.Pointer.FromRef(ref stringSid), 0);
+    var (r1, _, e1) = Syscall(procConvertSidToStringSidW.Addr(), 2, (uintptr)new @unsafe.Pointer(Ꮡsid), (uintptr)new @unsafe.Pointer(ᏑstringSid), 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -206,8 +205,7 @@ public static error /*err*/ ConvertSidToStringSid(ж<SID> Ꮡsid, ж<ж<uint16>>
 public static error /*err*/ ConvertStringSidToSid(ж<uint16> ᏑstringSid, ж<ж<SID>> Ꮡsid) {
     error err = default!;
 
-    ref var sid = ref Ꮡsid.Value;
-    var (r1, _, e1) = Syscall(procConvertStringSidToSidW.Addr(), 2, (uintptr)new @unsafe.Pointer(ᏑstringSid), (uintptr)@unsafe.Pointer.FromRef(ref sid), 0);
+    var (r1, _, e1) = Syscall(procConvertStringSidToSidW.Addr(), 2, (uintptr)new @unsafe.Pointer(ᏑstringSid), (uintptr)new @unsafe.Pointer(Ꮡsid), 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -241,8 +239,7 @@ public static error /*err*/ CreateProcessAsUser(Token token, ж<uint16> ᏑappNa
 public static error /*err*/ CryptAcquireContext(ж<ΔHandle> Ꮡprovhandle, ж<uint16> Ꮡcontainer, ж<uint16> Ꮡprovider, uint32 provtype, uint32 flags) {
     error err = default!;
 
-    ref var provhandle = ref Ꮡprovhandle.Value;
-    var (r1, _, e1) = Syscall6(procCryptAcquireContextW.Addr(), 5, (uintptr)@unsafe.Pointer.FromRef(ref provhandle), (uintptr)new @unsafe.Pointer(Ꮡcontainer), (uintptr)new @unsafe.Pointer(Ꮡprovider), (uintptr)provtype, (uintptr)flags, 0);
+    var (r1, _, e1) = Syscall6(procCryptAcquireContextW.Addr(), 5, (uintptr)new @unsafe.Pointer(Ꮡprovhandle), (uintptr)new @unsafe.Pointer(Ꮡcontainer), (uintptr)new @unsafe.Pointer(Ꮡprovider), (uintptr)provtype, (uintptr)flags, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -310,8 +307,7 @@ public static error /*err*/ LookupAccountSid(ж<uint16> ᏑsystemName, ж<SID> �
 public static error /*err*/ OpenProcessToken(ΔHandle h, uint32 access, ж<Token> Ꮡtoken) {
     error err = default!;
 
-    ref var token = ref Ꮡtoken.Value;
-    var (r1, _, e1) = Syscall(procOpenProcessToken.Addr(), 3, (uintptr)h, (uintptr)access, (uintptr)@unsafe.Pointer.FromRef(ref token));
+    var (r1, _, e1) = Syscall(procOpenProcessToken.Addr(), 3, (uintptr)h, (uintptr)access, (uintptr)new @unsafe.Pointer(Ꮡtoken));
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -341,8 +337,7 @@ internal static error /*regerrno*/ regEnumKeyEx(ΔHandle key, uint32 index, ж<u
 public static error /*regerrno*/ RegOpenKeyEx(ΔHandle key, ж<uint16> Ꮡsubkey, uint32 options, uint32 desiredAccess, ж<ΔHandle> Ꮡresult) {
     error regerrno = default!;
 
-    ref var result = ref Ꮡresult.Value;
-    var (r0, _, _) = Syscall6(procRegOpenKeyExW.Addr(), 5, (uintptr)key, (uintptr)new @unsafe.Pointer(Ꮡsubkey), (uintptr)options, (uintptr)desiredAccess, (uintptr)@unsafe.Pointer.FromRef(ref result), 0);
+    var (r0, _, _) = Syscall6(procRegOpenKeyExW.Addr(), 5, (uintptr)key, (uintptr)new @unsafe.Pointer(Ꮡsubkey), (uintptr)options, (uintptr)desiredAccess, (uintptr)new @unsafe.Pointer(Ꮡresult), 0);
     if (r0 != 0) {
         regerrno = ((Errno)r0);
     }
@@ -372,8 +367,7 @@ public static error /*regerrno*/ RegQueryValueEx(ΔHandle key, ж<uint16> Ꮡnam
 public static error /*err*/ CertAddCertificateContextToStore(ΔHandle store, ж<CertContext> ᏑcertContext, uint32 addDisposition, ж<ж<CertContext>> ᏑstoreContext) {
     error err = default!;
 
-    ref var storeContext = ref ᏑstoreContext.Value;
-    var (r1, _, e1) = Syscall6(procCertAddCertificateContextToStore.Addr(), 4, (uintptr)store, (uintptr)new @unsafe.Pointer(ᏑcertContext), (uintptr)addDisposition, (uintptr)@unsafe.Pointer.FromRef(ref storeContext), 0, 0);
+    var (r1, _, e1) = Syscall6(procCertAddCertificateContextToStore.Addr(), 4, (uintptr)store, (uintptr)new @unsafe.Pointer(ᏑcertContext), (uintptr)addDisposition, (uintptr)new @unsafe.Pointer(ᏑstoreContext), 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -432,8 +426,7 @@ public static error /*err*/ CertFreeCertificateContext(ж<CertContext> Ꮡctx) {
 public static error /*err*/ CertGetCertificateChain(ΔHandle engine, ж<CertContext> Ꮡleaf, ж<Filetime> Ꮡtime, ΔHandle additionalStore, ж<CertChainPara> Ꮡpara, uint32 flags, uintptr reserved, ж<ж<CertChainContext>> ᏑchainCtx) {
     error err = default!;
 
-    ref var chainCtx = ref ᏑchainCtx.Value;
-    var (r1, _, e1) = Syscall9(procCertGetCertificateChain.Addr(), 8, (uintptr)engine, (uintptr)new @unsafe.Pointer(Ꮡleaf), (uintptr)new @unsafe.Pointer(Ꮡtime), (uintptr)additionalStore, (uintptr)new @unsafe.Pointer(Ꮡpara), (uintptr)flags, (uintptr)reserved, (uintptr)@unsafe.Pointer.FromRef(ref chainCtx), 0);
+    var (r1, _, e1) = Syscall9(procCertGetCertificateChain.Addr(), 8, (uintptr)engine, (uintptr)new @unsafe.Pointer(Ꮡleaf), (uintptr)new @unsafe.Pointer(Ꮡtime), (uintptr)additionalStore, (uintptr)new @unsafe.Pointer(Ꮡpara), (uintptr)flags, (uintptr)reserved, (uintptr)new @unsafe.Pointer(ᏑchainCtx), 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -496,8 +489,7 @@ public static error /*status*/ DnsQuery(@string name, uint16 qtype, uint32 optio
 internal static error /*status*/ _DnsQuery(ж<uint16> Ꮡname, uint16 qtype, uint32 options, ж<byte> Ꮡextra, ж<ж<DNSRecord>> Ꮡqrs, ж<byte> Ꮡpr) {
     error status = default!;
 
-    ref var qrs = ref Ꮡqrs.Value;
-    var (r0, _, _) = Syscall6(procDnsQuery_W.Addr(), 6, (uintptr)new @unsafe.Pointer(Ꮡname), (uintptr)qtype, (uintptr)options, (uintptr)new @unsafe.Pointer(Ꮡextra), (uintptr)@unsafe.Pointer.FromRef(ref qrs), (uintptr)new @unsafe.Pointer(Ꮡpr));
+    var (r0, _, _) = Syscall6(procDnsQuery_W.Addr(), 6, (uintptr)new @unsafe.Pointer(Ꮡname), (uintptr)qtype, (uintptr)options, (uintptr)new @unsafe.Pointer(Ꮡextra), (uintptr)new @unsafe.Pointer(Ꮡqrs), (uintptr)new @unsafe.Pointer(Ꮡpr));
     if (r0 != 0) {
         status = ((Errno)r0);
     }
@@ -618,9 +610,7 @@ internal static (ΔHandle handle, error err) createIoCompletionPort(ΔHandle fil
 public static error /*err*/ CreatePipe(ж<ΔHandle> Ꮡreadhandle, ж<ΔHandle> Ꮡwritehandle, ж<SecurityAttributes> Ꮡsa, uint32 size) {
     error err = default!;
 
-    ref var readhandle = ref Ꮡreadhandle.Value;
-    ref var writehandle = ref Ꮡwritehandle.Value;
-    var (r1, _, e1) = Syscall6(procCreatePipe.Addr(), 4, (uintptr)@unsafe.Pointer.FromRef(ref readhandle), (uintptr)@unsafe.Pointer.FromRef(ref writehandle), (uintptr)new @unsafe.Pointer(Ꮡsa), (uintptr)size, 0, 0);
+    var (r1, _, e1) = Syscall6(procCreatePipe.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡreadhandle), (uintptr)new @unsafe.Pointer(Ꮡwritehandle), (uintptr)new @unsafe.Pointer(Ꮡsa), (uintptr)size, 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -691,12 +681,11 @@ public static error /*err*/ DeviceIoControl(ΔHandle handle, uint32 ioControlCod
 public static error /*err*/ DuplicateHandle(ΔHandle hSourceProcessHandle, ΔHandle hSourceHandle, ΔHandle hTargetProcessHandle, ж<ΔHandle> ᏑlpTargetHandle, uint32 dwDesiredAccess, bool bInheritHandle, uint32 dwOptions) {
     error err = default!;
 
-    ref var lpTargetHandle = ref ᏑlpTargetHandle.Value;
     uint32 _p0 = default!;
     if (bInheritHandle) {
         _p0 = 1;
     }
-    var (r1, _, e1) = Syscall9(procDuplicateHandle.Addr(), 7, (uintptr)hSourceProcessHandle, (uintptr)hSourceHandle, (uintptr)hTargetProcessHandle, (uintptr)@unsafe.Pointer.FromRef(ref lpTargetHandle), (uintptr)dwDesiredAccess, (uintptr)_p0, (uintptr)dwOptions, 0, 0);
+    var (r1, _, e1) = Syscall9(procDuplicateHandle.Addr(), 7, (uintptr)hSourceProcessHandle, (uintptr)hSourceHandle, (uintptr)hTargetProcessHandle, (uintptr)new @unsafe.Pointer(ᏑlpTargetHandle), (uintptr)dwDesiredAccess, (uintptr)_p0, (uintptr)dwOptions, 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -950,8 +939,7 @@ public static (uint32 n, error err) GetFullPathName(ж<uint16> Ꮡpath, uint32 b
     uint32 n = default!;
     error err = default!;
 
-    ref var fname = ref Ꮡfname.Value;
-    var (r0, _, e1) = Syscall6(procGetFullPathNameW.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡpath), (uintptr)buflen, (uintptr)new @unsafe.Pointer(Ꮡbuf), (uintptr)@unsafe.Pointer.FromRef(ref fname), 0, 0);
+    var (r0, _, e1) = Syscall6(procGetFullPathNameW.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡpath), (uintptr)buflen, (uintptr)new @unsafe.Pointer(Ꮡbuf), (uintptr)new @unsafe.Pointer(Ꮡfname), 0, 0);
     n = (uint32)r0;
     if (n == 0) {
         err = errnoErr(e1);
@@ -1018,9 +1006,7 @@ public static error /*err*/ GetProcessTimes(ΔHandle handle, ж<Filetime> Ꮡcre
 internal static error /*err*/ getQueuedCompletionStatus(ΔHandle cphandle, ж<uint32> Ꮡqty, ж<uintptr> Ꮡkey, ж<ж<Overlapped>> Ꮡoverlapped, uint32 timeout) {
     error err = default!;
 
-    ref var key = ref Ꮡkey.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    var (r1, _, e1) = Syscall6(procGetQueuedCompletionStatus.Addr(), 5, (uintptr)cphandle, (uintptr)new @unsafe.Pointer(Ꮡqty), (uintptr)@unsafe.Pointer.FromRef(ref key), (uintptr)@unsafe.Pointer.FromRef(ref overlapped), (uintptr)timeout, 0);
+    var (r1, _, e1) = Syscall6(procGetQueuedCompletionStatus.Addr(), 5, (uintptr)cphandle, (uintptr)new @unsafe.Pointer(Ꮡqty), (uintptr)new @unsafe.Pointer(Ꮡkey), (uintptr)new @unsafe.Pointer(Ꮡoverlapped), (uintptr)timeout, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -1100,8 +1086,7 @@ public static (uint32 ver, error err) GetVersion() {
 internal static error /*err*/ initializeProcThreadAttributeList(ж<_PROC_THREAD_ATTRIBUTE_LIST> Ꮡattrlist, uint32 attrcount, uint32 flags, ж<uintptr> Ꮡsize) {
     error err = default!;
 
-    ref var size = ref Ꮡsize.Value;
-    var (r1, _, e1) = Syscall6(procInitializeProcThreadAttributeList.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡattrlist), (uintptr)attrcount, (uintptr)flags, (uintptr)@unsafe.Pointer.FromRef(ref size), 0, 0);
+    var (r1, _, e1) = Syscall6(procInitializeProcThreadAttributeList.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡattrlist), (uintptr)attrcount, (uintptr)flags, (uintptr)new @unsafe.Pointer(Ꮡsize), 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -1365,8 +1350,7 @@ public static error /*err*/ UnmapViewOfFile(uintptr addr) {
 internal static error /*err*/ updateProcThreadAttribute(ж<_PROC_THREAD_ATTRIBUTE_LIST> Ꮡattrlist, uint32 flags, uintptr attr, @unsafe.Pointer value, uintptr size, @unsafe.Pointer prevvalue, ж<uintptr> Ꮡreturnedsize) {
     error err = default!;
 
-    ref var returnedsize = ref Ꮡreturnedsize.Value;
-    var (r1, _, e1) = Syscall9(procUpdateProcThreadAttribute.Addr(), 7, (uintptr)new @unsafe.Pointer(Ꮡattrlist), (uintptr)flags, (uintptr)attr, (uintptr)value, (uintptr)size, (uintptr)prevvalue, (uintptr)@unsafe.Pointer.FromRef(ref returnedsize), 0, 0);
+    var (r1, _, e1) = Syscall9(procUpdateProcThreadAttribute.Addr(), 7, (uintptr)new @unsafe.Pointer(Ꮡattrlist), (uintptr)flags, (uintptr)attr, (uintptr)value, (uintptr)size, (uintptr)prevvalue, (uintptr)new @unsafe.Pointer(Ꮡreturnedsize), 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -1440,10 +1424,7 @@ public static error /*err*/ AcceptEx(ΔHandle ls, ΔHandle @as, ж<byte> Ꮡbuf,
 }
 
 public static void GetAcceptExSockaddrs(ж<byte> Ꮡbuf, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<ж<RawSockaddrAny>> Ꮡlrsa, ж<int32> Ꮡlrsalen, ж<ж<RawSockaddrAny>> Ꮡrrsa, ж<int32> Ꮡrrsalen) {
-    ref var lrsa = ref Ꮡlrsa.Value;
-    ref var rrsa = ref Ꮡrrsa.Value;
-
-    Syscall9(procGetAcceptExSockaddrs.Addr(), 8, (uintptr)new @unsafe.Pointer(Ꮡbuf), (uintptr)rxdatalen, (uintptr)laddrlen, (uintptr)raddrlen, (uintptr)@unsafe.Pointer.FromRef(ref lrsa), (uintptr)new @unsafe.Pointer(Ꮡlrsalen), (uintptr)@unsafe.Pointer.FromRef(ref rrsa), (uintptr)new @unsafe.Pointer(Ꮡrrsalen), 0);
+    Syscall9(procGetAcceptExSockaddrs.Addr(), 8, (uintptr)new @unsafe.Pointer(Ꮡbuf), (uintptr)rxdatalen, (uintptr)laddrlen, (uintptr)raddrlen, (uintptr)new @unsafe.Pointer(Ꮡlrsa), (uintptr)new @unsafe.Pointer(Ꮡlrsalen), (uintptr)new @unsafe.Pointer(Ꮡrrsa), (uintptr)new @unsafe.Pointer(Ꮡrrsalen), 0);
     return;
 }
 
@@ -1470,8 +1451,7 @@ public static error /*neterr*/ NetApiBufferFree(ж<byte> Ꮡbuf) {
 public static error /*neterr*/ NetGetJoinInformation(ж<uint16> Ꮡserver, ж<ж<uint16>> Ꮡname, ж<uint32> ᏑbufType) {
     error neterr = default!;
 
-    ref var name = ref Ꮡname.Value;
-    var (r0, _, _) = Syscall(procNetGetJoinInformation.Addr(), 3, (uintptr)new @unsafe.Pointer(Ꮡserver), (uintptr)@unsafe.Pointer.FromRef(ref name), (uintptr)new @unsafe.Pointer(ᏑbufType));
+    var (r0, _, _) = Syscall(procNetGetJoinInformation.Addr(), 3, (uintptr)new @unsafe.Pointer(Ꮡserver), (uintptr)new @unsafe.Pointer(Ꮡname), (uintptr)new @unsafe.Pointer(ᏑbufType));
     if (r0 != 0) {
         neterr = ((Errno)r0);
     }
@@ -1481,8 +1461,7 @@ public static error /*neterr*/ NetGetJoinInformation(ж<uint16> Ꮡserver, ж<ж
 public static error /*neterr*/ NetUserGetInfo(ж<uint16> ᏑserverName, ж<uint16> ᏑuserName, uint32 level, ж<ж<byte>> Ꮡbuf) {
     error neterr = default!;
 
-    ref var buf = ref Ꮡbuf.Value;
-    var (r0, _, _) = Syscall6(procNetUserGetInfo.Addr(), 4, (uintptr)new @unsafe.Pointer(ᏑserverName), (uintptr)new @unsafe.Pointer(ᏑuserName), (uintptr)level, (uintptr)@unsafe.Pointer.FromRef(ref buf), 0, 0);
+    var (r0, _, _) = Syscall6(procNetUserGetInfo.Addr(), 4, (uintptr)new @unsafe.Pointer(ᏑserverName), (uintptr)new @unsafe.Pointer(ᏑuserName), (uintptr)level, (uintptr)new @unsafe.Pointer(Ꮡbuf), 0, 0);
     if (r0 != 0) {
         neterr = ((Errno)r0);
     }
@@ -1539,8 +1518,7 @@ public static void FreeAddrInfoW(ж<AddrinfoW> Ꮡaddrinfo) {
 public static error /*sockerr*/ GetAddrInfoW(ж<uint16> Ꮡnodename, ж<uint16> Ꮡservicename, ж<AddrinfoW> Ꮡhints, ж<ж<AddrinfoW>> Ꮡresult) {
     error sockerr = default!;
 
-    ref var result = ref Ꮡresult.Value;
-    var (r0, _, _) = Syscall6(procGetAddrInfoW.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡnodename), (uintptr)new @unsafe.Pointer(Ꮡservicename), (uintptr)new @unsafe.Pointer(Ꮡhints), (uintptr)@unsafe.Pointer.FromRef(ref result), 0, 0);
+    var (r0, _, _) = Syscall6(procGetAddrInfoW.Addr(), 4, (uintptr)new @unsafe.Pointer(Ꮡnodename), (uintptr)new @unsafe.Pointer(Ꮡservicename), (uintptr)new @unsafe.Pointer(Ꮡhints), (uintptr)new @unsafe.Pointer(Ꮡresult), 0, 0);
     if (r0 != 0) {
         sockerr = ((Errno)r0);
     }

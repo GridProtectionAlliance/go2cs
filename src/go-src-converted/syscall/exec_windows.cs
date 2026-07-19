@@ -2,10 +2,47 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 // Fork, exec, wait, etc.
+
+// go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted exec_windows.go output).
+// Everything in this file except StartProcess is the converted output verbatim — the argument
+// escaping, command-line building, environment-block building and path normalization are pure Go
+// logic that converts faithfully. StartProcess alone cannot work as literally converted:
+//
+//   Go hands CreateProcessW a *_STARTUPINFOEXW — a struct whose fields are POINTERS into native
+//   memory (lpDesktop, lpTitle, lpReserved2, the three std HANDLEs, and the attribute list). The
+//   converted C# struct holds those fields as golib `ж<T>` boxes, which are managed CLASS
+//   references: they are neither the right bytes at the right offsets for the Win32 layout, nor
+//   marshalable at all — `unsafe.Sizeof(*si)` (golib's Marshal.SizeOf) throws outright with
+//   "cannot be marshaled as an unmanaged structure; no meaningful size or offset can be computed."
+//   The same applies to _PROC_THREAD_ATTRIBUTE_LIST, whose converted form wraps an `array<byte>`
+//   class reference. This is the memory-layout / raw-metal case documented in
+//   docs/Baseline-vs-FullConversion.md: a faithful conversion is impossible, so the declaration is
+//   hand-owned.
+//
+// The implementation below is a straight transcription of exec_windows.go's StartProcess against
+// blittable [StructLayout(LayoutKind.Sequential)] mirrors of STARTUPINFOEXW / PROCESS_INFORMATION /
+// SECURITY_ATTRIBUTES and direct P/Invokes, preserving Go's ordering, validation and error results.
+// It reuses the converted helpers (makeCmdLine, createEnvBlock, joinExeDirAndFName) and the
+// converted scalar-only syscall wrappers (GetCurrentProcess, DuplicateHandle, CloseHandle), so only
+// the struct-passing seam is native.
+//
+// Soundness improvement over the converted form: every buffer handed to CreateProcessW (application
+// name, command line, environment block, working directory, handle list, attribute list) is copied
+// into UNMANAGED memory for the duration of the call and freed in a finally. golib's ж→uintptr
+// conversion can only produce a TRANSIENT pinned address (see the note in dll_windows.cs), which a
+// compacting GC could invalidate mid-call; unmanaged copies remove that window entirely here.
+
+using System;
+using System.Runtime.InteropServices;
+
+// Hand-owned native replacement of the converted exec_windows.go output — the converter skips
+// regenerating a file that carries this marker, so a -stdlib reconvert preserves it (see
+// containsManualConversionMarker).
+[module: go.GoManualConversion]
+
 namespace go;
 
 using bytealg = @internal.bytealg_package;
-using Δruntime = runtime_package;
 using Δsync = sync_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
@@ -273,144 +310,328 @@ internal static ref ProcAttr zeroProcAttr => ref ᏑzeroProcAttr.Value;
 internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 
-public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    nint pid = default!;
-    uintptr handle = default!;
-    error err = default!;
-    func((defer, recover) => {
-    ref var attr = ref Ꮡattr.DerefOrNil();
+// ---- native Win32 layout mirrors and entry points (see the file header) ----
 
-        if (len(argv0) == 0) {
-            (pid, handle, err) = (0, 0, EWINDOWS); return;
+// STARTUPINFOW / STARTUPINFOEXW exactly as Windows lays them out. The converted [GoType] structs
+// (types_windows.cs StartupInfo / _STARTUPINFOEXW) hold their pointer fields as managed ж<T>
+// boxes, so they can neither be sized nor passed; these are the blittable equivalents.
+[StructLayout(LayoutKind.Sequential)]
+private struct NativeStartupInfoW
+{
+    public uint32 Cb;
+    public IntPtr Reserved;
+    public IntPtr Desktop;
+    public IntPtr Title;
+    public uint32 X;
+    public uint32 Y;
+    public uint32 XSize;
+    public uint32 YSize;
+    public uint32 XCountChars;
+    public uint32 YCountChars;
+    public uint32 FillAttribute;
+    public uint32 Flags;
+    public uint16 ShowWindow;
+    public uint16 Reserved2Length;
+    public IntPtr Reserved2;
+    public IntPtr StdInput;
+    public IntPtr StdOutput;
+    public IntPtr StdErr;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+private struct NativeStartupInfoExW
+{
+    public NativeStartupInfoW StartupInfo;
+    public IntPtr ProcThreadAttributeList;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+private struct NativeProcessInformation
+{
+    public IntPtr Process;
+    public IntPtr Thread;
+    public uint32 ProcessId;
+    public uint32 ThreadId;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+private struct NativeSecurityAttributes
+{
+    public uint32 Length;
+    public IntPtr SecurityDescriptor;
+    public int32 InheritHandle;
+}
+
+[DllImport("kernel32.dll", EntryPoint = "CreateProcessW", SetLastError = true)]
+private static extern int win32CreateProcess(IntPtr applicationName, IntPtr commandLine, IntPtr processAttributes, IntPtr threadAttributes, int inheritHandles, uint32 creationFlags, IntPtr environment, IntPtr currentDirectory, IntPtr startupInfo, IntPtr processInformation);
+
+[DllImport("advapi32.dll", EntryPoint = "CreateProcessAsUserW", SetLastError = true)]
+private static extern int win32CreateProcessAsUser(IntPtr token, IntPtr applicationName, IntPtr commandLine, IntPtr processAttributes, IntPtr threadAttributes, int inheritHandles, uint32 creationFlags, IntPtr environment, IntPtr currentDirectory, IntPtr startupInfo, IntPtr processInformation);
+
+[DllImport("kernel32.dll", EntryPoint = "InitializeProcThreadAttributeList", SetLastError = true)]
+private static extern int win32InitializeProcThreadAttributeList(IntPtr attributeList, int32 attributeCount, int32 flags, ref IntPtr size);
+
+[DllImport("kernel32.dll", EntryPoint = "UpdateProcThreadAttribute", SetLastError = true)]
+private static extern int win32UpdateProcThreadAttribute(IntPtr attributeList, uint32 flags, IntPtr attribute, IntPtr value, IntPtr size, IntPtr previousValue, IntPtr returnSize);
+
+[DllImport("kernel32.dll", EntryPoint = "DeleteProcThreadAttributeList")]
+private static extern void win32DeleteProcThreadAttributeList(IntPtr attributeList);
+
+// Copies a Go string to a NUL-terminated unmanaged UTF-16 buffer. Mirrors UTF16PtrFromString:
+// a string containing a NUL is rejected with EINVAL (Windows would silently truncate).
+private static (IntPtr ptr, error err) allocUTF16(@string s) {
+    string value = s.ToString();
+
+    if (value.IndexOf('\0') >= 0) {
+        return (IntPtr.Zero, EINVAL);
+    }
+
+    return (Marshal.StringToHGlobalUni(value), default!);
+}
+
+// StartProcess is the native transcription of exec_windows.go's StartProcess — see the file header
+// for why this one declaration cannot be a literal conversion. Ordering, validation and returned
+// errors follow the Go original exactly.
+public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
+    if (len(argv0) == 0) {
+        return (0, 0, EWINDOWS);
+    }
+    if (Ꮡattr == nil) {
+        Ꮡattr = ᏑzeroProcAttr;
+    }
+
+    ref var attr = ref Ꮡattr.Value;
+    var sys = attr.Sys;
+
+    if (sys == nil) {
+        sys = ᏑzeroSysProcAttr;
+    }
+    if (len(attr.Files) > 3) {
+        return (0, 0, EWINDOWS);
+    }
+    if (len(attr.Files) < 3) {
+        return (0, 0, EINVAL);
+    }
+    if (len(attr.Dir) != 0) {
+        // StartProcess assumes that argv0 is relative to attr.Dir,
+        // because it implies Chdir(attr.Dir) before executing argv0.
+        // Windows CreateProcess assumes the opposite: it looks for
+        // argv0 relative to the current directory, and, only once the new
+        // process is started, it does Chdir(attr.Dir). We are adjusting
+        // for that difference here by making argv0 absolute.
+        (argv0, var dirErr) = joinExeDirAndFName(attr.Dir, argv0);
+        if (dirErr != default!) {
+            return (0, 0, dirErr);
         }
-        if (Ꮡattr == nil) {
-            Ꮡattr = ᏑzeroProcAttr; attr = ref Ꮡattr.DerefOrNil();
+    }
+
+    // Windows CreateProcess takes the command line as a single string:
+    // use attr.CmdLine if set, else build the command line by escaping
+    // and joining each argument with spaces.
+    @string cmdline = (~sys).CmdLine != ""u8 ? sys.Value.CmdLine : makeCmdLine(argv);
+
+    var (envBlock, envErr) = createEnvBlock(attr.Env);
+    if (envErr != default!) {
+        return (0, 0, envErr);
+    }
+
+    IntPtr argv0p = IntPtr.Zero;
+    IntPtr argvp = IntPtr.Zero;
+    IntPtr dirp = IntPtr.Zero;
+    IntPtr envp = IntPtr.Zero;
+    IntPtr handleListp = IntPtr.Zero;
+    IntPtr attrList = IntPtr.Zero;
+    IntPtr sip = IntPtr.Zero;
+    IntPtr pip = IntPtr.Zero;
+    IntPtr processAttrp = IntPtr.Zero;
+    IntPtr threadAttrp = IntPtr.Zero;
+    IntPtr parentProcessp = IntPtr.Zero;
+    bool attrListInitialized = false;
+
+    // The handles duplicated below are owned by this call until CreateProcess consumes them;
+    // Go closes the duplicates through a deferred DuplicateHandle(DUPLICATE_CLOSE_SOURCE).
+    var duplicated = new System.Collections.Generic.List<ΔHandle>();
+    var (currentProcess, _) = GetCurrentProcess();
+    var parentProcess = (~sys).ParentProcess != 0 ? sys.Value.ParentProcess : currentProcess;
+
+    try {
+        (argv0p, var nameErr) = allocUTF16(argv0);
+        if (nameErr != default!) {
+            return (0, 0, nameErr);
         }
-        var sys = attr.Sys;
-        if (sys == nil) {
-            sys = ᏑzeroSysProcAttr;
-        }
-        if (len(attr.Files) > 3) {
-            (pid, handle, err) = (0, 0, EWINDOWS); return;
-        }
-        if (len(attr.Files) < 3) {
-            (pid, handle, err) = (0, 0, EINVAL); return;
-        }
-        if (len(attr.Dir) != 0) {
-            // StartProcess assumes that argv0 is relative to attr.Dir,
-            // because it implies Chdir(attr.Dir) before executing argv0.
-            // Windows CreateProcess assumes the opposite: it looks for
-            // argv0 relative to the current directory, and, only once the new
-            // process is started, it does Chdir(attr.Dir). We are adjusting
-            // for that difference here by making argv0 absolute.
-            error errΔ1 = default!;
-            (argv0, errΔ1) = joinExeDirAndFName(attr.Dir, argv0);
-            if (errΔ1 != default!) {
-                (pid, handle, err) = (0, 0, errΔ1); return;
-            }
-        }
-        (var argv0p, err) = UTF16PtrFromString(argv0);
-        if (err != default!) {
-            (pid, handle, err) = (0, 0, err); return;
-        }
-        @string cmdline = default!;
-        // Windows CreateProcess takes the command line as a single string:
-        // use attr.CmdLine if set, else build the command line by escaping
-        // and joining each argument with spaces
-        if ((~sys).CmdLine != ""u8){
-            cmdline = sys.Value.CmdLine;
-        } else {
-            cmdline = makeCmdLine(argv);
-        }
-        ж<uint16> argvp = default!;
         if (len(cmdline) != 0) {
-            (argvp, err) = UTF16PtrFromString(cmdline);
-            if (err != default!) {
-                (pid, handle, err) = (0, 0, err); return;
+            (argvp, var lineErr) = allocUTF16(cmdline);
+            if (lineErr != default!) {
+                return (0, 0, lineErr);
             }
         }
-        ж<uint16> dirp = default!;
         if (len(attr.Dir) != 0) {
-            (dirp, err) = UTF16PtrFromString(attr.Dir);
-            if (err != default!) {
-                (pid, handle, err) = (0, 0, err); return;
+            (dirp, var dErr) = allocUTF16(attr.Dir);
+            if (dErr != default!) {
+                return (0, 0, dErr);
             }
         }
-        var (p, _) = GetCurrentProcess();
-        var parentProcess = p;
-        if ((~sys).ParentProcess != 0) {
-            parentProcess = sys.Value.ParentProcess;
-        }
-        var fd = new slice<ΔHandle>(len(attr.Files));
-        foreach (var (i, _) in attr.Files) {
+
+        // Duplicate the caller's three std handles into inheritable handles in the parent process,
+        // exactly as Go does, and collect the non-zero ones for the inherit list.
+        var fd = new ΔHandle[len(attr.Files)];
+
+        for (nint i = 0; i < len(attr.Files); i++) {
             if (attr.Files[i] > 0) {
-                var errΔ2 = DuplicateHandle(p, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
-                if (errΔ2 != default!) {
-                    (pid, handle, err) = (0, 0, errΔ2); return;
+                ref var dup = ref heap(new ΔHandle(), out var Ꮡdup);
+                var dupErr = DuplicateHandle(currentProcess, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡdup, 0, true, DUPLICATE_SAME_ACCESS);
+                if (dupErr != default!) {
+                    return (0, 0, dupErr);
                 }
-                deferǃ(DuplicateHandle, parentProcess, fd[i], (ΔHandle)(0), (ж<ΔHandle>)(nil), (uint32)(0), (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), defer);
+                fd[i] = dup;
+                duplicated.Add(dup);
             }
         }
-        var si = @new<_STARTUPINFOEXW>();
-        (si.Value.ProcThreadAttributeList, err) = newProcThreadAttributeList(2);
-        if (err != default!) {
-            (pid, handle, err) = (0, 0, err); return;
+
+        // The presence of a NULL handle in the list is enough to cause
+        // PROC_THREAD_ATTRIBUTE_HANDLE_LIST to treat the entire list as empty, so remove NULL
+        // handles. Additional inherited handles are appended first, matching Go.
+        var inherit = new System.Collections.Generic.List<IntPtr>();
+
+        foreach (var h in fd) {
+            if (h != 0) {
+                inherit.Add((IntPtr)(nint)(nuint)(uintptr)h);
+            }
         }
-        deferǃ(deleteProcThreadAttributeList, (~si).ProcThreadAttributeList, defer);
-        si.Value.Cb = (uint32)@unsafe.Sizeof(si.Value);
-        si.Value.Flags = STARTF_USESTDHANDLES;
-        if ((~sys).HideWindow) {
-            si.Value.Flags |= STARTF_USESHOWWINDOW;
-            si.Value.ShowWindow = SW_HIDE;
+        for (nint i = 0; i < len((~sys).AdditionalInheritedHandles); i++) {
+            var h = (~sys).AdditionalInheritedHandles[i];
+            if (h != 0) {
+                inherit.Add((IntPtr)(nint)(nuint)(uintptr)h);
+            }
         }
+
+        bool willInheritHandles = inherit.Count > 0 && !(~sys).NoInheritHandles;
+
+        // Two attribute slots, matching Go's newProcThreadAttributeList(2): the handle list and
+        // an optional explicit parent process.
+        IntPtr attrSize = IntPtr.Zero;
+        win32InitializeProcThreadAttributeList(IntPtr.Zero, 2, 0, ref attrSize);
+
+        if (attrSize == IntPtr.Zero) {
+            return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
+        }
+
+        attrList = Marshal.AllocHGlobal(attrSize);
+
+        if (win32InitializeProcThreadAttributeList(attrList, 2, 0, ref attrSize) == 0) {
+            return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
+        }
+
+        attrListInitialized = true;
+
         if ((~sys).ParentProcess != 0) {
-            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, @unsafe.Pointer.FromRef(ref (sys.of(SysProcAttr.ᏑParentProcess)).Value), @unsafe.Sizeof((~sys).ParentProcess), nil, nil);
-            if (err != default!) {
-                (pid, handle, err) = (0, 0, err); return;
+            parentProcessp = Marshal.AllocHGlobal(IntPtr.Size);
+            Marshal.WriteIntPtr(parentProcessp, (IntPtr)(nint)(nuint)(uintptr)sys.Value.ParentProcess);
+
+            if (win32UpdateProcThreadAttribute(attrList, 0, (IntPtr)(nint)(uint32)_PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, parentProcessp, (IntPtr)IntPtr.Size, IntPtr.Zero, IntPtr.Zero) == 0) {
+                return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
             }
         }
-        si.Value.StdInput = fd[0];
-        si.Value.StdOutput = fd[1];
-        si.Value.StdErr = fd[2];
-        fd = append(fd, (~sys).AdditionalInheritedHandles.ꓸꓸꓸ);
-        // The presence of a NULL handle in the list is enough to cause PROC_THREAD_ATTRIBUTE_HANDLE_LIST
-        // to treat the entire list as empty, so remove NULL handles.
-        nint j = 0;
-        foreach (var (i, _) in fd) {
-            if (fd[i] != 0) {
-                fd[j] = fd[i];
-                j++;
-            }
-        }
-        fd = fd[..(int)(j)];
-        var willInheritHandles = len(fd) > 0 && !(~sys).NoInheritHandles;
+
         // Do not accidentally inherit more than these handles.
         if (willInheritHandles) {
-            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_HANDLE_LIST, @unsafe.Pointer.FromRef(ref (Ꮡ(fd, 0)).Value), (uintptr)len(fd) * @unsafe.Sizeof(fd[0]), nil, nil);
-            if (err != default!) {
-                (pid, handle, err) = (0, 0, err); return;
+            handleListp = Marshal.AllocHGlobal(IntPtr.Size * inherit.Count);
+
+            for (int i = 0; i < inherit.Count; i++) {
+                Marshal.WriteIntPtr(handleListp, i * IntPtr.Size, inherit[i]);
+            }
+
+            if (win32UpdateProcThreadAttribute(attrList, 0, (IntPtr)(nint)(uint32)_PROC_THREAD_ATTRIBUTE_HANDLE_LIST, handleListp, (IntPtr)(IntPtr.Size * inherit.Count), IntPtr.Zero, IntPtr.Zero) == 0) {
+                return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
             }
         }
-        (var envBlock, err) = createEnvBlock(attr.Env);
-        if (err != default!) {
-            (pid, handle, err) = (0, 0, err); return;
+
+        NativeStartupInfoExW si = default;
+        si.StartupInfo.Cb = (uint32)Marshal.SizeOf<NativeStartupInfoExW>();
+        si.StartupInfo.Flags = STARTF_USESTDHANDLES;
+        si.ProcThreadAttributeList = attrList;
+
+        if ((~sys).HideWindow) {
+            si.StartupInfo.Flags |= STARTF_USESHOWWINDOW;
+            si.StartupInfo.ShowWindow = SW_HIDE;
         }
-        var pi = @new<ProcessInformation>();
-        var flags = (uint32)((uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT) | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
-        if ((~sys).Token != 0){
-            err = CreateProcessAsUser((~sys).Token, argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
-        } else {
-            err = CreateProcess(argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
+
+        si.StartupInfo.StdInput = (IntPtr)(nint)(nuint)(uintptr)fd[0];
+        si.StartupInfo.StdOutput = (IntPtr)(nint)(nuint)(uintptr)fd[1];
+        si.StartupInfo.StdErr = (IntPtr)(nint)(nuint)(uintptr)fd[2];
+
+        sip = Marshal.AllocHGlobal(Marshal.SizeOf<NativeStartupInfoExW>());
+        Marshal.StructureToPtr(si, sip, false);
+
+        pip = Marshal.AllocHGlobal(Marshal.SizeOf<NativeProcessInformation>());
+
+        processAttrp = allocSecurityAttributes((~sys).ProcessAttributes);
+        threadAttrp = allocSecurityAttributes((~sys).ThreadAttributes);
+
+        // The environment block is a sequence of NUL-terminated UTF-16 strings ending in a
+        // double NUL — createEnvBlock already produced exactly that.
+        envp = Marshal.AllocHGlobal(len(envBlock) * sizeof(uint16));
+
+        for (nint i = 0; i < len(envBlock); i++) {
+            Marshal.WriteInt16(envp, (int)i * sizeof(uint16), unchecked((short)envBlock[i]));
         }
-        if (err != default!) {
-            (pid, handle, err) = (0, 0, err); return;
+
+        uint32 flags = (uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
+
+        int ok = (~sys).Token != 0
+            ? win32CreateProcessAsUser((IntPtr)(nint)(nuint)(uintptr)(~sys).Token, argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip)
+            : win32CreateProcess(argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip);
+
+        if (ok == 0) {
+            return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
         }
-        deferǃ(CloseHandle, (~pi).Thread, defer);
-        Δruntime.KeepAlive(fd);
-        Δruntime.KeepAlive(sys);
-        (pid, handle, err) = ((nint)(~pi).ProcessId, (uintptr)(~pi).Process, default!);
-    });
-    return (pid, handle, err);
+
+        NativeProcessInformation pi = Marshal.PtrToStructure<NativeProcessInformation>(pip);
+
+        CloseHandle((ΔHandle)(uintptr)(nuint)(nint)pi.Thread);
+
+        return (((nint)pi.ProcessId), ((uintptr)(nuint)(nint)pi.Process), default!);
+    }
+    finally {
+        // Close this call's duplicates in the parent process — Go's deferred
+        // DuplicateHandle(…, DUPLICATE_CLOSE_SOURCE). CreateProcess has already inherited them.
+        foreach (var h in duplicated) {
+            DuplicateHandle(parentProcess, h, (ΔHandle)(0), (ж<ΔHandle>)(nil), 0, false, DUPLICATE_CLOSE_SOURCE);
+        }
+
+        if (attrListInitialized) {
+            win32DeleteProcThreadAttributeList(attrList);
+        }
+
+        freeAll(argv0p, argvp, dirp, envp, handleListp, attrList, sip, pip, processAttrp, threadAttrp, parentProcessp);
+    }
+}
+
+// Copies a converted SecurityAttributes (blittable: two uint32s and a uintptr) into unmanaged
+// memory for CreateProcess, or returns NULL for a nil pointer — Go passes the pointer straight
+// through, and nil means "default security attributes".
+private static IntPtr allocSecurityAttributes(ж<SecurityAttributes> Ꮡsa) {
+    if (Ꮡsa == nil) {
+        return IntPtr.Zero;
+    }
+
+    NativeSecurityAttributes native = new NativeSecurityAttributes {
+        Length = (uint32)Marshal.SizeOf<NativeSecurityAttributes>(),
+        SecurityDescriptor = (IntPtr)(nint)(nuint)(~Ꮡsa).SecurityDescriptor,
+        InheritHandle = (int32)(~Ꮡsa).InheritHandle
+    };
+
+    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf<NativeSecurityAttributes>());
+    Marshal.StructureToPtr(native, ptr, false);
+    return ptr;
+}
+
+private static void freeAll(params IntPtr[] pointers) {
+    foreach (IntPtr ptr in pointers) {
+        if (ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(ptr);
+        }
+    }
 }
 
 public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
