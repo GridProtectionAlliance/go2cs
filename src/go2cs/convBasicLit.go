@@ -101,6 +101,14 @@ func emitByteArrayString(token string) (string, bool) {
 		return "", false
 	}
 
+	return byteArrayStringLiteral(decoded), true
+}
+
+// byteArrayStringLiteral emits a byte-array-backed C# @string holding the EXACT bytes of `decoded` —
+// `((@string)(new byte[]{ 0xNN, ... }))`. Used for a Go string holding raw bytes a C# string/u8
+// literal would mangle (byte tables, blobs); the @string's byte indexing (`s[i]`) then matches Go.
+// See emitByteArrayString (from a literal token) and the const-string path (from a folded value).
+func byteArrayStringLiteral(decoded string) string {
 	builder := &strings.Builder{}
 	builder.WriteString("((@string)(new byte[]{")
 
@@ -114,7 +122,7 @@ func emitByteArrayString(token string) (string, bool) {
 
 	builder.WriteString("}))")
 
-	return builder.String(), true
+	return builder.String()
 }
 
 func replaceOctalChars(value string) string {

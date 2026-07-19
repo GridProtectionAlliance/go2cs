@@ -120,6 +120,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
+    public void CheckByteTableStringConst() => CheckTarget("ByteTableStringConst");
+
+    [TestMethod]
     public void CheckCaptureModeFuncLitParam() => CheckTarget("CaptureModeFuncLitParam");
 
     [TestMethod]

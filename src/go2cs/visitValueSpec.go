@@ -8,6 +8,7 @@ import (
 	"go/types"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup, tok token.Token) {
@@ -652,6 +653,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			if c.Val().Kind() == constant.String && len(valueSpec.Values) >= i+1 {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
 					constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+				} else if s := constant.StringVal(c.Val()); !utf8.ValidString(s) {
+					// A CONCATENATED string const folds to one value here; unlike a single *ast.BasicLit
+					// (handled by convBasicLit's byte-array machinery above) it bypassed that path, so a
+					// raw-byte table like math/bits' `rev8tab` ("\x00\x80…", built by "" + … concatenation)
+					// rendered a UTF-16 string literal whose @string byte view UTF-8-re-encodes each >=0x80
+					// byte (`rev8tab[1]` == 0xC2, not 0x80 → Reverse8 wrong). A value that is not valid
+					// UTF-8 cannot round-trip through a C# string/u8 literal, so emit its exact bytes; a
+					// valid-UTF-8 value keeps the readable getStringLiteral form.
+					constVal = byteArrayStringLiteral(s)
 				} else {
 					constVal, _ = v.getStringLiteral(c.Val().ExactString())
 				}
