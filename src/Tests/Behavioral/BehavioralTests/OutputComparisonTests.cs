@@ -796,6 +796,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
+    public void CheckParallelAssignmentHazard() => CheckTarget("ParallelAssignmentHazard");
+
+    [TestMethod]
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
 
     [TestMethod]

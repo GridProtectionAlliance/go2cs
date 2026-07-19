@@ -764,7 +764,26 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
-	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
+	// A genuine parallel assignment (`rhsLen == lhsLen`) that MIXES declared and reassigned targets is
+	// SIMULTANEOUS in Go — every RHS is evaluated before any store (Go spec, two-phase assignment) — but
+	// sequential C# emission writes an earlier target before a LATER RHS reads it, corrupting that read.
+	// strconv's Ryū `dc, fracc := dc>>extra, dc&extraMask` is exactly this: sequential emission shifts dc
+	// first, so `fracc` reads the SHIFTED dc and the rounding residual is wrong (FloatMinMax rounds down).
+	// Route such a read-after-write hazard through the tuple deconstruction path below, where C# evaluates
+	// the whole RHS tuple before deconstructing. The existing swap fix covers the PURE-reassigned parallel
+	// case (`lhsLen == reassignedCount`); this covers the mixed declared/reassigned case. Scoped to the
+	// actual hazard (a written target reused in a later RHS) so drift stays minimal, and it inherits the
+	// same int/string/unsafe.Pointer exclusions as the declared branch (the tuple path cannot infer those
+	// cleanly — a hazard on those narrow types keeps its explicit-typed sequential decls, a separate follow-up).
+	// A newly-declared int/uint element cannot use `var` (the RHS may infer C# 32-bit `int` instead of
+	// the Go-int-target `nint`/`nuint`); the per-element declared prefix below emits its explicit type
+	// instead, so int hazards are NOT excluded here. String is excluded — an `@string`'s u8 span cannot
+	// sit on a value-tuple LHS — as is unsafe.Pointer (rare; `var` would infer uintptr); those keep their
+	// buggy-but-compiling sequential form, a documented parallel-hazard limitation.
+	parallelHazard := rhsLen == lhsLen && lhsLen > 1 && reassignedCount > 0 && declaredCount > 0 &&
+		!anyTypeIsString && !anyTypeIsUnsafePointer && v.lhsReusedInLaterRhs(lhsExprs, rhsExprs)
+
+	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
 		leftExprs := HashSet[string]{}
 
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
@@ -947,7 +966,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			_, lhsIsDirectIdent := lhsExprs[i].(*ast.Ident)
 
 			if mixedDeclare && lhsIsDirectIdent && ident != nil && ident.Name != "_" && !v.isReassignment(ident) && !escaping[i] {
-				result.WriteString("var ")
+				// A parallel-hazard int/uint element takes its EXPLICIT type: `var` would infer C# 32-bit
+				// `int` from a literal/int32 RHS instead of the Go-int-target `nint`/`nuint` (see the
+				// anyTypeIsInt note above), so `(a, b, nint c) = (b, a, a + b)` types c correctly. Scoped
+				// to the hazard path so existing call-deconstruction mixed tuples keep their `var`.
+				if parallelHazard && lhsTypeIsInt[i] {
+					result.WriteString(convertToCSTypeName(v.getExprTypeName(ident, false)))
+					result.WriteRune(' ')
+				} else {
+					result.WriteString("var ")
+				}
 			}
 
 			result.WriteString(lhsExpr)
@@ -1674,4 +1702,50 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	}
 
 	v.targetFile.WriteString(result.String())
+}
+
+// lhsReusedInLaterRhs reports whether a WRITTEN left-hand identifier of a parallel assignment appears in
+// a LATER right-hand expression — the read-after-write hazard that makes sequential C# emission diverge
+// from Go's simultaneous assignment (Go evaluates every RHS before any store; sequential C# writes the
+// earlier target first, so the later RHS reads the already-updated value). Identifiers are matched by
+// go/types object, so a same-named but distinct variable is never a false positive. Only earlier targets
+// can be re-read (index j > i); a target reused in its OWN RHS (j == i) reads the same value under either
+// ordering and is not a hazard.
+func (v *Visitor) lhsReusedInLaterRhs(lhsExprs, rhsExprs []ast.Expr) bool {
+	for i, lhs := range lhsExprs {
+		ident := getIdentifier(lhs)
+
+		if ident == nil || ident.Name == "_" {
+			continue
+		}
+
+		obj := v.info.ObjectOf(ident)
+
+		if obj == nil {
+			continue
+		}
+
+		for j := i + 1; j < len(rhsExprs); j++ {
+			reused := false
+
+			ast.Inspect(rhsExprs[j], func(n ast.Node) bool {
+				if reused {
+					return false
+				}
+
+				if id, ok := n.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+					reused = true
+					return false
+				}
+
+				return true
+			})
+
+			if reused {
+				return true
+			}
+		}
+	}
+
+	return false
 }

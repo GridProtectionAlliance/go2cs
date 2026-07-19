@@ -335,6 +335,7 @@
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
     <Project Path="Tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
+    <Project Path="Tests/Behavioral/ParallelAssignmentHazard/ParallelAssignmentHazard.csproj" />
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="Tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="Tests/Behavioral/PointerParamWalk/PointerParamWalk.csproj" />

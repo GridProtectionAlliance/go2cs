@@ -903,6 +903,17 @@ func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
 
 Such a paren-deref index LHS is now counted as a reassignment directly (a single-element `(*h)[i] = v` write emits identically on either path, so nothing else drifts). The bug was invisible to compilation — the broken form compiled cleanly — and only surfaced when a converted test *ran*: it silently miscompiled `container/heap`'s test heap and the `internal/trace/internal/oldtrace` order heap (three swap sites). (Guarded by the `PointerReceiverSliceSwap` behavioral test — a pointer-receiver `swap` and a full slice reversal by repeated swaps, output-compared vs `go run`; the pre-fix converter loses elements and diverges. It is also what makes `container/heap`'s Go test suite validate — see [Phase 4](Roadmap.md#phase-4--convert-and-run-go-package-tests).)
 
+The swap recognition above routes a *pure*-reassignment parallel assignment (every target already exists) to the deconstruction form. A **mixed** parallel `:=` — some targets reassigned, some newly declared, with `rhsLen == lhsLen` — was not covered: it satisfies neither `lhsLen == reassignedCount` nor the all-declared arm, and (unlike the call-deconstruction mixed cases below) has no single-call RHS to trigger `tupleResult`, so it fell through to **sequential** statements. When a reassigned target is *read by a later right-hand expression*, that read must see the target's ORIGINAL value (Go evaluates every RHS before any store); sequential emission reads the already-updated value. strconv's Ryū shortest-float rounding does exactly this — `dc, fracc := dc>>extra, dc&extraMask`, where `fracc` must read the pre-shift `dc`:
+
+```go
+dc, fracc := dc>>extra, dc&extraMask   // fracc must read the ORIGINAL dc
+```
+```csharp
+(dc, var fracc) = (dc.Rsh(extra), (uint64)(dc & extraMask));   // whole tuple evaluated, then deconstructed
+```
+
+The converter now detects this read-after-write **hazard** (`lhsReusedInLaterRhs`: a written target's `types.Object` appears in a strictly *later* RHS element) and routes the mixed assignment through the same deconstruction path, where C# evaluates the entire right-hand tuple before deconstructing. It is scoped to the actual hazard, so a hazard-free mixed `:=` (`m, n := m+1, 100`) keeps its minimal sequential form. A newly-declared **int/uint** element takes its *explicit* type rather than `var` — `(a, b, nint c) = (b, a, a + b)` — because `var` would infer C# 32-bit `int` from a literal/int32 RHS instead of the Go-`int`-target `nint`; `string` (an `@string`'s u8 span cannot sit on a value-tuple LHS) and `unsafe.Pointer` hazards are excluded and keep the sequential form, a documented limitation with no stdlib occurrence. Like the swap bug this was invisible to compilation and surfaced only at runtime: it made strconv's shortest-float formatting round down, failing `math`'s `TestFloatMinMax` (`4e-324` vs Go's `5e-324`). (Guarded by the `ParallelAssignmentHazard` behavioral test — reassigned + newly-declared parallel forms whose later RHS re-reads a written target, output-compared vs `go run`; the pre-fix converter diverges. It is also what makes `math`'s Go test suite validate — see [Phase 4](Roadmap.md#phase-4--convert-and-run-go-package-tests).)
+
 Go's **partial redeclaration** — `a, b := f()` where `a` already exists in the same scope — reuses `a` (assigns it) and declares only the new names. A blanket `var (a, b)` would re-declare the reused variable, so the converter emits `var` per *newly-declared* element only:
 
 ```go
