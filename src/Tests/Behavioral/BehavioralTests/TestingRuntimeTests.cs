@@ -400,6 +400,56 @@ public class TestingRuntimeTests
     }
 
     [TestMethod]
+    public void FuzzCompileSurfaceIsNoOpAndAcceptsAnyTargetSignature()
+    {
+        // Fuzz declarations are disclosed-unsupported exactly as benchmarks are, but their bodies
+        // still COMPILE — math/big's `func FuzzExpMont(f *testing.F)` failed the whole package
+        // build with CS0426 before F existed. Every member must be present on both receiver shapes
+        // converted code binds, and stay a safe non-throwing no-op.
+        ж<testing_package.F> fuzz = new(new testing_package.F());
+
+        fuzz.Add(1, "seed");
+        fuzz.Error("error");
+        fuzz.Errorf("errorf %d", 1);
+        fuzz.Log("log");
+        fuzz.Logf("logf %d", 2);
+        fuzz.Fatal("fatal");
+        fuzz.Fatalf("fatalf %d", 3);
+        fuzz.Skip("skip");
+        fuzz.Skipf("skipf %d", 4);
+        fuzz.Fail();
+        fuzz.FailNow();
+        fuzz.SkipNow();
+        fuzz.Helper();
+        fuzz.Cleanup(() => { });
+        fuzz.Setenv("K", "V");
+        Assert.IsFalse(fuzz.Failed());
+        Assert.IsFalse(fuzz.Skipped());
+        Assert.IsTrue(fuzz.Name() == "");
+        Assert.IsTrue(fuzz.TempDir() == "");
+
+        ref testing_package.F direct = ref fuzz.Value;
+        direct.Add(2);
+        direct.Errorf("errorf");
+        direct.Fatal("fatal");
+        direct.Skip("skip");
+        direct.Helper();
+
+        // Fuzz takes a System.Delegate because a Go fuzz target's signature is arbitrary — the
+        // converted body is an explicitly-typed lambda, so C# infers its natural Action<…>. Both
+        // a wide arity (math/big's target takes *testing.T plus nine uints) and a minimal one must
+        // bind, and neither target may be invoked: there is no fuzzing engine.
+        bool invoked = false;
+
+        fuzz.Fuzz((ж<testing_package.T> t, nuint a, nuint b, nuint c, nuint d,
+            nuint e, nuint f, nuint g, nuint h, nuint i) => invoked = true);
+
+        direct.Fuzz((ж<testing_package.T> t, byte[] data) => invoked = true);
+
+        Assert.IsFalse(invoked, "a compile-only fuzz surface must never invoke its target");
+    }
+
+    [TestMethod]
     public void JUnitOutputSurvivesXmlInvalidCharacters()
     {
         // Real Go test logs legitimately contain XML-invalid characters (unicode/utf8's own
