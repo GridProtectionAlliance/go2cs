@@ -341,14 +341,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				goTypeName = goTypeName[:bracketIndex]
 			}
 
-			if selectorType {
-				// Get index of last dot in go type name
-				dotIndex := strings.LastIndex(goTypeName, ".")
-
-				if dotIndex != -1 {
-					// Get the name of the struct type
-					goTypeName = goTypeName[dotIndex+1:]
-				}
+			// An embedded field's NAME is the UNQUALIFIED type name (Go spec), so strip any package
+			// qualifier. A selector embed (`io.Writer`) carries it explicitly; a DOT-IMPORTED ident
+			// embed does too once resolved — io_test's `import . "io"` + embedded `ReaderFrom` reaches
+			// here as a bare *ast.Ident whose getTypeName still renders the (collision-renamed)
+			// package qualifier `Δio.ReaderFrom`. Gating the strip on selectorType left that qualifier
+			// in the field name (`Δio.ReaderFrom`), whose dot is a C# syntax error (CS1003/CS1026).
+			// Strip whenever a qualifier survives, covering both forms; a same-package embed has no
+			// dot, so this is a no-op there (byte-identical).
+			if dotIndex := strings.LastIndex(goTypeName, "."); dotIndex != -1 {
+				// Get the unqualified name of the embedded type
+				goTypeName = goTypeName[dotIndex+1:]
 			}
 
 			// Lookup identity to determine if it's an interface — for a SELECTOR embed

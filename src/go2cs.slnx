@@ -258,6 +258,7 @@
     <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/LinknameVarPull/LinknameVarPull.csproj" />
     <Project Path="Tests/Behavioral/LinknameVarPullLib/LinknameVarPullLib.csproj" />
+    <Project Path="Tests/Behavioral/LocalNamedTypeDecls/LocalNamedTypeDecls.csproj" />
     <Project Path="Tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.csproj" />
     <Project Path="Tests/Behavioral/LocalStructFieldAddr/LocalStructFieldAddr.csproj" />
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />

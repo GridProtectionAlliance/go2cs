@@ -565,6 +565,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLinknameVarPull() => CheckTarget("LinknameVarPull");
 
     [TestMethod]
+    public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
+
+    [TestMethod]
     public void CheckLocalShadowsEmbedHopType() => CheckTarget("LocalShadowsEmbedHopType");
 
     [TestMethod]

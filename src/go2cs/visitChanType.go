@@ -7,7 +7,7 @@ import (
 )
 
 // Handles channel types in context of a TypeSpec
-func (v *Visitor) visitChanType(chanType *ast.ChanType, name string) {
+func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, name string) {
 	// A defined channel type — `type closeWaiter chan struct{}` (net/http's h2 bundle) — emits
 	// the `[GoType("chan T")] partial struct` forward declaration whose Channel template
 	// go2cs-gen implements (the wrapper holds a `channel<T>` and forwards its send/receive/
@@ -17,8 +17,18 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, name string) {
 	elemType := convertToCSTypeName(v.getTypeName(v.info.TypeOf(chanType.Value), false))
 	access := v.pendingTypeAccess
 	v.pendingTypeAccess = ""
-	v.targetFile.WriteString(v.newline)
-	v.writeOutputLn("[GoType(\"chan %s\")] %spartial struct %s;", elemType, access, getSanitizedIdentifier(name))
+
+	// A channel type declared inside a function body cannot be a method-body statement in C#; hoist
+	// it to member level (see liftLocalTypeDecl). A package-level declaration is unaffected — target
+	// is v.targetFile and finish() is a no-op.
+	name, target, finish := v.liftLocalTypeDecl(name, identType)
+
+	if !v.inFunction {
+		target.WriteString(v.newline)
+	}
+
+	v.writeStringLn(target, "[GoType(\"chan %s\")] %spartial struct %s;", elemType, access, getSanitizedIdentifier(name))
+	finish()
 }
 
 // namedChanElemTypeArg returns an explicit type-argument list ("<T>") for a golib channel-op

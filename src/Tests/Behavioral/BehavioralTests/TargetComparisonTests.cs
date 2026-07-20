@@ -624,6 +624,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckLinknameVarPullLib() => CheckTarget("LinknameVarPullLib");
 
     [TestMethod]
+    public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
+
+    [TestMethod]
     public void CheckLocalShadowsEmbedHopType() => CheckTarget("LocalShadowsEmbedHopType");
 
     [TestMethod]

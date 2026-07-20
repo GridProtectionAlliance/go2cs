@@ -621,6 +621,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLinknameVarPullLib() => CheckTarget("LinknameVarPullLib");
 
     [TestMethod]
+    public void CheckLocalNamedTypeDecls() => CheckTarget("LocalNamedTypeDecls");
+
+    [TestMethod]
     public void CheckLocalShadowsEmbedHopType() => CheckTarget("LocalShadowsEmbedHopType");
 
     [TestMethod]
