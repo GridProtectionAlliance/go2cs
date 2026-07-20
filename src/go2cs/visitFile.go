@@ -115,6 +115,17 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 		alias, namespace := packageUsingAlias(importPath)
 
+		// The alias is collision-renamed (`Δunicode`) when a same-named CHILD namespace is visible from
+		// the import closure (`go.unicode`, present once unicode/utf8 is transitively imported):
+		// getAliasedTypeName renders this file's short-form type references through that SAME renamed
+		// qualifier (`Δunicode.Range16`), so the SUPPLIED canonical using must carry the rename too, or the
+		// reference binds an alias that was never emitted (CS0246) — and the bare `using unicode =
+		// unicode_package;` would itself collide with the child namespace (CS0576). Surfaced by a -tests
+		// external variant that DOT-imports the package under test (unicode's letter_test) yet still
+		// references its types qualified; importQualifier is a no-op for any package that isn't renamed, so
+		// a non-colliding supplied alias is byte-identical.
+		alias = getSanitizedImport(importQualifier(alias))
+
 		// Skip when the canonical alias collides with one a real import already bound to a DIFFERENT
 		// namespace: cryptobyte's asn1.go imports `encoding_asn1 "encoding/asn1"` (referenced by type,
 		// so it lands here) AND the subpackage `.../cryptobyte/asn1` (unaliased → alias `asn1`), so

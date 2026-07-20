@@ -149,6 +149,7 @@
     <Project Path="Tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
     <Project Path="Tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
+    <Project Path="Tests/Behavioral/DotImportRenamedPackage/DotImportRenamedPackage.csproj" />
     <Project Path="Tests/Behavioral/DynamicInterfaceKeywordMethod/DynamicInterfaceKeywordMethod.csproj" />
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
     <Project Path="Tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
