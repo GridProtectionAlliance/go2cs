@@ -2196,6 +2196,42 @@ A `select` lowers to a C# `switch`: with a `default:` clause present, the non-bl
 
 The golib non-blocking receive underpinning the default-form guards distinguishes the two "no value" cases per Go semantics: a **closed** empty channel is receive-ready with the zero value; an **open** empty channel reports not-ready, so the `default:` is taken. (Guarded by the `SelectStatement` extensions `firstMsg` — terminal blocking select in a value-returning func — and `poll` — empty `default:` after a returning case, polled both before and after `close`.)
 
+### A NIL channel is never ready — and asking must not throw
+
+golib models a channel as a **struct**, so the nil channel is that struct's ZERO value: every field
+is null. Go gives a nil channel well-defined behavior — it is never closed, a receive or send on it
+blocks forever, and in a `select` with a `default` the nil case is simply not chosen — so the
+readiness probes must *report* "not ready" rather than dereference the absent state. Most of them
+already did (`SendIsReady` / `ReceiveIsReady` / `Receiving` all null-check their backing fields);
+`IsClosed` did not, so merely asking whether a nil channel was closed threw a
+`NullReferenceException`.
+
+This is not an exotic shape. os/exec's `Start` runs
+
+```go
+if c.ctx != nil {
+	select {
+	case <-c.ctx.Done():
+		return c.ctx.Err()
+	default:
+	}
+}
+```
+
+and `context.Background().Done()` **is** a nil channel, so every child process launched through a
+background context crashed in the probe — the last blocker on math/rand's `TestDefaultRace`.
+`IsClosed` now reports `false` for a nil channel, which makes the non-blocking receive fall through
+to "not ready" and the `default:` clause run, matching Go. (Guarded by `NilChannelSelectDefault`:
+nil receive and comma-ok receive taking the default, `len`/`cap` of a nil channel, a real channel
+behaving normally alongside, and a mixed select where the nil case must never win over a ready real
+case.)
+
+**Known gap (separate from the above).** A `select` **send** case with a `default` is emitted as an
+unguarded `case ᐧ:` — no send-readiness probe at all — so it always takes the case. This is wrong
+for a *full real* buffered channel too, where Go takes the `default`; it is not specific to nil
+channels. The `NilChannelSelectDefault` guard deliberately omits send coverage until the lowering
+grows a non-blocking send probe, so no golden bakes in the wrong output.
+
 ### An escaping comm-clause binding receives into a temp and heap-boxes at clause entry
 
 A `case result := <-ch:` whose bound variable's address is taken in the clause body — internal/fuzz
