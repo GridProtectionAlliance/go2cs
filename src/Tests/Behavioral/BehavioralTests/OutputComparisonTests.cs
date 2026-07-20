@@ -130,6 +130,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckByteTableStringConst() => CheckTarget("ByteTableStringConst");
 
     [TestMethod]
+    public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
+
+    [TestMethod]
     public void CheckCaptureModeFuncLitParam() => CheckTarget("CaptureModeFuncLitParam");
 
     [TestMethod]

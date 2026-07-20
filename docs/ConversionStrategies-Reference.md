@@ -1828,6 +1828,28 @@ The outer parentheses are load-bearing: an inline-indexed literal (`"…"[i]`) w
 
 The above routes a single `*ast.BasicLit` through `convBasicLit`'s scan. A string **constant** whose value is a *concatenation* — `const rev8tab = "" + "\x00\x80…" + …` (math/bits' bit-reversal table) — folds to one value with **no** single `BasicLit`, so it bypassed that scan and rendered a UTF-16 string literal: `rev8tab[1]` returned `0xC2` (the UTF-8 lead byte of U+0080), not `0x80`, and `Reverse8` was wrong. The const-string path now tests the FOLDED value directly — a value that is not valid UTF-8 (`utf8.ValidString`) cannot round-trip through a C# string/u8 literal, so it emits the same byte-array `@string` from its exact bytes (`byteArrayStringLiteral`, shared with `emitByteArrayString`); a valid-UTF-8 value keeps the readable `getStringLiteral` form. This catches any non-UTF-8 byte table built by concatenation (crypto S-boxes, embedded blobs), not just single literals. (Guarded by the `ByteTableStringConst` behavioral test — a concatenated `\x00\x80…` table byte-indexed and `len`-measured, output-compared vs `go run`; the pre-fix converter returns `0xC2` for index 1. The full corpus compiles with the byte-array consts, and CNR is byte-identical.)
 
+The **`var`** form of the same table needs no separate rule, and it is worth stating why, because
+the two declaration kinds reach the byte-array emission by genuinely different routes. A `const`
+is *folded* by go/types, so the concatenation is gone by the time the declaration is emitted and
+only the folded value can be inspected — hence the `utf8.ValidString` test above. A `var`'s
+initializer is *rendered as an expression*: `var tbl = "" + "\xff…" + …` walks the `BinaryExpr` and
+converts each operand through `convBasicLit`, so every piece is scanned on its own and the
+non-UTF-8 pieces become byte-array `@string`s that then concatenate as `@string`s:
+
+```csharp
+internal static @string tbl = ""u8 + ((@string)(new byte[]{0xff, 0x00, 0x80})) + ((@string)(new byte[]{0x01, 0xfe}));
+```
+
+This holds for a package-level var, a function-local var, an explicitly typed var
+(`var t string = …`), a single non-concatenated literal, and a `[]byte("" + "\xff…")` conversion.
+Note `encoding/hex`'s `reverseHexTable` — the 256-byte table that motivated a second look at this
+area — is a **`const`**, already covered by the folded-value rule; the corrupted UTF-16 literal
+still visible in a stale `src/go-src-converted/encoding/hex/hex.cs` is pre-fix output, not current
+converter behavior. (Guarded by the `ByteTableStringVar` behavioral test — package-level, local,
+typed, and single-literal non-UTF-8 tables byte-indexed and `len`-measured, plus valid-UTF-8
+controls asserting the readable literal form and UTF-8 byte-count `len`, output-compared vs
+`go run`.)
+
 ### Composite types render structurally (`[]*T` keeps the pointer)
 A slice/array type is rendered structurally in every type-name path: the `[N]`/`[]` marker plus the recursively resolved element, never from the `go/types` string form. The string form is path-qualified (`[]*internal/abi.Type`), and the cross-package last-segment strip would eat everything before the slash *including the pointer marker*, silently dropping the `ж<>` (reflect's `[]*abi.Type` fields compiled against the WRONG element type). The recursion also resolves lifted anonymous elements and cross-package generic elements:
 ```go

@@ -129,6 +129,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckByteTableStringConst() => CheckTarget("ByteTableStringConst");
 
     [TestMethod]
+    public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
+
+    [TestMethod]
     public void CheckCaptureModeFuncLitParam() => CheckTarget("CaptureModeFuncLitParam");
 
     [TestMethod]
