@@ -228,6 +228,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
 
     [TestMethod]
+    public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
+
+    [TestMethod]
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]

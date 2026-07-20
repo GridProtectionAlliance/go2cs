@@ -1424,11 +1424,48 @@ ran `pp()`'s ctor, which left `fmt` as `default(fmt)` with a null box, and `p.fm
 therefore also emits `this.f = new FieldType(nil);` for each such field, and because that runs
 `FieldType`'s own NilType constructor (which recursively constructs *its* needy fields), a single level of
 construction fixes every depth. "Needs construction" (`StructTypeNeedsConstruction`) is: has a promoted
-embed, a fixed-array field, or a nested struct field that needs construction — resolved only for
-converter-generated structs (`GetStructDeclaration`), so a `true` result guarantees the public
-`FieldType(NilType)` constructor exists; a reference field (pointer/interface/delegate) keeps its correct
-nil zero value, and a cross-package/golib field type is left `default` (conservative — its own package
-constructs it, and its nil zero value is correct anyway). Only the NilType and parameterless constructors
+embed, a fixed-array field, or a nested struct field that needs construction; a reference field
+(pointer/interface/delegate) keeps its correct nil zero value.
+
+**The resolution must be by SYMBOL, not by syntax.** `StructTypeNeedsConstruction` originally answered
+only for structs it could find a `StructDeclarationSyntax` for (`GetStructDeclaration`), and left every
+other field type `default` on the reasoning that "its own package constructs it, and its nil zero value is
+correct anyway". The first half is wrong and the second half does not apply to a fixed array. A
+`<ProjectReference>` reaches the compiler as a **`PortableExecutableReference`** — compiled metadata with
+no syntax trees — so in any real MSBuild build *every* cross-package field type was unresolvable, and
+nothing in the consuming package ever constructed it. When such a type carries a fixed array at any depth,
+`default` leaves that `array<T>`'s backing null (golib's deliberate zero-value discriminator), so `len` and
+`range` silently measure **zero** and the first index or pin throws — `GCHandle.AddrOfPinnedObject`'s
+`InvalidOperationException: Handle is not initialized` (see golib `ж.cs`, `pinnedArrayData`). The live case
+was `math/rand/v2`'s `ChaCha8`, whose `internal chacha8rand.State state;` never got `State`'s
+`buf = new(32)` / `seed = new(4)`, where Go's `new(ChaCha8)` yields 32 real zeroed words. (The syntax path
+only ever worked because `CompilationReference`s — in-memory Roslyn compilations — do carry syntax; that is
+the shape unit tests use, not the shape MSBuild produces.)
+
+`GetStructDeclaration` is therefore backed by `Compilation.FindTypeSymbol`, which resolves a
+fully-qualified display name to an `INamedTypeSymbol` through `GetTypeByMetadataName` (stripping `global::`
+and verbatim `@`, rendering type arguments as arity suffixes, and trying each namespace-vs-nested-type split
+of the dotted name since a display string spells both `.`). The metadata walk applies the same three
+triggers over `GetMembers()` — a ref-returning property is a promoted embed, a `go.array<T>`-typed field is
+a fixed array, a struct-typed field recurses — with the same cycle guard. On the metadata path the
+`public T(NilType)` constructor that `new T(nil)` needs is **checked rather than assumed** (metadata is
+fully compiled, so the generated constructor is really there): a hand-written golib struct or any other
+referenced type without one returns `false` and correctly keeps its `default`. Scalars, pointers, slices,
+maps and interfaces are still left `default`, because `default` **is** their Go zero value — over-
+constructing would add an allocation to every instantiation for no semantic gain. (Guarded by the
+`CrossPackageArrayZeroValue` output-compared test — a `Holder` whose field type lives in the `bufpkg`
+sibling library sub-project, so the reference is genuinely metadata; a same-project field type resolves by
+syntax and would pass even unfixed. Against the unfixed generator the test panics with
+`index out of range [2] with length 0`.)
+
+A **known remaining gap, not covered by the above:** the *parameterized* constructor
+(`GenerateConstructor`, used by a composite literal such as `&Holder{tag: "lit"}`) assigns
+`this.f = f;` unconditionally for a needy struct member, so an OMITTED argument overwrites the field with
+its broken `default`. A fixed-array member beside it already has the analogous
+`if (f.Source is not null)` guard; the needy-struct member has no equivalent. This path never consults
+`StructTypeNeedsConstruction` at all, so it fails identically for a **same-package** field type — it is an
+independent defect rather than part of the cross-package resolution bug, and closing it would touch every
+parameterized constructor. Only the NilType and parameterless constructors
 are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`. A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
 closes the remaining gap on its side: when `T` needs construction it emits `T x = new();` — the generated
 parameterless constructor, which runs the same field initializers + `AppendZeroValueInitializers` — instead

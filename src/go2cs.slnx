@@ -123,6 +123,8 @@
     <Project Path="Tests/Behavioral/ConstSubexprOverflow/ConstSubexprOverflow.csproj" />
     <Project Path="Tests/Behavioral/ConstrainedSliceParamInPlace/ConstrainedSliceParamInPlace.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
+    <Project Path="Tests/Behavioral/CrossPackageArrayZeroValue/CrossPackageArrayZeroValue.csproj" />
+    <Project Path="Tests/Behavioral/CrossPackageArrayZeroValue/bufpkg/CrossPackageArrayZeroValue.bufpkg.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgFuncLib/CrossPkgFuncLib.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />

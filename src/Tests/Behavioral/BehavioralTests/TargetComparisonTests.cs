@@ -231,6 +231,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
 
     [TestMethod]
+    public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
+
+    [TestMethod]
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]

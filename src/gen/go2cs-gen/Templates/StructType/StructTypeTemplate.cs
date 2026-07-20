@@ -926,8 +926,16 @@ internal class StructTypeTemplate : TemplateBase
 
         (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
 
+        // A type whose SOURCE this compilation cannot see — the normal shape of a cross-package
+        // field in a real MSBuild build, where a <ProjectReference> arrives as compiled METADATA —
+        // resolves by SYMBOL instead. Leaving it `default` here is not conservative: if the type
+        // carries a fixed array at any depth, `default` gives that array a NULL backing (golib's
+        // deliberate zero-value discriminator), so the first pin throws "Handle is not initialized"
+        // from GCHandle.AddrOfPinnedObject (math/rand/v2's ChaCha8, whose cross-package
+        // chacha8rand.State holds `buf = new(32)`). Go's `new(ChaCha8)` yields 32 real zeroed words.
         if (structDecl is null)
-            return false;
+            return Context.Compilation.FindTypeSymbol(typeName) is { TypeKind: TypeKind.Struct } typeSymbol &&
+                   NeedsConstruction(typeSymbol, seen);
 
         foreach ((string memberType, string memberName, bool isReferenceType, bool isProperty) in structDecl.GetStructMembers(compilation!, true))
         {
@@ -949,6 +957,59 @@ internal class StructTypeTemplate : TemplateBase
 
             if (NeedsConstruction(memberType, seen))
                 return true;
+        }
+
+        return false;
+    }
+
+    // Symbol-based counterpart of the syntax walk above, for a type that reached us as compiled
+    // METADATA. Same rule, same three triggers (promoted-embed box, fixed array, needy nested
+    // value struct); only the member enumeration differs.
+    private bool NeedsConstruction(INamedTypeSymbol structType, HashSet<string> seen)
+    {
+        // `new T(nil)` is only emittable when the type actually exposes the public NilType
+        // constructor the generator gives converter-produced structs — a hand-written golib struct
+        // (or any other referenced type) has no such constructor, and its `default` is its correct
+        // Go zero value anyway. Metadata is fully compiled, so unlike the source path this can be
+        // CHECKED rather than assumed.
+        if (!structType.InstanceConstructors.Any(constructor =>
+                constructor.DeclaredAccessibility == Accessibility.Public &&
+                constructor.Parameters.Length == 1 &&
+                constructor.Parameters[0].Type.Name == "NilType"))
+            return false;
+
+        foreach (ISymbol member in structType.GetMembers())
+        {
+            if (member.IsStatic || member.IsImplicitlyDeclared || GetSimpleName(member.Name) == "_")
+                continue;
+
+            switch (member)
+            {
+                // A promoted embed's `partial ref` property — its box is constructor-allocated.
+                // IsIndexer excludes a ref-returning INDEXER, which Roslyn also models as an
+                // IPropertySymbol but the syntax path never saw (it matches PropertyDeclarationSyntax,
+                // not IndexerDeclarationSyntax). Every golib named-slice/array wrapper declares
+                // `public ref T this[nint index]`, so without this the walk called EVERY such wrapper
+                // needy — `image/color.Palette`, `net.IP`, `go/scanner.ErrorList` — and emitted a
+                // pointless `new Palette(nil)` whose body is just `m_value = default!`, i.e. exactly
+                // the `default` it replaced.
+                case IPropertySymbol { ReturnsByRef: true, IsIndexer: false }:
+                    return true;
+                case IFieldSymbol { Type: { IsReferenceType: false } fieldType }:
+                {
+                    // A fixed-size array field (`[N]T` → golib `array<T>`) carries a `= new(N)`
+                    // initializer that `default(T)` skips, leaving a null backing.
+                    if (fieldType is INamedTypeSymbol { Name: "array", Arity: 1, ContainingNamespace.Name: "go" })
+                        return true;
+
+                    if (fieldType is INamedTypeSymbol { TypeKind: TypeKind.Struct } nestedType &&
+                        seen.Add(nestedType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)) &&
+                        NeedsConstruction(nestedType, seen))
+                        return true;
+
+                    break;
+                }
+            }
         }
 
         return false;

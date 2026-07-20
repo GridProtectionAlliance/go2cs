@@ -124,6 +124,93 @@ public static class GeneratorExecutionContextExtensions
             });
     }
 
+    /// <summary>
+    /// Resolves a fully-qualified type name to its <see cref="INamedTypeSymbol"/>, searching the
+    /// compilation's own assembly AND every referenced assembly — including METADATA references.
+    /// </summary>
+    /// <remarks>
+    /// The syntax-based <see cref="FindStructDeclaration"/> can only see types whose SOURCE is in
+    /// this compilation (or in a <see cref="CompilationReference"/>). A real MSBuild build hands a
+    /// <c>&lt;ProjectReference&gt;</c> to the compiler as a <see cref="PortableExecutableReference"/>
+    /// — compiled metadata, no syntax trees — so every cross-package type resolved to null there.
+    /// Symbol lookup has no such blind spot: metadata and source types resolve identically.
+    /// </remarks>
+    public static INamedTypeSymbol? FindTypeSymbol(this Compilation compilation, string typeName)
+    {
+        typeName = GetUnderlyingTypeName(typeName);
+
+        if (typeName.StartsWith("global::", StringComparison.Ordinal))
+            typeName = typeName["global::".Length..];
+
+        // Split on the dots that separate NAME segments, ignoring any dot nested inside a type
+        // argument list (`Ns.Outer<A.B>.Inner`), and reduce each segment to its metadata form
+        // (`array<ulong>` → ``array`1``, verbatim `@internal` → `internal`).
+        List<string> segments = [];
+        int depth = 0, start = 0;
+
+        for (int i = 0; i <= typeName.Length; i++)
+        {
+            if (i < typeName.Length)
+            {
+                switch (typeName[i])
+                {
+                    case '<':
+                        depth++;
+                        continue;
+                    case '>':
+                        depth--;
+                        continue;
+                    case '.' when depth == 0:
+                        break;
+                    default:
+                        continue;
+                }
+            }
+            else if (depth != 0)
+            {
+                // Unbalanced angle brackets — not a name this routine can parse.
+                return null;
+            }
+
+            segments.Add(ToMetadataSegment(typeName[start..i]));
+            start = i + 1;
+        }
+
+        if (segments.Count == 0)
+            return null;
+
+        // A namespace separator and a nested-type separator are both rendered `.` in a display
+        // string but differ in metadata (`.` vs `+`), and the name alone cannot say which is which.
+        // Try every split, deepest nesting last, so the common all-namespaces form is tried first.
+        for (int nested = 0; nested < segments.Count; nested++)
+        {
+            string candidate = string.Join(".", segments.Take(segments.Count - nested)) +
+                               (nested > 0 ? "+" + string.Join("+", segments.Skip(segments.Count - nested)) : "");
+
+            INamedTypeSymbol? symbol = compilation.GetTypeByMetadataName(candidate);
+
+            if (symbol is not null)
+                return symbol;
+        }
+
+        return null;
+    }
+
+    // Reduces one display-name segment to its metadata spelling: drops the verbatim-identifier
+    // escape C# display formatting adds to keyword-like names (`@internal`), and replaces a type
+    // argument list with the arity suffix metadata uses (`array<ulong>` → ``array`1``).
+    private static string ToMetadataSegment(string segment)
+    {
+        segment = segment.Replace("@", "");
+
+        int ltIndex = segment.IndexOf('<');
+
+        if (ltIndex < 0 || !segment.EndsWith(">", StringComparison.Ordinal))
+            return segment;
+
+        return $"{segment[..ltIndex]}`{CountTopLevelTypeArguments(segment)}";
+    }
+
     // Counts the top-level type arguments of a generic type reference's OUTERMOST `<…>`
     // (`Foo<Bar<Baz>, Qux>` → 2), tracking nesting so an inner comma is not counted.
     private static int CountTopLevelTypeArguments(string typeName)
