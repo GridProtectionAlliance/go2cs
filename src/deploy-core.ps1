@@ -124,7 +124,10 @@ else {
     Write-Host "  deploying full stdlib   -> core" -ForegroundColor Yellow
     # Exclude go-src-converted's own Directory.Build.props: the root props written below is
     # the authoritative one; a nested copy would shadow it for everything under core\.
-    Invoke-Robocopy (Join-Path $srcRoot 'go-src-converted') $coreDst @('/XF', 'Directory.Build.props')
+    # Also exclude the committed Phase-4 test projects: a `<pkg>.tests.csproj` builds against the
+    # hand-owned go.testing host (not part of a deployment) and belongs to go2cs's own test
+    # infrastructure, not the deployable standard library -- staging it makes the verify build fail.
+    Invoke-Robocopy (Join-Path $srcRoot 'go-src-converted') $coreDst @('/XF', 'Directory.Build.props', '*.tests.csproj')
 
     # go-src-converted references the shared runtime + shared project it does not itself carry.
     # Overlay ONLY those (golib, the go2cs shared projitems dir, and the core-root icons) -- NOT
@@ -151,6 +154,13 @@ else {
     Write-Host "    rewrote $rewritten project file(s)" -ForegroundColor DarkGray
 }
 
+# ---- Stage the shared version.props at the deploy root -----------------------------------
+# golib.csproj and go2cs-gen.csproj each <Import ..\..\version.props /> (the single-source
+# NuGet version stamp, src\version.props). Deployed to <root>\core\golib and <root>\gen\go2cs-gen,
+# that relative import resolves to <root>\version.props, so the file must sit at the deploy root
+# or every project transitively referencing golib/the analyzer fails with MSB4019.
+Copy-Item (Join-Path $srcRoot 'version.props') (Join-Path $Target 'version.props') -Force
+
 # ---- Write the root Directory.Build.props ------------------------------------------------
 # Pins $(go2csPath) to this deploy root for every project beneath it, so all
 # $(go2csPath)core\... / $(go2csPath)gen\... references resolve with no per-build flag.
@@ -172,7 +182,9 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText((Join-Path $Target 'Directory.Build.props'), $propsContent, $utf8NoBom)
 
 # ---- Generate a solution over everything deployed ----------------------------------------
-$projectLines = Get-ChildItem -Path $Target -Recurse -Filter *.csproj | ForEach-Object {
+# Skip any `<pkg>.tests.csproj` (excluded from staging above; also filtered here so a stale one
+# left in the deploy root from a prior deploy can't slip into the verify solution).
+$projectLines = Get-ChildItem -Path $Target -Recurse -Filter *.csproj | Where-Object { $_.Name -notlike '*.tests.csproj' } | ForEach-Object {
     $rel = $_.FullName.Substring($Target.Length).TrimStart('\', '/').Replace('\', '/')
     "  <Project Path=`"$rel`" />"
 }
