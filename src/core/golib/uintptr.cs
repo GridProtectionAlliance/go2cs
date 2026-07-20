@@ -61,7 +61,11 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     IMultiplyOperators<uintptr, uintptr, uintptr>, IDivisionOperators<uintptr, uintptr, uintptr>,
     IModulusOperators<uintptr, uintptr, uintptr>, IBitwiseOperators<uintptr, uintptr, uintptr>,
     IShiftOperators<uintptr, int, uintptr>, IEqualityOperators<uintptr, uintptr, bool>,
-    IComparisonOperators<uintptr, uintptr, bool>, IIncrementOperators<uintptr>, IDecrementOperators<uintptr>
+    IComparisonOperators<uintptr, uintptr, bool>, IIncrementOperators<uintptr>, IDecrementOperators<uintptr>,
+    // Go defines unary `-x` on every numeric type as the wrap-around `0 - x`; the operator below
+    // already implements it, and the lifted Arithmetic constraint set now demands the interface
+    // (reflect's rangeNum<uintptr, uint64>, CS0315).
+    IUnaryNegationOperators<uintptr, uintptr>
 {
     // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
     public nuint Value;

@@ -46,7 +46,7 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("LeadingZeros16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= 4294967296L - 1) {
+            if (x <= (uint64)(4294967296L - 1)) {
                 nint got = LeadingZeros32((uint32)x);
                 nint want = nlz - k + (32 - 8);
                 if (x == 0) {
@@ -166,7 +166,7 @@ public static void TestTrailingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("TrailingZeros16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= 4294967296L - 1) {
+            if (x <= (uint64)(4294967296L - 1)) {
                 nint got = TrailingZeros32((uint32)x);
                 if (x == 0) {
                     want = 32;
@@ -280,7 +280,7 @@ internal static void testOnesCount(ж<testing.T> Ꮡt, uint64 x, nint want) {
             Ꮡt.Fatalf("OnesCount16(%#04x) == %d; want %d"u8, (uint16)x, got, want);
         }
     }
-    if (x <= 4294967296L - 1) {
+    if (x <= (uint64)(4294967296L - 1)) {
         nint got = OnesCount32((uint32)x);
         if (got != want) {
             Ꮡt.Fatalf("OnesCount32(%#08x) == %d; want %d"u8, (uint32)x, got, want);
@@ -719,7 +719,7 @@ public static void TestLen(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("Len16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= 4294967296L - 1) {
+            if (x <= (uint64)(4294967296L - 1)) {
                 nint got = Len32((uint32)x);
                 if (got != want) {
                     Ꮡt.Fatalf("Len32(%#08x) == %d; want %d"u8, x, got, want);

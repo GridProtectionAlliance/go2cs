@@ -730,6 +730,18 @@ func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
 // Paletted→image.Image record must not satisfy a Paletted→draw.Image cast (both reduce to
 // "Image"; image/draw referenced the foreign adapter implementing the WRONG interface,
 // CS1503).
+// NOTE (deliberate non-collapse): a record PARSED from a package_info file is class-relative
+// (`http_package.ΔHandler`) while the same interface rendered at a CAST SITE carries its whole
+// namespace chain (`go.net.http_package.ΔHandler`). Collapsing the longer form to its last two
+// segments so the two spellings key alike looks correct and is NOT: for a genuinely FOREIGN pair
+// the mismatch is load-bearing. Matching the foreign package's own record suppresses the LOCAL
+// record the consumer needs — go2cs-gen emits the implicit conversion into the assembly that
+// carries the record, and a VALUE-form foreign implement gives the consumer nothing to convert
+// through (expvar/net-http-cgi/internal-trace-traceviewer: `HandlerFunc` → `ΔHandler`, CS0029 ×3 +
+// CS1503). The same-assembly case this would have helped — a `-tests` external variant reaching
+// the package under test through its import path — is handled at EMISSION instead, by
+// stripLocalTypeQualifier over testLocalTypePrefixes, which is scoped to exactly the classes that
+// really do compile into the current assembly.
 func canonicalRecordIfaceName(ifaceName string, rootPackageName string) string {
 	ifaceName = strings.TrimPrefix(ifaceName, RootNamespace+".")
 

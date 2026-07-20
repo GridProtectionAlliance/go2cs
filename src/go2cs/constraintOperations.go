@@ -282,6 +282,13 @@ func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
 				// go2cs-gen InterfaceTypeTemplate "Arithmetic" list — keep the two in sync.
 				fmt.Sprintf("IIncrementOperators<%s>", name),
 				fmt.Sprintf("IDecrementOperators<%s>", name),
+				// Unary `-x` on a type parameter (math/rand/v2's
+				// `keep[T int | uint | … | uint64](x T) T { return -x }`, CS0023). Numeric-only,
+				// like increment/decrement — @string has no negation. Every .NET primitive numeric
+				// satisfies this through INumberBase; a go2cs-gen NAMED numeric type satisfies it
+				// because NumericTypeTemplate now emits the operator for unsigned types too (as
+				// Go's wrap-around `0 - x`) — keep the three lists in sync.
+				fmt.Sprintf("IUnaryNegationOperators<%s, %s>", name, name),
 			}
 		case IntegerOperators:
 			constraints = []string{

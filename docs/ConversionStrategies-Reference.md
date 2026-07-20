@@ -2847,6 +2847,33 @@ Guarded by `GenericTypeInference` (`seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[
 ### Increment/decrement on a type parameter
 `i++` / `i--` on a constrained type parameter binds `IIncrementOperators<T>` / `IDecrementOperators<T>`, which the lifted **Arithmetic** operator set now includes (reflect `rangeNum`'s loop, CS0023). They live in the numeric-only Arithmetic set -- never the string-including Sum set, since `@string` implements neither. The list is emitted in two places that must stay in sync: the converter's `getLiftedConstraints` (`constraintOperations.go`) and the go2cs-gen `InterfaceTypeTemplate`.
 
+### Unary negation on a type parameter
+`-x` on a constrained type parameter binds `IUnaryNegationOperators<T, T>`, which the lifted
+**Arithmetic** operator set now includes (math/rand/v2's
+`func keep[T int | uint | int32 | uint32 | int64 | uint64](x T) T { return -x }`, CS0023). Like
+increment/decrement it is numeric-only — `@string` has no negation — so it never joins the Sum set.
+
+Satisfying it needed a matching change on the generator side, because a NAMED Go numeric type is
+instantiated through its go2cs-gen wrapper. Go defines `-x` on EVERY numeric type, unsigned
+included, as the wrap-around `0 - x`; C# has no unary minus for `ulong` at all and widens
+`uint`/`ushort`/`byte` to a signed type, which is why `NumericTypeTemplate` previously emitted the
+operator only for signed types. It now emits the unsigned form as that subtraction under
+`unchecked` — exactly Go's semantics — so a generic over `~uint64` instantiated with a named
+unsigned type (internal/trace's `dataTable[EI ~uint64, E]` over `type stringID uint64`) satisfies
+the constraint instead of failing CS0315:
+
+```csharp
+// generated for `type counter uint64`
+public static counter operator -(counter value) => (counter)unchecked((uint64)((uint64)0 - value.m_value));
+```
+
+The list is emitted in THREE places that must stay in sync: the converter's `getLiftedConstraints`
+(`constraintOperations.go`), the go2cs-gen `InterfaceTypeTemplate` "Arithmetic" constraint list, and
+`InheritedTypeTemplate`'s `NumericInterfaces` declaration list (whose operator bodies come from
+`NumericTypeTemplate`). Guarded by `GenericNegation`, which negates across the primitive widths and
+through named types over both a signed (`~int32`) and an unsigned (`~uint64`) underlying type,
+output-compared against Go so the unsigned wrap is verified rather than merely compiled.
+
 ### `uintptr` as a generic numeric type argument
 The golib `uintptr` struct declares the full generic-math interface set the lifted numeric constraints demand (`IAdditionOperators` through `IComparisonOperators`, `IShiftOperators<uintptr, int, uintptr>` with a `>>>` operator, `IIncrementOperators`/`IDecrementOperators`) -- matching operators alone never satisfy a C# where-clause (CS0315 at reflect's `rangeNum<uintptr, uint64>`). At runtime, `ConvertToType`/`ConvertToUInt64` have `uintptr` fast paths, and the reflection-cached `TypeParamCaster` probes a public `Value` FIELD as well as the generated wrappers' `Value` property (hand-written wrappers keep a field for `Interlocked`/`Volatile` `ref x.Value` seams). Guarded by `GenericTypeInference` (`growShrink[U ~uint32 | ~uintptr]`).
 
@@ -3756,6 +3783,81 @@ through a nested local module literally named `go/nsshadow` (emitting `namespace
 a single-file behavioral test cannot express): the nested lib imports `math` + `math/rand` so its
 own rooted using exercises the own-namespace branch, and the importing `main` package (namespace
 `go`, with `go.go` in its closure) exercises the closure branch.
+
+**Under `-tests` the shadow gate spans BOTH compilation halves, and the directly-composed using
+targets must go through it too.** The gate had two holes that only a test conversion can expose,
+and math/rand/v2 (whose `regress_test.go` imports `go/format`) hit both — 13 of the package's 22
+compile errors:
+
+1. *The closure was computed per PACKAGE, not per ASSEMBLY.* A `-tests` run recompiles the
+   package's PRODUCTION sources into the test assembly, so that assembly's reference closure is the
+   UNION of the production and `_test.go` closures. The production conversion pass saw only its own
+   half, never learned `go.go` was in scope, and emitted bare `using bits = go.math.bits_package;`
+   into a compilation that did contain `go.go`. `collectSiblingTestClosure` now runs a
+   metadata-only (`NeedName|NeedImports|NeedDeps`) load of the test variants before the production
+   conversion and records their transitive import paths in `siblingClosureImportPaths`, which
+   `computeImportAliasRenames` folds into the closure it walks — so every consumer of the namespace
+   maps (the shadow gate, `rootQualifyIfAmbiguous`, `isStrippedGoPathPackageRef`) describes the
+   assembly rather than the package. The set is empty for every non-`-tests` conversion, so no
+   other output moves.
+2. *Targets composed straight from `packageNamespace` bypassed `rootQualified` entirely.* Both the
+   package-under-test anchor (`visitImportSpec`'s `isPackageUnderTest` branch, which REPLACES the
+   `rootQualifyIfAmbiguous`-derived target with `<packageNamespace>.<pkg>_package`) and the test
+   host's `using go.testing_runtime;` were bare, which is why one emitted file could show a
+   correctly-qualified `using iotest = global::go.testing.iotest_package;` beside a broken
+   `using static go.math.rand.rand_package;`. `globalQualifyRooted` applies the same gate to an
+   ALREADY-rooted path and both sites now route through it. It is idempotent and a no-op with no
+   shadow, so unshadowed packages emit byte-identically.
+
+Both holes fire for ANY package whose test closure reaches a `go/*` package, and a `regress_test.go`
+importing `go/format` is a common stdlib idiom — this is not a v2 quirk. Guarded by
+`TestGlobalQualifyRootedForcesGlobalUnderRootShadow` and `TestSiblingClosureContributesRootShadow`
+(`src/go2cs/rootShadowQualification_test.go`); the behavioral corpus cannot cover them because it
+never runs `-tests` and no behavioral package imports a `go/*` package.
+
+### A GoImplement record's adapter key is canonical, not textual
+`interfaceImplementations` is keyed by RENDERED type name, so one resolved pair recorded under two
+spellings is two records — and go2cs-gen turns two records into two definitions of the SAME adapter
+type. The interface side arrives class-relative when PARSED from a `package_info.cs`
+(`rand_package.Source`, via `loadPackageImplements`) and fully namespace-qualified when rendered at
+a CAST SITE (`go.math.rand.rand_package.Source`). `canonicalRecordIfaceName` stripped only the root
+prefix, so the two keyed differently, the foreign-adapter existence proof missed, and the pair was
+re-recorded under the second spelling.
+
+Under `-tests` this is routine rather than exotic: the EXTERNAL (`package <name>_test`) variant
+reaches the package under test through its import path, so it renders that package's types
+qualified, while the seeded production metadata carries them short. math/rand/v2 emitted both
+`[assembly: GoImplement<PCG, Source>(Pointer = true)]` and
+`[assembly: GoImplement<go.math.rand.rand_package.PCG, go.math.rand.rand_package.Source>(Pointer = true)]`,
+and `ImplementGenerator`'s `GetUniqueHintName` silently uniquified the duplicate FILE name — so the
+duplicate TYPE reached the compiler as CS0102 + CS0111 ×5 + CS8646 on `rand_package.PCGжSource`.
+(`math/rand` escapes only by luck: its one self-qualified record targets a different interface than
+any short record.)
+
+The adapter's identity is exactly `<class>_package.<Type>` — the pair `ImplementGenerator` composes
+its class name from — so `canonicalRecordIfaceName` now collapses a longer chain to its last two
+segments, guarded on the penultimate segment actually being a package class so a nested type
+reference (`x.y_package.Outer.Inner`) is untouched. The EMISSION side is normalized to match:
+`stripLocalTypeQualifier` rewrites a reference naming one of THIS package's own types through the
+package's fully-qualified class back to the bare local form the attribute file's
+`using static <ns>.<pkg>_package;` resolves, so the two spellings collapse in the emitting
+`HashSet`. Guarded by `TestCanonicalRecordIfaceNameCollapsesToPackageClass` and
+`TestStripLocalTypeQualifier`.
+
+### A test project's references cover UNROOTED single-segment alias targets
+A `-tests` project sets `DisableTransitiveProjectReferences`, so its references are the
+direct-import closure plus whatever `aliasReferenceImports` recovers by scanning the emitted `using`
+aliases for namespace tokens. The scan matched only the ROOTED token (`go.hash_package`), but a
+SINGLE-SEGMENT package emits its alias UNROOTED — `using hash = hash_package;` inside
+`namespace go.math.rand`, where C#'s outward lookup finds the class in the enclosing root namespace
+with no qualifier. math/rand/v2's `chacha8_test.cs` needs `hash` purely because `sha256.New()`
+RETURNS `hash.Hash`, so the package appears in no import list and only this scan could have found
+it: the reference went missing and the build failed CS0246 on `hash_package`. The scan now also
+carries a bare token per single-segment package, matched on a SEGMENT boundary (`target == token` or
+`target` starts with `token + "."`) — a substring test would let `hash_package` match
+`go.hash.maphash_package` and pull in a package nothing references. Guarded by
+`TestAliasReferenceImportsMatchesUnrootedSingleSegmentAlias` and
+`TestAliasReferenceImportsDoesNotMatchAcrossSegmentBoundaries`.
 
 **Referencing a `go/*`-package TYPE loses a root segment because the path's own `go` collides with the root namespace.** A `go/ast` type reference renders correctly as `go.go.ast_package.X` (root `go` + the path's `go.ast` → namespace `go.go`, class `ast_package`), but `convertToCSTypeName` then strips the *leading* `go.` as a redundant root (bodies live inside `namespace go`), leaving `go.ast_package.X` — namespace `go`, which has no `ast_package` (CS0234/CS0426 in the go/* consumers go/doc, go/printer, go/internal/typeparams, whose GoImplement attributes and `using` aliases both carry the stripped form). The two rooting helpers now recognise this: `isStrippedGoPathPackageRef` splits the ref at its first `_package` class segment and tests the *namespace* portion against `packageChildNamespaces` (the current package's rooted import-closure namespaces): the ref is stripped iff that namespace is NOT already a real rooted namespace but *becomes* one when the root `go.` is prepended. This is a **membership** test, not a string-shape test, so it recognises a stripped go/*-package ref at any depth — `go.ast_package` (ns `go`✗ → `go.go`✓), `go.build.constraint_package` (ns `go.build`✗ → `go.go.build`✓, three-segment `go/build/constraint`), `go.doc.comment_package` (ns `go.doc`✗ → `go.go.doc`✓) — while leaving a genuinely-rooted ref alone (`go.io.fs_package` — ns `go.io` is already real). (The earlier two-segment string heuristic — "the class segment sits immediately after `go.`" — recognised only the depth-one `go.ast_package` shape and silently missed the three-segment `go/build/constraint` and `go/doc/comment` sub-package refs, which are string-indistinguishable from a correctly-rooted `go.io.fs_package`; the membership test is what disambiguates them.) `rootQualifySubNamespaceTypeRefs` (the assembly-scope GoImplement/GoImplicitConv attributes) re-roots the stripped form to a bare `go.go.ast_package`; `rootQualifyIfAmbiguous` (the in-namespace `using` aliases) re-roots to `global::go.go.ast_package` — always `global::`, because a bare `go.go.<pkg>_package` re-binds its leading `go` to the nearest enclosing `go` from *any* importer (a go/*-package's own `go.go.*` namespace, and equally `internal/pkgbits` at `go.internal.pkgbits` resolving the second `go` inside `go.go`, CS0234). This un-blocks the whole go/* chain at the rooting level (go/doc's own-errors 17 → 1); each go/* package still needs its remaining per-package residuals (e.g. a methodless-func-type's `[GoTypeAlias]` still names an inline-rendered `ΔFilter`) to fully compile. The depth-one shape is now guarded by `GoNamespaceShadow` (its `go/nsshadow` nested module's import renders through `isStrippedGoPathPackageRef` → `using nsshadow = global::go.go.nsshadow_package;`); the multi-segment sub-package depth (`go/build/constraint`) remains census-verified only — the A/B reconvert-diff showed only the four `go/build/constraint`- and `go/doc/comment`-importing packages, go/build, go/doc, go/parser, go/printer, gaining the corrected double-`go` rooting, with the depth-one `go.go.ast_package` refs unchanged and zero collateral.
 

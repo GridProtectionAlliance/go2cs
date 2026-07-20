@@ -909,6 +909,13 @@ Examples:
 			// by converting the package's tests); build/run/compare act on EXISTING artifacts
 			// (manifest-validated) without reconverting.
 			if !options.convertTests || options.testAction == "convert" || options.testAction == "all" {
+				// The production sources about to be converted are RECOMPILED into the test
+				// assembly, so their usings must be qualified against the UNION of the production
+				// and _test.go reference closures — collect the test half first.
+				if options.convertTests {
+					collectSiblingTestClosure(inputFilePath, options)
+				}
+
 				processConversion(inputFilePath, isDir, outputFilePath, options)
 			}
 
@@ -1406,7 +1413,10 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	localTypePrefix := packageNamespace + "." + getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
 
 	qualifyLocalTypeRef := func(name string) string {
-		return qualifySystemCollidingLocalTypeRefs(rootQualifySubNamespaceTypeRefs(name), localTypePrefix)
+		// The strip runs AFTER rooting: a record's rendered name arrives WITHOUT the root prefix
+		// (`math.rand.rand_package.PCG`), and rootQualifySubNamespaceTypeRefs is what supplies the
+		// `go.` the local-class prefixes are expressed with.
+		return qualifySystemCollidingLocalTypeRefs(stripLocalTypeQualifier(rootQualifySubNamespaceTypeRefs(name), localTypePrefix), localTypePrefix)
 	}
 
 	// Handle interface implementations

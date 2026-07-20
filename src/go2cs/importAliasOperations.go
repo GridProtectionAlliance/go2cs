@@ -32,6 +32,29 @@ var packageChildNamespaces map[string]bool
 // first path segment is also named go.
 var packageQualifiedNamespaces map[string]bool
 
+// siblingClosureImportPaths holds import paths contributed by a SIBLING compilation unit that
+// shares the emitted assembly with the package being converted. Under -tests the package's
+// production sources are RECOMPILED into the test assembly (TestingInfrastructureRequirements
+// §2.1/§4.2), so that assembly's reference closure is the UNION of the production and _test.go
+// closures — but the production conversion pass runs against the production package alone and so
+// computed its namespace maps from the production half only. Every consumer of those maps
+// (rootQualified's `go.go` shadow gate, rootQualifyIfAmbiguous, isStrippedGoPathPackageRef) then
+// under-qualified the production usings for a shadow the test half introduces: math/rand/v2's
+// regress_test.go imports go/format, making `go.go` a member of namespace `go` in the test
+// assembly, so the production `using bits = go.math.bits_package;` re-bound its leading `go` to
+// `go.go` (CS0234 x13). Populated once per -tests run before the production conversion (see
+// collectSiblingTestClosure); empty for every non--tests conversion, so no other output moves.
+var siblingClosureImportPaths []string
+
+// testLocalTypePrefixes holds fully-qualified package-class prefixes OTHER than the current
+// package's own whose members nonetheless compile into the SAME assembly, so a record naming one of
+// their types must render in the bare local form rather than qualified. Only a `-tests` conversion
+// populates it: the package under test is recompiled into the test assembly, but an EXTERNAL
+// (`package <name>_test`) variant reaches it through its IMPORT PATH and so renders its types fully
+// qualified — while the seeded production metadata carries the same pairs short. See
+// stripLocalTypeQualifier. Empty for every other conversion.
+var testLocalTypePrefixes []string
+
 // packageImportLeadingSegments holds the C# using-alias identifier bound by every DIRECT import in
 // the current package (an unaliased import's canonical name, or an explicit alias). A sub-package
 // import path (`io/fs`) emits a RELATIVE namespace target (`io.fs_package`); if the leading segment
@@ -59,6 +82,12 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 	}
 
 	walk(pkg)
+
+	// Fold in the sibling compilation unit's closure (the _test.go half under -tests) so the
+	// namespace maps describe the ASSEMBLY the emitted C# compiles into, not just this package.
+	for _, path := range siblingClosureImportPaths {
+		closure[path] = true
+	}
 
 	// A GOROOT package's `golang.org/x/…` imports are GOROOT-VENDORED — visitImportSpec resolves them
 	// to their `vendor/…` on-disk path (and namespace) when the importing file lives under GOROOT. The

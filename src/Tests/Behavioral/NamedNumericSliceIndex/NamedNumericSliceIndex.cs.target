@@ -9,13 +9,13 @@ partial class main_package {
 [GoType("num:nint")] partial struct rank;
 
 internal static (@string, @string) lookup<K>(slice<@string> dense, K id)
-    where K : /* ~uint64 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
+    where K : /* ~uint64 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IUnaryNegationOperators<K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
 {
     return (dense[(nint)(ConvertToUInt64<K>(id))], dense[(nint)(ConvertToUInt64<K>(id / ConvertToType<K>(2)))]);
 }
 
 internal static uint8 bitset<K>(K id)
-    where K : /* ~uint64 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
+    where K : /* ~uint64 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IUnaryNegationOperators<K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
 {
     return (uint8)((uint8)1 << (int)(ConvertToUInt64<K>((id % ConvertToType<K>(8)))));
 }
