@@ -241,14 +241,26 @@ namespace BehavioralRunner
             Console.WriteLine(failed == 0 ? "ok" : $"{failed} failed");
         }
 
-        // A project is up to date when every .cs is newer than its matching .go source.
+        // A project is up to date when every .cs is newer than BOTH its matching .go source and the
+        // converter binary that produced it. The converter must be part of this comparison: converter
+        // work is the normal case where the .go files DON'T change, so a .go-only check leaves every
+        // project "up to date", skips transpilation entirely, and lets the Target/Output phases validate
+        // the PREVIOUS converter's output against goldens that same converter generated -- a false green
+        // that guards nothing. (check-no-regression.ps1 re-transpiles unconditionally and is immune.)
         private static bool UpToDate(string projPath)
         {
+            DateTime exe = File.GetLastWriteTimeUtc(s_go2csExe);
+
             foreach (string go in Directory.GetFiles(projPath, "*.go"))
             {
                 string cs = Path.ChangeExtension(go, ".cs");
 
-                if (!File.Exists(cs) || File.GetLastWriteTimeUtc(cs) <= File.GetLastWriteTimeUtc(go))
+                if (!File.Exists(cs))
+                    return false;
+
+                DateTime csTime = File.GetLastWriteTimeUtc(cs);
+
+                if (csTime <= File.GetLastWriteTimeUtc(go) || csTime <= exe)
                     return false;
             }
 

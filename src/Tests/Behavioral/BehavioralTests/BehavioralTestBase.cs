@@ -228,7 +228,12 @@ public abstract class BehavioralTestBase
         {
             if (!forceBuild && File.Exists(csproj))
             {
-                // If all .cs files are newer than associated .go files, skip build
+                // If all .cs files are newer than associated .go files AND newer than the converter that
+                // produced them, skip build. The converter must be part of this test: converter work is
+                // the normal case where the .go files DON'T change, so a .go-only check would leave every
+                // project "up to date" and let the Target/Output phases validate the PREVIOUS converter's
+                // output against goldens that same converter generated -- a false green.
+                DateTime go2csTime = File.GetLastWriteTimeUtc(go2cs);
                 FileInfo[] goFiles = Directory.GetFiles(projPath, "*.go").Select(fileName => new FileInfo(fileName)).ToArray();
                 bool allUpToDate = true;
 
@@ -236,7 +241,7 @@ public abstract class BehavioralTestBase
                 {
                     FileInfo csFile = new(Path.ChangeExtension(goFile.FullName, ".cs"));
 
-                    if (csFile.Exists && csFile.LastWriteTimeUtc > goFile.LastWriteTimeUtc)
+                    if (csFile.Exists && csFile.LastWriteTimeUtc > goFile.LastWriteTimeUtc && csFile.LastWriteTimeUtc > go2csTime)
                         continue;
 
                     allUpToDate = false;

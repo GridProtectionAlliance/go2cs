@@ -126,6 +126,20 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   `go build` whenever any converter `*.go` is newer than the binary, then re-transpiles. So after a
   converter change, running the suite regenerates the behavioral `.cs` from current source (and may show
   them as modified in git — that's expected).
+- **FALSE-GREEN route #2 — stale OUTPUT (fixed 2026-07-20).** Distinct from the stale-`go2cs.exe` trap
+  (route #1, where an un-rebuilt binary runs old logic): here the exe IS current but the runners *skip
+  transpiling* and validate the **previous** converter's `.cs`. All three of `BehavioralRunner.UpToDate`,
+  `PerformanceRunner.UpToDate`, and MSTest `BehavioralTestBase.TranspileProject` short-circuited on a
+  `.cs`-newer-than-`.go` check alone. Converter work is exactly the case where the `.go` files *don't*
+  change, so every project stayed "up to date", transpile was skipped for all of them, and Target/Output
+  then compared the old converter's output against goldens that same converter had generated — everything
+  matched and the suite printed **PASS**. A guard test "validated" that way guards nothing. All three now
+  also require the `.cs` to be newer than **`go2cs.exe`**, so any converter rebuild invalidates the whole
+  corpus. Verified by neutering a real converter fix (`lhsReusedInLaterRhs`) and rebuilding: the old
+  runner reported PASS, the fixed runner reports `FAIL [Target,Output]` with no manual touch.
+- **`check-no-regression.ps1` re-transpiles UNCONDITIONALLY** (it has no `UpToDate` equivalent), which is
+  why CNR was immune to both false-green routes and remains the authoritative drift instrument for
+  converter changes. Preserve that asymmetry: never add an up-to-date skip to CNR.
 - **`TargetComparisonTests` compares goldens with line endings NORMALIZED** (CRLF→LF; see
   `TargetComparisonTests.FileMatch` / `BehavioralRunner.FilesEqual`, both strip CRs). It was a raw
   byte-for-byte compare until 2026-07-07. Content diffs are still caught exactly; a pure line-ending
