@@ -341,6 +341,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// `*((*unsafe.Pointer)(k))` (convStarExpr's CallExpr branch sees a ParenExpr, not the CallExpr).
 		// The pointer-to-NAMED-type value conversion `(*atomic.Uint32)(counterPtr)` is handled and returned
 		// above (its arg is a *types.Pointer, not a raw address), so it never reaches here.
+		//
+		// NOTE isPointerCast means only "this conversion is the operand of a deref" — it does NOT imply the
+		// SOURCE is an address, and this bridge is only ever correct for one that is. The IDENTITY reinterpret
+		// `*(*T)(p)` with p already `*T` is the shape that made the difference visible: its source is a managed
+		// box (or, for a deref-aliased parameter, that box's VALUE alias), for which the `(uintptr)` leg has no
+		// conversion at all (CS0030). It is intercepted upstream by pointerReinterpretIdentitySource and never
+		// reaches here. Non-identity typed-pointer sources whose element types differ but share an underlying
+		// (a tag-differing struct, a named/unnamed array or struct pair) are NOT all covered by the re-box
+		// routes above and still land here; see ConversionStrategies-Reference.
 		if context.isPointerCast || v.isRawAddressPointerConversion(callExpr, arg) {
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
@@ -2340,18 +2349,37 @@ func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.
 
 // pointerReinterpretIdentitySource reports the underlying pointer expression when a `(*T)(…)`
 // conversion is a semantic IDENTITY — its source, after peeling an optional escape-analysis
-// identity wrapper, is `unsafe.Pointer(p)` where p ALREADY has the same pointer type `*T`.
+// identity wrapper, is a pointer that ALREADY has the same pointer type `*T`, reached either
+// DIRECTLY (`(*T)(p)`) or through an `unsafe.Pointer(p)` round trip.
+//
 // Go's strings.Builder/bytes.Buffer copyCheck writes `b.addr = (*Builder)(abi.NoEscape(unsafe.
 // Pointer(b)))`, which the language spec makes exactly `b.addr = b` (see the type's own TODO to
 // revert it once escape analysis improves). Emitting the uintptr round-trip instead
 // DEREFERENCES-and-COPIES through golib's `(ж<T>)(uintptr) => new ж<T>(*(T*)value)`, producing a
 // box that is NOT reference-equal to the source — so the type's copy-by-value self-check
 // (`b.addr != b`) false-fires at runtime. Returning p lets the caller emit the box directly and
-// preserve managed-pointer identity. Returns nil when the pattern does not apply (a DIFFERENT
-// element type is a genuine reinterpret and keeps the round-trip).
+// preserve managed-pointer identity.
+//
+// The DIRECT form — `*(*T)(p)` with p already `*T`, the shape reflect/runtime use to re-read a
+// pointer at a fixed type — is the same no-op, but its source is a MANAGED BOX (`ж<T>`), never an
+// address. Routing it through the raw-address uintptr bridge emitted `(ж<T>)(uintptr)(p)`, and a
+// deref-aliased pointer parameter renders as its VALUE alias, so the leg had no conversion at all
+// (CS0030 — `Cannot convert type 'Pt' to 'uintptr'`). Returning p emits the box, which the caller's
+// deref then reads in place: correct for a value read, an lvalue write, and pointer identity alike.
+// Returns nil when the pattern does not apply (a DIFFERENT element type is a genuine reinterpret and
+// keeps the round-trip).
 func (v *Visitor) pointerReinterpretIdentitySource(callExpr *ast.CallExpr, arg ast.Expr) ast.Expr {
 	targetPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer)
 	if !ok {
+		return nil
+	}
+
+	// callExpr must be the CONVERSION `(*T)(…)` — its Fun DENOTES the pointer type. Without this the
+	// direct-source form below matches any one-argument CALL that happens to take and return the same
+	// pointer type, and elides it: `advance(a)` → `a`, `Ꮡp.Swap(Ꮡa)` → `Ꮡa`. (The unsafe.Pointer form
+	// was implicitly guarded by requiring its ARGUMENT to be a type conversion; the direct form has no
+	// such wrapper and must check the call itself.)
+	if tv, isType := v.info.Types[callExpr.Fun]; !isType || !tv.IsType() {
 		return nil
 	}
 
@@ -2361,26 +2389,23 @@ func (v *Visitor) pointerReinterpretIdentitySource(callExpr *ast.CallExpr, arg a
 		inner = call.Args[0]
 	}
 
-	// The (possibly unwrapped) source must be an `unsafe.Pointer(p)` CONVERSION — a call whose Fun
-	// DENOTES the unsafe.Pointer type, not merely a function that happens to return unsafe.Pointer
-	// (e.g. runtime `mallocgc(…)`), which is a genuine raw-address reinterpret and keeps its path.
-	call, ok := inner.(*ast.CallExpr)
-	if !ok || len(call.Args) != 1 {
-		return nil
-	}
+	// The source pointer, either reached directly or unwrapped from an `unsafe.Pointer(p)`
+	// CONVERSION — a call whose Fun DENOTES the unsafe.Pointer type, not merely a function that
+	// happens to return unsafe.Pointer (e.g. runtime `mallocgc(…)`), which is a genuine raw-address
+	// reinterpret and keeps its path.
+	p := inner
 
-	if tv, ok := v.info.Types[call.Fun]; !ok || !tv.IsType() {
-		return nil
-	}
-
-	if basic, ok := v.info.TypeOf(call).Underlying().(*types.Basic); !ok || basic.Kind() != types.UnsafePointer {
-		return nil
+	if call, ok := inner.(*ast.CallExpr); ok && len(call.Args) == 1 {
+		if tv, isType := v.info.Types[call.Fun]; isType && tv.IsType() {
+			if basic, ok := v.info.TypeOf(call).Underlying().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
+				p = call.Args[0]
+			}
+		}
 	}
 
 	// p must already be `*T` with the SAME element type as the target — only then is the whole
 	// conversion a no-op identity.
-	p := call.Args[0]
-	srcPtr, ok := v.info.TypeOf(p).(*types.Pointer)
+	srcPtr, ok := types.Unalias(v.info.TypeOf(p)).(*types.Pointer)
 	if !ok {
 		return nil
 	}

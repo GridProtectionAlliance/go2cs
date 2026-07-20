@@ -1227,6 +1227,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTypeConversionReturnType() => CheckTarget("TypeConversionReturnType");
 
     [TestMethod]
+    public void CheckTypedPointerCastDeref() => CheckTarget("TypedPointerCastDeref");
+
+    [TestMethod]
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
