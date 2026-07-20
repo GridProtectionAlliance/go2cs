@@ -217,6 +217,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
 
     [TestMethod]
+    public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
+
+    [TestMethod]
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]

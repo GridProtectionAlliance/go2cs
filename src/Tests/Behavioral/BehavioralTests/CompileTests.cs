@@ -228,6 +228,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
 
     [TestMethod]
+    public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
+
+    [TestMethod]
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]
