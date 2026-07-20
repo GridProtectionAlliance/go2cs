@@ -69,6 +69,11 @@ namespace BehavioralRunner
         // it must still surface and fail the run, since it blocks output comparison).
         private static readonly List<string> s_goBuildFailures = new();
 
+        // Newest shared-dependency output (golib, the analyzer, core/* and any redirected package) as of
+        // the pre-build. A target assembly older than this predates its own dependencies, so it cannot be
+        // treated as evidence that the target still compiles -- see SuspectProjects.
+        private static DateTime s_sharedDepStamp = DateTime.MinValue;
+
         public static int Main(string[] args)
         {
             // ----- argument parsing -----
@@ -313,16 +318,39 @@ namespace BehavioralRunner
             // means they are up to date during the fan-out, so no node writes to them and the race is gone.
             PreBuildSharedDeps(projects, go2csPathArg);
 
-            Console.Write($"[Compile]  C# (one-shot parallel build of {projects.Count})... ");
-
             // Generate a traversal project that builds every target csproj in a single parallel MSBuild
             // invocation -- replacing 180 sequential "dotnet build" calls (Tier 2a). go2csPath is pinned
             // to the src root so each target's golib/analyzer refs resolve to live source (matching the
             // MSTest harness, which sets the go2csPath env var); Configuration=Release matches TargetConfig.
             string traversal = WriteTraversalProject(projects);
 
+            string commonArgs = $"-nologo -clp:ErrorsOnly -p:Configuration={Config} -p:go2csPath={go2csPathArg}";
+
+            // RESTORE FIRST -- and in its own process. The traversal drives each target through the
+            // MSBuild *task* (Targets="Build"), which -- unlike the "dotnet build <csproj>" the
+            // per-project path uses -- does NOT imply a restore. Any project in the graph that has no
+            // obj\project.assets.json therefore fails instantly with NETSDK1004 ("Assets file not
+            // found"), which fails the whole batch and drops the ENTIRE suite onto the per-project
+            // attribution path below -- a ~20 minute tax to discover that nothing was actually broken
+            // (the fallback restores as it goes, so it reports 0 failures). That is not a cold-clone
+            // curiosity: it fires on any fresh worktree, after clean-bin, and for any dependency
+            // subtree the pre-build does not cover. Restore runs as a SEPARATE invocation because
+            // restore rewrites a project's imports, so it must not share an evaluation with Build.
+            Console.Write($"[Compile]  C# (restoring {projects.Count})... ");
+
+            ProcResult restore = Exec("dotnet",
+                $"build \"{traversal}\" -t:RestoreAll {commonArgs}",
+                s_behavioralDir, BuildAllTimeoutMs);
+
+            Console.WriteLine(restore.ExitCode == 0 ? "ok" : $"restore reported errors (exit {restore.ExitCode})");
+
+            if (restore.ExitCode != 0)
+                Console.Error.WriteLine($"  restore output: {Truncate(restore.StdOut + restore.StdErr, 1000)}");
+
+            Console.Write($"[Compile]  C# (one-shot parallel build of {projects.Count})... ");
+
             ProcResult all = Exec("dotnet",
-                $"build \"{traversal}\" -nologo -clp:ErrorsOnly -p:Configuration={Config} -p:go2csPath={go2csPathArg}",
+                $"build \"{traversal}\" -t:BuildAll {commonArgs}",
                 s_behavioralDir, BuildAllTimeoutMs);
 
             if (all.ExitCode == 0)
@@ -334,13 +362,38 @@ namespace BehavioralRunner
                 return;
             }
 
-            // Build-all failed: fall back to per-project builds to attribute the failure(s). Slow path,
-            // only on failure.
-            Console.WriteLine("build-all reported errors; attributing per project...");
+            // Build-all failed. Narrow the per-project attribution to the projects that could actually
+            // be responsible, so one broken project costs one rebuild instead of 438. A project is a
+            // suspect when MSBuild named it in an error line, OR when it has no up-to-date output
+            // assembly (which also covers targets the failed batch never got around to scheduling).
+            // Anything with a fresh assembly demonstrably compiled in THIS batch and is passed without
+            // a rebuild. When the suspect set cannot be determined -- an empty set, or a timeout, where
+            // the batch was killed mid-flight and the assembly evidence is meaningless -- every project
+            // is attributed, preserving the original conservative behavior.
+            bool timedOut = all.ExitCode == -1 && all.StdErr.StartsWith("TIMEOUT", StringComparison.Ordinal);
+            string buildOutput = all.StdOut + all.StdErr;
+
+            List<string> suspects = timedOut
+                ? projects.ToList()
+                : SuspectProjects(projects, buildOutput);
+
+            if (suspects.Count == 0)
+                suspects = projects.ToList();
+
+            Console.WriteLine(timedOut
+                ? $"build-all TIMED OUT after {BuildAllTimeoutMs} ms; attributing all {suspects.Count} per project..."
+                : $"build-all reported errors; attributing {suspects.Count} suspect project(s) per project...");
+
+            // Always surface why the batch failed -- silently discarding it (as this path used to) makes
+            // an infrastructure failure indistinguishable from a real compile break.
+            Console.Error.WriteLine($"  build-all output: {Truncate(buildOutput, 1000)}");
+
+            foreach (string p in projects.Except(suspects, StringComparer.OrdinalIgnoreCase))
+                results[p].Phases[Phase.Compile] = Status.Pass;
 
             int failed = 0;
 
-            foreach (string p in projects)
+            foreach (string p in suspects)
             {
                 string csproj = Path.Combine(s_behavioralDir, p, $"{p}.csproj");
 
@@ -361,6 +414,64 @@ namespace BehavioralRunner
             }
 
             Console.WriteLine($"[Compile]  C# per-project: {failed} failed");
+        }
+
+        // Projects that could be responsible for a failed batch build: those MSBuild named in an error
+        // line, plus those with no up-to-date output assembly. The assembly check is what makes it safe
+        // to pass the remainder without rebuilding -- an assembly newer than every .cs in the project AND
+        // newer than every shared dependency was necessarily produced from exactly the inputs in play now,
+        // so a stale artifact from an earlier converter (or an earlier golib) can never be mistaken for a
+        // fresh success. Note this degrades to attributing everything in the case that matters most: a
+        // converter change rewrites every .cs, which makes every assembly stale and every project a
+        // suspect. The narrowing only ever pays off when the inputs really did not move.
+        private static List<string> SuspectProjects(IReadOnlyList<string> projects, string buildOutput)
+        {
+            HashSet<string> suspects = new(StringComparer.OrdinalIgnoreCase);
+
+            // MSBuild appends the owning project to each diagnostic: "... error CS1002: ; expected
+            // [C:\path\Foo.csproj]". Errors from a referenced package (e.g. a go-src-converted
+            // dependency) name that project instead, which matches nothing here -- leaving the suspect
+            // set empty and falling back to attributing everything.
+            foreach (string line in buildOutput.Split('\n'))
+            {
+                int open = line.LastIndexOf('[');
+                int close = line.LastIndexOf(".csproj]", StringComparison.OrdinalIgnoreCase);
+
+                if (open < 0 || close < open)
+                    continue;
+
+                string name = Path.GetFileNameWithoutExtension(line[(open + 1)..(close + ".csproj".Length)]);
+
+                foreach (string p in projects)
+                {
+                    if (string.Equals(p, name, StringComparison.OrdinalIgnoreCase))
+                        suspects.Add(p);
+                }
+            }
+
+            foreach (string p in projects)
+            {
+                if (suspects.Contains(p))
+                    continue;
+
+                string projPath = Path.Combine(s_behavioralDir, p);
+                string assembly = Path.Combine(projPath, "bin", Config, NetVersion, $"{p}.dll");
+
+                if (!File.Exists(assembly))
+                {
+                    suspects.Add(p);
+                    continue;
+                }
+
+                DateTime built = File.GetLastWriteTimeUtc(assembly);
+
+                // Stale against its own sources, or against the shared dependencies it links -- either
+                // way the assembly proves nothing about whether this project still compiles today.
+                if (built < s_sharedDepStamp || Directory.GetFiles(projPath, "*.cs").Any(cs => File.GetLastWriteTimeUtc(cs) > built))
+                    suspects.Add(p);
+            }
+
+            return projects.Where(suspects.Contains).ToList();
         }
 
         private static void RunCompileGo(IReadOnlyList<string> projects, Dictionary<string, ProjectResult> results)
@@ -489,25 +600,49 @@ namespace BehavioralRunner
 
             foreach (string p in projects)
             {
-                string csproj = Path.Combine(s_behavioralDir, p, $"{p}.csproj");
-                string csprojDir = Path.GetDirectoryName(csproj)!;
+                string csprojDir = Path.Combine(s_behavioralDir, p);
 
-                foreach (string line in File.ReadLines(csproj))
+                // Read the csproj AND the project-local Directory.Build.props/.targets, honouring both
+                // Include and Remove. A test whose converter-generated csproj names a reference that does
+                // not exist in the stub baseline redirects it from a Directory.Build.targets -- the csproj
+                // itself is template output the converter rewrites on every re-transpile, so the redirect
+                // cannot live there. DeepEqual does exactly this: it declares core\reflect (baseline has
+                // no reflect) and swaps in go-src-converted\reflect. Reading the csproj alone therefore
+                // both chased a phantom path (MSB1009 "Project file does not exist") and stayed blind to
+                // the 34-project closure the test really pulls in -- leaving that closure unbuilt during
+                // the parallel fan-out, which is precisely the race this pre-build exists to prevent.
+                // Same order MSBuild imports them: props, then the project body, then targets -- so a
+                // Remove in targets cancels an Include from the csproj, exactly as it does in a real build.
+                foreach (string file in new[] { "Directory.Build.props", $"{p}.csproj", "Directory.Build.targets" })
                 {
-                    int idx = line.IndexOf("ProjectReference Include=\"", StringComparison.OrdinalIgnoreCase);
-                    if (idx < 0) continue;
+                    string path = Path.Combine(csprojDir, file);
 
-                    int start = idx + "ProjectReference Include=\"".Length;
-                    int end = line.IndexOf('"', start);
-                    if (end < 0) continue;
+                    if (!File.Exists(path))
+                        continue;
 
-                    string raw = line[start..end].Replace("$(go2csPath)", s_srcRoot + Path.DirectorySeparatorChar);
+                    foreach (string line in File.ReadLines(path))
+                    {
+                        string? include = AttributeValue(line, "ProjectReference Include=\"");
+                        string? remove = AttributeValue(line, "ProjectReference Remove=\"");
 
-                    // Resolve relative to the csproj's OWN directory (not the runner CWD) so a relative
-                    // cross-project ProjectReference (e.g. a cross-package test's `..\lib\lib.csproj`)
-                    // resolves correctly instead of producing a phantom path + MSB1009 warning.
-                    deps.Add(Path.GetFullPath(raw, csprojDir));
+                        // Resolve relative to the csproj's OWN directory (not the runner CWD) so a relative
+                        // cross-project ProjectReference (e.g. a cross-package test's `..\lib\lib.csproj`)
+                        // resolves correctly instead of producing a phantom path + MSB1009 warning.
+                        if (include is not null)
+                            deps.Add(Path.GetFullPath(Expand(include), csprojDir));
+
+                        if (remove is not null)
+                            deps.Remove(Path.GetFullPath(Expand(remove), csprojDir));
+                    }
                 }
+            }
+
+            // A reference that still does not exist is a genuine wiring defect, not something to spend a
+            // build call discovering -- report it plainly instead of via an opaque MSB1009.
+            foreach (string missing in deps.Where(d => !File.Exists(d)).ToList())
+            {
+                Console.Error.WriteLine($"\n  WARNING: unresolved ProjectReference (skipped): {missing}");
+                deps.Remove(missing);
             }
 
             Console.Write($"[Compile]  pre-building {deps.Count} shared dependencies... ");
@@ -520,10 +655,42 @@ namespace BehavioralRunner
 
                 if (r.ExitCode != 0)
                     Console.Error.WriteLine($"\n  WARNING: shared dep build failed ({Path.GetFileName(dep)}): {Truncate(r.StdOut + r.StdErr)}");
+
+                // Record how fresh the dependency outputs are, for the staleness test in SuspectProjects.
+                string depBin = Path.Combine(Path.GetDirectoryName(dep)!, "bin");
+
+                if (!Directory.Exists(depBin))
+                    continue;
+
+                foreach (string dll in Directory.EnumerateFiles(depBin, "*.dll", SearchOption.AllDirectories))
+                {
+                    DateTime stamp = File.GetLastWriteTimeUtc(dll);
+
+                    if (stamp > s_sharedDepStamp)
+                        s_sharedDepStamp = stamp;
+                }
             }
 
             Console.WriteLine("ok");
         }
+
+        // Value of a double-quoted XML attribute on a line, or null when the attribute is absent.
+        private static string? AttributeValue(string line, string attribute)
+        {
+            int idx = line.IndexOf(attribute, StringComparison.OrdinalIgnoreCase);
+
+            if (idx < 0)
+                return null;
+
+            int start = idx + attribute.Length;
+            int end = line.IndexOf('"', start);
+
+            return end < 0 ? null : line[start..end];
+        }
+
+        // Expands the one MSBuild property the behavioral csprojs use in a ProjectReference path.
+        private static string Expand(string path) =>
+            path.Replace("$(go2csPath)", s_srcRoot + Path.DirectorySeparatorChar);
 
         // Writes a traversal MSBuild project that builds all target csprojs in parallel in one call.
         private static string WriteTraversalProject(IReadOnlyList<string> projects)
@@ -543,9 +710,13 @@ namespace BehavioralRunner
             }
 
             sb.AppendLine("  </ItemGroup>");
-            sb.AppendLine("  <Target Name=\"BuildAll\">");
             // Global props (Configuration, go2csPath) passed on the command line propagate to each project.
-            // ("Target" is a reserved MSBuild item name, hence ProjectToBuild.)
+            // ("Target" is a reserved MSBuild item name, hence ProjectToBuild.) RestoreAll and BuildAll are
+            // separate targets because the runner drives them in separate processes -- see RunCompileCSharp.
+            sb.AppendLine("  <Target Name=\"RestoreAll\">");
+            sb.AppendLine("    <MSBuild Projects=\"@(ProjectToBuild)\" Targets=\"Restore\" BuildInParallel=\"true\" />");
+            sb.AppendLine("  </Target>");
+            sb.AppendLine("  <Target Name=\"BuildAll\">");
             sb.AppendLine("    <MSBuild Projects=\"@(ProjectToBuild)\" Targets=\"Build\" BuildInParallel=\"true\" />");
             sb.AppendLine("  </Target>");
             sb.AppendLine("</Project>");
