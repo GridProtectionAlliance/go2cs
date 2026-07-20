@@ -660,6 +660,23 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 					return false
 				}
 			}
+		case *ast.SendStmt:
+			// The receiver SENT on a channel whose element is a pointer — `call.Done <- call`
+			// inside net/rpc's `func (call *Call) done()`. The channel's element renders as
+			// `ж<T>`, so the send value must be the receiver's BOX; a value-ref receiver
+			// (`this ref T call`) has only the deref'd value, which cannot bind the `in ж<T>`
+			// send parameter (CS1503). Both send forms are SendStmt nodes and route through
+			// convSendValueExpr, so this covers the statement (`ch <- recv`) and the `select`
+			// send case alike. Gated on the ident's type being a pointer, so a SHADOWED local
+			// of another type cannot promote (mirrors bodyPassesReceiverAsPointerArg).
+			if ident, ok := n.Value.(*ast.Ident); ok && ident.Name == recvName {
+				if valueType := info.TypeOf(n.Value); valueType != nil {
+					if _, isPtr := valueType.(*types.Pointer); isPtr {
+						found = true
+						return false
+					}
+				}
+			}
 		case *ast.CompositeLit:
 			// The receiver placed whole into a COMPOSITE-LITERAL element whose slot is a Go
 			// pointer. Its pointer identity is copied/stored, which needs the receiver's box —

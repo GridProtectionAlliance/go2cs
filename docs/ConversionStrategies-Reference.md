@@ -2336,11 +2336,88 @@ nil receive and comma-ok receive taking the default, `len`/`cap` of a nil channe
 behaving normally alongside, and a mixed select where the nil case must never win over a ready real
 case.)
 
-**Known gap (separate from the above).** A `select` **send** case with a `default` is emitted as an
-unguarded `case ᐧ:` — no send-readiness probe at all — so it always takes the case. This is wrong
-for a *full real* buffered channel too, where Go takes the `default`; it is not specific to nil
-channels. The `NilChannelSelectDefault` guard deliberately omits send coverage until the lowering
-grows a non-blocking send probe, so no golden bakes in the wrong output.
+### A select SEND case with a default is guarded by the non-blocking send
+
+The receive side's rule has a send-side twin, and until it was implemented the send case was emitted
+as a bare, unguarded `case ᐧ:`. In the default form the switch expression is the constant `ᐧ` and no
+`select(…)` call is emitted, so nothing probed the channel *and nothing performed the send*: the
+clause ran unconditionally and the value was silently dropped. os/signal's `process` shows the shape
+at its starkest — the whole point of the function vanished:
+
+```go
+select {
+case c <- sig:
+default:   // send but do not block for it
+}
+```
+
+```csharp
+switch (ᐧ) {                        // BEFORE — the send is simply gone
+case ᐧ: {
+    break;
+}
+default: {
+    break;
+}}
+```
+
+The send case now carries the same kind of guard the receive case does — a non-blocking operation
+that both *probes* and, when ready, *performs* the communication:
+
+```csharp
+switch (ᐧ) {
+case ᐧ when c.ᐸꟷ(sig, ꟷ): {       // AFTER — golib Sent: probe + deliver
+    break;
+}
+default: {
+    break;
+}}
+```
+
+`ᐸꟷ(value, ꟷ)` is golib's `Sent` under the established overload-discriminator idiom (`ꟷ` is the
+`false` const, as in the comma-ok receive `ᐸꟷ(ch, ꟷ)`); `-uco=false` emits `ch.Sent(value)`. `Sent`
+delegates to `TrySend`, so there is exactly ONE non-blocking send implementation and Go's rules fall
+out of it: a **closed** channel panics (the open-assert runs *before* the readiness test — a closed
+FULL channel is not send-ready, yet Go panics rather than taking the `default:`), and a **nil**
+channel is never ready (`SendIsReady` null-checks the absent queue), so its case is never chosen.
+
+The guard is emitted **only** in the default form. The blocking form's `select(…)` call already
+performed the send through `Sending`, so a guard there would either send the value twice or fail and
+silently skip the chosen clause body.
+
+A pointer-element channel forced two further root fixes, both pre-existing and both previously
+unreachable because the dropped send never compiled the value expression. net/rpc's
+`func (call *Call) done()` sends `call.Done <- call`: (1) the capture-mode pre-pass had no
+send-value position, so the method was never promoted to direct-ж and had no receiver box to hand
+out — `bodyUsesReceiverAsPointerValue` now recognizes a `SendStmt` whose value is the pointer
+receiver; and (2) `convSendValueExpr` applied the pointer ident context only for *interface*
+elements, so a deref-aliased pointer (a pointer parameter, or the receiver) rendered as its value
+and could not bind the `in ж<T>` send parameter (CS1503). Both forms of send route through
+`convSendValueExpr`, so the statement form `ch <- recv` — broken in exactly the same way — is fixed
+by the same change.
+
+(Guarded by `SelectSendDefault`: full buffered taking the default then the same select succeeding
+once drained, free-capacity buffered delivering the value, unbuffered with a waiting receiver, nil,
+closed-panics-through-the-default, one-ready-among-several, a send and a receive case with neither
+ready, exactly-one-send when several are ready, and a no-default select still blocking.)
+
+**Remaining channel-semantics gaps** (deliberately uncovered, so no golden bakes in output golib
+does not yet produce):
+
+* **Unbuffered send readiness has no rendezvous.** golib models an unbuffered channel as a one-slot
+  buffer, so a send into one reports ready even with no waiting receiver; Go takes the `default:`.
+  Fixing this needs waiting-receiver tracking, and it interacts with the item below.
+* **`make(chan T)` and `make(chan T, 1)` are indistinguishable.** Both emit `new channel<T>(1)`, and
+  `IsUnbuffered` is `Capacity == 1`. So `cap` of an unbuffered channel reports 1 (Go: 0) and `len` of
+  a capacity-1 buffered channel reports 0 (Go: its count). The fix is to carry Go's declared capacity
+  (0 for unbuffered) separately from the internal slot budget, which changes emission for every
+  unbuffered `make` — its own campaign.
+* **A blocking select performs EVERY send case.** `select(a.ᐸꟷ(1, ꓸꓸꓸ), b.ᐸꟷ(2, ꓸꓸꓸ))` evaluates
+  `Sending` for each case as an argument, so every send is performed and only the winner's body runs;
+  Go performs exactly one. A correct fix needs a real two-phase select (offer, then commit).
+* **Choice among several ready cases is first-match, not uniform-random.** Go randomizes; the lowered
+  `switch` takes the first matching guard. Deterministic rather than fair — observable only by a
+  program that depends on the distribution.
 
 ### An escaping comm-clause binding receives into a temp and heap-boxes at clause entry
 

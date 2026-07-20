@@ -404,6 +404,7 @@
     <Project Path="Tests/Behavioral/SStringElision/SStringElision.csproj" />
     <Project Path="Tests/Behavioral/SameUnderlyingNamedConv/SameUnderlyingNamedConv.csproj" />
     <Project Path="Tests/Behavioral/SelectEscapeBinding/SelectEscapeBinding.csproj" />
+    <Project Path="Tests/Behavioral/SelectSendDefault/SelectSendDefault.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayIfaceElem/SparseArrayIfaceElem.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />

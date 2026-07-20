@@ -37,6 +37,8 @@ internal static class IChannelTypeTemplate
 
                 public bool Sent(in {{targetTypeName}} value) => m_value.Sent(value);
 
+                public bool {{ChannelLeftOp}}(in {{targetTypeName}} value, bool _) => m_value.Sent(value);
+
                 public {{targetTypeName}} Receive() => m_value.Receive();
 
                 public ({{targetTypeName}} val, bool ok) Receive(bool _) => m_value.Receive(_);

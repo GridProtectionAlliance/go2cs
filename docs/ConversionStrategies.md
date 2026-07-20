@@ -628,9 +628,31 @@ goǃ(() => {                     // context/context.cs
 });
 ```
 
+With a `default:` clause the select becomes non-blocking: the switch is over the constant `ᐧ` and each
+case is guarded by a try-operation that both probes readiness and performs the communication — `ꟷᐳ`
+for a receive, `ᐸꟷ(value, ꟷ)` for a send. A send is chosen only if the channel can accept the value
+right now, so a full channel falls to the `default:` exactly as in Go:
+
+```go
+select {                        // os/signal/signal.go
+case c <- sig:
+default:                        // send but do not block for it
+}
+```
+```csharp
+switch (ᐧ) {                    // os/signal/signal.cs
+case ᐧ when c.ᐸꟷ(sig, ꟷ): {
+    break;
+}
+default: {
+    break;
+}}
+```
+
 **Full detail:** [Reference → Maps and Channels](ConversionStrategies-Reference.md#maps-and-channels) —
 named map/channel types, constrained map access through type parameters, and full `select` lowering
-(terminating/empty clauses, escaping comm-clause bindings).
+(terminating/empty clauses, escaping comm-clause bindings, the send-case readiness guard and the
+remaining channel-semantics gaps).
 
 ---
 
