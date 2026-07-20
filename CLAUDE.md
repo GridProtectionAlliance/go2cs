@@ -304,7 +304,11 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
 - **csproj layout/relocation:** the converter emits inter-package refs as `$(go2csPath)core\<pkg>\…` and
   the golib ref as `$(go2csPath)core\golib\…`. The 2026-06-25 relocation rewrote **`core\` → `go-src-converted\`
   for all stdlib refs *except* `core\golib`** (golib stays shared in `src/core/golib`). A fresh wholesale
-  reconvert must re-apply that rewrite to the generated csprojs.
+  reconvert must re-apply that rewrite to the generated csprojs. **⚠ There is a SECOND exception (2026-07-20):
+  `core\testing`.** `internal/testenv` deliberately references `$(go2csPath)core\testing\testing.csproj` per the
+  F15b one-testing-package ruling (`98642bca1`) — the Phase-4 test host must bind ONE testing package, not a
+  per-tree copy. A blanket `core\` rewrite clobbers that reference and silently breaks `internal/testenv` and
+  everything downstream of it, so an overlay must except **both** `core\golib` and `core\testing`.
 - **Metric:** measure **packages-compiling**, not raw error count. Fixing file-inclusion bugs (e.g. the
   filename build-constraint fix) *raises* the error count because newly-included files surface their own
   latent defects — that's progress, not regression.
