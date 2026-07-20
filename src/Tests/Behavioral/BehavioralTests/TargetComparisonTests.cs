@@ -1218,6 +1218,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeConversionReturnType() => CheckTarget("TypeConversionReturnType");
 
     [TestMethod]
+    public void CheckTypedPointerCastDeref() => CheckTarget("TypedPointerCastDeref");
+
+    [TestMethod]
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]

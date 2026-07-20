@@ -79,6 +79,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
+    public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
+
+    [TestMethod]
     public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
 
     [TestMethod]
@@ -1127,6 +1130,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeConversionInterfaceParam() => CheckTarget("TypeConversionInterfaceParam");
+
+    [TestMethod]
+    public void CheckTypedPointerCastDeref() => CheckTarget("TypedPointerCastDeref");
 
     [TestMethod]
     public void CheckTypeInference() => CheckTarget("TypeInference");

@@ -1562,10 +1562,14 @@ reflect line, whose CS1061 had blocked the whole converted stdlib through `fmt`�
 
 (All guarded by the `ArrayValueCopySites` behavioral test — one output-compared section per site
 class, including multidimensional deep-copy through range and parameter passing — plus
-`ArrayCastDerefClone`, a compile-shape guard for the wrapped cast-deref form above. That one is
-deliberately NOT output-compared: reconstructing an array through an `unsafe.Pointer` round trip
-cannot RUN under the managed model, so the guard asserts the emitted C# compiles and matches its
-golden, and the copy SEMANTICS stay covered by `ArrayValueCopySites`.)
+`ArrayCastDerefClone`, which guards the wrapped cast-deref form above. That guard is now
+**output-compared**: its TYPED-pointer half (`*(*T)(p)` where `p` is already `*T`) RUNS once the
+identity reinterpret stops routing through the raw-address `uintptr` bridge (see *A SAME-TYPE
+reinterpret … collapses to the pointer itself*), so the clone's copy semantics are proven by VALUE
+— mutating the returned array must leave the pointed-to original untouched, and the lvalue form
+must write through. Its `unsafe.Pointer` half stays compile-shape only, with the results
+deliberately discarded: reconstructing an array through an `unsafe.Pointer` round trip reads raw
+memory and cannot reproduce Go's values under the managed model.)
 
 **Known remaining gaps (documented, not yet emitted):** (1) STRUCT-typed copies whose fields embed
 arrays (`s2 := s1` memberwise-copies the `array<T>` field reference — needs a deep-copy strategy
@@ -5118,6 +5122,25 @@ internal static void copyCheck(this ж<Builder> Ꮡb) {
 }
 ```
 This preserves pointer identity AND shared storage (a write through the reinterpreted pointer now flows back, unlike the copy). A **different** element type is a genuine reinterpret and keeps the `uintptr` round-trip; the interception is `(*T)`-target- and same-element-type-gated (`types.Identical(srcElem, targetElem)`), so it fires ONLY for the identity. Across the 302-package stdlib it rewrites exactly **8** latently-miscompiled sites (`strings.Builder.copyCheck`, `internal/reflectlite`, `internal/syscall/windows/registry`, `os`, `syscall`, and three `runtime` sites) to the cleaner, correct box form — CNR byte-identical everywhere else; the bare `unsafe.Pointer(p)` pin (61 files) and the genuine-reinterpret round-trip (130 files) both remain and stay compile-guarded by the full build. (Guarded by the `PointerReinterpretIdentity` behavioral **output** test — a Builder-style `copyCheck` self-reference called repeatedly must NOT panic, and a genuine copy-by-value MUST still be caught, vs Go; it panicked before the fix — plus the identity-collapse arms of `UnsafePointerParamPin` (param/receiver/field), `PointerSelectorDeref`, and `PointerCastSliceRange`.)
+
+**The identity also collapses when the source pointer is reached DIRECTLY — `*(*T)(p)` / `(*T)(p)` with `p` already `*T`.** This is the same no-op, minus the `unsafe.Pointer` hop: Go's way of re-reading a pointer at a fixed type. It was **not** recognised, and the deref path made it worse than the round-trip above. `convStarExpr`'s casted-pointer-deref branch sets `isPointerCast`, and the conversion renderer took that flag *alone* as licence to emit the raw-address bridge `(ж<T>)(uintptr)(p)`. But `isPointerCast` means only "this conversion is the operand of a deref" — it says nothing about the source being an **address**, and the bridge is only ever correct for one that is. A typed Go pointer is a managed **box**, and a deref-aliased pointer parameter renders as that box's *value alias*, so the `(uintptr)` leg had no conversion at all:
+
+```csharp
+// Go:  func derefStruct(p *Pt) Pt { return *(*Pt)(p) }
+internal static Pt derefStruct(ж<Pt> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+    return ~(ж<Pt>)(uintptr)(p);           // CS0030: cannot convert 'Pt' to 'uintptr'
+}
+```
+```csharp
+internal static Pt derefStruct(ж<Pt> Ꮡp) {
+    return ~Ꮡp;                            // the box, dereferenced in place
+}
+```
+
+`pointerReinterpretIdentitySource` now accepts either source form — the direct pointer, or one unwrapped from `unsafe.Pointer(p)` — so the identity is intercepted before the bridge is ever considered. Emitting the box is correct for all three uses at once: a **value read** copies (`~Ꮡp`, plus the array `.Clone()` where the element is an array), an **lvalue write** lands on the real storage (`(Ꮡp).Value = …`) rather than on the round-trip's copy, and **pointer identity** is preserved. Note the recognition must stay pinned to a genuine `(*T)(…)` **conversion** — its `Fun` must denote a type. Matching on argument type alone collapses any one-argument *call* that takes and returns the same pointer type, silently deleting it (`advance(a)` → `a`, `Ꮡp.Swap(Ꮡa)` → `Ꮡa`); CNR caught exactly that across 13 behavioral projects. The corpus-wide A/B footprint is **two lines in one file** — `time.NewTimer`/`AfterFunc`'s `(*Timer)(newTimer(…))`, where `newTimer` already returns `*Timer`, shed a redundant identity cast — because the CS0030 shape needs a pointer *parameter*, which the stdlib's own reinterprets never use; the defect bites converted end-user code and behavioral guards. (Guarded by the `TypedPointerCastDeref` behavioral **output** test — struct, named-numeric, via-`unsafe`, non-deref, lvalue, and local-pointer shapes, plus the one-argument-call over-match control — and by the strengthened `ArrayCastDerefClone`; both verified to FAIL with the fix neutered, with that exact CS0030.)
+
+**Still routed through the bridge (a known gap):** a typed-pointer source whose element type *differs* but shares an underlying — Go permits `(*T)(p)` there — is only partly covered by the named↔named / named↔basic / named↔array re-box routes below. A tag-differing struct pair (`types.Identical` counts tags, Go's conversion rule does not), an unnamed-array ↔ named-array pair, and a named ↔ unnamed struct pair all fall through to the raw-address bridge and mis-render. None occurs in the stdlib corpus, and narrowing the bridge gate without a correct box→box route for them merely trades one broken form (`(ж<Row>)(uintptr)(p)`) for another (`(ж<Row>)p`), so the gate is left as-is and the shapes are recorded here.
 
 A deref whose **starred inner is a func type** (or any non-identifier type) — `*(*func())(add(…))`, runtime `panic.go`'s deferred-slot read `return *(*func())(add(p.slotsPtr, i*…)), true` — misses the identifier-gated cast-deref branch and falls to the default deref path, which must **wrap the cast before `.Value`**: C# postfix binds tighter than a cast, so a naked `.Value` re-binds onto the cast's *inner* operand (`(ж<Action>)(uintptr)(add(…)).Value` reads the inner `@unsafe.Pointer`'s `uintptr` — CS0029 `ж<Action>`→`Action` in the tuple return). The default deref now wraps any type-conversion operand: `(((ж<Action>)(uintptr)(add(…))).Value, true)`. This is the fourth instance of the cast-precedence/extra-paren family, and **indexing** a reinterpret result directly is the fifth: `(*[2]uint64)(x)[0] = 0` (runtime `malloc.go`) appended the pointer-to-array auto-deref `.Value` and the index to the cast render — `(ж<array<uint64>>)(uintptr)(x).Value[0]` read the inner `@unsafe.Pointer`'s `uintptr` and indexed a `nuint` (CS0021); the index emission now wraps a type-conversion base the same way: `((ж<array<uint64>>)(uintptr)(x)).Value[0]`. (Guarded by the `UnsafePointerReinterpret` extensions — the func-type deref in a tuple return and the indexed reinterpret write/read.)
 

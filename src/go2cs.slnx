@@ -466,6 +466,7 @@
     <Project Path="Tests/Behavioral/TypeSwitchNamedInterfaceCase/TypeSwitchNamedInterfaceCase.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchTagShadowRename/TypeSwitchTagShadowRename.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchPointerAdapter/TypeSwitchPointerAdapter.csproj" />
+    <Project Path="Tests/Behavioral/TypedPointerCastDeref/TypedPointerCastDeref.csproj" />
     <Project Path="Tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />
     <Project Path="Tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="Tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
