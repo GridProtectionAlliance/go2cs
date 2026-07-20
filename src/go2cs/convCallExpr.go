@@ -1616,7 +1616,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if resultType.String() == "unsafe.Pointer" {
 			if len(constructType) == 0 {
 				constructType = "(uintptr)"
-			} else if len(callExpr.Args) == 1 {
+			} else if len(callExpr.Args) == 1 && v.currentFuncSignature != nil {
+				// The ref-based extension-function rewrite below only applies to a pointer-receiver
+				// METHOD whose argument aliases the receiver; a package-scope initializer (e.g.
+				// `var p uintptr = uintptr(unsafe.Pointer(&x))` in cmp_test.go) has no enclosing
+				// function, so currentFuncSignature is nil — skip the receiver handling and fall
+				// through to the normal `(uintptr)new @unsafe.Pointer(...)` emission.
 				// Check if current function is a receiver function
 				if v.currentFuncSignature.Recv() != nil {
 					// Get the receiver type
