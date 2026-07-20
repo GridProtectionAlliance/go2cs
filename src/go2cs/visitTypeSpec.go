@@ -194,7 +194,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ArrayType:
 		v.visitArrayType(typeSpecType, identType, name, typeSpec.Comment)
 	case *ast.ChanType:
-		v.visitChanType(typeSpecType, name)
+		v.visitChanType(typeSpecType, identType, name)
 	case *ast.FuncType:
 		v.visitFuncType(typeSpecType, identType, name)
 	case *ast.Ident:
@@ -202,7 +202,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.InterfaceType:
 		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	case *ast.MapType:
-		v.visitMapType(typeSpecType, name)
+		v.visitMapType(typeSpecType, identType, name)
 	case *ast.ParenExpr:
 		v.targetFile.WriteString(v.convParenExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.SelectorExpr:
@@ -252,6 +252,45 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	default:
 		panic(fmt.Sprintf("@visitTypeSpec - Unexpected TypeSpec type: %#v", v.getPrintedNode(typeSpecType)))
+	}
+}
+
+// liftLocalTypeDecl prepares a forward-declaration type-kind (array/slice, map, channel) for
+// emission when it is declared INSIDE a function body. C# forbids a type declaration in a method
+// body, so a `type X []T` / `type X map[K]V` / `type X chan T` written inside a function is renamed
+// with the enclosing-function prefix, registered in liftedTypeMap (so every later reference resolves
+// to the lifted name), redirected to a member-level builder, and emitted at indent 0. The returned
+// finish closure flushes that builder into currentFuncPrefix — which the function's prefix marker
+// emits ahead of the method — and restores the indent level. At package scope it is a no-op: the
+// returned target is v.targetFile and finish() does nothing, so the emitted bytes are unchanged.
+// Mirrors the identical in-function hoisting inlined by visitIdent/visitStructType/visitInterfaceType.
+func (v *Visitor) liftLocalTypeDecl(name string, identType types.Type) (liftedName string, target *strings.Builder, finish func()) {
+	if !v.inFunction {
+		return name, v.targetFile, func() {}
+	}
+
+	target = &strings.Builder{}
+
+	if !strings.HasPrefix(name, v.currentFuncName+"_") {
+		name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
+	}
+
+	preLiftIndentLevel := v.indentLevel
+	v.indentLevel = 0
+
+	name = v.getUniqueLiftedTypeName(name)
+
+	if identType != nil {
+		v.liftedTypeMap[identType] = name
+	}
+
+	return name, target, func() {
+		if v.currentFuncPrefix.Len() > 0 {
+			v.currentFuncPrefix.WriteString(v.newline)
+		}
+
+		v.currentFuncPrefix.WriteString(target.String())
+		v.indentLevel = preLiftIndentLevel
 	}
 }
 

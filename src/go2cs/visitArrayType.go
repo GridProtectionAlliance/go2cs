@@ -49,7 +49,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 
 	if csTypeName != "" {
 		// element already resolved to a lifted name above
-	} else if ident := getIdentifier(arrayType.Elt); ident != nil && isSimpleIdentExpr(arrayType.Elt) {
+	} else if ident := getIdentifier(arrayType.Elt); ident != nil && isSimpleIdentExpr(arrayType.Elt) && !v.liftedTypeExists(arrayType.Elt) {
 		goTypeName = ident.Name
 		csTypeName = convertToCSTypeName(goTypeName)
 	} else if eltType := v.info.TypeOf(arrayType.Elt); eltType != nil {
@@ -70,11 +70,21 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 
 	typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
 
-	v.targetFile.WriteString(v.newline)
+	access := v.pendingTypeAccess
+	v.pendingTypeAccess = ""
+
+	// A slice/array type declared inside a function body (`type People []Person`, example_test.go)
+	// cannot be a method-body statement in C#; hoist it to member level (see liftLocalTypeDecl). A
+	// package-level declaration is unaffected — target is v.targetFile and finish() is a no-op.
+	name, target, finish := v.liftLocalTypeDecl(name, identType)
+
+	if !v.inFunction {
+		target.WriteString(v.newline)
+	}
 
 	if arrayType.Len == nil {
 		// Handle slice type
-		v.writeOutput("[GoType(\"[]%s\")] ", csTypeName)
+		v.writeString(target, "[GoType(\"[]%s\")] ", csTypeName)
 	} else {
 		// Handle array type
 		var arrayLenValue string
@@ -91,23 +101,21 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 		}
 
 		if len(arrayLenValue) > 0 && arrayLenValue != arrayLenExpr {
-			v.writeOutput("[GoType(\"[%s]%s\")] /* [%s]%s */%s", arrayLenValue, csTypeName, arrayLenExpr, csTypeName, v.newline)
+			v.writeString(target, "[GoType(\"[%s]%s\")] /* [%s]%s */%s", arrayLenValue, csTypeName, arrayLenExpr, csTypeName, v.newline)
 		} else {
-			v.writeOutput("[GoType(\"[%s]%s\")] ", arrayLenExpr, csTypeName)
+			v.writeString(target, "[GoType(\"[%s]%s\")] ", arrayLenExpr, csTypeName)
 		}
 	}
-
-	access := v.pendingTypeAccess
-	v.pendingTypeAccess = ""
 
 	// Append generic type parameters and constraints (e.g. `<K, V> where K : new()`) for a generic
 	// named array type so the forward declaration matches its uses, and the constraints propagate
 	// type-wide to the generated array-backed partial (whose element type may require them).
 	typeParams, constraints := v.getGenericDefinition(identType)
 
-	v.writeOutput("%spartial struct %s%s%s;", access, getSanitizedIdentifier(name), typeParams, constraints)
-	v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
-	v.targetFile.WriteString(v.newline)
+	v.writeString(target, "%spartial struct %s%s%s;", access, getSanitizedIdentifier(name), typeParams, constraints)
+	v.writeCommentString(target, comment, arrayType.Elt.End()+typeLenDeviation)
+	target.WriteString(v.newline)
+	finish()
 }
 
 // arrayZeroValueArgs renders the constructor arguments for a fixed-size array's zero value: the

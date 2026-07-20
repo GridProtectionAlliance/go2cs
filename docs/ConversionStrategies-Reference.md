@@ -2434,6 +2434,46 @@ no public surface is lost. (Guarded by `NamedChannelType` — the closeWaiter tr
 `type intQueue chan int` exercising make/send/len/cap/receive/comma-ok/close/range/select, output
 vs Go.)
 
+### A function-LOCAL named type declaration hoists to member level (slice/map/channel/array)
+
+C# forbids a type declaration inside a method body, so a `type X []T` / `type X map[K]V` /
+`type X chan T` / `type X [N]T` declared **inside a function** cannot emit its `[GoType(…)] partial
+struct X;` forward declaration in place — the following statements would then parse as MEMBER
+declarations (`CS1519 Invalid token 'foreach' in a member declaration`, `CS1513 } expected`, the
+map form's `CS8124`). A local `type X struct{…}` already hoists: `visitStructType`/`visitIdent`/
+`visitInterfaceType` each redirect the declaration into `currentFuncPrefix` (emitted at member level
+ahead of the method), rename it with the enclosing-function prefix (`ExampleChunk_People`), and
+register the lifted name in `liftedTypeMap` so every reference resolves to it. The array/slice, map,
+and channel emitters did **not** — they wrote the forward declaration straight into the method body
+(the reported slices `example_test`/maps `maps_test` defect). The shared helper `liftLocalTypeDecl`
+(`visitTypeSpec.go`) now applies that same hoist to all three: at package scope it is a no-op
+(target stays `v.targetFile`, `finish()` does nothing, so production emission is byte-identical),
+and inside a function it prefixes the name, registers the lift, redirects to a member-level builder,
+and flushes into `currentFuncPrefix`. A local **slice/array of a local element type** also needs the
+element resolved to its lifted name: `visitArrayType`'s simple-identifier fast path (which keeps the
+written name so `[3]rune` stays `rune`) is skipped when the element is itself a lifted local type
+(`!v.liftedTypeExists`), routing it through `getFullTypeName`, which resolves `liftedTypeMap` — so
+`type People []Person` (Person a local struct) emits `[GoType("[]ExampleChunk_Person")] partial
+struct ExampleChunk_People;`, not the raw `[]Person`. (Guarded by the `LocalNamedTypeDecls`
+behavioral test — a function-local named slice-of-local-struct, map, channel, and fixed-size array,
+each constructed/ranged/indexed in the body and output-compared vs Go; the unfixed converter leaks
+four `partial struct …;` declarations into the method body.)
+
+### An embedded field's NAME is the UNQUALIFIED type name (dot-imported embeds)
+
+An embedded struct field's name is, per the Go spec, the *unqualified* type name. A cross-package
+embed written as a selector (`struct{ io.Writer }`) already stripped its qualifier for the field
+name; a **dot-imported** embed (`import . "io"` then embedded `ReaderFrom`) reaches the emitter as a
+bare `*ast.Ident`, yet `getTypeName` still renders it package-qualified — and, once the package is a
+collision-rename, as `Δio.ReaderFrom`. Gating the qualifier-strip on the *selector* form left that
+qualifier in the field name (`internal io_package.ReaderFrom Δio.ReaderFrom;`), whose embedded dot is
+a C# syntax error (`CS1003 '(' expected` / `CS1026 ') expected'` — the reported io `io_test`
+defect). `visitStructType` now strips to the last segment whenever the resolved embedded-type name
+carries a qualifier (covering both the selector and dot-imported-ident forms; a same-package embed
+has no dot, so it is a byte-identical no-op), yielding the correct `public io_package.ReaderFrom
+ReaderFrom;`. (This is one root among several in the io test suite, which remains blocked by separate
+`import . "io"` using-alias resolution issues — the `Δio` namespace is emitted but never aliased.)
+
 ### Select statement lowering (terminating and empty clauses)
 
 A `select` lowers to a C# `switch`: with a `default:` clause present, the non-blocking form `switch (ᐧ)` whose case guards are try-operations (`case ᐧ when ch.ꟷᐳ(out v):`); without one, the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` dispatching on the ready index. Two structural completions (io pipe.go's `read`):
