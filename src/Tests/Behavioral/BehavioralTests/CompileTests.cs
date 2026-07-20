@@ -843,6 +843,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

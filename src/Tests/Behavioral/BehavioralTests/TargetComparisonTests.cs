@@ -846,6 +846,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

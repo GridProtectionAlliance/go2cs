@@ -126,8 +126,16 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// </summary>
     public bool IsClosed
     {
-        get => m_isClosed.Value;
-        private set => m_isClosed.Value = value;
+        // A NIL channel is the struct's ZERO value (see the NilType operator), so every field is
+        // null. Go treats a nil channel as never closed and never ready — a receive or send on one
+        // blocks forever, and in a `select` with a `default` the nil case simply is not chosen. It
+        // is not an error to ASK about one, so this must report false rather than dereference the
+        // absent state: os/exec's Start runs Go's `select { case <-c.ctx.Done(): … default: }`, and
+        // context.Background().Done() IS a nil channel, so every child launch through a background
+        // context threw a NullReferenceException here. The sibling readiness members below
+        // (SendIsReady / ReceiveIsReady / Receiving) already guard exactly this way.
+        get => m_isClosed is not null && m_isClosed.Value;
+        private set => m_isClosed!.Value = value;
     }
 
     /// <summary>

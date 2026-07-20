@@ -333,6 +333,7 @@
     <Project Path="Tests/Behavioral/NestedPromotedEmbedInit/NestedPromotedEmbedInit.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
     <Project Path="Tests/Behavioral/NewAnonStructIfaceEmbed/NewAnonStructIfaceEmbed.csproj" />
+    <Project Path="Tests/Behavioral/NilChannelSelectDefault/NilChannelSelectDefault.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/NilPointerParamUnsafePointer/NilPointerParamUnsafePointer.csproj" />
     <Project Path="Tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
