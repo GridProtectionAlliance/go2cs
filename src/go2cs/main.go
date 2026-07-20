@@ -38,6 +38,7 @@ type Options struct {
 	mainModulePath      string // -recurse: import path of the app (main) module; routes its packages to src\, deps to pkg\
 	nugetRefs           bool   // -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local $(go2csPath) project references
 	targetPlatform      string
+	buildTags           []string // -tags: build tags applied to package loading AND constraint evaluation
 	indentSpaces        int
 	preferVarDecl       bool
 	useChannelOperators bool
@@ -697,6 +698,7 @@ func main() {
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
+	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
@@ -753,6 +755,7 @@ Examples:
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
   go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
+  go2cs -stdlib -comments -tags purego    # Select the portable Go crypto implementations over the assembly ones
  `)
 		os.Exit(1)
 	}
@@ -768,6 +771,7 @@ Examples:
 		recurse:             recurseVal.enabled,
 		nugetRefs:           recurseVal.nuget,
 		targetPlatform:      *targetPlatformCmd,
+		buildTags:           parseBuildTags(*buildTagsCmd),
 		indentSpaces:        *indentSpacesCmd,
 		preferVarDecl:       *preferVarDeclCmd,
 		useChannelOperators: *useChannelOperatorsCmd,
@@ -916,12 +920,38 @@ Examples:
 	}
 }
 
+// parseBuildTags splits a -tags value into individual build tags. Commas and whitespace are both
+// accepted as separators (the go command has used each form over time), and empty fields are dropped
+// so "-tags=" is indistinguishable from omitting the flag.
+func parseBuildTags(value string) []string {
+	tags := strings.FieldsFunc(value, func(r rune) bool {
+		return r == ',' || unicode.IsSpace(r)
+	})
+
+	if len(tags) == 0 {
+		return nil
+	}
+
+	return tags
+}
+
+// loaderBuildFlags renders the go/packages BuildFlags for the configured build tags. It returns nil
+// when no tags are set so the default load path stays byte-for-byte what it was before -tags existed.
+func (o Options) loaderBuildFlags() []string {
+	if len(o.buildTags) == 0 {
+		return nil
+	}
+
+	return []string{"-tags=" + strings.Join(o.buildTags, ",")}
+}
+
 func processConversion(inputFilePath string, isDir bool, outputFilePath string, options Options) {
 	var err error
 
 	cfg := &packages.Config{
-		Mode: packages.LoadAllSyntax,
-		Dir:  inputFilePath,
+		Mode:       packages.LoadAllSyntax,
+		Dir:        inputFilePath,
+		BuildFlags: options.loaderBuildFlags(),
 	}
 
 	targetParts := strings.Split(options.targetPlatform, "/")
@@ -991,7 +1021,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			for i, file := range pkg.Syntax {
 				path := pkg.GoFiles[i]
 
-				if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
+				if match, err := CheckBuildConstraints(path, options.targetPlatform, options.buildTags); err != nil {
 					showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
 				} else if !match {
 					// Skipping file due to non-matching build constraints
