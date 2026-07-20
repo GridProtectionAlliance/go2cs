@@ -459,9 +459,19 @@ public static class builtin
     /// </summary>
     /// <param name="n">Number of integers to enumerate.</param>
     /// <returns>Enumerable range of integers.</returns>
-    public static IEnumerable<int> range(nint n)
+    /// <remarks>
+    /// Yields <see cref="nint"/> values (Go's <c>int</c>, the type of a range-over-int index in
+    /// <c>for i := range n</c>) so a <c>var i</c> loop variable infers <c>nint</c> rather than a C#
+    /// <c>int</c> — the latter subtly diverges from Go's index type and makes downstream generic calls
+    /// like <c>append(s, i)</c> ambiguous. Producing values 0..n-1 (and no iterations when n &lt;= 0)
+    /// matches Go's integer-range semantics exactly.
+    /// </remarks>
+    public static IEnumerable<nint> range(nint n)
     {
-        return Enumerable.Range(0, (int)n);
+        for (nint i = 0; i < n; i++)
+        {
+            yield return i;
+        }
     }
 
     /// <summary>

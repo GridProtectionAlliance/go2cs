@@ -391,6 +391,7 @@
     <Project Path="Tests/Behavioral/RangeShadowSelectorMethod/RangeShadowSelectorMethod.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceAnonAlias/PublicizedInterfaceAnonAlias.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceParam/PublicizedInterfaceParam.csproj" />
+    <Project Path="Tests/Behavioral/RangeIntIndexAppend/RangeIntIndexAppend.csproj" />
     <Project Path="Tests/Behavioral/RangePointerArrayConversion/RangePointerArrayConversion.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="Tests/Behavioral/RangeVarHeapBox/RangeVarHeapBox.csproj" />

@@ -6216,6 +6216,24 @@ for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
 
 Loops whose clause variables are neither captured nor boxed emit exactly as before — the shared clause variable is then unobservable, so there is no churn. A read-only captured variable skips the copy-backs. Every clause reference (init/cond/post) renders the carrier, so the body keeps the variable's Go name — nested same-name loops compose with shadow renames (`iΔ1` gets carrier `iΔ1ᴛ1`), and a multi-variable clause transforms only the variables that need it. One legacy fallback: a heap-boxed variable that a **clause** func literal references keeps the old hoisted whole-loop box, since the body-scoped box would not be in scope at the clause. (Guarded by the `ForLoopPerIterationVars` behavioral test — read-only capture, body write + unlabeled `continue`, stored `&i` distinctness, boxed + captured closures, labeled continue with a write, nested same-name loops, a multi-variable clause, a struct-typed clause variable, and an immediately-invoked writing closure — values vs Go. `EscapedLoopVarSiblingIndex`, `ForVariants`, and `RingPointerMethods` re-baselined to the per-iteration shape.)
 
+### A range-over-int index is `nint` (golib's `range` helper yields Go's `int`)
+Go 1.22's `for i := range n` (range over an integer) produces `i` of type `int`, which go2cs maps to `nint`. The converter lowers it to a `foreach` over golib's `range` helper, and — with `-var` (the default) — leaves the index as the idiomatic `var`:
+```go
+size := 5
+var s []int
+for i := range size {
+    s = append(s, i)
+}
+```
+```csharp
+nint size = 5;
+slice<nint> s = default!;
+foreach (var i in range(size)) {
+    s = append(s, i);
+}
+```
+For `var i` to infer `nint` — matching Go's index type — golib's `range(nint)` must *yield* `nint`, not a C# `int`. It originally returned `Enumerable.Range(0, (int)n)` (element type `int`), so `var i` inferred `int`. That is invisible until the index feeds a generic builtin: `append(s, i)` with `s` a `slice<nint>` and `i` an `int` matches **two** `builtin.append` overloads with **different** inferred `T` — `append<T>(slice<T>, params Span<T>)` infers `T=nint` (from `s`; the `int→nint` element conversion is implicit), while `append<T>(ISlice, params T[])` infers `T=int` (from `i`). Neither wins the argument-by-argument betterness tie (each is better on one argument), so the call is ambiguous — **CS0121**. An explicit `nint i` always resolved (both overloads then infer `T=nint`, and `slice<T>` beats `ISlice` on the first argument), which is the tell that the defect was the *element type* the index inferred, not the converter's `var` (correct and idiomatic) nor the `append` overload set (unambiguous for a correctly-typed `nint`). The root fix is therefore in golib: `range(nint)` yields `nint`. As a hand-written iterator (`for (nint i = 0; i < n; i++) yield return i;`) it also matches Go's integer-range semantics for `n <= 0` exactly (zero iterations), where the old `Enumerable.Range` threw on a negative count. Because the converter emission is unchanged, this is a pure golib change — byte-identical `check-no-regression` — that silently corrects the index type for *every* range-over-int loop in the corpus, and unblocked the `maps` and `slices` Phase-4 test suites (whose `want = append(want, i)` over a `range(size)` index hit exactly this CS0121). Guarded by the `RangeIntIndexAppend` behavioral test (the minimal `append(s, i)`-over-`range(size)` shape, output-compared vs Go; neutering golib's `range` back to `IEnumerable<int>` reproduces the CS0121).
+
 ## The `go.golib` support namespace
 
 golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `TypeExtensions`, `HashCode`, `FatalError`, …) live in the **`go.golib`** child namespace — deliberately NOT `go.<any Go package name>`. The namespace was originally `go.runtime`, which collides with the real `runtime` package: converted code imports runtime as `using runtime = runtime_package;` inside `namespace go`, and a child namespace `go.runtime` visible from any referenced assembly (golib is referenced by *every* project) wins simple-name lookup over the alias — CS0576 at every `runtime.X` use (surfaced by `iter`/`internal/weak` in wave 1). The same reasoning forbids `go.internal`, `go.sync`, etc.; `golib` is not a Go stdlib package name, so the child namespace can never collide with an import alias. Emitted code references these types via the child namespace (`new golib.SparseArray<T>{…}`), which resolves inside `namespace go` with no using directive.
