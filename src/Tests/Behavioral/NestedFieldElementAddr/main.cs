@@ -15,7 +15,7 @@ partial class main_package {
 }
 
 [GoType] partial struct cacheT {
-    internal array<array<nint>> entries = new(2);
+    internal array<array<nint>> entries = new(2, () => new(3));
 }
 
 [GoType] partial struct store {

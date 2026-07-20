@@ -766,6 +766,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]
+    public void CheckNestedFixedArrays() => CheckTarget("NestedFixedArrays");
+
+    [TestMethod]
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]

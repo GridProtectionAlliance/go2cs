@@ -825,6 +825,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]
+    public void CheckNestedFixedArrays() => CheckTarget("NestedFixedArrays");
+
+    [TestMethod]
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]

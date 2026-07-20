@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/constant"
 	"go/token"
@@ -107,6 +108,73 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 	v.writeOutput("%spartial struct %s%s%s;", access, getSanitizedIdentifier(name), typeParams, constraints)
 	v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 	v.targetFile.WriteString(v.newline)
+}
+
+// arrayZeroValueArgs renders the constructor arguments for a fixed-size array's zero value: the
+// length, plus an element factory when `default(T)` is not usable storage for the element type.
+//
+// golib's `new array<T>(N)` fills its backing with `default(T)`, which is only the correct Go zero
+// value when `default(T)` is itself well formed. It is NOT when the element is:
+//
+//   - another UNNAMED fixed-size array — `[2][4]byte` emits `array<array<byte>>`, and the inner
+//     length lives only in the Go type, never in `array<T>`, so every element would keep a null
+//     backing: `len(x[1])` reports 0 (Go says 4) and the first indexed write panics; or
+//   - a struct whose own zero value needs construction — `default(T)` skips the generated
+//     constructor that runs its fixed-array field initializers and allocates its embed boxes.
+//
+// A NAMED array element (`type row [4]byte`) needs no factory: its generated wrapper allocates its
+// backing lazily from its own known size (go2cs-gen's `m_value ??= new row(4)`).
+//
+// Mirrors go2cs-gen's AppendZeroValueInitializers, which does the same for struct FIELDS. Every
+// other element type renders the bare length, so only genuinely nested shapes change.
+func (v *Visitor) arrayZeroValueArgs(lengthExpr string, arrayType types.Type) string {
+	if arrayType == nil {
+		return lengthExpr
+	}
+
+	array, ok := arrayType.Underlying().(*types.Array)
+
+	if !ok {
+		return lengthExpr
+	}
+
+	elemFactory := v.arrayElemFactory(array.Elem())
+
+	if len(elemFactory) == 0 {
+		return lengthExpr
+	}
+
+	return fmt.Sprintf("%s, () => %s", lengthExpr, elemFactory)
+}
+
+// arrayElemFactory renders the target-typed construction expression for one element of a
+// fixed-size array, or "" when `default(T)` is already the correct zero value. See
+// arrayZeroValueArgs for which element shapes need one.
+func (v *Visitor) arrayElemFactory(elemType types.Type) string {
+	if elemType == nil {
+		return ""
+	}
+
+	// A NAMED element keeps its own zero-value handling — an array wrapper allocates its backing
+	// lazily, and a struct routes through the constructor forms below — so only an unnamed nested
+	// array needs its length threaded through here.
+	if _, isNamed := types.Unalias(elemType).(*types.Named); !isNamed {
+		if innerArray, isArray := elemType.Underlying().(*types.Array); isArray {
+			return fmt.Sprintf("new(%s)", v.arrayZeroValueArgs(strconv.FormatInt(innerArray.Len(), 10), innerArray))
+		}
+	}
+
+	// Mirrors the zero-value construction the local/global variable paths already emit for these
+	// struct shapes (a promoted embed's readonly `ж<T>` box exists only when a constructor runs).
+	if v.structHasPromotedEmbeds(elemType) {
+		return "new(nil)"
+	}
+
+	if v.structZeroValueNeedsConstruction(elemType) {
+		return "new()"
+	}
+
+	return ""
 }
 
 // isSimpleIdentExpr reports whether an expression is a bare identifier (not a selector, index,
