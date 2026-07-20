@@ -21,7 +21,7 @@ partial class traceviewer_package {
 }
 
 // Five buckets for every power of 10.
-internal static float64 logDiv = math.Log(math.Pow(10, 1.0D / 5));
+internal static float64 logDiv = math.Log(math.Pow(10, 1.0D / 5D));
 
 // Add adds a single sample to the histogram.
 [GoRecv] public static void Add(this ref TimeHistogram h, time.Duration d) {
@@ -50,7 +50,7 @@ internal static float64 logDiv = math.Log(math.Pow(10, 1.0D / 5));
 
 // ToHTML renders the histogram as HTML.
 public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
-    ref var h = ref Ꮡh.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
     if (Ꮡh == nil || h.Count == 0) {
         return ((template.HTML)(@string)""u8);

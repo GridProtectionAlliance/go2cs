@@ -17,7 +17,7 @@ internal const byte ratGobVersion = 1;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡx == nil) {
         return (default!, default!);
@@ -53,7 +53,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
         return errors.New("Rat.GobDecode: buffer too small"u8);
     }
     var b = buf[0];
-    if ((b >> (int)(1)) != ratGobVersion) {
+    if ((byte)((b >> (int)(1))) != ratGobVersion) {
         return fmt.Errorf("Rat.GobDecode: encoding version %d not supported"u8, (b >> (int)(1)));
     }
     UntypedInt j = /* 1 + 4 */ 5;

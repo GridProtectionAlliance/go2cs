@@ -202,7 +202,7 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
 
 [GoRecv] internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
     if (s == default!) {
-        s = new nodeSet();
+        s = new nodeSet(0);
     }
     (s)[Ꮡp] = true;
 }
@@ -285,9 +285,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     }
     // remove edge to n
     // fill in index and ndeps fields
-    foreach (var (i, vᴛ1) in G) {
-        var n = vᴛ1;
-
+    foreach (var (i, n) in G) {
         n.Value.index = i;
         n.Value.ndeps = len((~n).succ);
     }

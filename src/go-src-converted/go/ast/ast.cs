@@ -111,7 +111,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Multiple empty lines are reduced to one, and trailing space on lines is trimmed.
 // Unless the result is empty, it is newline-terminated.
 public static @string Text(this ж<CommentGroup> Ꮡg) {
-    ref var g = ref Ꮡg.Value;
+    ref var g = ref Ꮡg.DerefOrNil();
 
     if (Ꮡg == nil) {
         return ""u8;
@@ -279,7 +279,7 @@ internal static bool isDirective(@string c) {
 
 // NumFields returns the number of parameters or struct fields represented by a [FieldList].
 public static nint NumFields(this ж<FieldList> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
+    ref var f = ref Ꮡf.DerefOrNil();
 
     nint n = 0;
     if (Ꮡf != nil) {
@@ -763,7 +763,7 @@ public static bool IsExported(@string name) {
 }
 
 public static @string String(this ж<Ident> Ꮡid) {
-    ref var id = ref Ꮡid.Value;
+    ref var id = ref Ꮡid.DerefOrNil();
 
     if (Ꮡid != nil) {
         return id.Name;

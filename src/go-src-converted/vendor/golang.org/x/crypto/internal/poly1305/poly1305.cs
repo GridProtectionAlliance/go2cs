@@ -89,14 +89,14 @@ public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
     if (h.finalized) {
         throw panic("poly1305: write to MAC after Sum or Verify");
     }
-    return Ꮡh.of(MAC.Ꮡmac).Write(p);
+    return Ꮡh.of(MAC.Ꮡmac).of(mac.ᏑmacGeneric).Write(p);
 }
 
 // Sum computes the authenticator of all data written to the
 // message authentication code.
 [GoRecv] public static slice<byte> Sum(this ref MAC h, slice<byte> b) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
-    h.mac.Sum(Ꮡmac);
+    Ꮡ(h.mac).of(poly1305_package.mac.ᏑmacGeneric).Sum(Ꮡmac);
     h.finalized = true;
     return append(b, mac[..].ꓸꓸꓸ);
 }
@@ -105,7 +105,7 @@ public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
 // the message authentication code matches the expected value.
 [GoRecv] public static bool Verify(this ref MAC h, slice<byte> expected) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
-    h.mac.Sum(Ꮡmac);
+    Ꮡ(h.mac).of(poly1305_package.mac.ᏑmacGeneric).Sum(Ꮡmac);
     h.finalized = true;
     return subtle.ConstantTimeCompare(expected, mac[..]) == 1;
 }

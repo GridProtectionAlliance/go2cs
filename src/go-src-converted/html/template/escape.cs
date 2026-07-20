@@ -255,7 +255,7 @@ internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpl
                 err: errorf(ErrAmbigContext, new parse_ActionNodeжNode(Ꮡn), n.Line, "%s appears in an ambiguous context within a URL"u8, Ꮡn)
             );
         }
-        if (!matchᴛ1) { /* default: */
+        else if (!matchᴛ1) { /* default: */
             throw panic(c.urlPart.String());
         }
 
@@ -810,7 +810,7 @@ internal static array<@string> delimEnds = new golib.SparseArray<@string>{
     [delimDoubleQuote] = @""""u8,
     [delimSingleQuote] = "'"u8,
     [delimSpaceOrTagEnd] = " \t\n\f\r>"u8
-}.array();
+}.array(4);
 
 internal static ж<regexp.Regexp> specialScriptTagRE = regexp.MustCompile("(?i)<(script|/script|!--)"u8);
 internal static slice<byte> specialScriptTagReplacement = slice<byte>("\\x3C$1"u8);
@@ -1018,14 +1018,10 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
     foreach (var (n, s) in e.actionNodeEdits) {
         ensurePipelineContains((~n).Pipe, s);
     }
-    foreach (var (kᴛ1, name) in e.templateNodeEdits) {
-        var n = kᴛ1;
-
+    foreach (var (n, name) in e.templateNodeEdits) {
         n.Value.Name = name;
     }
-    foreach (var (kᴛ2, s) in e.textNodeEdits) {
-        var n = kᴛ2;
-
+    foreach (var (n, s) in e.textNodeEdits) {
         n.Value.Text = s;
     }
     // Reset state that is specific to this commit so that the same changes are

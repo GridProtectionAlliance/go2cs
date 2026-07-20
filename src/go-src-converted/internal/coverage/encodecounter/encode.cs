@@ -242,9 +242,9 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
 
     // Emit file header.
     var ch = new coverage.CounterFileHeader(
-        Magic: coverage.CovCounterMagic,
+        Magic: coverage.CovCounterMagic.Clone(),
         Version: coverage.CounterFileVersion,
-        MetaHash: metaFileHash,
+        MetaHash: metaFileHash.Clone(),
         CFlavor: cfw.cflavor,
         BigEndian: false
     );
@@ -344,7 +344,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
 [GoRecv] internal static error writeFooter(this ref CoverageDataWriter cfw) {
     cfw.segs++;
     var cf = new coverage.CounterFileFooter(
-        Magic: coverage.CovCounterMagic,
+        Magic: coverage.CovCounterMagic.Clone(),
         NumSegments: cfw.segs
     );
     {

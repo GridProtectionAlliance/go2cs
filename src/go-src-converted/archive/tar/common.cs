@@ -451,10 +451,10 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
             return (FormatUnknown, default!, new headerError(new @string[]{"filename may not have trailing slash"}.slice()));
         }
     }
-    if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeGNULongName || exprᴛ1 == TypeGNULongLink) {
+    else if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeGNULongName || exprᴛ1 == TypeGNULongLink) {
         return (FormatUnknown, default!, new headerError(new @string[]{"cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"}.slice()));
     }
-    if (exprᴛ1 == TypeXGlobalHeader) {
+    else if (exprᴛ1 == TypeXGlobalHeader) {
         var h2 = new Header(Name: h.Name, Typeflag: h.Typeflag, Xattrs: h.Xattrs, PAXRecords: h.PAXRecords, Format: h.Format);
         if (!reflect.DeepEqual(h, h2)) {
             return (FormatUnknown, default!, new headerError(new @string[]{"only PAXRecords should be set for TypeXGlobalHeader"}.slice()));

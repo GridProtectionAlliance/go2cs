@@ -430,7 +430,7 @@ internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
         IsTimedEvent: true,
         Experiment: AllocFree
     )
-}.array();
+}.array(137);
 
 [GoType("num:uint8")] partial struct GoStatus;
 

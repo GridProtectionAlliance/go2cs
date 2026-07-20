@@ -297,7 +297,7 @@ internal static array<@string> publicKeyAlgoName = new golib.SparseArray<@string
     [(int)DSA] = "DSA"u8,
     [(int)ECDSA] = "ECDSA"u8,
     [(int)Ed25519] = "Ed25519"u8
-}.array();
+}.array(5);
 
 public static @string String(this PublicKeyAlgorithm algo) {
     if (0 < algo && (nint)algo < builtin.len(publicKeyAlgoName)) {
@@ -845,7 +845,7 @@ public static @string Error(this ConstraintViolationError _) {
 }
 
 public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
     ref var other = ref Ꮡother.DerefOrNil();
 
     if (Ꮡc == nil || Ꮡother == nil) {
@@ -933,10 +933,10 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
             return ErrUnsupportedAlgorithm;
         }
     }
-    if (exprᴛ1 == crypto.MD5) { matchᴛ1 = true;
+    else if (exprᴛ1 == crypto.MD5) { matchᴛ1 = true;
         return ((InsecureAlgorithmError)(nint)algo);
     }
-    if (exprᴛ1 == crypto.SHA1) { matchᴛ1 = true;
+    else if (exprᴛ1 == crypto.SHA1) { matchᴛ1 = true;
         if (!allowSHA1) {
             // SHA-1 signatures are mostly disabled. See go.dev/issue/41682.
             if (x509sha1.Value() != "1"u8) {
@@ -1061,7 +1061,7 @@ internal static nint asn1BitLength(slice<byte> bitString) {
     foreach (var (i, _) in bitString) {
         var b = bitString[builtin.len(bitString) - i - 1];
         for (nuint bit = (nuint)0; bit < 8; bit++) {
-            if ((byte)(((b >> (int)(bit))) & 1) == 1) {
+            if ((byte)((b.Rsh(bit)) & 1) == 1) {
                 return bitLen;
             }
             bitLen--;
@@ -1538,7 +1538,7 @@ internal static (slice<byte>, error) signTBS(slice<byte> tbs, crypto.Signer key,
         h.Write(signed);
         signed = h.Sum(default!);
     }
-    crypto.SignerOpts signerOpts = new crypto_HashᴠSignerOpts(hashFunc);
+    crypto.SignerOpts signerOpts = hashFunc;
     if (sigAlg.isRSAPSS()) {
         signerOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(
             SaltLength: rsa.PSSSaltLengthEqualsHash,

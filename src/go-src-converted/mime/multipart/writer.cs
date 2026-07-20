@@ -146,7 +146,7 @@ internal static @string escapeQuotes(@string s) {
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
 public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) {
-    var h = new textproto.MIMEHeader();
+    var h = new textproto.MIMEHeader(0);
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
             escapeQuotes(fieldname), escapeQuotes(filename)));
@@ -157,7 +157,7 @@ public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fi
 // CreateFormField calls [Writer.CreatePart] with a header using the
 // given field name.
 public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) {
-    var h = new textproto.MIMEHeader();
+    var h = new textproto.MIMEHeader(0);
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
     return Ꮡw.CreatePart(h);

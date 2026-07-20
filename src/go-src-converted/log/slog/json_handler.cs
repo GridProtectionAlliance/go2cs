@@ -134,7 +134,7 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
             }
         }
     }
-    if (exprᴛ1 == KindBool) {
+    else if (exprᴛ1 == KindBool) {
         s.buf.ValueSlot = strconv.AppendBool(s.buf.ValueSlot, v.Bool());
     }
     else if (exprᴛ1 == KindDuration) {
@@ -155,7 +155,7 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
             }
         }
     }
-    { /* default: */
+    else { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
 

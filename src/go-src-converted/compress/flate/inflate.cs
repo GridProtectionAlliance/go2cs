@@ -25,7 +25,7 @@ internal static readonly UntypedInt numCodes = 19; // number of codes in Huffman
 internal static ж<sync.Once> ᏑfixedOnce = new(default(sync.Once));
 internal static ref sync.Once fixedOnce => ref ᏑfixedOnce.Value;
 
-internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new(default(huffmanDecoder));
+internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ᏑfixedHuffmanDecoder.Value;
 
 [GoType("num:int64")] partial struct CorruptInputError;
@@ -155,12 +155,12 @@ internal static readonly UntypedInt huffmanValueShift = 4;
     // Exception: To be compatible with zlib, we also need to
     // accept degenerate single-code codings. See also
     // TestDegenerateHuffmanCoding.
-    if (code != (1 << (int)((nuint)max)) && !(code == 1 && max == 1)) {
+    if (code != ((nint)1).Lsh((nuint)max) && !(code == 1 && max == 1)) {
         return false;
     }
     h.min = min;
     if (max > huffmanChunkBits) {
-        nint numLinks = (1 << (int)(((nuint)max - (nuint)huffmanChunkBits)));
+        nint numLinks = ((nint)1).Lsh(((nuint)max - (nuint)huffmanChunkBits));
         h.linkMask = (uint32)(numLinks - 1);
         // create link tables
         nint link = (nextcode[huffmanChunkBits + 1] >> (int)(1));
@@ -186,7 +186,7 @@ internal static readonly UntypedInt huffmanValueShift = 4;
         nint reverse = (nint)bits.Reverse16((uint16)codeΔ1);
         reverse >>= (int)((nuint)(16 - n));
         if (n <= huffmanChunkBits){
-            for (nint off = reverse; off < len(h.chunks); off += (1 << (int)((nuint)n))) {
+            for (nint off = reverse; off < len(h.chunks); off += ((nint)1).Lsh((nuint)n)) {
                 // We should never need to overwrite
                 // an existing chunk. Also, 0 is
                 // never a valid chunk, because the
@@ -207,7 +207,7 @@ internal static readonly UntypedInt huffmanValueShift = 4;
             var value = (h.chunks[j] >> (int)(huffmanValueShift));
             var linktab = h.links[(nint)(value)];
             reverse >>= (int)(huffmanChunkBits);
-            for (nint off = reverse; off < len(linktab); off += (1 << (int)((nuint)(n - (nint)huffmanChunkBits)))) {
+            for (nint off = reverse; off < len(linktab); off += ((nint)1).Lsh((nuint)(n - (nint)huffmanChunkBits))) {
                 if (sanity && linktab[off] != 0) {
                     throw panic("impossible: overwriting existing chunk");
                 }
@@ -455,7 +455,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
                 }
             }
         }
-        rep += (nint)((uint32)(f.b & (uint32)(((uint32)1 << (int)(nb)) - 1)));
+        rep += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
         f.b >>= (int)(nb);
         f.nb -= nb;
         if (i + rep > n) {
@@ -484,7 +484,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
 [GoRecv] internal static void huffmanBlock(this ref decompressor f) {
-    const nint stateInit = /* iota */ 0; // Zero value must be stateInit
+    const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
     var exprᴛ1 = f.stepState;
     if (exprᴛ1 == stateInit) {
@@ -570,7 +570,7 @@ readLiteral:
                     }
                 }
             }
-            length += (nint)((uint32)(f.b & (uint32)(((uint32)1 << (int)(n)) - 1)));
+            length += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(n) - 1)));
             f.b >>= (int)(n);
             f.nb -= n;
         }
@@ -602,7 +602,7 @@ readLiteral:
         }
         case {} when dist < maxNumDist: {
             nuint nb = ((nuint)(dist - 2) >> (int)(1));
-            nint extra = (((nint)(dist & 1)) << (int)(nb));
+            nint extra = ((nint)(dist & 1)).Lsh(nb);
             while (f.nb < nb) {
                 // have 1 bit in bottom of dist, need nb more.
                 {
@@ -612,10 +612,10 @@ readLiteral:
                     }
                 }
             }
-            extra |= (nint)((nint)((uint32)(f.b & (uint32)(((uint32)1 << (int)(nb)) - 1))));
+            extra |= (nint)((nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1))));
             f.b >>= (int)(nb);
             f.nb -= nb;
-            dist = (1 << (int)((nb + 1))) + 1 + extra;
+            dist = ((nint)1).Lsh((nb + 1)) + 1 + extra;
             break;
         }
         default: {
@@ -726,7 +726,7 @@ internal static error noEOF(error e) {
         return noEOF(err);
     }
     f.roffset++;
-    f.b |= ((uint32)c << (int)(f.nb));
+    f.b |= ((uint32)c).Lsh(f.nb);
     f.nb += 8;
     return default!;
 }

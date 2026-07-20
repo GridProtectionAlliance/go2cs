@@ -150,7 +150,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             return (dst + utf8.EncodeRune(b[(int)(dst)..], x), src + i);
         } else 
         {
-            var xΔ1 = entity2[((@string)entityName)]; if (xΔ1[0] != 0){
+            var xΔ1 = entity2[((@string)entityName)].Clone(); if (xΔ1[0] != 0){
                 nint dst1Δ1 = dst + utf8.EncodeRune(b[(int)(dst)..], xΔ1[0]);
                 return (dst1Δ1 + utf8.EncodeRune(b[(int)(dst1Δ1)..], xΔ1[1]), src + i);
             } else 

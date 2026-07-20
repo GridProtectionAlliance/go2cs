@@ -70,7 +70,7 @@ public static void Init64(this ж<State> Ꮡs, array<uint64> seed) {
     seed = seed.Clone();
 
     ref var s = ref Ꮡs.Value;
-    s.seed = seed;
+    s.seed = seed.Clone();
     block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), 0);
     s.c = 0;
     s.i = 0;

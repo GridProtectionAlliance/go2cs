@@ -44,7 +44,7 @@ internal static uint32 absInt32(int32 i) {
         if (i == 0) {
             // This extra work is only required for the base strip.
             while (ᐧ) {
-                x = -math.Log(r.Float64()) * (float64)(1.0D / rn);
+                x = -math.Log(r.Float64()) * /* (1.0 / rn) */ 0.29047645161474317D;
                 var y = -math.Log(r.Float64());
                 if (y + y >= x * x) {
                     break;
@@ -53,7 +53,7 @@ internal static uint32 absInt32(int32 i) {
             if (j > 0) {
                 return (float64)rn + x;
             }
-            return (float64)(-rn) - x;
+            return /* -rn */ -3.442619855899D - x;
         }
         if (fn[(nint)(i)] + (float32)r.Float64() * (fn[(nint)(i - 1)] - fn[(nint)(i)]) < (float32)math.Exp(-.5D * x * x)) {
             return x;

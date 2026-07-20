@@ -1,19 +1,21 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build !purego
+//go:build purego
 
 // Package alias implements memory aliasing tests.
 namespace go.vendor.golang.org.x.crypto.@internal;
 
-using @unsafe = unsafe_package;
+// This is the Google App Engine standard variant based on reflect
+// because the unsafe package and cgo are disallowed.
+using reflect = reflect_package;
 
 partial class alias_package {
 
 // AnyOverlap reports whether x and y share memory at any (not necessarily
 // corresponding) index. The memory beyond the slice length is ignored.
 public static bool AnyOverlap(slice<byte> x, slice<byte> y) {
-    return len(x) > 0 && len(y) > 0 && (uintptr)new @unsafe.Pointer(Ꮡ(x, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(y, len(y) - 1)) && (uintptr)new @unsafe.Pointer(Ꮡ(y, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(x, len(x) - 1));
+    return len(x) > 0 && len(y) > 0 && reflect.ValueOf(Ꮡ(x, 0)).Pointer() <= reflect.ValueOf(Ꮡ(y, len(y) - 1)).Pointer() && reflect.ValueOf(Ꮡ(y, 0)).Pointer() <= reflect.ValueOf(Ꮡ(x, len(x) - 1)).Pointer();
 }
 
 // InexactOverlap reports whether x and y share memory at any non-corresponding

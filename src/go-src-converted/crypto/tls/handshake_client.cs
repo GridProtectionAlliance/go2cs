@@ -823,7 +823,7 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
             }
         }
         var signed = hs.finishedHash.hashForClientCertificate(sigType, sigHash);
-        var signOpts = ((crypto.SignerOpts)new crypto_HashᴠSignerOpts(sigHash));
+        var signOpts = ((crypto.SignerOpts)sigHash);
         if (sigType == signatureRSAPSS) {
             signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
         }

@@ -548,7 +548,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
             ))
         )));
     }
-    e.prevGstates = e.gstates;
+    e.prevGstates = e.gstates.Clone();
 }
 
 [GoRecv] public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
@@ -569,7 +569,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
         )));
     }
     // TODO(mknyszek): Why is InSyscallRuntime not included here?
-    e.prevThreadStats = e.threadStats;
+    e.prevThreadStats = e.threadStats.Clone();
 }
 
 [GoRecv] public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) {

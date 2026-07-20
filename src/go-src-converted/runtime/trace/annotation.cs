@@ -178,7 +178,7 @@ internal static ж<Region> noopRegion = Ꮡ(new Region(nil));
 
 // End marks the end of the traced code region.
 public static void End(this ж<Region> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     if (Ꮡr == noopRegion) {
         return;

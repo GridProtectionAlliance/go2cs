@@ -84,9 +84,7 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     }
     var list = fields.List;
     nint j = 0;
-    foreach (var (_, vᴛ1) in list) {
-        var f = vᴛ1;
-
+    foreach (var (_, f) in list) {
         var keepField = false;
         if (len((~f).Names) == 0){
             // anonymous field

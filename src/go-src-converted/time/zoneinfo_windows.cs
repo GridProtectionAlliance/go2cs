@@ -212,11 +212,11 @@ internal static syscall.Timezoneinformation usPacific = new syscall.Timezoneinfo
     Bias: 8 * 60,
     StandardName: new uint16[]{
         (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
-    }.array(),
+    }.array(32),
     StandardDate: new syscall.Systemtime(Month: 11, Day: 1, Hour: 2),
     DaylightName: new uint16[]{
         (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'D', (rune)'a', (rune)'y', (rune)'l', (rune)'i', (rune)'g', (rune)'h', (rune)'t', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
-    }.array(),
+    }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 3, Day: 2, Hour: 2),
     DaylightBias: -60
 );
@@ -225,11 +225,11 @@ internal static syscall.Timezoneinformation aus = new syscall.Timezoneinformatio
     Bias: -10 * 60,
     StandardName: new uint16[]{
         (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
-    }.array(),
+    }.array(32),
     StandardDate: new syscall.Systemtime(Month: 4, Day: 1, Hour: 3),
     DaylightName: new uint16[]{
         (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'D', (rune)'a', (rune)'y', (rune)'l', (rune)'i', (rune)'g', (rune)'h', (rune)'t', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
-    }.array(),
+    }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 10, Day: 1, Hour: 2),
     DaylightBias: -60
 );

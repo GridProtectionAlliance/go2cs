@@ -217,7 +217,7 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
 }
 
 internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt == nil) {
         return false;

@@ -104,7 +104,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     while (ᐧ) {
         var b = r.b[(nint)(r.off)];
         r.off++;
-        value |= (uint64)((((uint64)((byte)(b & 0x7F)) << (int)(shift))));
+        value |= (uint64)((((uint64)((byte)(b & 0x7F))).Lsh(shift)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }

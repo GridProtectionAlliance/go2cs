@@ -54,16 +54,26 @@ using static go.flag_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<boolFuncValue, Value>]
+[assembly: GoImplement<boolFuncValue, boolFlag>]
+[assembly: GoImplement<boolValue, Getter>(Pointer = true)]
 [assembly: GoImplement<boolValue, Value>(Pointer = true)]
+[assembly: GoImplement<boolValue, boolFlag>(Pointer = true)]
+[assembly: GoImplement<durationValue, Getter>(Pointer = true)]
 [assembly: GoImplement<durationValue, Value>(Pointer = true)]
+[assembly: GoImplement<float64Value, Getter>(Pointer = true)]
 [assembly: GoImplement<float64Value, Value>(Pointer = true)]
 [assembly: GoImplement<funcValue, Value>]
+[assembly: GoImplement<int64Value, Getter>(Pointer = true)]
 [assembly: GoImplement<int64Value, Value>(Pointer = true)]
+[assembly: GoImplement<intValue, Getter>(Pointer = true)]
 [assembly: GoImplement<intValue, Value>(Pointer = true)]
+[assembly: GoImplement<stringValue, Getter>(Pointer = true)]
 [assembly: GoImplement<stringValue, Value>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<textValue, Value>]
+[assembly: GoImplement<textValue, Getter>]
+[assembly: GoImplement<uint64Value, Getter>(Pointer = true)]
 [assembly: GoImplement<uint64Value, Value>(Pointer = true)]
+[assembly: GoImplement<uintValue, Getter>(Pointer = true)]
 [assembly: GoImplement<uintValue, Value>(Pointer = true)]
 // </InterfaceImplementations>
 

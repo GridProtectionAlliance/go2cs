@@ -244,7 +244,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     if (!d.is224) {
         byteorder.BePutUint32(digest[28..], d.h[7]);
     }
-    return digest;
+    return digest.Clone();
 }
 
 // Sum256 returns the SHA256 checksum of the data.
@@ -269,7 +269,7 @@ public static array<byte> Sum224(slice<byte> data) {
     Ꮡd.Write(data);
     var sum = Ꮡd.checkSum();
     var ap = Ꮡ(new array<byte>(sum[..], 28));
-    return ap.Value;
+    return ap.Value.Clone();
 }
 
 } // end sha256_package

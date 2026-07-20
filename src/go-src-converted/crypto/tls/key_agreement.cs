@@ -236,7 +236,7 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
         return (default!, errors.New("tls: certificate cannot be used with the selected cipher suite"u8));
     }
     var signed = hashForServerKeyExchange(sigType, sigHash, ka.version, clientHello.random, hello.random, serverECDHEParams);
-    var signOpts = ((crypto.SignerOpts)new crypto_HashᴠSignerOpts(sigHash));
+    var signOpts = ((crypto.SignerOpts)sigHash);
     if (sigType == signatureRSAPSS) {
         signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
     }

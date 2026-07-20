@@ -171,7 +171,7 @@ public static complex128 Asinh(complex128 x) {
 // Acos returns the inverse cosine of x.
 public static complex128 Acos(complex128 x) {
     var w = Asin(x);
-    return complex((float64)(math.Pi / 2D) - real(w), -imag(w));
+    return complex(/* math.Pi / 2 */ 1.5707963267948966D - real(w), -imag(w));
 }
 
 // Acosh returns the inverse hyperbolic cosine of x.

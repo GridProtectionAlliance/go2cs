@@ -353,11 +353,11 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
     nint n = default!;
     error err = default!;
 
-    ref var d = ref Ꮡd.Value;
+    ref var d = ref Ꮡd.DerefOrNil();
     // Run data through a simple state machine to
     // elide leading dots, rewrite trailing \r\n into \n,
     // and detect ending .\r\n line.
-    const nint stateBeginLine = /* iota */ 0; // beginning of line; initial state; must be zero
+    const nint stateBeginLine = iota; // beginning of line; initial state; must be zero
     
     const nint stateDot = 1; // read . at beginning of line
     
@@ -722,7 +722,7 @@ internal static bool validHeaderFieldByte(byte c) {
 	1<<'|' |
 	1<<'~' */
             GoUntyped.Parse("116972063611741436228934278030836105216");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 // validHeaderValueByte reports whether c is a valid byte in a header
@@ -750,7 +750,7 @@ internal static bool validHeaderValueByte(byte c) {
 	1<<0x20 |
 	1<<0x09 */ // HTAB: %x09
             GoUntyped.Parse("170141183460469231731687303711589138944");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & ~(((uint64)mask >> (int)(64)))))) == 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & ~(((uint64)mask).Rsh((uint64)(64)))))) == 0;
 }
 
 // canonicalMIMEHeaderKey is like CanonicalMIMEHeaderKey but is

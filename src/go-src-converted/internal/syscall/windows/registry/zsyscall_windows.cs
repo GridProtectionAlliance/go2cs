@@ -47,8 +47,7 @@ internal static ж<syscall.LazyProc> procExpandEnvironmentStringsW = modkernel32
 internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint16> Ꮡsubkey, uint32 reserved, ж<uint16> Ꮡclass, uint32 options, uint32 desired, ж<syscall.SecurityAttributes> Ꮡsa, ж<syscallꓸHandle> Ꮡresult, ж<uint32> Ꮡdisposition) {
     error regerrno = default!;
 
-    ref var result = ref Ꮡresult.Value;
-    var (r0, _, _) = syscall.Syscall9(procRegCreateKeyExW.Addr(), 9, (uintptr)key, (uintptr)new @unsafe.Pointer(Ꮡsubkey), (uintptr)reserved, (uintptr)new @unsafe.Pointer(Ꮡclass), (uintptr)options, (uintptr)desired, (uintptr)new @unsafe.Pointer(Ꮡsa), (uintptr)@unsafe.Pointer.FromRef(ref result), (uintptr)new @unsafe.Pointer(Ꮡdisposition));
+    var (r0, _, _) = syscall.Syscall9(procRegCreateKeyExW.Addr(), 9, (uintptr)key, (uintptr)new @unsafe.Pointer(Ꮡsubkey), (uintptr)reserved, (uintptr)new @unsafe.Pointer(Ꮡclass), (uintptr)options, (uintptr)desired, (uintptr)new @unsafe.Pointer(Ꮡsa), (uintptr)new @unsafe.Pointer(Ꮡresult), (uintptr)new @unsafe.Pointer(Ꮡdisposition));
     if (r0 != 0) {
         regerrno = ((syscall.Errno)r0);
     }

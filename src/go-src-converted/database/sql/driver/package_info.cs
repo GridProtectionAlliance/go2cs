@@ -49,10 +49,13 @@ using static go.database.sql.driver_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<NotNull, ValueConverter>]
+[assembly: GoImplement<Null, ValueConverter>]
 [assembly: GoImplement<boolType, ValueConverter>]
 [assembly: GoImplement<defaultConverter, ValueConverter>]
 [assembly: GoImplement<int32Type, ValueConverter>]
 [assembly: GoImplement<noRows, Result>]
+[assembly: GoImplement<stringType, ValueConverter>]
 [assembly: GoImplement<ΔRowsAffected, Result>]
 // </InterfaceImplementations>
 

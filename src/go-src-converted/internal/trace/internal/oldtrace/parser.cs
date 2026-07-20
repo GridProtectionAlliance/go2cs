@@ -896,7 +896,7 @@ internal static readonly UntypedInt skipStrings = 2;
             return ErrTimeOrder;
         }
     }
-    if (exprᴛ1 == EvTimerGoroutine) {
+    else if (exprᴛ1 == EvTimerGoroutine) {
         p.timerGoids[raw.args[0]] = true;
     }
     else if (exprᴛ1 == EvStack) {
@@ -1010,7 +1010,7 @@ public static error ErrTimeOrder = errors.New("time stamps out of order"u8);
 internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     ref var p = ref Ꮡp.Value;
 
-    const nint gDead = /* iota */ 0;
+    const nint gDead = iota;
     const nint gRunnable = 1;
     const nint gRunning = 2;
     const nint gWaiting = 3;
@@ -1555,7 +1555,7 @@ public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new(new go
     [EvUserRegion] = new("UserRegion"u8, 11, true, new @string[]{"taskid", "mode", "typeid"}.slice(), new @string[]{"name"}.slice()),
     [EvUserLog] = new("UserLog"u8, 11, true, new @string[]{"id", "keyid"}.slice(), new @string[]{"category", "message"}.slice()),
     [EvCPUSample] = new("CPUSample"u8, 19, true, new @string[]{"ts", "p", "g"}.slice(), default!)
-}.array());
+}.array(256));
 public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ᏑEventDescriptions.Value;
 
 //gcassert:inline

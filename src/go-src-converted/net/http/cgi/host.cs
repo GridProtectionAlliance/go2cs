@@ -267,7 +267,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
     var stdoutReadʗ1 = stdoutRead;
     defer(() => stdoutReadʗ1.Close());
     var linebody = bufio.NewReaderSize(stdoutRead, 1024);
-    var headers = new httpꓸHeader();
+    var headers = new httpꓸHeader(0);
     nint statusCode = 0;
     nint headerLines = 0;
     var sawBlankLine = false;
@@ -402,7 +402,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         Proto: "HTTP/1.1"u8,
         ProtoMajor: 1,
         ProtoMinor: 1,
-        Header: new httpꓸHeader(),
+        Header: new httpꓸHeader(0),
         Host: (~url).Host,
         RemoteAddr: req.RemoteAddr,
         TLS: req.TLS

@@ -126,7 +126,6 @@ internal static void block() {
 // a value was received.
 internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, ж<uintptr> Ꮡpc0, nint nsends, nint nrecvs, bool block) {
     ref var cas0 = ref Ꮡcas0.Value;
-    ref var pc0 = ref Ꮡpc0.DerefOrNil();
 
     if (debugSelect) {
         print("select: cas0=", Ꮡcas0, "\n");
@@ -145,7 +144,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // ensureSigM in runtime/signal_unix.go).
     slice<uintptr> pcs = default!;
     if (raceenabled && Ꮡpc0 != nil) {
-        var pc1 = (ж<array<uintptr>>)(uintptr)(@unsafe.Pointer.FromRef(ref pc0));
+        var pc1 = (ж<array<uintptr>>)(uintptr)(new @unsafe.Pointer(Ꮡpc0));
         pcs = (~pc1).slice(-1, ncases, ncases);
     }
     var pcsʗ1 = pcs;

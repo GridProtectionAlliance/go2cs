@@ -144,7 +144,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
         return z.err;
     }
     var h = binary.BigEndian.Uint16(z.scratch[..2]);
-    if (((byte)(z.scratch[0] & 0x0f) != zlibDeflate) || ((z.scratch[0] >> (int)(4)) > zlibMaxWindow) || (h % 31 != 0)) {
+    if (((byte)(z.scratch[0] & 0x0f) != zlibDeflate) || ((byte)((z.scratch[0] >> (int)(4))) > zlibMaxWindow) || ((uint16)(h % 31) != 0)) {
         z.err = ErrHeader;
         return z.err;
     }

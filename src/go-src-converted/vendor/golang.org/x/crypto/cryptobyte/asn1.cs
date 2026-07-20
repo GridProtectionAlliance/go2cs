@@ -40,7 +40,7 @@ internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v)
             length++;
         }
         for (; length > 0; length--) {
-            var i = (int64)((v >> (int)((nuint)((length - 1) * 8))) & 0xff);
+            var i = (int64)(v.Rsh((nuint)((length - 1) * 8)) & 0xff);
             c.AddUint8((uint8)i);
         }
     });
@@ -54,7 +54,7 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
             length++;
         }
         for (; length > 0; length--) {
-            var i = (uint64)((v >> (int)((nuint)((length - 1) * 8))) & 0xff);
+            var i = (uint64)(v.Rsh((nuint)((length - 1) * 8)) & 0xff);
             c.AddUint8((uint8)i);
         }
     });
@@ -154,7 +154,7 @@ public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) {
         }
     }
     for (nint i = length - 1; i >= 0; i--) {
-        var o = (byte)((n >> (int)((nuint)(i * 7))));
+        var o = (byte)(n.Rsh((nuint)(i * 7)));
         o &= (byte)(0x7f);
         if (i != 0) {
             o |= (byte)(0x80);
@@ -593,7 +593,7 @@ internal static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700"u8
     }
     var paddingBits = bytes[0];
     bytes = bytes[1..];
-    if (paddingBits > 7 || len(bytes) == 0 && paddingBits != 0 || len(bytes) > 0 && (byte)(bytes[len(bytes) - 1] & ((byte)(1 << (int)(paddingBits)) - 1)) != 0) {
+    if (paddingBits > 7 || len(bytes) == 0 && paddingBits != 0 || len(bytes) > 0 && (byte)(bytes[len(bytes) - 1] & (((byte)1).Lsh((uint64)(paddingBits)) - 1)) != 0) {
         return false;
     }
     @out.BitLength = len(bytes) * 8 - (nint)paddingBits;
@@ -862,7 +862,7 @@ public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
             // Length should have used short-form encoding.
             return false;
         }
-        if ((len32 >> (int)(((lenLen - 1) * 8))) == 0) {
+        if (len32.Rsh((uint64)(((lenLen - 1) * 8))) == 0) {
             // Leading octet is 0. Length should have been at least one byte shorter.
             return false;
         }

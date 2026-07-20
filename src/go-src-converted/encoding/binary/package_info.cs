@@ -43,6 +43,12 @@ using static go.encoding.binary_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<bigEndian, AppendByteOrder>]
+[assembly: GoImplement<bigEndian, ByteOrder>]
+[assembly: GoImplement<littleEndian, AppendByteOrder>]
+[assembly: GoImplement<littleEndian, ByteOrder>]
+[assembly: GoImplement<nativeEndian, AppendByteOrder>]
+[assembly: GoImplement<nativeEndian, ByteOrder>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -109,7 +109,7 @@ public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) 
                 return true;
             }
         }
-        if (exprᴛ1 == "ppc64"u8) {
+        else if (exprᴛ1 == "ppc64"u8) {
             if (goos == "aix"u8 || goos == "linux"u8) {
                 // Big Endian PPC64 cgo internal linking is not implemented for aix or linux.
                 // https://go.dev/issue/8912
@@ -135,7 +135,7 @@ public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) 
             return true;
         }
     }
-    if (exprᴛ3 == "ios"u8) {
+    else if (exprᴛ3 == "ios"u8) {
         if (goarch == "arm64"u8) {
             return true;
         }
@@ -177,7 +177,7 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
             }
 
         }
-        if (exprᴛ2 == "freebsd"u8) {
+        else if (exprᴛ2 == "freebsd"u8) {
             return goarch == "amd64"u8;
         }
 

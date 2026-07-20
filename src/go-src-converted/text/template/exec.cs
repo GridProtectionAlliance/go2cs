@@ -484,7 +484,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
             return;
         } while (false);
     }
-    if (exprᴛ1 == reflect.Map) {
+    else if (exprᴛ1 == reflect.Map) {
         do {
             if (val.Len() == 0) {
                 break;
@@ -496,7 +496,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
             return;
         } while (false);
     }
-    if (exprᴛ1 == reflect.Chan) {
+    else if (exprᴛ1 == reflect.Chan) {
         do {
             if (val.IsNil()) {
                 break;
@@ -519,7 +519,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
             return;
         } while (false);
     }
-    if (exprᴛ1 == reflect.Invalid) {
+    else if (exprᴛ1 == reflect.Invalid) {
         do {
             break;
         } while (false);
@@ -794,7 +794,7 @@ internal static bool isHexInt(@string s) {
             return field;
         }
     }
-    if (exprᴛ1 == reflect.Map) {
+    else if (exprᴛ1 == reflect.Map) {
         var nameVal = reflect.ValueOf(fieldName);
         if (nameVal.Type().AssignableTo(receiver.Type().Key())) {
             // If it's a map, attempt to use the field name as a key.
@@ -818,7 +818,7 @@ internal static bool isHexInt(@string s) {
             return result;
         }
     }
-    if (exprᴛ1 == reflect.ΔPointer) {
+    else if (exprᴛ1 == reflect.ΔPointer) {
         do {
             var etyp = receiver.Type().Elem();
             if (etyp.Kind() == reflect.Struct) {
@@ -1058,15 +1058,15 @@ internal static bool canBeNil(reflectꓸType typ) {
             return s.evalEmptyInterface(dot, n);
         }
     }
-    if (exprᴛ1 == reflect.Struct) {
+    else if (exprᴛ1 == reflect.Struct) {
         if (AreEqual(typ, reflectValueType)) {
             return reflect.ValueOf(s.evalEmptyInterface(dot, n));
         }
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    else if (exprᴛ1 == reflect.ΔString) {
         return s.evalString(typ, n);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+    else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
         return s.evalUnsignedInteger(typ, n);
     }
 

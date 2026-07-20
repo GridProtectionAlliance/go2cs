@@ -241,9 +241,7 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
     m.Value.p = re.prog;
     if (cap((~m).matchcap) < re.matchcap) {
         m.Value.matchcap = new slice<nint>(re.matchcap);
-        foreach (var (_, vᴛ1) in (~m).pool) {
-            var t = vᴛ1;
-
+        foreach (var (_, t) in (~m).pool) {
             t.Value.cap = new slice<nint>(re.matchcap);
         }
     }
@@ -742,12 +740,12 @@ internal static array<byte> specialBytes = new(16);
 
 // special reports whether byte b needs to be escaped by QuoteMeta.
 internal static bool special(byte b) {
-    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & ((byte)(1 << (int)((b / 16))))) != 0;
+    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (((byte)1).Lsh((uint64)((b / 16))))) != 0;
 }
 
 [GoInit] internal static void init() {
     foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$"u8)) {
-        specialBytes[b % 16] |= (byte)((byte)(1 << (int)((b / 16))));
+        specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)((b / 16))));
     }
 }
 

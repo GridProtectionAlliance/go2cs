@@ -78,9 +78,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         }
         if (combineFiles && numDiskFiles > 1) {
             foreach (var (_, fhs) in (~formʗ1).File) {
-                foreach (var (_, vᴛ1) in fhs) {
-                    var fh = vᴛ1;
-
+                foreach (var (_, fh) in fhs) {
                     fh.Value.tmpshared = true;
                 }
             }

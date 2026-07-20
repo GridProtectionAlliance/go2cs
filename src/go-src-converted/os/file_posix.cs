@@ -18,7 +18,7 @@ partial class os_package {
 // be canceled and return immediately with an [ErrClosed] error.
 // Close will return an error if it has already been called.
 public static error Close(this ж<File> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
+    ref var f = ref Ꮡf.DerefOrNil();
 
     if (Ꮡf == nil) {
         return ErrInvalid;

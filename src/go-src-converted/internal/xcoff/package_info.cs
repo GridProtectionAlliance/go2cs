@@ -48,8 +48,6 @@ using static go.@internal.xcoff_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]

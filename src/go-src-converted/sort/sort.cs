@@ -68,7 +68,7 @@ internal static readonly sortedHint decreasingHint = 2;
 
 internal static nuint nextPowerOfTwo(nint length) {
     nuint shift = (nuint)bits.Len((nuint)length);
-    return (nuint)(((nuint)1 << (int)(shift)));
+    return (nuint)(((nuint)1).Lsh(shift));
 }
 
 // lessSwap is a pair of Less and Swap function for use with the

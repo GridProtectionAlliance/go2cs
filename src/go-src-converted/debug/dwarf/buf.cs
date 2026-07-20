@@ -137,7 +137,7 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 
     for (nint i = 0; i < len(b.data); i++) {
         var @byte = b.data[i];
-        c |= (uint64)(((uint64)((byte)(@byte & 0x7F)) << (int)(bits)));
+        c |= (uint64)(((uint64)((byte)(@byte & 0x7F))).Lsh(bits));
         bits += 7;
         if ((byte)(@byte & 0x80) == 0) {
             b.off += ((Offset)(uint32)(i + 1));
@@ -158,8 +158,8 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 [GoRecv] internal static int64 @int(this ref buf b) {
     var (ux, bits) = b.varint();
     var x = (int64)ux;
-    if ((int64)(x & (((int64)1 << (int)((bits - 1))))) != 0) {
-        x |= (int64)(((int64)(-1) << (int)(bits)));
+    if ((int64)(x & (((int64)1).Lsh((bits - 1)))) != 0) {
+        x |= (int64)(((int64)(-1)).Lsh(bits));
     }
     return x;
 }

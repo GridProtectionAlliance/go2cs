@@ -1168,7 +1168,7 @@ public static bool EqualFold(@string s, @string t) {
             (tr, sr) = (sr, tr);
         }
         // ASCII only, sr/tr must be upper/lower case
-        if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == sr + (rune)'a' - (rune)'A') {
+        if ((rune)'A' <= sr && sr <= (rune)'Z' && tr == (byte)(sr + (rune)'a' - (rune)'A')) {
             continue;
         }
         return false;

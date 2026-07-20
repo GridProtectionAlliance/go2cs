@@ -645,7 +645,7 @@ Loop:
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
             return l.errorf("unterminated character constant"u8);
         }
-        if (exprᴛ1 is (rune)'\'') { matchᴛ1 = true;
+        else if (exprᴛ1 is (rune)'\'') { matchᴛ1 = true;
             goto break_Loop;
         }
 
@@ -737,7 +737,7 @@ Loop:
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
             return l.errorf("unterminated quoted string"u8);
         }
-        if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
+        else if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
             goto break_Loop;
         }
 

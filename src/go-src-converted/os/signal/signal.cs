@@ -37,15 +37,15 @@ internal static ref handlersᴛ1 handlers => ref Ꮡhandlers.Value;
 }
 
 [GoRecv] internal static bool want(this ref handler h, nint sig) {
-    return (uint32)(((h.mask[sig / 32] >> (int)((nuint)((nint)(sig & 31))))) & 1) != 0;
+    return (uint32)((h.mask[sig / 32].Rsh((nuint)((nint)(sig & 31)))) & 1) != 0;
 }
 
 [GoRecv] internal static void set(this ref handler h, nint sig) {
-    h.mask[sig / 32] |= (uint32)(((uint32)1 << (int)((nuint)((nint)(sig & 31)))));
+    h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31))));
 }
 
 [GoRecv] internal static void clear(this ref handler h, nint sig) {
-    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((nuint)((nint)(sig & 31))))));
+    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31)))));
 }
 
 // Stop relaying the signals, sigs, to any channels previously registered to
@@ -228,7 +228,7 @@ internal static void process(osꓸSignal sig) => func((defer, recover) => {
         if (h.want(n)) {
             // send but do not block for it
             switch (ᐧ) {
-            case ᐧ: {
+            case ᐧ when c.ᐸꟷ(sig, ꟷ): {
                 break;
             }
             default: {
@@ -240,7 +240,7 @@ internal static void process(osꓸSignal sig) => func((defer, recover) => {
     foreach (var (_, d) in handlers.stopping) {
         if (d.h.want(n)) {
             switch (ᐧ) {
-            case ᐧ: {
+            case ᐧ when d.c.ᐸꟷ(sig, ꟷ): {
                 break;
             }
             default: {

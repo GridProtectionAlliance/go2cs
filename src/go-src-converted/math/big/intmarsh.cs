@@ -15,7 +15,7 @@ internal const byte intGobVersion = 1;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡx == nil) {
         return (default!, default!);
@@ -41,7 +41,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
         return default!;
     }
     var b = buf[0];
-    if ((b >> (int)(1)) != intGobVersion) {
+    if ((byte)((b >> (int)(1))) != intGobVersion) {
         return fmt.Errorf("Int.GobDecode: encoding version %d not supported"u8, (b >> (int)(1)));
     }
     z.neg = (byte)(b & 1) != 0;
@@ -54,7 +54,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
     slice<byte> text = default!;
     error err = default!;
 
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     if (Ꮡx == nil) {
         return (slice<byte>("<nil>"u8), default!);
     }
@@ -77,7 +77,7 @@ public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
 
 // MarshalJSON implements the [encoding/json.Marshaler] interface.
 public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡx == nil) {
         return (slice<byte>("null"u8), default!);

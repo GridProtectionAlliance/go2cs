@@ -154,7 +154,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     [go122.EvGoroutineStack] = (Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree),
     [go122.EvGoroutineStackAlloc] = (Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree),
     [go122.EvGoroutineStackFree] = (Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)
-}.array(); }
+}.array(256); }
 
 [GoRecv] internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.Value;

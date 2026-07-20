@@ -210,7 +210,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
     // bits and nBits are accumulated bits to write to w.
     internal uint32 bits, nBits;
     // quant is the scaled quantization tables, in zig-zag order.
-    internal array<array<byte>> quant = new(nQuantIndex);
+    internal array<array<byte>> quant = new(nQuantIndex, () => new(64));
 }
 
 [GoRecv] internal static void flush(this ref encoder e) {
@@ -274,7 +274,7 @@ internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Valu
     }
     e.emitHuff(h, (int32)((runLength << (int)(4)) | (int32)nBits));
     if (nBits > 0) {
-        e.emit((uint32)((uint32)b & (((uint32)1 << (int)(nBits)) - 1)), nBits);
+        e.emit((uint32)((uint32)b & (((uint32)1).Lsh((uint64)(nBits)) - 1)), nBits);
     }
 }
 
@@ -596,7 +596,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     if (b.Dx() >= (1 << (int)(16)) || b.Dy() >= (1 << (int)(16))) {
         return errors.New("jpeg: image is too large to encode"u8);
     }
-    encoder e = default!;
+    encoder e = new();
     {
         var (ww, ok) = w._<writer>(ᐧ); if (ok){
             e.w = ww;

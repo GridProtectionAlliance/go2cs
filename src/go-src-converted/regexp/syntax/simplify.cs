@@ -13,7 +13,7 @@ partial class syntax_package {
 // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
 // The returned regexp may share structure with or be the original.
 public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
+    ref var re = ref Ꮡre.DerefOrNil();
 
     if (Ꮡre == nil) {
         return default!;

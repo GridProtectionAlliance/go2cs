@@ -163,7 +163,7 @@ partial class net_package {
 }
 
 internal static bool ok(this ж<conn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     return Ꮡc != nil && c.fd != nil;
 }
@@ -508,7 +508,7 @@ internal static error mapErr(error err) {
 }
 
 public static @string Error(this ж<OpError> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
     if (Ꮡe == nil) {
         return "<nil>"u8;
@@ -598,7 +598,7 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
 }
 
 public static @string Error(this ж<AddrError> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
     if (Ꮡe == nil) {
         return "<nil>"u8;
@@ -783,7 +783,7 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 }
 
 public static @string Error(this ж<DNSError> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
     if (Ꮡe == nil) {
         return "<nil>"u8;

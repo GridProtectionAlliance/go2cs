@@ -909,7 +909,7 @@ internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> d
     [15] = decComplex64,
     [16] = decComplex128,
     [24] = decString
-}.array();
+}.array(25);
 
 // Indexed by gob types.  tComplex will be added during type.init().
 internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap;

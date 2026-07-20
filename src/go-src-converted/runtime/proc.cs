@@ -652,9 +652,7 @@ internal static (ж<ж<g>>, uintptr) atomicAllG() {
 
 // atomicAllGIndex returns ptr[i] with the allgptr returned from atomicAllG.
 internal static ж<g> atomicAllGIndex(ж<ж<g>> Ꮡptr, uintptr i) {
-    ref var ptr = ref Ꮡptr.Value;
-
-    return ~(ж<ж<g>>)(uintptr)(add(@unsafe.Pointer.FromRef(ref ptr), i * (uintptr)goarch.PtrSize));
+    return ~(ж<ж<g>>)(uintptr)(add(new @unsafe.Pointer(Ꮡptr), i * (uintptr)goarch.PtrSize));
 }
 
 // forEachG calls fn on every G from allgs.
@@ -1539,9 +1537,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     sched.stopwait--;
     // try to retake all P's in Psyscall status
     Δtrace = traceAcquire();
-    foreach (var (_, vᴛ1) in allp) {
-        var pp = vᴛ1;
-
+    foreach (var (_, pp) in allp) {
         var s = pp.Value.status;
         if (s == _Psyscall && atomic.Cas(pp.of(runtime_package.Δp.Ꮡstatus), s, _Pgcstop)) {
             if (Δtrace.ok()) {
@@ -1595,9 +1591,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     if (sched.stopwait != 0){
         bad = "stopTheWorld: not stopped (stopwait != 0)"u8;
     } else {
-        foreach (var (_, vᴛ2) in allp) {
-            var pp = vᴛ2;
-
+        foreach (var (_, pp) in allp) {
             if ((~pp).status != _Pgcstop) {
                 bad = "stopTheWorld: not stopped (status != _Pgcstop)"u8;
             }

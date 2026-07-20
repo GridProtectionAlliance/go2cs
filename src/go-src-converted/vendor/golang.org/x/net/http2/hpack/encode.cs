@@ -197,7 +197,7 @@ internal static slice<byte> appendTableSize(slice<byte> dst, uint32 v) {
 // See
 // https://httpwg.org/specs/rfc7541.html#integer.representation
 internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
-    var k = (uint64)((((uint64)1 << (int)(n))) - 1);
+    var k = (uint64)((((uint64)1).Lsh((uint64)(n))) - 1);
     if (i < k) {
         return append(dst, (byte)i);
     }

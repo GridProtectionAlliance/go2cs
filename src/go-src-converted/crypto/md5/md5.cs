@@ -163,7 +163,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     // 8 bytes representing the message length in bits.
     //
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
-    var tmp = new byte[]{0x80}.array();
+    var tmp = new byte[]{0x80}.array(72);
     var pad = (55 - d.len) % 64;
     // calculate number of padding bytes
     byteorder.LePutUint64(tmp[(int)(1 + pad)..], (d.len << (int)(3)));
@@ -179,7 +179,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     byteorder.LePutUint32(digest[4..], d.s[1]);
     byteorder.LePutUint32(digest[8..], d.s[2]);
     byteorder.LePutUint32(digest[12..], d.s[3]);
-    return digest;
+    return digest.Clone();
 }
 
 // Sum returns the MD5 checksum of the data.

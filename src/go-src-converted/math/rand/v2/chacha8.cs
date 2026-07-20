@@ -35,7 +35,7 @@ public static void Seed(this ж<ChaCha8> Ꮡc, array<byte> seed) {
     ref var c = ref Ꮡc.Value;
     Ꮡc.of(ChaCha8.Ꮡstate).Init(seed);
     c.readLen = 0;
-    c.readBuf = new byte[]{}.array();
+    c.readBuf = new byte[]{}.array(8);
 }
 
 // Uint64 returns a uniformly distributed random uint64 value.

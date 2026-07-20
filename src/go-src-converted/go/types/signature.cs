@@ -174,7 +174,7 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
                 //       again when we type-check the signature.
                 // TODO(gri) maybe the receiver should be marked as invalid instead?
                 {
-                    var recv = asNamed(Ꮡcheck.genericType(new ast_IdentжExpr(rname), nil)); if (recv != nil) {
+                    var recv = asNamed(Ꮡcheck.genericType(new ast.IdentжExpr(rname), nil)); if (recv != nil) {
                         recvTParams = recv.TypeParams().list();
                     }
                 }
@@ -182,9 +182,7 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
             // provide type parameter bounds
             if (len(tparams) == len(recvTParams)){
                 var smap = makeRenameMap(recvTParams, tparams);
-                foreach (var (i, vᴛ1) in tparams) {
-                    var tpar = vᴛ1;
-
+                foreach (var (i, tpar) in tparams) {
                     var recvTPar = recvTParams[i];
                     check.mono.recordCanon(tpar, recvTPar);
                     // recvTPar.bound is (possibly) parameterized in the context of the

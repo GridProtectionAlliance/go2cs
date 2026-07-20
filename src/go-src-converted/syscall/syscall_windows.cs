@@ -898,7 +898,7 @@ internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrInet4> 
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡsa.of(SockaddrInet4.Ꮡraw).of(RawSockaddrInet4.ᏑPort)));
     p.Value[0] = (byte)((sa.Port >> (int)(8)));
     p.Value[1] = (byte)sa.Port;
-    sa.raw.Addr = sa.Addr;
+    sa.raw.Addr = sa.Addr.Clone();
     return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet4.Ꮡraw)), (int32)@unsafe.Sizeof(sa.raw), default!);
 }
 
@@ -920,7 +920,7 @@ internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrInet6> 
     p.Value[0] = (byte)((sa.Port >> (int)(8)));
     p.Value[1] = (byte)sa.Port;
     sa.raw.Scope_id = sa.ZoneId;
-    sa.raw.Addr = sa.Addr;
+    sa.raw.Addr = sa.Addr.Clone();
     return (new @unsafe.Pointer(Ꮡsa.of(SockaddrInet6.Ꮡraw)), (int32)@unsafe.Sizeof(sa.raw), default!);
 }
 
@@ -995,7 +995,7 @@ public static (ΔSockaddr, error) Sockaddr(this ж<RawSockaddrAny> Ꮡrsa) {
         var sa = @new<SockaddrInet4>();
         var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(RawSockaddrInet4.ᏑPort)));
         sa.Value.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
-        sa.Value.Addr = pp.Value.Addr;
+        sa.Value.Addr = pp.Value.Addr.Clone();
         return (new SockaddrInet4жΔSockaddr(sa), default!);
     }
     if (exprᴛ1 == AF_INET6) {
@@ -1004,7 +1004,7 @@ public static (ΔSockaddr, error) Sockaddr(this ж<RawSockaddrAny> Ꮡrsa) {
         var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(RawSockaddrInet6.ᏑPort)));
         sa.Value.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
         sa.Value.ZoneId = pp.Value.Scope_id;
-        sa.Value.Addr = pp.Value.Addr;
+        sa.Value.Addr = pp.Value.Addr.Clone();
         return (new SockaddrInet6жΔSockaddr(sa), default!);
     }
 

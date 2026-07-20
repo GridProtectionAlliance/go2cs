@@ -222,7 +222,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     // one that does one block at a time.
     const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
     if ((uint64)s.counter + blocksPerBuf > ((uint64)1 << (int)(32))) {
-        s.buf = new byte[]{}.array();
+        s.buf = new byte[]{}.array(64);
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
         var buf = s.buf[(int)((nint)bufSize - numBlocksΔ1 * (nint)blockSize)..];
         copy(buf, src);
@@ -233,7 +233,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     // If we have a partial (multi-)block, pad it for xorKeyStreamBlocks, and
     // keep the leftover keystream for the next XORKeyStream invocation.
     if (len(src) > 0) {
-        s.buf = new byte[]{}.array();
+        s.buf = new byte[]{}.array(64);
         copy(s.buf[..], src);
         s.xorKeyStreamBlocks(s.buf[..], s.buf[..]);
         s.len = (nint)bufSize - copy(dst, s.buf[..]);

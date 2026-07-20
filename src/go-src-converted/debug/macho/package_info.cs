@@ -49,22 +49,24 @@ using static go.debug.macho_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<Dylib, Load>(Pointer = true)]
+[assembly: GoImplement<Dylib, Load>]
 [assembly: GoImplement<Dysymtab, Load>(Pointer = true)]
+[assembly: GoImplement<Dysymtab, Load>]
 [assembly: GoImplement<FormatError, error>(Pointer = true)]
 [assembly: GoImplement<LoadBytes, Load>]
 [assembly: GoImplement<Rpath, Load>(Pointer = true)]
+[assembly: GoImplement<Rpath, Load>]
 [assembly: GoImplement<Symtab, Load>(Pointer = true)]
+[assembly: GoImplement<Symtab, Load>]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
 [assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 [assembly: GoImplement<ΔSegment, Load>(Pointer = true)]
+[assembly: GoImplement<ΔSegment, Load>]
 [assembly: GoImplement<ΔSegment, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 

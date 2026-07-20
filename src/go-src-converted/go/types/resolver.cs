@@ -324,7 +324,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     // in a dot-import, the dot represents the package
                     Ꮡcheck.Value.recordDef((~dΔ1.spec).Name, new PkgNameжObject(pkgName));
                 } else {
-                    Ꮡcheck.Value.recordImplicit(new ast_ImportSpecжNode(dΔ1.spec), new PkgNameжObject(pkgName));
+                    Ꮡcheck.Value.recordImplicit(new ast.ImportSpecжNode(dΔ1.spec), new PkgNameжObject(pkgName));
                 }
                 if ((~imp).fake) {
                     // match 1.17 cmd/compile (not prescribed by spec)
@@ -520,7 +520,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     foreach (var (i, _) in methods) {
         var m = Ꮡ(methods, i);
         // Determine the receiver base type and associate m with it.
-        var (ptr, @base) = check.resolveBaseTypeName((~m).ptr, new ast_IdentжExpr((~m).recv), fileScopes);
+        var (ptr, @base) = check.resolveBaseTypeName((~m).ptr, new ast.IdentжExpr((~m).recv), fileScopes);
         if (@base != nil) {
             m.Value.obj.Value.hasPtrRecv_ = ptr;
             check.methods[@base] = append(check.methods[@base], (~m).obj);

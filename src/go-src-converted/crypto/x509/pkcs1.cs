@@ -152,7 +152,7 @@ public static (ж<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
     if (pub.N.Sign() <= 0 || pub.E <= 0) {
         return (default!, errors.New("x509: public key contains zero or negative value"u8));
     }
-    if (pub.E > 2147483648L - 1) {
+    if (pub.E > (nint)(2147483648L - 1)) {
         return (default!, errors.New("x509: public key contains large public exponent"u8));
     }
     return (Ꮡ(new rsa.PublicKey(

@@ -294,7 +294,7 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
         qq++;
         r0 -= d;
     }
-    return (((Word)qq), ((Word)((r0 >> (int)(s)))));
+    return (((Word)qq), ((Word)(r0.Rsh(s))));
 }
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).

@@ -203,7 +203,7 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
         }
         if (exprᴛ1 == i) {
         }
-        { /* default: */
+        else { /* default: */
             if (hostport[end + 1] == (rune)':') {
                 // The expected result.
                 // Either ']' isn't followed by a colon, or it is
@@ -286,7 +286,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
             }
         }
     }
-    if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
+    else if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
         if (addr != ""u8) {
             host = addr;
         }

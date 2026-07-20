@@ -80,7 +80,7 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) => func((defer, 
 
 [GoRecv] internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
     switch (ᐧ) {
-    case ᐧ: {
+    case ᐧ when conf.ch.ᐸꟷ(new EmptyStruct(), ꟷ): {
         return true;
     }
     default: {

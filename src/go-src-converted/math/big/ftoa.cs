@@ -235,7 +235,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ж<Float> Ꮡx) {
         var okdown = l != m || inclusive && i + 1 == len(lower.mant);
         // Okay to round up if upper has a different digit and either upper
         // is inclusive or upper is bigger than the result of rounding up.
-        var okup = m != u && (inclusive || m + 1 < u || i + 1 < len(upper.mant));
+        var okup = m != u && (inclusive || (byte)(m + 1) < u || i + 1 < len(upper.mant));
         // If it's okay to do either, then round to the nearest one.
         // If it's okay to do only one, do it.
         switch (ᐧ) {

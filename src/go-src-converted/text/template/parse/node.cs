@@ -104,7 +104,7 @@ internal static ж<ListNode> newList(this ж<Tree> Ꮡt, Pos pos) {
 }
 
 public static ж<ListNode> CopyList(this ж<ListNode> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
 
     if (Ꮡl == nil) {
         return Ꮡl;
@@ -232,7 +232,7 @@ internal static ж<PipeNode> newPipeline(this ж<Tree> Ꮡt, Pos pos, nint line,
 }
 
 public static ж<PipeNode> CopyPipe(this ж<PipeNode> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
+    ref var p = ref Ꮡp.DerefOrNil();
 
     if (Ꮡp == nil) {
         return Ꮡp;
@@ -332,7 +332,7 @@ internal static ж<CommandNode> newCommand(this ж<Tree> Ꮡt, Pos pos) {
 }
 
 public static Node Copy(this ж<CommandNode> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     if (Ꮡc == nil) {
         return new CommandNodeжNode(Ꮡc);

@@ -19,15 +19,11 @@ partial class profile_package {
 [GoRecv] internal static void preEncode(this ref Profile p) {
     var strings = new map<@string, nint>();
     addString(strings, ""u8);
-    foreach (var (_, vᴛ1) in p.SampleType) {
-        var st = vᴛ1;
-
+    foreach (var (_, st) in p.SampleType) {
         st.Value.typeX = addString(strings, (~st).Type);
         st.Value.unitX = addString(strings, (~st).Unit);
     }
-    foreach (var (_, vᴛ2) in p.Sample) {
-        var s = vᴛ2;
-
+    foreach (var (_, s) in p.Sample) {
         s.Value.labelX = default!;
         slice<@string> keys = default!;
         foreach (var (k, _) in (~s).Label) {
@@ -64,15 +60,11 @@ partial class profile_package {
             s.Value.locationIDX = append((~s).locationIDX, (~l).ID);
         }
     }
-    foreach (var (_, vᴛ3) in p.Mapping) {
-        var m = vᴛ3;
-
+    foreach (var (_, m) in p.Mapping) {
         m.Value.fileX = addString(strings, (~m).File);
         m.Value.buildIDX = addString(strings, (~m).BuildID);
     }
-    foreach (var (_, vᴛ4) in p.Location) {
-        var l = vᴛ4;
-
+    foreach (var (_, l) in p.Location) {
         foreach (var (i, ln) in (~l).Line) {
             if (ln.Function != nil){
                 (~l).Line[i].functionIDX = ln.Function.Value.ID;
@@ -86,9 +78,7 @@ partial class profile_package {
             l.Value.mappingIDX = 0;
         }
     }
-    foreach (var (_, vᴛ5) in p.Function) {
-        var f = vᴛ5;
-
+    foreach (var (_, f) in p.Function) {
         f.Value.nameX = addString(strings, (~f).Name);
         f.Value.systemNameX = addString(strings, (~f).SystemName);
         f.Value.filenameX = addString(strings, (~f).Filename);
@@ -216,26 +206,20 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
 
     error err = default!;
     var mappings = new map<uint64, ж<Mapping>>();
-    foreach (var (_, vᴛ1) in p.Mapping) {
-        var m = vᴛ1;
-
+    foreach (var (_, m) in p.Mapping) {
         (m.Value.File, err) = getString(p.stringTable, m.of(Mapping.ᏑfileX), err);
         (m.Value.BuildID, err) = getString(p.stringTable, m.of(Mapping.ᏑbuildIDX), err);
         mappings[(~m).ID] = m;
     }
     var functions = new map<uint64, ж<Function>>();
-    foreach (var (_, vᴛ2) in p.Function) {
-        var f = vᴛ2;
-
+    foreach (var (_, f) in p.Function) {
         (f.Value.Name, err) = getString(p.stringTable, f.of(Function.ᏑnameX), err);
         (f.Value.SystemName, err) = getString(p.stringTable, f.of(Function.ᏑsystemNameX), err);
         (f.Value.Filename, err) = getString(p.stringTable, f.of(Function.ᏑfilenameX), err);
         functions[(~f).ID] = f;
     }
     var locations = new map<uint64, ж<Location>>();
-    foreach (var (_, vᴛ3) in p.Location) {
-        var l = vᴛ3;
-
+    foreach (var (_, l) in p.Location) {
         l.Value.Mapping = mappings[(~l).mappingIDX];
         l.Value.mappingIDX = 0;
         foreach (var (i, ln) in (~l).Line) {
@@ -251,20 +235,16 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
         }
         locations[(~l).ID] = l;
     }
-    foreach (var (_, vᴛ4) in p.SampleType) {
-        var st = vᴛ4;
-
+    foreach (var (_, st) in p.SampleType) {
         (st.Value.Type, err) = getString(p.stringTable, st.of(ValueType.ᏑtypeX), err);
         (st.Value.Unit, err) = getString(p.stringTable, st.of(ValueType.ᏑunitX), err);
     }
-    foreach (var (_, vᴛ5) in p.Sample) {
-        var s = vᴛ5;
-
+    foreach (var (_, s) in p.Sample) {
         var labels = new map<@string, slice<@string>>();
         var numLabels = new map<@string, slice<int64>>();
-        foreach (var (_, vᴛ6) in (~s).labelX) {
+        foreach (var (_, vᴛ1) in (~s).labelX) {
             ref var l = ref heap(new Label(), out var Ꮡl);
-            l = vᴛ6;
+            l = vᴛ1;
 
             @string key = default!;
             @string value = default!;
@@ -301,9 +281,9 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
             (pt.Value.Unit, err) = getString(p.stringTable, pt.of(ValueType.ᏑunitX), err);
         }
     }
-    foreach (var (_, vᴛ7) in p.commentX) {
+    foreach (var (_, vᴛ2) in p.commentX) {
         ref var i = ref heap(new int64(), out var Ꮡi);
-        i = vᴛ7;
+        i = vᴛ2;
 
         @string c = default!;
         (c, err) = getString(p.stringTable, Ꮡi, err);

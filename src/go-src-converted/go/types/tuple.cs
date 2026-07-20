@@ -26,7 +26,7 @@ public static ж<Tuple> NewTuple(params Span<ж<Var>> xʗp) {
 
 // Len returns the number variables of tuple t.
 public static nint Len(this ж<Tuple> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt != nil) {
         return len(t.vars);

@@ -17,7 +17,7 @@ partial class runtime_package {
 
 // reset resets the gTraceState for a new goroutine.
 [GoRecv] internal static void reset(this ref gTraceState s) {
-    s.seq = new uint64[]{}.array();
+    s.seq = new uint64[]{}.array(2);
 }
 
 // N.B. s.statusTraced is managed and cleared separately.

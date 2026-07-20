@@ -18,7 +18,7 @@ internal const byte floatGobVersion = 1;
 // The [Float] value and all its attributes (precision,
 // rounding mode, accuracy) are marshaled.
 public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡx == nil) {
         return (default!, default!);

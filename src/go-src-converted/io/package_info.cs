@@ -39,7 +39,22 @@ using static go.io_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<LimitedReader, Reader>(Pointer = true)]
+[assembly: GoImplement<OffsetWriter, Seeker>(Pointer = true)]
+[assembly: GoImplement<OffsetWriter, WriteSeeker>(Pointer = true)]
+[assembly: GoImplement<OffsetWriter, Writer>(Pointer = true)]
+[assembly: GoImplement<OffsetWriter, WriterAt>(Pointer = true)]
+[assembly: GoImplement<PipeReader, Closer>(Pointer = true)]
+[assembly: GoImplement<PipeReader, ReadCloser>(Pointer = true)]
+[assembly: GoImplement<PipeReader, Reader>(Pointer = true)]
+[assembly: GoImplement<PipeWriter, Closer>(Pointer = true)]
+[assembly: GoImplement<PipeWriter, WriteCloser>(Pointer = true)]
+[assembly: GoImplement<PipeWriter, Writer>(Pointer = true)]
+[assembly: GoImplement<SectionReader, ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<SectionReader, Reader>(Pointer = true)]
+[assembly: GoImplement<SectionReader, ReaderAt>(Pointer = true)]
+[assembly: GoImplement<SectionReader, Seeker>(Pointer = true)]
 [assembly: GoImplement<discard, ReaderFrom>]
+[assembly: GoImplement<discard, StringWriter>]
 [assembly: GoImplement<discard, Writer>]
 [assembly: GoImplement<eofReader, Reader>]
 [assembly: GoImplement<multiReader, Reader>(Pointer = true)]
@@ -50,6 +65,7 @@ using static go.io_package;
 [assembly: GoImplement<nopCloser, Reader>(Promoted = true)]
 [assembly: GoImplement<nopCloserWriterTo, ReadCloser>]
 [assembly: GoImplement<nopCloserWriterTo, Reader>(Promoted = true)]
+[assembly: GoImplement<nopCloserWriterTo, WriterTo>]
 [assembly: GoImplement<teeReader, Reader>(Pointer = true)]
 // </InterfaceImplementations>
 

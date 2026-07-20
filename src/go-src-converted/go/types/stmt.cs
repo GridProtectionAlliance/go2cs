@@ -48,7 +48,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
     if (check.hasLabel) {
         Ꮡcheck.labels(Ꮡbody);
     }
-    if (sig.results.Len() > 0 && !check.isTerminating(new ast_BlockStmtжStmt(Ꮡbody), ""u8)) {
+    if (sig.results.Len() > 0 && !check.isTerminating(new ast.BlockStmtжStmt(Ꮡbody), ""u8)) {
         Ꮡcheck.error(((atPos)body.Rbrace), MissingReturn, "missing return"u8);
     }
     // spec: "Implementation restriction: A compiler may make it illegal to
@@ -181,7 +181,7 @@ internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, �
     ref var x = ref heap(new operand(), out var Ꮡx);
     @string msg = default!;
     errors.Code code = default!;
-    var exprᴛ1 = Ꮡcheck.rawExpr(nil, Ꮡx, new ast_CallExprжExpr(Ꮡcall), default!, false);
+    var exprᴛ1 = Ꮡcheck.rawExpr(nil, Ꮡx, new ast.CallExprжExpr(Ꮡcall), default!, false);
     if (exprᴛ1 == Δconversion) {
         msg = "requires function call, not conversion"u8;
         code = InvalidDefer;
@@ -196,7 +196,7 @@ internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, �
     else if (exprᴛ1 == statement) {
         return;
     }
-    { /* default: */
+    else { /* default: */
         throw panic("unreachable");
     }
 
@@ -226,14 +226,14 @@ internal static any goVal(constant.Value val) {
             }
         }
     }
-    if (exprᴛ1 == constant.Float) {
+    else if (exprᴛ1 == constant.Float) {
         {
             var (x, ok) = constant.Float64Val(val); if (ok) {
                 return x;
             }
         }
     }
-    if (exprᴛ1 == constant.ΔString) {
+    else if (exprᴛ1 == constant.ΔString) {
         return constant.StringVal(val);
     }
 
@@ -476,16 +476,16 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         }
         var u = coreType(ch.typ);
         if (u == default!) {
-            Ꮡcheck.errorf(inNode(new ast_SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to %s: no core type", Ꮡch);
+            Ꮡcheck.errorf(inNode(new ast.SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to %s: no core type", Ꮡch);
             return;
         }
         var (uch, _) = u._<ж<Chan>>(ᐧ);
         if (uch == nil) {
-            Ꮡcheck.errorf(inNode(new ast_SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to non-channel %s", Ꮡch);
+            Ꮡcheck.errorf(inNode(new ast.SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to non-channel %s", Ꮡch);
             return;
         }
         if ((~uch).dir == RecvOnly) {
-            Ꮡcheck.errorf(inNode(new ast_SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to receive-only channel %s", Ꮡch);
+            Ꮡcheck.errorf(inNode(new ast.SendStmtжNode(sΔ1), (~sΔ1).Arrow), InvalidSend, invalidOp + "cannot send to receive-only channel %s", Ꮡch);
             return;
         }
         Ꮡcheck.assignment(Ꮡval, (~uch).elem, "send"u8);
@@ -501,7 +501,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             op = token.SUB;
         }
         else { /* default: */
-            Ꮡcheck.errorf(inNode(new ast_IncDecStmtжNode(sΔ1), (~sΔ1).TokPos), InvalidSyntaxTree, "unknown inc/dec operation %s"u8, (~sΔ1).Tok);
+            Ꮡcheck.errorf(inNode(new ast.IncDecStmtжNode(sΔ1), (~sΔ1).TokPos), InvalidSyntaxTree, "unknown inc/dec operation %s"u8, (~sΔ1).Tok);
             return;
         }
 
@@ -516,7 +516,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         }
         var Y = Ꮡ(new ast.BasicLit(ValuePos: (~sΔ1).X.Pos(), Kind: token.INT, Value: "1"u8));
         Ꮡcheck.binary(Ꮡx, // use x's position
- default!, (~sΔ1).X, new ast_BasicLitжExpr(Y), op, (~sΔ1).TokPos);
+ default!, (~sΔ1).X, new ast.BasicLitжExpr(Y), op, (~sΔ1).TokPos);
         if (x.mode == invalid) {
             return;
         }
@@ -531,7 +531,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 return;
             }
             if ((~sΔ1).Tok == token.DEFINE){
-                Ꮡcheck.shortVarDecl(inNode(new ast_AssignStmtжNode(sΔ1), (~sΔ1).TokPos), (~sΔ1).Lhs, (~sΔ1).Rhs);
+                Ꮡcheck.shortVarDecl(inNode(new ast.AssignStmtжNode(sΔ1), (~sΔ1).TokPos), (~sΔ1).Lhs, (~sΔ1).Rhs);
             } else {
                 // regular assignment
                 Ꮡcheck.assignVars((~sΔ1).Lhs, (~sΔ1).Rhs);
@@ -540,7 +540,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         else { /* default: */
             if (len((~sΔ1).Lhs) != 1 || len((~sΔ1).Rhs) != 1) {
                 // assignment operations
-                Ꮡcheck.errorf(inNode(new ast_AssignStmtжNode(sΔ1), (~sΔ1).TokPos), MultiValAssignOp, "assignment operation %s requires single-valued expressions"u8, (~sΔ1).Tok);
+                Ꮡcheck.errorf(inNode(new ast.AssignStmtжNode(sΔ1), (~sΔ1).TokPos), MultiValAssignOp, "assignment operation %s requires single-valued expressions"u8, (~sΔ1).Tok);
                 return;
             }
             token.Token op = assignOp((~sΔ1).Tok);
@@ -590,7 +590,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             if (res.Len() > 0) {
                 lhs = res.Value.vars;
             }
-            Ꮡcheck.initVars(lhs, (~sΔ1).Results, new ast_ReturnStmtжStmt(sΔ1));
+            Ꮡcheck.initVars(lhs, (~sΔ1).Results, new ast.ReturnStmtжStmt(sΔ1));
         }
         break;
     }
@@ -644,7 +644,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         break;
     }
     case ж<ast.IfStmt> sΔ1: {
-        check.openScope(new ast_IfStmtжNode(sΔ1), "if"u8);
+        check.openScope(new ast.IfStmtжNode(sΔ1), "if"u8);
         defer(Ꮡcheck.closeScope);
         Ꮡcheck.simpleStmt((~sΔ1).Init);
         ref var x = ref heap(new operand(), out var Ꮡx);
@@ -652,7 +652,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         if (x.mode != invalid && !allBoolean(x.typ)) {
             Ꮡcheck.error(new ast_Exprᴠpositioner((~sΔ1).Cond), InvalidCond, "non-boolean condition in if statement"u8);
         }
-        Ꮡcheck.stmt(inner, new ast_BlockStmtжStmt((~sΔ1).Body));
+        Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt((~sΔ1).Body));
         switch ((~sΔ1).Else.type()) {
         case null:
         case ж<ast.BadStmt> _: {
@@ -675,7 +675,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     }
     case ж<ast.SwitchStmt> sΔ1: {
         inner |= (stmtContext)(breakOk);
-        check.openScope(new ast_SwitchStmtжNode(sΔ1), "switch"u8);
+        check.openScope(new ast.SwitchStmtжNode(sΔ1), "switch"u8);
         defer(Ꮡcheck.closeScope);
         Ꮡcheck.simpleStmt((~sΔ1).Init);
         ref var x = ref heap(new operand(), out var Ꮡx);
@@ -694,10 +694,10 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             x.mode = constant_;
             x.typ = new BasicжΔType(Typ[Bool]);
             x.val = constant.MakeBool(true);
-            x.expr = new ast_IdentжExpr(Ꮡ(new ast.Ident(NamePos: (~(~sΔ1).Body).Lbrace, Name: "true"u8)));
+            x.expr = new ast.IdentжExpr(Ꮡ(new ast.Ident(NamePos: (~(~sΔ1).Body).Lbrace, Name: "true"u8)));
         }
         Ꮡcheck.multipleDefaults((~(~sΔ1).Body).List);
-        var seen = new valueMap();
+        var seen = new valueMap(0);
         foreach (var (i, c) in (~(~sΔ1).Body).List) {
             // map of seen case values to positions and types
             var (clause, _) = c._<ж<ast.CaseClause>>(ᐧ);
@@ -706,7 +706,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 continue;
             }
             Ꮡcheck.caseValues(Ꮡx, (~clause).List, seen);
-            check.openScope(new ast_CaseClauseжNode(clause), "case"u8);
+            check.openScope(new ast.CaseClauseжNode(clause), "case"u8);
             stmtContext innerΔ1 = inner;
             if (i + 1 < len((~(~sΔ1).Body).List)){
                 innerΔ1 |= (stmtContext)(fallthroughOk);
@@ -720,7 +720,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     }
     case ж<ast.TypeSwitchStmt> sΔ1: {
         inner |= (stmtContext)((stmtContext)(breakOk | inTypeSwitch));
-        check.openScope(new ast_TypeSwitchStmtжNode(sΔ1), "type switch"u8);
+        check.openScope(new ast.TypeSwitchStmtжNode(sΔ1), "type switch"u8);
         defer(Ꮡcheck.closeScope);
         Ꮡcheck.simpleStmt((~sΔ1).Init);
         // A type switch guard must be of the form:
@@ -798,7 +798,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             }
             // Check each type in this type switch case.
             var T = Ꮡcheck.caseTypes(sx, (~clause).List, seen);
-            check.openScope(new ast_CaseClauseжNode(clause), "case"u8);
+            check.openScope(new ast.CaseClauseжNode(clause), "case"u8);
             // If lhs exists, declare a corresponding variable in the case-local scope.
             if (lhs != nil) {
                 // spec: "The TypeSwitchGuard may include a short variable declaration.
@@ -821,7 +821,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                     }
                 }
                 Ꮡcheck.declare(check.scope, nil, new VarжObject(obj), scopePos);
-                check.recordImplicit(new ast_CaseClauseжNode(clause), new VarжObject(obj));
+                check.recordImplicit(new ast.CaseClauseжNode(clause), new VarжObject(obj));
                 // For the "declared and not used" error, all lhs variables act as
                 // one; i.e., if any one of them is 'used', all of them are 'used'.
                 // Collect them for later analysis.
@@ -833,9 +833,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         if (lhs != nil) {
             // If lhs exists, we must have at least one lhs variable that was used.
             bool used = default!;
-            foreach (var (_, vᴛ1) in lhsVars) {
-                var v = vᴛ1;
-
+            foreach (var (_, v) in lhsVars) {
                 if ((~v).used) {
                     used = true;
                 }
@@ -900,7 +898,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     }
     case ж<ast.ForStmt> sΔ1: {
         inner |= (stmtContext)((stmtContext)(breakOk | continueOk));
-        check.openScope(new ast_ForStmtжNode(sΔ1), "for"u8);
+        check.openScope(new ast.ForStmtжNode(sΔ1), "for"u8);
         defer(Ꮡcheck.closeScope);
         Ꮡcheck.simpleStmt((~sΔ1).Init);
         if ((~sΔ1).Cond != default!) {
@@ -923,7 +921,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             }
         }
         Ꮡcheck.stmt(inner, // avoid follow-up errors
- new ast_BlockStmtжStmt((~sΔ1).Body));
+ new ast.BlockStmtжStmt((~sΔ1).Body));
         break;
     }
     case ж<ast.RangeStmt> sΔ1: {
@@ -947,7 +945,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     ast.Expr sExtra = default!;         // (used only in types2 fork)
     var isDef = s.Tok == token.DEFINE;
     var rangeVar = s.X;
-    var noNewVarPos = inNode(new ast_RangeStmtжNode(Ꮡs), s.TokPos);
+    var noNewVarPos = inNode(new ast.RangeStmtжNode(Ꮡs), s.TokPos);
     // Everything from here on is shared between cmd/compile/internal/types2 and go/types.
     // check expression to iterate over
     ref var x = ref heap(new operand(), out var Ꮡx);
@@ -984,7 +982,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     }
     // Open the for-statement block scope now, after the range clause.
     // Iteration variables declared with := need to go in this scope (was go.dev/issue/51437).
-    check.openScope(new ast_RangeStmtжNode(Ꮡs), "range"u8);
+    check.openScope(new ast.RangeStmtжNode(Ꮡs), "range"u8);
     defer(Ꮡcheck.closeScope);
     // check assignment to/declaration of iteration variables
     // (irregular assignment, cannot easily map to existing assignment checks)
@@ -1097,7 +1095,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         // type (rune or int).
         Ꮡcheck.assignment(Ꮡx, default!, "range clause"u8);
     }
-    Ꮡcheck.stmt(inner, new ast_BlockStmtжStmt(s.Body));
+    Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt(s.Body));
 });
 
 // rangeKeyVal returns the key and value type produced by a range clause

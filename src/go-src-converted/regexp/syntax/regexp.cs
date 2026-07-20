@@ -55,7 +55,7 @@ internal static readonly Op opPseudo = 128; // where pseudo-ops start
 
 // Equal reports whether x and y have identical structure.
 public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     if (Ꮡx == nil || Ꮡy == nil) {
@@ -71,23 +71,23 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
             return false;
         }
     }
-    if (exprᴛ1 == OpLiteral || exprᴛ1 == OpCharClass) {
+    else if (exprᴛ1 == OpLiteral || exprᴛ1 == OpCharClass) {
         return slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
     }
-    if (exprᴛ1 == OpAlternate || exprᴛ1 == OpConcat) {
+    else if (exprᴛ1 == OpAlternate || exprᴛ1 == OpConcat) {
         return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, (Func<ж<Regexp>, ж<Regexp>, bool>)(Equal));
     }
-    if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest) {
+    else if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest) {
         if ((Flags)(x.Flags & NonGreedy) != (Flags)(y.Flags & NonGreedy) || !x.Sub[0].Equal(y.Sub[0])) {
             return false;
         }
     }
-    if (exprᴛ1 == OpRepeat) {
+    else if (exprᴛ1 == OpRepeat) {
         if ((Flags)(x.Flags & NonGreedy) != (Flags)(y.Flags & NonGreedy) || x.Min != y.Min || x.Max != y.Max || !x.Sub[0].Equal(y.Sub[0])) {
             return false;
         }
     }
-    if (exprᴛ1 == OpCapture) {
+    else if (exprᴛ1 == OpCapture) {
         if (x.Cap != y.Cap || x.Name != y.Name || !x.Sub[0].Equal(y.Sub[0])) {
             return false;
         }
@@ -114,7 +114,7 @@ internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags
         flags = new map<ж<Regexp>, printFlags>();
     }
     (flags)[Ꮡstart] = f;
-    (flags)[Ꮡlast] |= flagOff;
+    (flags)[Ꮡlast] |= (printFlags)(flagOff);
 }
 
 // maybe start==last

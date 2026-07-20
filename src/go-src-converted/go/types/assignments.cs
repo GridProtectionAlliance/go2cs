@@ -246,7 +246,7 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
     }
     if (exprᴛ1 == variable || exprᴛ1 == mapindex) {
     }
-    { /* default: */
+    else { /* default: */
         {
             var (sel, ok) = x.expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
                 // ok
@@ -449,9 +449,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
             }
         }
         // ensure that LHS variables have a type
-        foreach (var (_, vᴛ1) in lhs) {
-            var v = vᴛ1;
-
+        foreach (var (_, v) in lhs) {
             if ((~v).typ == default!) {
                 v.Value.typ = new BasicжΔType(Typ[Invalid]);
             }
@@ -481,9 +479,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
     }
     // ensure that LHS variables have a type
-    foreach (var (_, vᴛ2) in lhs) {
-        var v = vᴛ2;
-
+    foreach (var (_, v) in lhs) {
         if ((~v).typ == default!) {
             v.Value.typ = new BasicжΔType(Typ[Invalid]);
         }

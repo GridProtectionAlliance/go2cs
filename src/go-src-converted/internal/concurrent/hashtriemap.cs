@@ -66,7 +66,7 @@ public static ж<HashTrieMap<K, V>> NewHashTrieMap<K, V>()
     nint hashShift = 8 * goarch.PtrSize;
     while (hashShift != 0) {
         hashShift -= nChildrenLog2;
-        var n = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)(((hash >> (int)(hashShift))) & (uintptr)nChildrenMask))).Load();
+        var n = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)((hash.Rsh((uint64)(hashShift))) & (uintptr)nChildrenMask))).Load();
         if (n == nil) {
             return (@new<V>().ValueSlot, false);
         }
@@ -102,7 +102,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
             var haveInsertPoint = false;
             while (hashShift != 0) {
                 hashShift -= nChildrenLog2;
-                slot = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)(((hash >> (int)(hashShift))) & (uintptr)nChildrenMask)));
+                slot = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)((hash.Rsh(hashShift)) & (uintptr)nChildrenMask)));
                 n = slot.Load();
                 if (n == nil) {
                     // We found a nil slot which is a candidate for insertion.
@@ -194,8 +194,8 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         }
         hashShift -= nChildrenLog2;
         // hashShift is for the level parent is at. We need to go deeper.
-        var oi = (uintptr)(((oldHash >> (int)(hashShift))) & (uintptr)nChildrenMask);
-        var ni = (uintptr)(((newHash >> (int)(hashShift))) & (uintptr)nChildrenMask);
+        var oi = (uintptr)((oldHash.Rsh(hashShift)) & (uintptr)nChildrenMask);
+        var ni = (uintptr)((newHash.Rsh(hashShift)) & (uintptr)nChildrenMask);
         if (oi != ni) {
             newIndirect.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)(oi)).Store(ᏑoldEntry.of(concurrent_package.Δentry<K, V>.Ꮡnode));
             newIndirect.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)(ni)).Store(ᏑnewEntry.of(concurrent_package.Δentry<K, V>.Ꮡnode));
@@ -230,7 +230,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         var found = false;
         while (hashShift != 0) {
             hashShift -= nChildrenLog2;
-            slot = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)(((hash >> (int)(hashShift))) & (uintptr)nChildrenMask)));
+            slot = i.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)((hash.Rsh(hashShift)) & (uintptr)nChildrenMask)));
             n = slot.Load();
             if (n == nil) {
                 // Nothing to delete. Give up.
@@ -296,7 +296,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         var parent = i.Value.parent;
         parent.of(concurrent_package.Δindirect<K, V>.Ꮡmu).Lock();
         i.of(concurrent_package.Δindirect<K, V>.Ꮡdead).Store(true);
-        parent.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)(((hash >> (int)(hashShift))) & (uintptr)nChildrenMask))).Store(nil);
+        parent.at(concurrent_package.Δindirect<K, V>.Ꮡchildren, (nint)((uintptr)((hash.Rsh(hashShift)) & (uintptr)nChildrenMask))).Store(nil);
         i.of(concurrent_package.Δindirect<K, V>.Ꮡmu).Unlock();
         i = parent;
     }
@@ -410,13 +410,13 @@ internal static (V, bool) lookup<K, V>(this ж<Δentry<K, V>> Ꮡe, K key, Func<
     where K : /* comparable */ new()
     where V : /* comparable */ new()
 {
-    ref var e = ref Ꮡe.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
     while (Ꮡe != nil) {
         if (equal(new @unsafe.Pointer(Ꮡe.of(concurrent_package.Δentry<K, V>.Ꮡkey)), (uintptr)abi.NoEscape(new @unsafe.Pointer(Ꮡ(key))))) {
             return (e.value, true);
         }
-        Ꮡe = Ꮡe.of(concurrent_package.Δentry<K, V>.Ꮡoverflow).Load(); e = ref Ꮡe.Value;
+        Ꮡe = Ꮡe.of(concurrent_package.Δentry<K, V>.Ꮡoverflow).Load(); e = ref Ꮡe.DerefOrNil();
     }
     return (@new<V>().ValueSlot, false);
 }

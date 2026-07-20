@@ -15,9 +15,7 @@ partial class profile_package {
 [GoRecv] public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
-    foreach (var (_, vᴛ1) in p.Location) {
-        var loc = vᴛ1;
-
+    foreach (var (_, loc) in p.Location) {
         nint i = default!;
         for (i = len((~loc).Line) - 1; i >= 0; i--) {
             {
@@ -48,9 +46,7 @@ partial class profile_package {
         }
     }
     // Prune locs from each Sample
-    foreach (var (_, vᴛ2) in p.Sample) {
-        var sample = vᴛ2;
-
+    foreach (var (_, sample) in p.Sample) {
         // Scan from the root to the leaves to find the prune location.
         // Do not prune frames before the first user frame, to avoid
         // pruning everything.

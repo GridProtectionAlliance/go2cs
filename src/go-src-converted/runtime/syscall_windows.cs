@@ -186,13 +186,13 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
                 return Δp.assignReg(t.Size_, offset);
             }
         }
-        if (exprᴛ1 == abi.Array) {
+        else if (exprᴛ1 == abi.Array) {
             var at = (ж<arraytype>)(uintptr)(new @unsafe.Pointer(Ꮡt));
             if ((~at).Len == 1) {
                 return Δp.tryRegAssignArg((~at).Elem, offset);
             }
         }
-        if (exprᴛ1 == abi.Struct) {
+        else if (exprᴛ1 == abi.Struct) {
             var st = (ж<structtype>)(uintptr)(new @unsafe.Pointer(Ꮡt));
             foreach (var (i, _) in (~st).Fields) {
                 // TODO fix when runtime is fully commoned up w/ abi.Type

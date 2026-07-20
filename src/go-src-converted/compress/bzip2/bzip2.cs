@@ -177,7 +177,7 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
                 return (0, err);
             }
         }
-        if (exprᴛ1 == bzip2FinalMagic) {
+        else if (exprᴛ1 == bzip2FinalMagic) {
             var wantFileCRC = (uint32)br.ReadBits64(32);
             if ((~br).err != default!) {
                 // Check end-of-file CRC.
@@ -220,7 +220,7 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
                 }
             }
         }
-        { /* default: */
+        else { /* default: */
             return (0, ((StructuralError)(@string)"bad magic value found"u8));
         }
 
@@ -249,10 +249,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     var symbolPresent = new slice<bool>(256);
     nint numSymbols = 0;
     for (nuint symRange = (nuint)0; symRange < 16; symRange++) {
-        if ((nint)(symbolRangeUsedBitmap & ((1 << (int)((15 - symRange))))) != 0) {
+        if ((nint)(symbolRangeUsedBitmap & (((nint)1).Lsh((15 - symRange)))) != 0) {
             nint bits = br.ReadBits(16);
             for (nuint symbol = (nuint)0; symbol < 16; symbol++) {
-                if ((nint)(bits & ((1 << (int)((15 - symbol))))) != 0) {
+                if ((nint)(bits & (((nint)1).Lsh((15 - symbol)))) != 0) {
                     symbolPresent[(nint)(16 * symRange + symbol)] = true;
                     numSymbols++;
                 }
@@ -369,7 +369,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             if (repeat == 0) {
                 repeatPower = 1;
             }
-            repeat += (repeatPower << (int)(v));
+            repeat += repeatPower.Lsh((uint64)(v));
             repeatPower <<= (int)(1);
             // This limit of 2 million comes from the bzip2 source
             // code. It prevents repeat from overflowing.

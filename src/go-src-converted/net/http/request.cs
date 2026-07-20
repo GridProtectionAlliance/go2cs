@@ -901,7 +901,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         Proto: "HTTP/1.1"u8,
         ProtoMajor: 1,
         ProtoMinor: 1,
-        Header: new ΔHeader(),
+        Header: new ΔHeader(0),
         Body: rc,
         Host: (~u).Host
     ));
@@ -1364,12 +1364,12 @@ public static error ParseForm(this ж<Request> Ꮡr) {
             (r.PostForm, err) = parsePostForm(Ꮡr);
         }
         if (r.PostForm == default!) {
-            r.PostForm = new urlpkg.Values();
+            r.PostForm = new urlpkg.Values(0);
         }
     }
     if (r.Form == default!) {
         if (builtin.len(r.PostForm) > 0) {
-            r.Form = new urlpkg.Values();
+            r.Form = new urlpkg.Values(0);
             copyValues(r.Form, r.PostForm);
         }
         urlpkg.Values newValues = default!;
@@ -1381,7 +1381,7 @@ public static error ParseForm(this ж<Request> Ꮡr) {
             }
         }
         if (newValues == default!) {
-            newValues = new urlpkg.Values();
+            newValues = new urlpkg.Values(0);
         }
         if (r.Form == default!){
             r.Form = newValues;
@@ -1424,7 +1424,7 @@ public static error ParseMultipartForm(this ж<Request> Ꮡr, int64 maxMemory) {
         return err;
     }
     if (r.PostForm == default!) {
-        r.PostForm = new urlpkg.Values();
+        r.PostForm = new urlpkg.Values(0);
     }
     foreach (var (k, v) in (~f).Value) {
         r.Form[k] = append(r.Form[k], v.ꓸꓸꓸ);

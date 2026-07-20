@@ -182,7 +182,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     byteorder.BePutUint32(digest[8..], d.h[2]);
     byteorder.BePutUint32(digest[12..], d.h[3]);
     byteorder.BePutUint32(digest[16..], d.h[4]);
-    return digest;
+    return digest.Clone();
 }
 
 // ConstantTimeSum computes the same result of [Sum] but in constant time
@@ -199,7 +199,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     array<byte> length = new(8);
     var l = (d.len << (int)(3));
     for (nuint i = (nuint)0; i < 8; i++) {
-        length[(nint)(i)] = (byte)((l >> (int)((56 - 8 * i))));
+        length[(nint)(i)] = (byte)(l.Rsh((56 - 8 * i)));
     }
     var nx = (byte)d.nx;
     var t = (byte)(nx - 56);
@@ -246,7 +246,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
         digest[i * 4 + 2] |= (byte)((byte)(~mask1b & (byte)((s >> (int)(8)))));
         digest[i * 4 + 3] |= (byte)((byte)(~mask1b & (byte)s));
     }
-    return digest;
+    return digest.Clone();
 }
 
 // Sum returns the SHA-1 checksum of the data.

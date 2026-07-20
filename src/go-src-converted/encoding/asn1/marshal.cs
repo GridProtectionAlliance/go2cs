@@ -170,7 +170,7 @@ internal static nint base128IntLength(int64 n) {
 internal static slice<byte> appendBase128Int(slice<byte> dst, int64 n) {
     nint l = base128IntLength(n);
     for (nint i = l - 1; i >= 0; i--) {
-        var o = (byte)((n >> (int)((nuint)(i * 7))));
+        var o = (byte)(n.Rsh((nuint)(i * 7)));
         o &= (byte)(0x7f);
         if (i != 0) {
             o |= (byte)(0x80);
@@ -219,7 +219,7 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
 internal static slice<byte> appendLength(slice<byte> dst, nint i) {
     nint n = lengthLength(i);
     for (; n > 0; n--) {
-        dst = append(dst, (byte)((i >> (int)((nuint)((n - 1) * 8)))));
+        dst = append(dst, (byte)(i.Rsh((nuint)((n - 1) * 8))));
     }
     return dst;
 }
@@ -542,7 +542,7 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
             }
 
         }
-        if (exprᴛ2 == reflect.ΔSlice) {
+        else if (exprᴛ2 == reflect.ΔSlice) {
             var sliceType = v.Type();
             if (sliceType.Elem().Kind() == reflect.Uint8) {
                 return (((bytesEncoder)v.Bytes()), default!);
@@ -573,7 +573,7 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
             }
 
         }
-        if (exprᴛ2 == reflect.ΔString) {
+        else if (exprᴛ2 == reflect.ΔString) {
             var exprᴛ3 = @params.stringType;
             if (exprᴛ3 == TagIA5String) {
                 return makeIA5String(v.String());

@@ -1165,7 +1165,7 @@ internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
     [_Gdead] = "dead"u8,
     [_Gcopystack] = "copystack"u8,
     [_Gpreempted] = "preempted"u8
-}.array();
+}.array(10);
 
 internal static void goroutineheader(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNil();

@@ -41,6 +41,7 @@ using static go.crypto_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Hash, SignerOpts>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

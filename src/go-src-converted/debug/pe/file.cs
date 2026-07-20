@@ -94,7 +94,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     sr.Seek(@base, io.SeekStart);
     {
-        var errΔ2 = binary.Read(new io_SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), f.of(File.ᏑFileHeader)); if (errΔ2 != default!) {
+        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), f.of(File.ᏑFileHeader)); if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
     }
@@ -108,12 +108,12 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
     error err = default!;
     // Read string table.
-    (f.Value.StringTable, err) = readStringTable(f.of(File.ᏑFileHeader), new io_SectionReaderжReadSeeker(sr));
+    (f.Value.StringTable, err) = readStringTable(f.of(File.ᏑFileHeader), new io.SectionReaderжReadSeeker(sr));
     if (err != default!) {
         return (default!, err);
     }
     // Read symbol table.
-    (f.Value.COFFSymbols, err) = readCOFFSymbols(f.of(File.ᏑFileHeader), new io_SectionReaderжReadSeeker(sr));
+    (f.Value.COFFSymbols, err) = readCOFFSymbols(f.of(File.ᏑFileHeader), new io.SectionReaderжReadSeeker(sr));
     if (err != default!) {
         return (default!, err);
     }
@@ -127,7 +127,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         return (default!, err);
     }
     // Read optional header.
-    (f.Value.OptionalHeader, err) = readOptionalHeader(new io_SectionReaderжReadSeeker(sr), (~f).FileHeader.SizeOfOptionalHeader);
+    (f.Value.OptionalHeader, err) = readOptionalHeader(new io.SectionReaderжReadSeeker(sr), (~f).FileHeader.SizeOfOptionalHeader);
     if (err != default!) {
         return (default!, err);
     }
@@ -136,7 +136,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     for (nint i = 0; i < (nint)(~f).FileHeader.NumberOfSections; i++) {
         var sh = @new<SectionHeader32>();
         {
-            var errΔ3 = binary.Read(new io_SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), sh); if (errΔ3 != default!) {
+            var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), sh); if (errΔ3 != default!) {
                 return (default!, errΔ3);
             }
         }
@@ -163,12 +163,12 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             r2 = new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil)));
         }
         s.Value.sr = io.NewSectionReader(r2, (int64)(~s).SectionHeader.Offset, (int64)(~s).SectionHeader.Size);
-        s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+        s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         f.Value.Sections[i] = s;
     }
     foreach (var (i, _) in (~f).Sections) {
         error errΔ5 = default!;
-        ((~f).Sections[i].Value.Relocs, errΔ5) = readRelocs((~f).Sections[i].of(pe_package.ΔSection.ᏑSectionHeader), new io_SectionReaderжReadSeeker(sr));
+        ((~f).Sections[i].Value.Relocs, errΔ5) = readRelocs((~f).Sections[i].of(pe_package.ΔSection.ᏑSectionHeader), new io.SectionReaderжReadSeeker(sr));
         if (errΔ5 != default!) {
             return (default!, errΔ5);
         }

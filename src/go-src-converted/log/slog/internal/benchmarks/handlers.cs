@@ -131,7 +131,7 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
 // side. Since nothing actually reads from the ring buffer, it can handle an
 // arbitrary number of Records without either blocking or allocation.
 [GoType] partial struct asyncHandler {
-    internal array<slog.Record> ringBuffer = new(100);
+    internal array<slog.Record> ringBuffer = new(100, () => new());
     internal nint next;
 }
 

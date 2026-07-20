@@ -106,7 +106,7 @@ internal static readonly UntypedInt stackPoisonMin = /* uintptrMask & -4096 */ 1
     internal stackpoolItem item;
     internal array<byte> _ = new((uintptr)((uintptr)cpu.CacheLinePadSize - @unsafe.Sizeof(new stackpoolItem(nil)) % (uintptr)cpu.CacheLinePadSize) % cpu.CacheLinePadSize);
 }
-internal static ж<array<stackpoolᴛ1>> Ꮡstackpool = new(new array<stackpoolᴛ1>(2));
+internal static ж<array<stackpoolᴛ1>> Ꮡstackpool = new(new array<stackpoolᴛ1>(2, () => new()));
 internal static ref array<stackpoolᴛ1> stackpool => ref Ꮡstackpool.Value;
 
 [GoType] partial struct stackpoolItem {
@@ -1314,9 +1314,7 @@ internal static void gcComputeStartingStackSize() {
     // too large can still shrink.
     uint64 scannedStackSize = default!;
     uint64 scannedStacks = default!;
-    foreach (var (_, vᴛ1) in allp) {
-        var Δp = vᴛ1;
-
+    foreach (var (_, Δp) in allp) {
         scannedStackSize += Δp.Value.scannedStackSize;
         scannedStacks += Δp.Value.scannedStacks;
         // Reset for next time

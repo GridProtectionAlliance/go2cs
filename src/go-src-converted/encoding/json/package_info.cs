@@ -48,6 +48,7 @@ using static go.encoding.json_package;
 [assembly: GoImplement<InvalidUnmarshalError, error>(Pointer = true)]
 [assembly: GoImplement<MarshalerError, error>(Pointer = true)]
 [assembly: GoImplement<RawMessage, Marshaler>(Pointer = true)]
+[assembly: GoImplement<RawMessage, Marshaler>]
 [assembly: GoImplement<RawMessage, Unmarshaler>(Pointer = true)]
 [assembly: GoImplement<SyntaxError, error>(Pointer = true)]
 [assembly: GoImplement<UnmarshalTypeError, error>(Pointer = true)]

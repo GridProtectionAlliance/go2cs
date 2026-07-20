@@ -39,6 +39,9 @@ using static go.sync_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Mutex, Locker>(Pointer = true)]
+[assembly: GoImplement<RWMutex, Locker>(Pointer = true)]
+[assembly: GoImplement<noCopy, Locker>(Pointer = true)]
 [assembly: GoImplement<rlocker, Locker>(Pointer = true)]
 // </InterfaceImplementations>
 

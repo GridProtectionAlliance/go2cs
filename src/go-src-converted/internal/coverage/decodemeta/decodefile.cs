@@ -72,8 +72,8 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
         }
     }
     // Verify magic string
-    var m = r.hdr.Magic;
-    var g = coverage.CovMetaMagic;
+    var m = r.hdr.Magic.Clone();
+    var g = coverage.CovMetaMagic.Clone();
     if (m[0] != g[0] || m[1] != g[1] || m[2] != g[2] || m[3] != g[3]) {
         return fmt.Errorf("invalid meta-data file magic string"u8);
     }
@@ -164,7 +164,7 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
 // blobs. Coverage counter data files refer to this hash, and the
 // hash will be encoded into the meta-data file name.
 [GoRecv] public static array<byte> FileHash(this ref CoverageMetaFileReader r) {
-    return r.hdr.MetaFileHash;
+    return r.hdr.MetaFileHash.Clone();
 }
 
 // GetPackageDecoder requests a decoder object for the package within

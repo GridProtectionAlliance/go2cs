@@ -170,7 +170,7 @@ internal const bool physPageAlignedStacks = /* GOOS == "openbsd" */ false;
     // spaced CacheLinePadSize bytes apart, so that each mcentral.lock
     // gets its own cache line.
     // central is indexed by spanClass.
-    internal array<mheap_central> central = new(numSpanClasses);
+    internal array<mheap_central> central = new(numSpanClasses, () => new());
     internal fixalloc spanalloc; // allocator for span*
     internal fixalloc cachealloc; // allocator for mcache*
     internal fixalloc specialfinalizeralloc; // allocator for specialfinalizer*

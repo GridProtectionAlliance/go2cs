@@ -285,7 +285,7 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
     array<byte> buf = new(8);
     foreach (var (i, l) in new uint64[]{t.l0, t.l1, t.l2, t.l3, t.l4}.array()) {
         nint bitsOffset = i * 51;
-        byteorder.LePutUint64(buf[..], (l << (int)((nuint)(bitsOffset % 8))));
+        byteorder.LePutUint64(buf[..], l.Lsh((nuint)(bitsOffset % 8)));
         foreach (var (iΔ1, bb) in buf) {
             nint off = bitsOffset / 8 + iΔ1;
             if (off >= len(@out)) {

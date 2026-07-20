@@ -69,7 +69,7 @@ public static ж<Reader> NewReader(io.Reader rd) {
 // to the default size.
 // Calling b.Reset(b) (that is, resetting a [Reader] to itself) does nothing.
 public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     // If a Reader r is passed to NewReader, NewReader will return r.
     // Different layers of code may do that, and then later pass r
@@ -639,7 +639,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // to the default size.
 // Calling w.Reset(w) (that is, resetting a [Writer] to itself) does nothing.
 public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     // If a Writer w is passed to NewWriter, NewWriter will return w.
     // Different layers of code may do that, and then later pass w

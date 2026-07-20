@@ -558,7 +558,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 [GoRecv] internal static (Resource, error) resource(this ref Parser p, section sec) {
-    Resource r = default!;
+    Resource r = new();
     error err = default!;
     (r.Header, err) = p.resourceHeader(sec);
     if (err != default!) {
@@ -582,7 +582,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
             return (new ResourceHeader(nil), errΔ1);
         }
     }
-    ResourceHeader hdr = default!;
+    ResourceHeader hdr = new();
     var (off, err) = hdr.unpack(p.msg, p.off);
     if (err != default!) {
         return (new ResourceHeader(nil), err);
@@ -627,7 +627,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
             return (new ΔQuestion(nil), errΔ1);
         }
     }
-    Name name = default!;
+    Name name = new();
     var (off, err) = name.unpack(p.msg, p.off);
     if (err != default!) {
         return (new ΔQuestion(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Name", err))));
@@ -1869,7 +1869,7 @@ internal static readonly UntypedInt edns0DNSSECOKMask = 0x00ff8000;
 //
 // The provided extRCode must be an extended RCode.
 [GoRecv] public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
-    h.Name = new Name(Data: new byte[]{(rune)'.'}.array(), Length: 1);
+    h.Name = new Name(Data: new byte[]{(rune)'.'}.array(255), Length: 1);
     // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
     h.Class = ((Class)(uint16)udpPayloadLen);
@@ -2394,7 +2394,7 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
 }
 
 internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, nint off) {
-    Name cname = default!;
+    Name cname = new();
     {
         var (_, err) = cname.unpack(msg, off); if (err != default!) {
             return (new ΔCNAMEResource(nil), err);
@@ -2434,7 +2434,7 @@ internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off
     if (err != default!) {
         return (new ΔMXResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Pref", err))));
     }
-    Name mx = default!;
+    Name mx = new();
     {
         var (_, errΔ1) = mx.unpack(msg, off); if (errΔ1 != default!) {
             return (new ΔMXResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
@@ -2463,7 +2463,7 @@ internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off
 }
 
 internal static (ΔNSResource, error) unpackNSResource(slice<byte> msg, nint off) {
-    Name ns = default!;
+    Name ns = new();
     {
         var (_, err) = ns.unpack(msg, off); if (err != default!) {
             return (new ΔNSResource(nil), err);
@@ -2492,7 +2492,7 @@ internal static (ΔNSResource, error) unpackNSResource(slice<byte> msg, nint off
 }
 
 internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint off) {
-    Name ptr = default!;
+    Name ptr = new();
     {
         var (_, err) = ptr.unpack(msg, off); if (err != default!) {
             return (new ΔPTRResource(nil), err);
@@ -2543,12 +2543,12 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
 }
 
 internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint off) {
-    Name ns = default!;
+    Name ns = new();
     (off, var err) = ns.unpack(msg, off);
     if (err != default!) {
         return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("NS", err))));
     }
-    Name mbox = default!;
+    Name mbox = new();
     {
         (off, err) = mbox.unpack(msg, off); if (err != default!) {
             return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
@@ -2623,7 +2623,7 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
             }
         }
         // Check if we got too many bytes.
-        if (length - n < (uint16)len(t) + 1) {
+        if ((uint16)(length - n) < (uint16)((uint16)len(t) + 1)) {
             return (new ΔTXTResource(nil), errCalcLen);
         }
         n += (uint16)((uint16)len(t) + 1);
@@ -2675,7 +2675,7 @@ internal static (ΔSRVResource, error) unpackSRVResource(slice<byte> msg, nint o
     if (err != default!) {
         return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Port", err))));
     }
-    Name target = default!;
+    Name target = new();
     {
         var (_, errΔ1) = target.unpack(msg, off); if (errΔ1 != default!) {
             return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
@@ -2710,7 +2710,7 @@ internal static (ΔAResource, error) unpackAResource(slice<byte> msg, nint off) 
             return (new ΔAResource(nil), err);
         }
     }
-    return (new ΔAResource(a), default!);
+    return (new ΔAResource(a.Clone()), default!);
 }
 
 // An AAAAResource is an AAAA Resource record.
@@ -2739,7 +2739,7 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
             return (new ΔAAAAResource(nil), err);
         }
     }
-    return (new ΔAAAAResource(aaaa), default!);
+    return (new ΔAAAAResource(aaaa.Clone()), default!);
 }
 
 // An OPTResource is an OPT pseudo Resource record.

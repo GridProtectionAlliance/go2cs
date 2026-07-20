@@ -350,7 +350,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
         byteorder.BePutUint64(digest[48..], d.h[6]);
         byteorder.BePutUint64(digest[56..], d.h[7]);
     }
-    return digest;
+    return digest.Clone();
 }
 
 // Sum512 returns the SHA512 checksum of the data.
@@ -376,7 +376,7 @@ public static array<byte> Sum384(slice<byte> data) {
     Ꮡd.Write(data);
     var sum = Ꮡd.checkSum();
     var ap = Ꮡ(new array<byte>(sum[..], 48));
-    return ap.Value;
+    return ap.Value.Clone();
 }
 
 // Sum512_224 returns the Sum512/224 checksum of the data.
@@ -387,7 +387,7 @@ public static array<byte> Sum512_224(slice<byte> data) {
     Ꮡd.Write(data);
     var sum = Ꮡd.checkSum();
     var ap = Ꮡ(new array<byte>(sum[..], 28));
-    return ap.Value;
+    return ap.Value.Clone();
 }
 
 // Sum512_256 returns the Sum512/256 checksum of the data.
@@ -398,7 +398,7 @@ public static array<byte> Sum512_256(slice<byte> data) {
     Ꮡd.Write(data);
     var sum = Ꮡd.checkSum();
     var ap = Ꮡ(new array<byte>(sum[..], 32));
-    return ap.Value;
+    return ap.Value.Clone();
 }
 
 } // end sha512_package

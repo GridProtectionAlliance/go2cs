@@ -38,6 +38,7 @@ using static go.crypto.cipher_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<StreamWriter, io_package.Closer>]
 [assembly: GoImplement<cbcDecrypter, BlockMode>(Pointer = true)]
 [assembly: GoImplement<cbcEncrypter, BlockMode>(Pointer = true)]
 [assembly: GoImplement<cfb, Stream>(Pointer = true)]

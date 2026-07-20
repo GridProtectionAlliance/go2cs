@@ -217,7 +217,7 @@ internal static array<slice<byte>> specialTagEndMarkers = new golib.SparseArray<
     [elementStyle] = slice<byte>("style"u8),
     [elementTextarea] = slice<byte>("textarea"u8),
     [elementTitle] = slice<byte>("title"u8)
-}.array();
+}.array(5);
 
 internal static slice<byte> specialTagEndPrefix = slice<byte>("</"u8);
 internal static slice<byte> tagEndSeparators = slice<byte>("> \t\n\f/"u8);

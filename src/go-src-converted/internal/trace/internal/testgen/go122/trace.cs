@@ -237,7 +237,7 @@ public static ж<ΔBatch> Batch(this ж<ΔGeneration> Ꮡg, trace.ThreadID threa
     if (len(stk) > 32) {
         throw panic("stack too big for test");
     }
-    stack stkc = default!;
+    stack stkc = new();
     copy(stkc.stk[..], stk);
     stkc.len = len(stk);
     {

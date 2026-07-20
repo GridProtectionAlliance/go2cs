@@ -89,7 +89,7 @@ internal static @string toASCII(@string s) {
 // equivalent to the sign bit in two's complement form.
 internal static bool fitsInBase256(nint n, int64 x) {
     nuint binBits = (nuint)(n - 1) * 8;
-    return n >= 9 || (x >= ((int64)(-1) << (int)(binBits)) && x < ((int64)1 << (int)(binBits)));
+    return n >= 9 || (x >= ((int64)(-1)).Lsh(binBits) && x < ((int64)1).Lsh(binBits));
 }
 
 // parseNumeric parses the input as being encoded in either base-256 or octal.
@@ -198,7 +198,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
 // using octal encoding with the appropriate NUL terminator.
 internal static bool fitsInOctal(nint n, int64 x) {
     nuint octBits = (nuint)(n - 1) * 3;
-    return x >= 0 && (n >= 22 || x < ((int64)1 << (int)(octBits)));
+    return x >= 0 && (n >= 22 || x < ((int64)1).Lsh(octBits));
 }
 
 // parsePAXTime takes a string of the form %d.%d as described in the PAX

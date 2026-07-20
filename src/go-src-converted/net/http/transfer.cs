@@ -847,7 +847,7 @@ internal static (ΔHeader, error) fixTrailer(ΔHeader header, bool chunked) {
         return (default!, default!);
     }
     header.Del("Trailer"u8);
-    var trailer = new ΔHeader();
+    var trailer = new ΔHeader(0);
     ref var err = ref heap<error>(out var Ꮡerr);
     foreach (var (_, v) in vv) {
         var trailerʗ1 = trailer;

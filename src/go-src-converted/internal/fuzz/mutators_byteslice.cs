@@ -101,7 +101,7 @@ internal static slice<byte> byteSliceBitFlip(ж<mutator> Ꮡm, slice<byte> b) {
         return default!;
     }
     nint pos = m.rand(len(b));
-    b[pos] ^= (byte)((byte)(1 << (int)((nuint)m.rand(8))));
+    b[pos] ^= (byte)(((byte)1).Lsh((nuint)m.rand(8)));
     return b;
 }
 

@@ -142,7 +142,7 @@ internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡ
 // Its return values are the same as [routingNode.match].
 // The receiver should be a child of the root.
 internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<routingNode> Ꮡn, @string method, @string path) {
-    ref var n = ref Ꮡn.Value;
+    ref var n = ref Ꮡn.DerefOrNil();
 
     if (Ꮡn == nil) {
         return (default!, default!);
@@ -170,7 +170,7 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
 // matchPath calls itself recursively. The matches argument holds the wildcard matches
 // found so far.
 internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
-    ref var n = ref Ꮡn.Value;
+    ref var n = ref Ꮡn.DerefOrNil();
 
     if (Ꮡn == nil) {
         return (default!, default!);

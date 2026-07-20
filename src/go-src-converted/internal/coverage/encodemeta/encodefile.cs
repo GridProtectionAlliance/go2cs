@@ -60,11 +60,11 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, array<byte> fina
     }
     // Emit header
     var mh = new coverage.MetaFileHeader(
-        Magic: coverage.CovMetaMagic,
+        Magic: coverage.CovMetaMagic.Clone(),
         Version: coverage.MetaFileVersion,
         TotalLength: tlen,
         Entries: (uint64)len(blobs),
-        MetaFileHash: finalHash,
+        MetaFileHash: finalHash.Clone(),
         StrTabOffset: (uint32)stOffset,
         StrTabLength: stSize,
         CMode: mode,

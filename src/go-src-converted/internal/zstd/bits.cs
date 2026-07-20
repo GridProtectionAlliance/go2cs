@@ -39,7 +39,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
         }
         var c = br.data[(nint)(br.off)];
         br.off++;
-        br.bits |= ((uint32)c << (int)(br.cnt));
+        br.bits |= ((uint32)c).Lsh((uint64)(br.cnt));
         br.cnt += 8;
     }
     return default!;
@@ -47,7 +47,7 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
 
 // val is called to fetch a value of b bits.
 [GoRecv] internal static uint32 val(this ref bitReader br, uint8 b) {
-    var r = (uint32)(br.bits & ((((uint32)1 << (int)(b))) - 1));
+    var r = (uint32)(br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1));
     br.bits >>= (int)(b);
     br.cnt -= (uint32)b;
     return r;
@@ -103,7 +103,7 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
         return (0, rbr.r.makeEOFError((nint)rbr.off));
     }
     rbr.cnt -= (uint32)b;
-    var v = (uint32)(((rbr.bits >> (int)(rbr.cnt))) & ((((uint32)1 << (int)(b))) - 1));
+    var v = (uint32)((rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1));
     return (v, default!);
 }
 

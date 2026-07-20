@@ -79,7 +79,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
 
 // check may be nil
 internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
     if (Ꮡcheck != nil) {

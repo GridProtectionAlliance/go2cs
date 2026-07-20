@@ -76,7 +76,7 @@ internal static void send(this ж<Client> Ꮡclient, ж<ΔCall> Ꮡcall) => func
     if (client.shutdown || client.closing) {
         Ꮡclient.of(Client.Ꮡmutex).Unlock();
         call.Error = ErrShutdown;
-        call.done();
+        Ꮡcall.done();
         return;
     }
     var seq = client.seq;
@@ -94,7 +94,7 @@ internal static void send(this ж<Client> Ꮡclient, ж<ΔCall> Ꮡcall) => func
         Ꮡclient.of(Client.Ꮡmutex).Unlock();
         if (Ꮡcall != nil) {
             call.Error = err;
-            call.done();
+            Ꮡcall.done();
         }
     }
 });
@@ -162,9 +162,7 @@ internal static void input(this ж<Client> Ꮡclient) {
             err = io.ErrUnexpectedEOF;
         }
     }
-    foreach (var (_, vᴛ1) in client.pending) {
-        var call = vᴛ1;
-
+    foreach (var (_, call) in client.pending) {
         call.Value.Error = err;
         call.done();
     }
@@ -175,9 +173,11 @@ internal static void input(this ж<Client> Ꮡclient) {
     }
 }
 
-[GoRecv] internal static void done(this ref ΔCall call) {
+internal static void done(this ж<ΔCall> Ꮡcall) {
+    ref var call = ref Ꮡcall.Value;
+
     switch (ᐧ) {
-    case ᐧ: {
+    case ᐧ when call.Done.ᐸꟷ(Ꮡcall, ꟷ): {
         break;
     }
     default: {

@@ -98,7 +98,7 @@ public static ж<ΔInt> NewInt(int64 x) {
 
 // Set sets z to x and returns z.
 public static ж<ΔInt> Set(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡz != Ꮡx) {
@@ -377,7 +377,7 @@ public static ж<ΔInt> Div(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
 // If y == 0, a division-by-zero run-time panic occurs.
 // Mod implements Euclidean modulus (unlike Go); see [Int.DivMod] for more details.
 public static ж<ΔInt> Mod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     var y0 = Ꮡy;
@@ -412,7 +412,7 @@ public static ж<ΔInt> Mod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
 // ACM press.)
 // See [Int.QuoRem] for T-division and modulus (like Go).
 public static (ж<ΔInt>, ж<ΔInt>) DivMod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
     ref var m = ref Ꮡm.Value;
 
@@ -441,7 +441,7 @@ public static (ж<ΔInt>, ж<ΔInt>) DivMod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx,
 public static nint /*r*/ Cmp(this ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     nint r = default!;
 
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
     // x cmp y == x cmp y
     // x cmp (-y) == x
@@ -659,7 +659,7 @@ internal static ж<ΔInt> expSlow(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt>
 }
 
 internal static ж<ΔInt> exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm, bool slow) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.Value;
     ref var m = ref Ꮡm.DerefOrNil();

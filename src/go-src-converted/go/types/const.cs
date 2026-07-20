@@ -94,7 +94,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 var exprᴛ1 = typ.kind;
                 if (exprᴛ1 == Int) {
                     nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
-                    return ((int64)(-1) << (int)((s - 1))) <= xΔ4 && xΔ4 <= ((int64)1 << (int)((s - 1))) - 1;
+                    return ((int64)(-1)).Lsh((s - 1)) <= xΔ4 && xΔ4 <= ((int64)1).Lsh((s - 1)) - 1;
                 }
                 if (exprᴛ1 == Int8) {
                     UntypedInt s = 8;
@@ -114,7 +114,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 if (exprᴛ1 == Uint || exprᴛ1 == Uintptr) {
                     {
                         nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8; if (s < 64) {
-                            return 0 <= xΔ4 && xΔ4 <= ((int64)1 << (int)(s)) - 1;
+                            return 0 <= xΔ4 && xΔ4 <= ((int64)1).Lsh(s) - 1;
                         }
                     }
                     return 0 <= xΔ4;
@@ -174,7 +174,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 return true;
             }
         }
-        if (exprᴛ3 == Float64) {
+        else if (exprᴛ3 == Float64) {
             if (Ꮡrounded == nil) {
                 return fitsFloat64(xΔ5);
             }
@@ -184,10 +184,10 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 return true;
             }
         }
-        if (exprᴛ3 == ΔUntypedFloat) {
+        else if (exprᴛ3 == ΔUntypedFloat) {
             return true;
         }
-        { /* default: */
+        else { /* default: */
             throw panic("unreachable");
         }
 
@@ -210,7 +210,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 return true;
             }
         }
-        if (exprᴛ4 == Complex128) {
+        else if (exprᴛ4 == Complex128) {
             if (Ꮡrounded == nil) {
                 return fitsFloat64(constant.Real(xΔ6)) && fitsFloat64(constant.Imag(xΔ6));
             }
@@ -221,10 +221,10 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 return true;
             }
         }
-        if (exprᴛ4 == ΔUntypedComplex) {
+        else if (exprᴛ4 == ΔUntypedComplex) {
             return true;
         }
-        { /* default: */
+        else { /* default: */
             throw panic("unreachable");
         }
 

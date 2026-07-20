@@ -111,7 +111,7 @@ internal static @string opName(ast.Expr e) {
 
 internal static array<@string> op2str1 = new golib.SparseArray<@string>{
     [19] = "bitwise complement"u8
-}.array();
+}.array(20);
 
 // This is only used for operations that may cause overflow.
 internal static array<@string> op2str2 = new golib.SparseArray<@string>{
@@ -120,7 +120,7 @@ internal static array<@string> op2str2 = new golib.SparseArray<@string>{
     [19] = "bitwise XOR"u8,
     [14] = "multiplication"u8,
     [20] = "shift"u8
-}.array();
+}.array(21);
 
 // If typ is a type parameter, underIs returns the result of typ.underIs(f).
 // Otherwise, underIs returns the result of f(under(typ)).
@@ -208,7 +208,7 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
             prec = (nuint)(check.conf.@sizeof(x.typ) * 8);
         }
         x.val = constant.UnaryOp(op, x.val, prec);
-        x.expr = new ast_UnaryExprжExpr(Ꮡe);
+        x.expr = new ast.UnaryExprжExpr(Ꮡe);
         Ꮡcheck.overflow(Ꮡx, x.Pos());
         return;
     }
@@ -287,7 +287,7 @@ internal static void updateExprType0(this ж<Checker> Ꮡcheck, ast.Expr parent,
         break;
     }
     case ж<ast.ParenExpr> xΔ1: {
-        Ꮡcheck.updateExprType0(new ast_ParenExprжExpr(xΔ1), // Resulting in an untyped constant (e.g., built-in complex).
+        Ꮡcheck.updateExprType0(new ast.ParenExprжExpr(xΔ1), // Resulting in an untyped constant (e.g., built-in complex).
  // The respective calls take care of calling updateExprType
  // for the arguments if necessary.
  // An identifier denoting a constant, a constant literal,
@@ -305,7 +305,7 @@ internal static void updateExprType0(this ж<Checker> Ꮡcheck, ast.Expr parent,
             // at the end of the type check.
             break;
         }
-        Ꮡcheck.updateExprType0(new ast_UnaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
+        Ꮡcheck.updateExprType0(new ast.UnaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
         break;
     }
     case ж<ast.BinaryExpr> xΔ1: {
@@ -320,11 +320,11 @@ internal static void updateExprType0(this ж<Checker> Ꮡcheck, ast.Expr parent,
             // and the operand types must have final types.
             // The result type depends only on lhs operand.
             // The rhs type was updated when checking the shift.
-            Ꮡcheck.updateExprType0(new ast_BinaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
+            Ꮡcheck.updateExprType0(new ast.BinaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
         } else {
             // The operand types match the result type.
-            Ꮡcheck.updateExprType0(new ast_BinaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
-            Ꮡcheck.updateExprType0(new ast_BinaryExprжExpr(xΔ1), (~xΔ1).Y, typ, final);
+            Ꮡcheck.updateExprType0(new ast.BinaryExprжExpr(xΔ1), (~xΔ1).X, typ, final);
+            Ꮡcheck.updateExprType0(new ast.BinaryExprжExpr(xΔ1), (~xΔ1).Y, typ, final);
         }
         break;
     }
@@ -420,12 +420,12 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
                 return (default!, default!, InvalidUntypedConversion);
             }
         }
-        if (exprᴛ1 == ΔUntypedInt || exprᴛ1 == UntypedRune || exprᴛ1 == ΔUntypedFloat || exprᴛ1 == ΔUntypedComplex) {
+        else if (exprᴛ1 == ΔUntypedInt || exprᴛ1 == UntypedRune || exprᴛ1 == ΔUntypedFloat || exprᴛ1 == ΔUntypedComplex) {
             if (!isNumeric(target)) {
                 return (default!, default!, InvalidUntypedConversion);
             }
         }
-        if (exprᴛ1 == UntypedString) {
+        else if (exprᴛ1 == UntypedString) {
             if (!isString(target)) {
                 // Non-constant untyped string values are not permitted by the spec and
                 // should not occur during normal typechecking passes, but this path is
@@ -433,14 +433,14 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
                 return (default!, default!, InvalidUntypedConversion);
             }
         }
-        if (exprᴛ1 == UntypedNil) {
+        else if (exprᴛ1 == UntypedNil) {
             if (!hasNil(target)) {
                 // Unsafe.Pointer is a basic type that includes nil.
                 return (default!, default!, InvalidUntypedConversion);
             }
             return (new BasicжΔType(Typ[UntypedNil]), default!, 0);
         }
-        { /* default: */
+        else { /* default: */
             return (default!, default!, InvalidUntypedConversion);
         }
 
@@ -1185,7 +1185,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
     }
     case ж<ast.FuncLit> eΔ1: {
         {
-            var (sig, ok) = Ꮡcheck.typ(new ast_FuncTypeжExpr((~eΔ1).Type))._<ж<ΔSignature>>(ᐧ); if (ok){
+            var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr((~eΔ1).Type))._<ж<ΔSignature>>(ᐧ); if (ok){
                 // Set the Scope's extent to the complete "func (...) {...}"
                 // so that Scope.Innermost works correctly.
                 sig.Value.scope.Value.pos = eΔ1.Pos();
@@ -1358,7 +1358,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
                         Ꮡcheck.assignment(Ꮡx, etyp, "struct literal"u8);
                     }
                     if (len((~eΔ1).Elts) < len(fields)) {
-                        Ꮡcheck.errorf(inNode(new ast_CompositeLitжNode(eΔ1), (~eΔ1).Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
+                        Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(eΔ1), (~eΔ1).Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
                     }
                 }
             }
@@ -1483,7 +1483,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
     case ж<ast.ParenExpr> eΔ1: {
         exprKind kind = Ꮡcheck.rawExpr(nil, // type inference doesn't go past parentheses (targe type T = nil)
  Ꮡx, (~eΔ1).X, default!, false);
-        x.expr = new ast_ParenExprжExpr(eΔ1);
+        x.expr = new ast.ParenExprжExpr(eΔ1);
         return kind;
     }
     case ж<ast.SelectorExpr> eΔ1: {
@@ -1538,7 +1538,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         if (!isValid(TΔ1)) {
             goto ΔError;
         }
-        Ꮡcheck.typeAssertion(new ast_TypeAssertExprжExpr(eΔ1), Ꮡx, TΔ1, false);
+        Ꮡcheck.typeAssertion(new ast.TypeAssertExprжExpr(eΔ1), Ꮡx, TΔ1, false);
         x.mode = commaok;
         x.typ = TΔ1;
         break;
@@ -1585,14 +1585,14 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             goto ΔError;
         }
         if ((~eΔ1).Op == token.ARROW) {
-            x.expr = new ast_UnaryExprжExpr(eΔ1);
+            x.expr = new ast.UnaryExprжExpr(eΔ1);
             return statement;
         }
         break;
     }
     case ж<ast.BinaryExpr> eΔ1: {
         Ꮡcheck.binary(Ꮡx, // receive operations may appear in statement context
- new ast_BinaryExprжExpr(eΔ1), (~eΔ1).X, (~eΔ1).Y, (~eΔ1).Op, (~eΔ1).OpPos);
+ new ast.BinaryExprжExpr(eΔ1), (~eΔ1).X, (~eΔ1).Y, (~eΔ1).Op, (~eΔ1).OpPos);
         if (x.mode == invalid) {
             goto ΔError;
         }
@@ -1678,10 +1678,10 @@ internal static any keyVal(constant.Value x) {
             }
         }
     }
-    if (exprᴛ1 == constant.ΔString) {
+    else if (exprᴛ1 == constant.ΔString) {
         return constant.StringVal(x);
     }
-    if (exprᴛ1 == constant.Bool) { matchᴛ1 = true;
+    else if (exprᴛ1 == constant.Bool) { matchᴛ1 = true;
         return constant.BoolVal(x);
     }
 
@@ -1782,7 +1782,7 @@ internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast
 internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.Value;
 
-    if ((nuint)(modeset & (((nuint)1 << (int)(byte)(x.mode)))) != 0) {
+    if ((nuint)(modeset & (((nuint)1).Lsh((uint64)(byte)(x.mode)))) != 0) {
         @string msg = default!;
         errors.Code code = default!;
         var exprᴛ1 = x.mode;

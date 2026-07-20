@@ -36,7 +36,7 @@ partial class net_package {
 }
 
 public static @string String(this ж<IPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return "<nil>"u8;
@@ -49,7 +49,7 @@ public static @string String(this ж<IPAddr> Ꮡa) {
 }
 
 internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil || a.IP == default!) {
         return true;

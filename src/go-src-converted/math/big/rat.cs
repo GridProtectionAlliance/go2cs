@@ -39,7 +39,7 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
 
     UntypedInt expMask = /* 1<<11 - 1 */ 2047;
     var bits = math.Float64bits(f);
-    var mantissa = (uint64)(bits & (4503599627370496L - 1));
+    var mantissa = (uint64)(bits & ((uint64)(4503599627370496L - 1)));
     nint exp = (nint)((uint64)(((bits >> (int)(52))) & (uint64)expMask));
     var exprᴛ1 = exp;
     if (exprᴛ1 == expMask) {
@@ -143,7 +143,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
         // Denormal case; lose 'shift' bits of precision.
         nuint shift = (nuint)((nint)Emin - (exp - 1));
         // [1..Esize1)
-        var lostbits = (uint32)(mantissa & (((uint32)1 << (int)(shift)) - 1));
+        var lostbits = (uint32)(mantissa & (((uint32)1).Lsh(shift) - 1));
         haveRem = haveRem || lostbits != 0;
         mantissa >>= (int)(shift);
         exp = 2 - Ebias;
@@ -242,7 +242,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
         // Denormal case; lose 'shift' bits of precision.
         nuint shift = (nuint)((nint)Emin - (exp - 1));
         // [1..Esize1)
-        var lostbits = (uint64)(mantissa & (((uint64)1 << (int)(shift)) - 1));
+        var lostbits = (uint64)(mantissa & (((uint64)1).Lsh(shift) - 1));
         haveRem = haveRem || lostbits != 0;
         mantissa >>= (int)(shift);
         exp = 2 - Ebias;
@@ -376,7 +376,7 @@ public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
 
 // Set sets z to x (by making a copy of x) and returns z.
 public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
 
     if (Ꮡz != Ꮡx) {
         Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx.of(big_package.ΔRat.Ꮡa));

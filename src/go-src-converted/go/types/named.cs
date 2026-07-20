@@ -221,7 +221,7 @@ internal static void setState(this ж<Named> Ꮡn, namedState state) {
 
 // newNamed is like NewNamed but with a *Checker receiver.
 internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType underlying, slice<ж<Func>> methods) {
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var obj = ref Ꮡobj.Value;
 
     var typ = Ꮡ(new Named(check: Ꮡcheck, obj: Ꮡobj, fromRHS: underlying, underlying: underlying, methods: methods));
@@ -242,7 +242,7 @@ internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
 // If set, expanding is the named type instance currently being expanded, that
 // led to the creation of this instance.
 internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Named> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding) {
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var orig = ref Ꮡorig.Value;
     ref var expanding = ref Ꮡexpanding.DerefOrNil();
 
@@ -389,7 +389,7 @@ public static ж<Func> Method(this ж<Named> Ꮡt, nint i) => func((defer, recov
 // expandMethod substitutes type arguments in the i'th method for an
 // instantiated receiver.
 internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     // t.orig.methods is not lazy. origm is the method instantiated with its
     // receiver type parameters (the "origin" method).
@@ -605,9 +605,7 @@ continue_loop:;
     }
 break_loop:;
     // Continue collecting *Named types in the chain.
-    foreach (var (kᴛ1, _) in seen) {
-        var nΔ1 = kᴛ1;
-
+    foreach (var (nΔ1, _) in seen) {
         // We should never have to update the underlying type of an imported type;
         // those underlying types should have been resolved during the import.
         // Also, doing so would lead to a race condition (was go.dev/issue/31749).
@@ -650,7 +648,7 @@ internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> �
 // expandUnderlying substitutes type arguments in the underlying type n.orig,
 // returning the result. Returns Typ[Invalid] if there was an error.
 internal static ΔType expandUnderlying(this ж<Named> Ꮡn) => func((defer, recover) => {
-    ref var n = ref Ꮡn.Value;
+    ref var n = ref Ꮡn.DerefOrNil();
 
     var check = n.check;
     if (check != nil && (~(~check).conf)._Trace) {

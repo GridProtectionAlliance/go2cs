@@ -46,7 +46,7 @@ partial class httptest_package {
 // NewRecorder returns an initialized [ResponseRecorder].
 public static ж<ResponseRecorder> NewRecorder() {
     return Ꮡ(new ResponseRecorder(
-        HeaderMap: new httpꓸHeader(),
+        HeaderMap: new httpꓸHeader(0),
         Body: @new<bytes.Buffer>(),
         Code: 200
     ));
@@ -63,7 +63,7 @@ public static readonly @string DefaultRemoteAddr = "1.2.3.4"u8;
 [GoRecv] public static httpꓸHeader Header(this ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
     if (m == default!) {
-        m = new httpꓸHeader();
+        m = new httpꓸHeader(0);
         rw.HeaderMap = m;
     }
     return m;
@@ -141,7 +141,7 @@ internal static void checkWriteHeaderCode(nint code) {
     rw.Code = code;
     rw.wroteHeader = true;
     if (rw.HeaderMap == default!) {
-        rw.HeaderMap = new httpꓸHeader();
+        rw.HeaderMap = new httpꓸHeader(0);
     }
     rw.snapHeader = rw.HeaderMap.Clone();
 }
@@ -223,7 +223,7 @@ internal static void checkWriteHeaderCode(nint code) {
             continue;
         }
         if ((~res).Trailer == default!) {
-            res.Value.Trailer = new httpꓸHeader();
+            res.Value.Trailer = new httpꓸHeader(0);
         }
         foreach (var (_, v) in vv) {
             (~res).Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);

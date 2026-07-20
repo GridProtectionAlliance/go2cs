@@ -117,7 +117,7 @@ internal static (ж<PrivateKey>, error) newBoringPrivateKey(ΔCurve c, ж<boring
 internal static ж<ΔPublicKey> privateKeyToPublicKey<Point>(this ж<nistCurve<Point>> Ꮡc, ж<PrivateKey> Ꮡkey)
     where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
     ref var key = ref Ꮡkey.Value;
 
     boring.Unreachable();

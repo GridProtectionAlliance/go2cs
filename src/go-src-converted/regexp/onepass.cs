@@ -526,7 +526,7 @@ internal static ж<onePassProg> /*p*/ compileOnePass(ж<syntax.Prog> Ꮡprog) {
                 return default!;
             }
         }
-        if (exprᴛ1 == syntax.InstEmptyWidth) {
+        else if (exprᴛ1 == syntax.InstEmptyWidth) {
             if (opOut == syntax.InstMatch) {
                 if ((syntax.EmptyOp)(((syntax.EmptyOp)(uint8)inst.Arg) & syntax.EmptyEndText) == syntax.EmptyEndText) {
                     continue;
@@ -534,7 +534,7 @@ internal static ж<onePassProg> /*p*/ compileOnePass(ж<syntax.Prog> Ꮡprog) {
                 return default!;
             }
         }
-        { /* default: */
+        else { /* default: */
             if (opOut == syntax.InstMatch) {
                 return default!;
             }

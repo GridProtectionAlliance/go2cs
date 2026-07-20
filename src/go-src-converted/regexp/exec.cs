@@ -99,9 +99,7 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
 }
 
 [GoRecv] internal static void init(this ref machine m, nint ncap) {
-    foreach (var (_, vᴛ1) in m.pool) {
-        var t = vᴛ1;
-
+    foreach (var (_, t) in m.pool) {
         t.Value.cap = (~t).cap[..(int)(ncap)];
     }
     m.matchcap = m.matchcap[..(int)(ncap)];

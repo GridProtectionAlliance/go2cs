@@ -674,21 +674,21 @@ internal static array<EventKind> go122Type2Kind = new golib.SparseArray<EventKin
     [go122.EvGoroutineStackAlloc] = EventExperimental,
     [go122.EvGoroutineStackFree] = EventExperimental,
     [evSync] = EventSync
-}.array();
+}.array(256);
 
 internal static array<GoState> go122GoStatus2GoState = new golib.SparseArray<GoState>{
     [go122.GoRunnable] = GoRunnable,
     [go122.GoRunning] = GoRunning,
     [go122.GoWaiting] = GoWaiting,
     [go122.GoSyscall] = GoSyscall
-}.array();
+}.array(5);
 
 internal static array<ProcState> go122ProcStatus2ProcState = new golib.SparseArray<ProcState>{
     [go122.ProcRunning] = ProcRunning,
     [go122.ProcIdle] = ProcIdle,
     [go122.ProcSyscall] = ProcRunning,
     [go122.ProcSyscallAbandoned] = ProcIdle
-}.array();
+}.array(5);
 
 // String returns the event as a human-readable string.
 //
@@ -760,7 +760,7 @@ public static @string String(this ΔEvent e) {
                 });
             }
         }
-        if (exprᴛ1 == EventExperimental) {
+        else if (exprᴛ1 == EventExperimental) {
             var r = e.Experimental();
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s ArgNames=%v Args=%v"u8, r.Name, r.ArgNames, r.Args);
         }

@@ -70,7 +70,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
             return (Δmath.Inf(sign), nsign + nΔ2, true);
         }
     }
-    if (exprᴛ1 is (rune)'n' or (rune)'N') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'n' or (rune)'N') { matchᴛ1 = true;
         if (commonPrefixLenIgnoreCase(s, "nan"u8) == 3) {
             return (Δmath.NaN(), 3, true);
         }

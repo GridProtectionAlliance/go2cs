@@ -184,13 +184,13 @@ public static ref ж<Resolver> DefaultResolver => ref ᏑDefaultResolver.ValueSl
 // TODO(bradfitz): optional interface impl override hook
 // TODO(bradfitz): Timeout time.Duration?
 internal static bool preferGo(this ж<Resolver> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     return Ꮡr != nil && r.PreferGo;
 }
 
 internal static bool strictErrors(this ж<Resolver> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     return Ꮡr != nil && r.StrictErrors;
 }
@@ -739,7 +739,7 @@ internal static @string errMalformedDNSRecordsDetail = "DNS response contained r
 // an IP address) with the provided network type, using either r.Dial
 // (if both r and r.Dial are non-nil) or else Dialer.DialContext.
 internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string server) {
-    ref var r = ref Ꮡr.Value;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     // Calling Dial here is scary -- we have to be sure not to
     // dial a name that will require a DNS lookup, or Dial will
@@ -784,7 +784,7 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
     if (err != default!) {
         return ("", default!, err);
     }
-    dnsmessage.Name cname = default!;
+    dnsmessage.Name cname = new();
     while (ᐧ) {
         var (h, errΔ1) = p.AnswerHeader();
         if (AreEqual(errΔ1, dnsmessage.ErrSectionDone)) {

@@ -179,7 +179,7 @@ internal static array<byte> basicSizes = new golib.SparseArray<byte>{
     [(int)Float64] = 8,
     [(int)Complex64] = 8,
     [(int)Complex128] = 16
-}.array();
+}.array(17);
 
 public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
     ref var s = ref Ꮡs.Value;
@@ -306,7 +306,7 @@ public static Sizes SizesFor(@string compiler, @string arch) {
             }
         }
     }
-    if (exprᴛ1 == "gccgo"u8) {
+    else if (exprᴛ1 == "gccgo"u8) {
         {
             var (s, ok) = gccgoArchSizes[arch, ꟷ]; if (ok) {
                 return ((Sizes)new StdSizesжSizes(s));

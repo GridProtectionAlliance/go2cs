@@ -103,7 +103,7 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
 internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ж<token.FileSet> fset = default!;
     Func<ж<Package>, @string> qf = default!;
     if (Ꮡcheck != nil) {

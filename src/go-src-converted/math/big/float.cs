@@ -540,7 +540,7 @@ internal static ж<Float> setBits64(this ж<Float> Ꮡz, bool neg, uint64 x) {
     // x != 0
     z.form = finite;
     nint s = bits.LeadingZeros64(x);
-    z.mant = z.mant.setUint64((x << (int)((nuint)s)));
+    z.mant = z.mant.setUint64(x.Lsh((nuint)s));
     z.exp = (int32)(64 - s);
     // always fits
     if (z.prec < 64) {
@@ -691,7 +691,7 @@ public static ж<Float> SetInf(this ж<Float> Ꮡz, bool signbit) {
 // mode; and z's accuracy reports the result error relative to the
 // exact (not rounded) result.
 public static ж<Float> Set(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var x = ref Ꮡx.DerefOrNil();
 
     if (debugFloat) {
@@ -718,7 +718,7 @@ public static ж<Float> Set(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 // Copy sets z to x, with the same precision, rounding mode, and accuracy as x.
 // Copy returns z. If x and z are identical, Copy is a no-op.
 public static ж<Float> Copy(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
     ref var x = ref Ꮡx.DerefOrNil();
 
     if (debugFloat) {
@@ -806,7 +806,7 @@ public static (uint64, Accuracy) Uint64(this ж<Float> Ꮡx) {
         if (x.exp <= 64) {
             // 1 <= x < Inf
             // u = trunc(x) fits into a uint64
-            var u = (msb64(x.mant) >> (int)((64 - (uint32)x.exp)));
+            var u = msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp)));
             if (x.MinPrec() <= 64) {
                 return (u, Exact);
             }
@@ -852,7 +852,7 @@ public static (int64, Accuracy) Int64(this ж<Float> Ꮡx) {
             // x.exp > 0
             // 1 <= |x| < +Inf
             // i = trunc(x) fits into an int64 (excluding math.MinInt64)
-            var i = (int64)((msb64(x.mant) >> (int)((64 - (uint32)x.exp))));
+            var i = (int64)(msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp))));
             if (x.neg) {
                 i = -i;
             }
@@ -979,7 +979,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
             // and we have eliminated p <= 0 early, we know p > 0.
             // bexp == 0 for denormals
             p = (nint)(mbits + 1 - emin) + (nint)e;
-            mant = (msb32(r.mant) >> (int)((nuint)((nint)fbits - p)));
+            mant = msb32(r.mant).Rsh((nuint)((nint)fbits - p));
         } else {
             // normal number: emin <= e <= emax
             bexp = ((uint32)(e + (int32)bias) << (int)(mbits));
@@ -1099,11 +1099,11 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
             // and we have eliminated p <= 0 early, we know p > 0.
             // bexp == 0 for denormals
             p = (nint)(mbits + 1 - emin) + (nint)e;
-            mant = (msb64(r.mant) >> (int)((nuint)((nint)fbits - p)));
+            mant = msb64(r.mant).Rsh((nuint)((nint)fbits - p));
         } else {
             // normal number: emin <= e <= emax
             bexp = ((uint64)(e + (int32)bias) << (int)(mbits));
-            mant = (uint64)((msb64(r.mant) >> (int)(ebits)) & (uint64)((4503599627370496L - 1)));
+            mant = (uint64)((msb64(r.mant) >> (int)(ebits)) & (uint64)(((uint64)(4503599627370496L - 1))));
         }
         return (math.Float64frombits((uint64)((uint64)(sign | bexp) | mant)), r.acc);
     }
@@ -1806,7 +1806,7 @@ public static nint Cmp(this ж<Float> Ꮡx, ж<Float> Ꮡy) {
     else if (exprᴛ1 == zero) {
         return 0;
     }
-    if (exprᴛ1 == inf) {
+    else if (exprᴛ1 == inf) {
         m = 2;
     }
 

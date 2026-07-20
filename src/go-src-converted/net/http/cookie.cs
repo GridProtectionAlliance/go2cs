@@ -240,7 +240,7 @@ public static void SetCookie(ResponseWriter w, ж<ΔCookie> Ꮡcookie) {
 // header (if other fields are set).
 // If c is nil or c.Name is invalid, the empty string is returned.
 public static @string String(this ж<ΔCookie> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     if (Ꮡc == nil || !isCookieNameValid(c.Name)) {
         return ""u8;
@@ -313,7 +313,7 @@ public static @string String(this ж<ΔCookie> Ꮡc) {
 
 // Valid reports whether the cookie is valid.
 public static error Valid(this ж<ΔCookie> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     if (Ꮡc == nil) {
         return errors.New("http: nil Cookie"u8);

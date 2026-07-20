@@ -480,24 +480,24 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
             fmt.Println(msg);
         }
     };
-    print("== initFiles ==");
+    print("== initFiles =="u8);
     Ꮡcheck.initFiles(files);
-    print("== collectObjects ==");
+    print("== collectObjects =="u8);
     Ꮡcheck.collectObjects();
-    print("== packageObjects ==");
+    print("== packageObjects =="u8);
     Ꮡcheck.packageObjects();
-    print("== processDelayed ==");
+    print("== processDelayed =="u8);
     Ꮡcheck.processDelayed(0);
     // incl. all functions
-    print("== cleanup ==");
+    print("== cleanup =="u8);
     check.cleanup();
-    print("== initOrder ==");
+    print("== initOrder =="u8);
     Ꮡcheck.initOrder();
     if (!(~check.conf).DisableUnusedImportCheck) {
-        print("== unusedImports ==");
+        print("== unusedImports =="u8);
         Ꮡcheck.unusedImports();
     }
-    print("== recordUntyped ==");
+    print("== recordUntyped =="u8);
     Ꮡcheck.recordUntyped();
     if (check.firstErr == default!) {
         // TODO(mdempsky): Ensure monomorph is safe when errors exist.

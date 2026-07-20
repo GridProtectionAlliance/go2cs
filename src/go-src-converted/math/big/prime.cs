@@ -46,7 +46,7 @@ partial class big_package {
 	1<<37 | 1<<41 | 1<<43 | 1<<47 | 1<<53 | 1<<59 | 1<<61 */ 2891462833508853932;
     Word w = x.abs[0];
     if (len(x.abs) == 1 && w < 64) {
-        return (uint64)(primeBitMask & (((uint64)1 << (int)(nuint)(w)))) != 0;
+        return (uint64)(primeBitMask & (((uint64)1).Lsh(w))) != 0;
     }
     if ((Word)(w & 1) == 0) {
         return false;
@@ -62,7 +62,7 @@ partial class big_package {
         rB = (uint32)(nuint)x.abs.modW(primesB);
     }
     else if (exprᴛ1 == 64) {
-        Word r = x.abs.modW((Word)((nuint)((primesA * primesB)) & (nuint)_M));
+        Word r = x.abs.modW((nuint)(16294579238595022365UL));
         rA = (uint32)(nuint)(r % (nuint)primesA);
         rB = (uint32)(nuint)(r % (nuint)primesB);
     }

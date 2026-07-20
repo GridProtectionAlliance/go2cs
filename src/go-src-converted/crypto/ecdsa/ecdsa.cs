@@ -445,7 +445,7 @@ internal static void hashToNat<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat
                     for (nint i = len(hash) - 1; i >= 0; i--) {
                         hash[i] >>= (int)(excess);
                         if (i > 0) {
-                            hash[i] |= (byte)((byte)(hash[i - 1] << (int)((8 - excess))));
+                            hash[i] |= (byte)(hash[i - 1].Lsh((uint64)((8 - excess))));
                         }
                     }
                 }

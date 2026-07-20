@@ -1151,7 +1151,7 @@ internal static bool isHost(byte c) {
 	1<<']' |
 	1<<':' */
             GoUntyped.Parse("10633823862292363665388054147449749504");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 // isPunct reports whether c is a punctuation byte that can appear
@@ -1168,7 +1168,7 @@ internal static bool isPunct(byte c) {
 	1<<';' |
 	1<<'?' |
 	1<<'!' */ 10088151134830067712;
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 // isPath reports whether c is a (non-punctuation) path byte.
@@ -1201,7 +1201,7 @@ internal static bool isPath(byte c) {
 	1<<'}' |
 	1<<'%' */
             GoUntyped.Parse("148873535423923614449401688976238051328");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 // isName reports whether s is a capitalized Go identifier (like Name).
@@ -1257,7 +1257,7 @@ internal static bool isIdentASCII(byte c) {
 	(1<<10-1)<<'0' |
 	1<<'_' */
             GoUntyped.Parse("10633823849912963253799171395480977408");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 // validImportPath reports whether path is a valid import path.
@@ -1317,7 +1317,7 @@ internal static bool importPathOK(byte c) {
 	1<<'_' |
 	1<<'+' */
             GoUntyped.Parse("95704415580147579119642937602632318976");
-    return ((uint64)((uint64)((((uint64)1 << (int)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1 << (int)((c - 64)))) & (((uint64)mask >> (int)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1).Lsh((uint64)((c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
 }
 
 } // end comment_package

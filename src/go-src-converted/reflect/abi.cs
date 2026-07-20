@@ -214,25 +214,25 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         }
 
     }
-    if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
+    else if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
         return a.assignFloatN(offset, t.Size(), 1);
     }
-    if (exprᴛ1 == Complex64) {
+    else if (exprᴛ1 == Complex64) {
         return a.assignFloatN(offset, 4, 2);
     }
-    if (exprᴛ1 == Complex128) {
+    else if (exprᴛ1 == Complex128) {
         return a.assignFloatN(offset, 8, 2);
     }
-    if (exprᴛ1 == ΔString) {
+    else if (exprᴛ1 == ΔString) {
         return a.assignIntN(offset, goarch.PtrSize, 2, 0b01);
     }
-    if (exprᴛ1 == ΔInterface) {
+    else if (exprᴛ1 == ΔInterface) {
         return a.assignIntN(offset, goarch.PtrSize, 2, 0b10);
     }
-    if (exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == ΔSlice) {
         return a.assignIntN(offset, goarch.PtrSize, 3, 0b001);
     }
-    if (exprᴛ1 == Array) {
+    else if (exprᴛ1 == Array) {
         var tt = (ж<arrayType>)(uintptr)(new @unsafe.Pointer(Ꮡt));
         var exprᴛ3 = (~tt).Len;
         if (exprᴛ3 == 0) {
@@ -249,7 +249,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         }
 
     }
-    if (exprᴛ1 == Struct) {
+    else if (exprᴛ1 == Struct) {
         var st = (ж<structType>)(uintptr)(new @unsafe.Pointer(Ꮡt));
         foreach (var (i, _) in (~st).Fields) {
             var f = Ꮡ((~st).Fields, i);
@@ -259,7 +259,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         }
         return true;
     }
-    { /* default: */
+    else { /* default: */
         print("t.Kind == ", t.Kind(), "\n");
         throw panic("unknown type kind");
     }
@@ -288,7 +288,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     }
     for (nint i = 0; i < n; i++) {
         abiStepKind kind = abiStepIntReg;
-        if ((uint8)(ptrMap & ((uint8)((uint8)1 << (int)(i)))) != 0) {
+        if ((uint8)(ptrMap & (((uint8)1).Lsh((uint64)(i)))) != 0) {
             kind = abiStepPointer;
         }
         a.steps = builtin.append(a.steps, new abiStep(
@@ -391,6 +391,8 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 }
 
 internal static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
+    b = b.Clone();
+
     for (nint i = 0; i < intArgRegs; i++) {
         nint x = 0;
         if (b.Get(i)) {
@@ -474,7 +476,7 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     // Undo the faking from earlier so that stackBytes
     // is accurate.
     @out.stackBytes -= retOffset;
-    return new abiDesc(@in, @out, stackCallArgsSize, retOffset, spill, stackPtrs, inRegPtrs, outRegPtrs);
+    return new abiDesc(@in, @out, stackCallArgsSize, retOffset, spill, stackPtrs, inRegPtrs.Clone(), outRegPtrs.Clone());
 }
 
 // intFromReg loads an argSize sized integer from reg and places it at to.

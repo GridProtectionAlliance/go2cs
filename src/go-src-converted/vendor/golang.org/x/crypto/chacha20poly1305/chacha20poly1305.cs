@@ -41,29 +41,29 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
     return ΔOverhead;
 }
 
-internal static slice<byte> Seal(this ж<chacha20poly1305> Ꮡc, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+[GoRecv] internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
-    if ((uint64)len(plaintext) > (274877906944L) - 64) {
+    if ((uint64)len(plaintext) > (uint64)((274877906944L) - 64)) {
         throw panic("chacha20poly1305: plaintext too large");
     }
-    return Ꮡc.seal(dst, nonce, plaintext, additionalData);
+    return c.seal(dst, nonce, plaintext, additionalData);
 }
 
 internal static error errOpen = errors.New("chacha20poly1305: message authentication failed"u8);
 
-internal static (slice<byte>, error) Open(this ж<chacha20poly1305> Ꮡc, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+[GoRecv] internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
     if (len(ciphertext) < 16) {
         return (default!, errOpen);
     }
-    if ((uint64)len(ciphertext) > (274877906944L) - 48) {
+    if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
     }
-    return Ꮡc.open(dst, nonce, ciphertext, additionalData);
+    return c.open(dst, nonce, ciphertext, additionalData);
 }
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a

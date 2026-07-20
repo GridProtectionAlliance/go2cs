@@ -127,11 +127,11 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     uint64 cutoff = default!;
     switch (@base) {
     case 10: {
-        cutoff = 1844674407370955161L + 1;
+        cutoff = (uint64)(1844674407370955161L + 1);
         break;
     }
     case 16: {
-        cutoff = 1152921504606846975L + 1;
+        cutoff = (uint64)(1152921504606846975L + 1);
         break;
     }
     default: {

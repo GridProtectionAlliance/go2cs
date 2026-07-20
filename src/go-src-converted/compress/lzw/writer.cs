@@ -55,7 +55,7 @@ internal static readonly UntypedInt invalidEntry = 0;
 
 // writeLSB writes the code c for "Least Significant Bits first" data.
 [GoRecv] internal static error writeLSB(this ref Writer w, uint32 c) {
-    w.bits |= (c << (int)(w.nBits));
+    w.bits |= c.Lsh(w.nBits);
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
@@ -71,7 +71,7 @@ internal static readonly UntypedInt invalidEntry = 0;
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
 [GoRecv] internal static error writeMSB(this ref Writer w, uint32 c) {
-    w.bits |= (c << (int)((32 - w.width - w.nBits)));
+    w.bits |= c.Lsh((32 - w.width - w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
@@ -101,7 +101,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         w.overflow <<= (int)(1);
     }
     if (w.hi == maxCode) {
-        var clear = ((uint32)1 << (int)(w.litWidth));
+        var clear = ((uint32)1).Lsh(w.litWidth);
         {
             var err = w.write(Ꮡw, clear); if (err != default!) {
                 return err;
@@ -131,7 +131,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         return (0, default!);
     }
     {
-        var maxLit = (uint8)((uint8)(1 << (int)(w.litWidth)) - 1); if (maxLit != 0xff) {
+        var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
             foreach (var (_, x) in p) {
                 if (x > maxLit) {
                     w.err = errors.New("lzw: input byte too large for the litWidth"u8);
@@ -150,7 +150,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         //
         // LZW compression isn't only used by GIF, but it's cheap to follow
         // that directive unconditionally.
-        var clear = ((uint32)1 << (int)(w.litWidth));
+        var clear = ((uint32)1).Lsh(w.litWidth);
         {
             var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != default!) {
                 return (0, errΔ1);
@@ -236,7 +236,7 @@ public static error Close(this ж<Writer> Ꮡw) {
         }
     } else {
         // Write the starting clear code, as w.Write did not.
-        var clear = ((uint32)1 << (int)(w.litWidth));
+        var clear = ((uint32)1).Lsh(w.litWidth);
         {
             var err = w.write(Ꮡw, clear); if (err != default!) {
                 return err;
@@ -244,7 +244,7 @@ public static error Close(this ж<Writer> Ꮡw) {
         }
     }
     // Write the eof code.
-    var eof = ((uint32)1 << (int)(w.litWidth)) + 1;
+    var eof = ((uint32)1).Lsh(w.litWidth) + 1;
     {
         var err = w.write(Ꮡw, eof); if (err != default!) {
             return err;
@@ -316,8 +316,8 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
     w.order = order;
     w.width = 1 + lw;
     w.litWidth = lw;
-    w.hi = ((uint32)1 << (int)(lw)) + 1;
-    w.overflow = ((uint32)1 << (int)((lw + 1)));
+    w.hi = ((uint32)1).Lsh(lw) + 1;
+    w.overflow = ((uint32)1).Lsh((lw + 1));
     w.savedCode = invalidCode;
 }
 

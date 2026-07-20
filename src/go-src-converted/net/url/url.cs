@@ -447,7 +447,7 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 
 // Username returns the username.
 public static @string Username(this ж<Userinfo> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
+    ref var u = ref Ꮡu.DerefOrNil();
 
     if (Ꮡu == nil) {
         return ""u8;
@@ -457,7 +457,7 @@ public static @string Username(this ж<Userinfo> Ꮡu) {
 
 // Password returns the password in case it is set, and whether it is set.
 public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
+    ref var u = ref Ꮡu.DerefOrNil();
 
     if (Ꮡu == nil) {
         return ("", false);
@@ -468,7 +468,7 @@ public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
 // String returns the encoded userinfo information in the standard form
 // of "username[:password]".
 public static @string String(this ж<Userinfo> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
+    ref var u = ref Ꮡu.DerefOrNil();
 
     if (Ꮡu == nil) {
         return ""u8;
@@ -983,7 +983,7 @@ internal static bool validOptionalPort(@string port) {
 // Redacted is like [URL.String] but replaces any password with "xxxxx".
 // Only the password in u.User is redacted.
 public static @string Redacted(this ж<URL> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
+    ref var u = ref Ꮡu.DerefOrNil();
 
     if (Ꮡu == nil) {
         return ""u8;
@@ -1045,7 +1045,7 @@ public static bool Has(this Values v, @string key) {
 // value.
 // Settings containing a non-URL-encoded semicolon are considered invalid.
 public static (Values, error) ParseQuery(@string query) {
-    var m = new Values();
+    var m = new Values(0);
     var err = parseQuery(m, query);
     return (m, err);
 }

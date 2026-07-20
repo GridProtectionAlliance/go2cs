@@ -510,7 +510,7 @@ internal static void cgoCheckPointer(any ptr, any arg) {
                 return;
             } while (false);
         }
-        if (exprᴛ1 == abi.Slice) {
+        else if (exprᴛ1 == abi.Slice) {
             ep = aep;
             t = ep.Value._type;
         }

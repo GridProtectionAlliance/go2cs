@@ -1592,7 +1592,7 @@ Switch:
         }
         return (r, t, default!);
     }
-    if (exprᴛ1 is (rune)'x') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'x') { matchᴛ1 = true;
         do {
             if (t == ""u8) {
                 // Hexadecimal escapes.
@@ -1651,22 +1651,22 @@ Switch:
             return (x * 16 + y, t, default!);
         } while (false);
     }
-    if (exprᴛ1 is (rune)'a') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'a') { matchᴛ1 = true;
         return ((rune)'\a', t, err);
     }
-    if (exprᴛ1 is (rune)'f') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'f') { matchᴛ1 = true;
         return ((rune)'\f', t, err);
     }
-    if (exprᴛ1 is (rune)'n') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'n') { matchᴛ1 = true;
         return ((rune)'\n', t, err);
     }
-    if (exprᴛ1 is (rune)'r') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'r') { matchᴛ1 = true;
         return ((rune)'\r', t, err);
     }
-    if (exprᴛ1 is (rune)'t') {
+    else if (exprᴛ1 is (rune)'t') {
         return ((rune)'\t', t, err);
     }
-    if (exprᴛ1 is (rune)'v') { matchᴛ1 = true;
+    else if (exprᴛ1 is (rune)'v') { matchᴛ1 = true;
         return ((rune)'\v', t, err);
     }
 

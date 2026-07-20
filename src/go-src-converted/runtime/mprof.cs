@@ -27,7 +27,7 @@ internal static ref mutex profBlockLock => ref ᏑprofBlockLock.Value;
 internal static ж<mutex> ᏑprofMemActiveLock = new(new mutex(nil));
 internal static ref mutex profMemActiveLock => ref ᏑprofMemActiveLock.Value;
 
-internal static ж<array<mutex>> ᏑprofMemFutureLock = new(new array<mutex>(3));
+internal static ж<array<mutex>> ᏑprofMemFutureLock = new(new array<mutex>(3, () => new(nil)));
 internal static ref array<mutex> profMemFutureLock => ref ᏑprofMemFutureLock.Value;
 
 // All memory allocations are local and do not escape outside of the profiler.

@@ -48,7 +48,7 @@ public static ж<P384Element> Set(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
     ref var e = ref Ꮡe.Value;
     ref var t = ref Ꮡt.Value;
 
-    e.x = t.x;
+    e.x = t.x.Clone();
     return Ꮡe;
 }
 

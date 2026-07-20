@@ -57,7 +57,7 @@ public static ж<Package> NewPackage(@string path, @string name) {
 // Consts, Vars, and Funcs).
 // For a nil pkg receiver, Scope returns the Universe scope.
 public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
-    ref var pkg = ref Ꮡpkg.Value;
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
 
     if (Ꮡpkg != nil) {
         return pkg.scope;

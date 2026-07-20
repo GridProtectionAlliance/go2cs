@@ -537,7 +537,7 @@ public static (@string, error) UserCacheDir() {
             return ("", errors.New("%LocalAppData% is not defined"u8));
         }
     }
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
         dir = Getenv("HOME"u8);
         if (dir == ""u8) {
             return ("", errors.New("$HOME is not defined"u8));
@@ -588,7 +588,7 @@ public static (@string, error) UserConfigDir() {
             return ("", errors.New("%AppData% is not defined"u8));
         }
     }
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
         dir = Getenv("HOME"u8);
         if (dir == ""u8) {
             return ("", errors.New("$HOME is not defined"u8));

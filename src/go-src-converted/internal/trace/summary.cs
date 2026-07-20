@@ -224,9 +224,7 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
     // This may happen e.g. if the first GC is triggered within a region,
     // starting the GC worker goroutines.
     if (!IsSystemGoroutine(g.Name)) {
-        foreach (var (_, vᴛ1) in g.activeRegions) {
-            var s = vᴛ1;
-
+        foreach (var (_, s) in g.activeRegions) {
             s.Value.End = Ꮡtrigger;
             s.Value.GoroutineExecStats = finalStat.sub((~s).GoroutineExecStats);
             g.Regions = append(g.Regions, s);
@@ -614,9 +612,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
 // Finalize indicates to the summarizer that we're done processing the trace.
 // It cleans up any remaining state and returns the full summary.
 [GoRecv] public static ж<Summary> ΔFinalize(this ref Summarizer s) {
-    foreach (var (_, vᴛ1) in s.gs) {
-        var g = vᴛ1;
-
+    foreach (var (_, g) in s.gs) {
         g.finalize(s.lastTs, nil);
         // Sort based on region start time.
         slices.SortFunc((~g).Regions, (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {

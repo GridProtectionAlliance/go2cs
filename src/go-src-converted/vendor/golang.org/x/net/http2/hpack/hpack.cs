@@ -468,9 +468,9 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     }
     i = (uint64)p[0];
     if (n < 8) {
-        i &= (uint64)((((uint64)1 << (int)((uint64)n))) - 1);
+        i &= (uint64)((((uint64)1).Lsh((uint64)n)) - 1);
     }
-    if (i < (((uint64)1 << (int)((uint64)n))) - 1) {
+    if (i < (((uint64)1).Lsh((uint64)n)) - 1) {
         return (i, p[1..], default!);
     }
     var origP = p;
@@ -479,7 +479,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     while (builtin.len(p) > 0) {
         var b = p[0];
         p = p[1..];
-        i += ((uint64)((byte)(b & 127)) << (int)(m));
+        i += ((uint64)((byte)(b & 127))).Lsh(m);
         if ((byte)(b & 128) == 0) {
             return (i, p, default!);
         }

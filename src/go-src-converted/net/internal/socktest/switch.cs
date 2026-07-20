@@ -24,8 +24,8 @@ partial class socktest_package {
 
 [GoRecv] internal static void init(this ref Switch sw) {
     sw.fltab = new map<FilterType, Filter>();
-    sw.sotab = new ΔSockets();
-    sw.stats = new stats();
+    sw.sotab = new ΔSockets(0);
+    sw.stats = new stats(0);
 }
 
 // Stats returns a list of per-cookie socket statistics.

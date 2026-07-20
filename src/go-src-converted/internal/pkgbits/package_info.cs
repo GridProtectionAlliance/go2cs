@@ -51,6 +51,8 @@ using static go.@internal.pkgbits_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<CodeObj, ΔCode>]
+[assembly: GoImplement<CodeType, ΔCode>]
 [assembly: GoImplement<CodeVal, ΔCode>]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]

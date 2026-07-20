@@ -161,7 +161,7 @@ internal static readonly UntypedInt gcmStandardNonceSize = 12;
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    if ((uint64)len(plaintext) > ((4294967296L) - 2) * (uint64)g.cipher.BlockSize()) {
+    if ((uint64)len(plaintext) > ((uint64)((4294967296L) - 2)) * (uint64)g.cipher.BlockSize()) {
         throw panic("crypto/cipher: message too large for GCM");
     }
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + g.tagSize);
@@ -194,7 +194,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
     if (len(ciphertext) < g.tagSize) {
         return (default!, errOpen);
     }
-    if ((uint64)len(ciphertext) > ((4294967296L) - 2) * (uint64)g.cipher.BlockSize() + (uint64)g.tagSize) {
+    if ((uint64)len(ciphertext) > ((uint64)((4294967296L) - 2)) * (uint64)g.cipher.BlockSize() + (uint64)g.tagSize) {
         return (default!, errOpen);
     }
     var tag = ciphertext[(int)(len(ciphertext) - g.tagSize)..];

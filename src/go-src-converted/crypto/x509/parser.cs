@@ -336,7 +336,7 @@ internal static (KeyUsage, error) parseKeyUsageExtension(cryptobyte.String der) 
     nint usage = default!;
     for (nint i = 0; i < 9; i++) {
         if (usageBits.At(i) != 0) {
-            usage |= (nint)((1 << (int)((nuint)i)));
+            usage |= (nint)(((nint)1).Lsh((nuint)i));
         }
     }
     return (((KeyUsage)usage), default!);

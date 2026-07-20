@@ -554,7 +554,7 @@ internal static ж<chattyPrinter> newChattyPrinter(Δio.Writer w) {
 // the global variable. For convenience, we allow p == nil and treat
 // that as not in json mode (because it's not chatty at all).
 internal static @string prefix(this ж<chattyPrinter> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
+    ref var p = ref Ꮡp.DerefOrNil();
 
     if (Ꮡp != nil && p.json) {
         return ((@string)marker);
@@ -722,9 +722,9 @@ internal static Δruntime.Frame frameSkip(this ж<common> Ꮡc, nint skip) => fu
         throw panic("testing: zero callers found");
     }
     var frames = Δruntime.CallersFrames(pc[..(int)(n)]);
-    Δruntime.Frame firstFrame = default!;
-    Δruntime.Frame prevFrame = default!;
-    Δruntime.Frame frame = default!;
+    Δruntime.Frame firstFrame = new();
+    Δruntime.Frame prevFrame = new();
+    Δruntime.Frame frame = new();
     for (var more = true; more; prevFrame = frame) {
         (frame, more) = frames.Next();
         if (frame.Function == "runtime.gopanic"u8) {

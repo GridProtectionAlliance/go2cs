@@ -220,7 +220,7 @@ internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
             // as an in-progress request. This is an error.
             return errors.New("fcgi: received ID that is already in-flight"u8);
         }
-        beginRequest br = default!;
+        beginRequest br = new();
         {
             var err = br.read(rec.content()); if (err != default!) {
                 return err;
@@ -252,7 +252,7 @@ internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
                 // body could be an io.LimitReader, but it shouldn't matter
                 // as long as both sides are behaving.
                 var (ᴛ1, ᴛ2) = io.Pipe();
-                (body, req.Value.pw) = (new io_PipeReaderжReadCloser(ᴛ1), ᴛ2);
+                (body, req.Value.pw) = (new io.PipeReaderжReadCloser(ᴛ1), ᴛ2);
             } else {
                 body = emptyBody;
             }

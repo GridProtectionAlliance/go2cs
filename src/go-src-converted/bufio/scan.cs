@@ -167,7 +167,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
         if (s.end == len(s.buf)) {
             // Guarantee no overflow in the multiplication below.
             nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
-            if (len(s.buf) >= s.maxTokenSize || len(s.buf) > 4611686018427387903L) {
+            if (len(s.buf) >= s.maxTokenSize || len(s.buf) > (nint)(4611686018427387903L)) {
                 s.setErr(ErrTooLong);
                 return false;
             }

@@ -232,7 +232,7 @@ internal static (slice<ast.Expr> blist, slice<ast.Expr> tlist) flattenUnion(slic
     {
         var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && (~o).Op == token.OR) {
             (blist, tlist) = flattenUnion(list, (~o).X);
-            blist = append(blist, (ast.Expr)(new ast_BinaryExprжExpr(o)));
+            blist = append(blist, (ast.Expr)(new ast.BinaryExprжExpr(o)));
             x = o.Value.Y;
         }
     }

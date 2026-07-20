@@ -246,7 +246,7 @@ internal static void encComplex(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, re
     ref var state = ref Ꮡstate.Value;
 
     var c = v.Complex();
-    if (c != 0 + 0D.i() || state.sendZero) {
+    if (c != 0D + 0D.i() || state.sendZero) {
         var rpart = floatBits(real(c));
         var ipart = floatBits(imag(c));
         state.update(Ꮡi);
@@ -515,7 +515,7 @@ internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> e
     [15] = encComplex,
     [16] = encComplex,
     [24] = encString
-}.array();
+}.array(25);
 
 // encOpFor returns (a pointer to) the encoding op for the base type under rt and
 // the indirection count to reach it.

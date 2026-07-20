@@ -89,7 +89,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
         z.digest.Reset();
     }
     z.err = default!;
-    z.scratch = new byte[]{}.array();
+    z.scratch = new byte[]{}.array(4);
     z.wroteHeader = false;
 }
 

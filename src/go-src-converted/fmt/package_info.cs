@@ -52,6 +52,7 @@ using static go.fmt_package;
 [assembly: GoImplement<pp, State>(Pointer = true)]
 [assembly: GoImplement<readRune, io_package.RuneScanner>(Pointer = true)]
 [assembly: GoImplement<ss, ScanState>(Pointer = true)]
+[assembly: GoImplement<ss, io_package.RuneScanner>(Pointer = true)]
 [assembly: GoImplement<stringReader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<wrapError, error>(Pointer = true)]
 [assembly: GoImplement<wrapErrors, error>(Pointer = true)]

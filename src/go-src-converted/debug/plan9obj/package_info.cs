@@ -46,9 +46,6 @@ using static go.debug.plan9obj_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<formatError, error>(Pointer = true)]
 [assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]

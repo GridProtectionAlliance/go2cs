@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,7 +41,6 @@ using static go.crypto.@internal.nistec_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<p256AffinePoint, ж<p256AffinePoint>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.crypto.@internal;

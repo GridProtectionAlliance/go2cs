@@ -47,7 +47,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     // the second half of the counter is not available. This is unlikely to be
     // an issue because the cipher.AEAD API requires the entire message to be in
     // memory, and the counter overflows at 256 GB.
-    if ((uint64)len(plaintext) > (274877906944L) - 64) {
+    if ((uint64)len(plaintext) > (uint64)((274877906944L) - 64)) {
         throw panic("chacha20poly1305: plaintext too large");
     }
     var c = @new<chacha20poly1305>();
@@ -66,7 +66,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     if (len(ciphertext) < 16) {
         return (default!, errOpen);
     }
-    if ((uint64)len(ciphertext) > (274877906944L) - 48) {
+    if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
     }
     var c = @new<chacha20poly1305>();

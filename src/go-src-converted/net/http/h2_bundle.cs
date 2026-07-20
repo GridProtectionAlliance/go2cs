@@ -523,9 +523,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
     }
     while (ᐧ) {
         Ꮡp.of(http2clientConnPool.Ꮡmu).Lock();
-        foreach (var (_, vᴛ1) in p.conns[addr]) {
-            var ccΔ1 = vᴛ1;
-
+        foreach (var (_, ccΔ1) in p.conns[addr]) {
             if (ccΔ1.ReserveNewRequest()) {
                 // When a connection is presented to us by the net/http package,
                 // the GetConn hook has already been called.
@@ -1349,7 +1347,7 @@ internal static void writeDebug(this http2FrameHeader h, ж<bytes.Buffer> Ꮡbuf
             if (name != ""u8){
                 buf.WriteString(name);
             } else {
-                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "0x%x"u8, (1 << (int)(i)));
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "0x%x"u8, ((nint)1).Lsh((uint64)(i)));
             }
         }
     }
@@ -1396,7 +1394,7 @@ internal static (http2FrameHeader, error) http2readFrameHeader(slice<byte> buf, 
         Length: ((uint32)((uint32)(((uint32)buf[0] << (int)(16)) | ((uint32)buf[1] << (int)(8))) | (uint32)buf[2])),
         Type: ((http2FrameType)buf[3]),
         Flags: ((http2Flags)buf[4]),
-        StreamID: (uint32)(binary.BigEndian.Uint32(buf[5..]) & (2147483648L - 1)),
+        StreamID: (uint32)(binary.BigEndian.Uint32(buf[5..]) & ((uint32)(2147483648L - 1))),
         valid: true
     ), default!);
 }
@@ -1909,7 +1907,7 @@ internal static (http2Frame, error) http2parseSettingsFrame(ж<http2frameCache> 
     }
     var f = Ꮡ(new http2SettingsFrame(http2FrameHeader: fh, p: p));
     {
-        var (v, ok) = f.Value(http2SettingInitialWindowSize); if (ok && v > (2147483648L) - 1) {
+        var (v, ok) = f.Value(http2SettingInitialWindowSize); if (ok && v > (uint32)((2147483648L) - 1)) {
             countError("frame_settings_window_size_too_big"u8);
             // Values above the maximum flow control window size of 2^31 - 1 MUST
             // be treated as a connection error (Section 5.4.1) of type
@@ -2095,7 +2093,7 @@ internal static (http2Frame, error) http2parseGoAwayFrame(ж<http2frameCache> _,
     }
     return (new http2GoAwayFrameжhttp2Frame(Ꮡ(new http2GoAwayFrame(
         http2FrameHeader: fh,
-        LastStreamID: (uint32)(binary.BigEndian.Uint32(p[..4]) & (2147483648L - 1)),
+        LastStreamID: (uint32)(binary.BigEndian.Uint32(p[..4]) & ((uint32)(2147483648L - 1))),
         ErrCode: ((http2ErrCode)binary.BigEndian.Uint32(p[4..8])),
         debugData: p[8..]
     ))), default!);
@@ -2105,7 +2103,7 @@ internal static error WriteGoAway(this ж<http2Framer> Ꮡf, uint32 maxStreamID,
     ref var f = ref Ꮡf.Value;
 
     f.startWrite(http2FrameGoAway, 0, 0);
-    f.writeUint32((uint32)(maxStreamID & (2147483648L - 1)));
+    f.writeUint32((uint32)(maxStreamID & ((uint32)(2147483648L - 1))));
     f.writeUint32((uint32)code);
     f.writeBytes(debugData);
     return Ꮡf.endWrite();
@@ -2525,7 +2523,7 @@ internal static (http2Frame, error err) http2parsePushPromise(ж<http2frameCache
         countError("frame_pushpromise_promiseid_short"u8);
         return (default!, err);
     }
-    pp.Value.PromiseID = (uint32)((~pp).PromiseID & (2147483648L - 1));
+    pp.Value.PromiseID = (uint32)((~pp).PromiseID & ((uint32)(2147483648L - 1)));
     if ((nint)padLength > builtin.len(p)) {
         // like the DATA frame, error out if padding is longer than the body.
         countError("frame_pushpromise_pad_too_big"u8);
@@ -3028,7 +3026,7 @@ internal static (uint64 n, error err) http2parseUintBytes(slice<byte> s, nint @b
 
     n = 0;
     cutoff = http2cutoff64(@base);
-    maxVal = ((uint64)1 << (int)((nuint)bitSize)) - 1;
+    maxVal = ((uint64)1).Lsh((nuint)bitSize) - 1;
     for (nint i = 0; i < builtin.len(s); i++) {
         byte v = default!;
         var d = s[i];
@@ -3271,12 +3269,12 @@ internal static error Valid(this http2Setting s) {
             return ((http2ConnectionError)(uint32)http2ErrCodeProtocol);
         }
     }
-    if (exprᴛ1 == http2SettingInitialWindowSize) {
-        if (s.Val > 2147483648L - 1) {
+    else if (exprᴛ1 == http2SettingInitialWindowSize) {
+        if (s.Val > (uint32)(2147483648L - 1)) {
             return ((http2ConnectionError)(uint32)http2ErrCodeFlowControl);
         }
     }
-    if (exprᴛ1 == http2SettingMaxFrameSize) {
+    else if (exprᴛ1 == http2SettingMaxFrameSize) {
         if (s.Val < 16384 || s.Val > (1 << (int)(24)) - 1) {
             return ((http2ConnectionError)(uint32)http2ErrCodeProtocol);
         }
@@ -3611,7 +3609,7 @@ internal static (nint n, error err) Read(this ж<http2pipe> Ꮡp, slice<byte> d)
         Ꮡp.of(http2pipe.Ꮡmu).Lock();
         defer(Ꮡp.of(http2pipe.Ꮡmu).Unlock);
         if (p.c.L == default!) {
-            p.c.L = new sync_MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
+            p.c.L = new sync.MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
         }
         while (ᐧ) {
             if (p.breakErr != default!) {
@@ -3650,7 +3648,7 @@ internal static (nint n, error err) Write(this ж<http2pipe> Ꮡp, slice<byte> d
         Ꮡp.of(http2pipe.Ꮡmu).Lock();
         defer(Ꮡp.of(http2pipe.Ꮡmu).Unlock);
         if (p.c.L == default!) {
-            p.c.L = new sync_MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
+            p.c.L = new sync.MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
         }
         defer(Ꮡp.of(http2pipe.Ꮡc).Signal);
         if (p.err != default! || p.breakErr != default!) {
@@ -3699,7 +3697,7 @@ internal static void closeWithError(this ж<http2pipe> Ꮡp, ж<error> Ꮡdst, e
     Ꮡp.of(http2pipe.Ꮡmu).Lock();
     defer(Ꮡp.of(http2pipe.Ꮡmu).Unlock);
     if (p.c.L == default!) {
-        p.c.L = new sync_MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
+        p.c.L = new sync.MutexжLocker(Ꮡp.of(http2pipe.Ꮡmu));
     }
     defer(Ꮡp.of(http2pipe.Ꮡc).Signal);
     if (dst != default!) {
@@ -3952,7 +3950,7 @@ internal static Func<ж<http2serverConn>, any, bool> http2testHookOnPanic;
 }
 
 internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> Ꮡsc) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     if (Ꮡs == nil) {
         return;
@@ -3964,7 +3962,7 @@ internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<htt
 }
 
 internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> Ꮡsc) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     if (Ꮡs == nil) {
         return;
@@ -3976,7 +3974,7 @@ internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<h
 }
 
 internal static void startGracefulShutdown(this ж<http2serverInternalState> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     if (Ꮡs == nil) {
         return;
@@ -4108,7 +4106,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
 }
 
 internal static context.Context context(this ж<http2ServeConnOpts> Ꮡo) {
-    ref var o = ref Ꮡo.Value;
+    ref var o = ref Ꮡo.DerefOrNil();
 
     if (Ꮡo != nil && o.Context != default!) {
         return o.Context;
@@ -4117,7 +4115,7 @@ internal static context.Context context(this ж<http2ServeConnOpts> Ꮡo) {
 }
 
 internal static ж<Server> baseConfig(this ж<http2ServeConnOpts> Ꮡo) {
-    ref var o = ref Ꮡo.Value;
+    ref var o = ref Ꮡo.DerefOrNil();
 
     if (Ꮡo != nil && o.BaseConfig != nil) {
         return o.BaseConfig;
@@ -4126,7 +4124,7 @@ internal static ж<Server> baseConfig(this ж<http2ServeConnOpts> Ꮡo) {
 }
 
 internal static ΔHandler handler(this ж<http2ServeConnOpts> Ꮡo) {
-    ref var o = ref Ꮡo.Value;
+    ref var o = ref Ꮡo.DerefOrNil();
 
     if (Ꮡo != nil) {
         if (o.Handler != default!) {
@@ -4803,7 +4801,7 @@ internal static void serve(this ж<http2serverConn> Ꮡsc) => func((defer, recov
                     sc.vlogf("GOAWAY close timer fired; closing conn from %v"u8, sc.conn.RemoteAddr());
                     return;
                 }
-                if (exprᴛ1 == http2gracefulShutdownMsg) {
+                else if (exprᴛ1 == http2gracefulShutdownMsg) {
                     Ꮡsc.startGracefulShutdownInternal();
                 }
                 else if (exprᴛ1 == http2handlerDoneMsg) {
@@ -5680,7 +5678,7 @@ internal static error processSetting(this ж<http2serverConn> Ꮡsc, http2Settin
     else if (exprᴛ1 == http2SettingInitialWindowSize) {
         return Ꮡsc.processSettingInitialWindowSize(s.Val);
     }
-    if (exprᴛ1 == http2SettingMaxFrameSize) {
+    else if (exprᴛ1 == http2SettingMaxFrameSize) {
         sc.maxFrameSize = (int32)s.Val;
     }
     else if (exprᴛ1 == http2SettingMaxHeaderListSize) {
@@ -5980,7 +5978,7 @@ internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2Met
     }
     st.Value.reqTrailer = req.Value.Trailer;
     if ((~st).reqTrailer != default!) {
-        st.Value.trailer = new ΔHeader();
+        st.Value.trailer = new ΔHeader(0);
     }
     st.Value.body = (~req).Body._<ж<http2requestBody>>().Value.pipe;
     // may be nil
@@ -6019,7 +6017,7 @@ internal static void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> 
     var st = Ꮡsc.newStream(id, 0, http2stateHalfClosedRemote);
     st.Value.reqTrailer = req.Trailer;
     if ((~st).reqTrailer != default!) {
-        st.Value.trailer = new ΔHeader();
+        st.Value.trailer = new ΔHeader(0);
     }
     var rw = Ꮡsc.newResponseWriter(st, Ꮡreq);
     // Disable any read deadline set by the net/http package
@@ -6156,7 +6154,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
         // pseudo-header fields"
         return (default!, default!, Ꮡsc.countError("bad_path_method"u8, http2streamError(f.StreamID, http2ErrCodeProtocol)));
     }
-    rp.header = new ΔHeader();
+    rp.header = new ΔHeader(0);
     foreach (var (_, hf) in f.RegularFields()) {
         rp.header.Add(sc.canonicalHeader(hf.Name), hf.Value);
     }
@@ -6229,7 +6227,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
                 if (trailer == default!) {
                     // Bogus. (copy of http1 rules)
                     // Ignore.
-                    trailer = new ΔHeader();
+                    trailer = new ΔHeader(0);
                 }
                 trailer[key] = default!;
             }
@@ -6929,7 +6927,7 @@ internal static readonly @string http2TrailerPrefix = "Trailer:"u8;
         throw panic("Header called after Handler finished");
     }
     if ((~rws).handlerHeader == default!) {
-        rws.Value.handlerHeader = new ΔHeader();
+        rws.Value.handlerHeader = new ΔHeader(0);
     }
     return (~rws).handlerHeader;
 }
@@ -7323,7 +7321,7 @@ internal static bool http2h1ServerKeepAlivesDisabled(ж<Server> Ꮡhs) {
 }
 
 internal static error countError(this ж<http2serverConn> Ꮡsc, @string name, error err) {
-    ref var sc = ref Ꮡsc.Value;
+    ref var sc = ref Ꮡsc.DerefOrNil();
 
     if (Ꮡsc == nil || sc.srv == nil) {
         return err;
@@ -7498,7 +7496,7 @@ internal static readonly UntypedInt http2defaultMaxConcurrentStreams = 1000;
 }
 
 internal static void markNewGoroutine(this ж<http2Transport> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt != nil && t.http2transportTestHooks != nil) {
         (~t.http2transportTestHooks).group.Join();
@@ -7943,7 +7941,7 @@ internal static (ж<Response>, error) RoundTripOpt(this ж<http2Transport> Ꮡt,
                         t.vlogf("RoundTrip retrying after failure: %v"u8, roundTripErr);
                         continue;
                     }
-                    var backoff = (float64)(((nuint)1 << (int)(((nuint)retry - 1))));
+                    var backoff = (float64)(((nuint)1).Lsh(((nuint)retry - 1)));
                     backoff += backoff * (0.1D * mathrand.Float64());
                     var d = time.ΔSecond * ((time.Duration)(int64)backoff);
                     var tm = t.newTimer(d);
@@ -8157,7 +8155,7 @@ internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transpor
     if (http2VerboseLogs) {
         t.vlogf("http2: Transport creating client conn %p to %v"u8, cc, c.RemoteAddr());
     }
-    cc.Value.cond = sync.NewCond(new sync_MutexжLocker(cc.of(http2ClientConn.Ꮡmu)));
+    cc.Value.cond = sync.NewCond(new sync.MutexжLocker(cc.of(http2ClientConn.Ꮡmu)));
     cc.of(http2ClientConn.Ꮡflow).add((int32)http2initialWindowSize);
     // TODO: adjust this writer size to account for frame size +
     // MTU + crypto/tls record padding.
@@ -10039,7 +10037,7 @@ internal static error processHeaders(this ж<http2clientConnReadLoop> Ꮡrl, ж<
             ref var t = ref heap<ΔHeader>(out var Ꮡt);
             t = res.Value.Trailer;
             if (t == default!) {
-                t = new ΔHeader();
+                t = new ΔHeader(0);
                 res.Value.Trailer = t;
             }
             http2foreachHeaderElement(hf.Value, (@string v) => {
@@ -10081,7 +10079,7 @@ internal static error processHeaders(this ж<http2clientConnReadLoop> Ꮡrl, ж<
         if (statusCode == 100) {
             http2traceGot100Continue(cs.trace);
             switch (ᐧ) {
-            case ᐧ: {
+            case ᐧ when cs.on100.ᐸꟷ(new EmptyStruct(), ꟷ): {
                 break;
             }
             default: {
@@ -10156,7 +10154,7 @@ internal static error processTrailers(this ж<http2clientConnReadLoop> Ꮡrl, ж
         // TODO: ConnectionError might be overly harsh? Check.
         return ((http2ConnectionError)(uint32)http2ErrCodeProtocol);
     }
-    var trailer = new ΔHeader();
+    var trailer = new ΔHeader(0);
     foreach (var (_, hf) in f.RegularFields()) {
         @string key = http2canonicalHeader(hf.Name);
         trailer[key] = append(trailer[key], hf.Value);
@@ -10425,7 +10423,7 @@ internal static ж<http2clientStream> streamByID(this ж<http2clientConnReadLoop
     foreach (var (k, vv) in cs.trailer) {
         var t = cs.resTrailer;
         if (t.ValueSlot == default!) {
-            t.ValueSlot = new ΔHeader();
+            t.ValueSlot = new ΔHeader(0);
         }
         (t.ValueSlot)[k] = vv;
     }
@@ -11531,7 +11529,7 @@ public static @string String(this http2FrameWriteRequest wr) {
         return;
     }
     switch (ᐧ) {
-    case ᐧ: {
+    case ᐧ when wr.done.ᐸꟷ(err, ꟷ): {
         break;
     }
     default: {
@@ -11715,7 +11713,7 @@ internal static readonly http2priorityNodeState http2priorityNodeIdle = 2;
 }
 
 internal static void setParent(this ж<http2priorityNode> Ꮡn, ж<http2priorityNode> Ꮡparent) {
-    ref var n = ref Ꮡn.Value;
+    ref var n = ref Ꮡn.DerefOrNil();
     ref var parent = ref Ꮡparent.DerefOrNil();
 
     if (Ꮡn == Ꮡparent) {
@@ -11755,11 +11753,11 @@ internal static void setParent(this ж<http2priorityNode> Ꮡn, ж<http2priority
 }
 
 internal static void addBytes(this ж<http2priorityNode> Ꮡn, int64 b) {
-    ref var n = ref Ꮡn.Value;
+    ref var n = ref Ꮡn.DerefOrNil();
 
     n.bytes += b;
     for (; Ꮡn != nil; Ꮡn = n.parent) {
-        n = ref Ꮡn.Value;
+        n = ref Ꮡn.DerefOrNil();
         n.subtreeBytes += b;
     }
 }

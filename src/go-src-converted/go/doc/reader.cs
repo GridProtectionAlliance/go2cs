@@ -241,9 +241,9 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     // type not found - add one without declaration
     var typ = Ꮡ(new namedType(
         name: name,
-        embedded: new embeddedSet(),
-        funcs: new methodSet(),
-        methods: new methodSet()
+        embedded: new embeddedSet(0),
+        funcs: new methodSet(0),
+        methods: new methodSet(0)
     ));
     r.types[name] = typ;
     return typ;
@@ -712,7 +712,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
 
                                     TokPos: s.Pos(),
                                     Tok: token.TYPE,
-                                    Specs: new ast.Spec[]{new ast_TypeSpecжSpec(s)}.slice()
+                                    Specs: new ast.Spec[]{new ast.TypeSpecжSpec(s)}.slice()
                                 ));
                                 r.readType(fake, s);
                             }
@@ -741,7 +741,7 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
     r.imports = new map<@string, nint>();
     r.mode = mode;
     r.types = new map<@string, ж<namedType>>();
-    r.funcs = new methodSet();
+    r.funcs = new methodSet(0);
     r.notes = new map<@string, slice<ж<Note>>>();
     r.importByName = new map<@string, @string>();
     // sort package files before reading them so that the
@@ -793,11 +793,11 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
     origPos = newField.Type.Pos();
     var (_, origRecvIsPtr) = newField.Type._<ж<ast.StarExpr>>(ᐧ);
     var newIdent = Ꮡ(new ast.Ident(NamePos: origPos, Name: recvTypeName));
-    ast.Expr typ = new ast_IdentжExpr(newIdent);
+    ast.Expr typ = new ast.IdentжExpr(newIdent);
     if (!embeddedIsPtr && origRecvIsPtr) {
         newIdent.Value.NamePos++;
         // '*' is one character
-        typ = new ast_StarExprжExpr(Ꮡ(new ast.StarExpr(Star: origPos, X: new ast_IdentжExpr(newIdent))));
+        typ = new ast.StarExprжExpr(Ꮡ(new ast.StarExpr(Star: origPos, X: new ast.IdentжExpr(newIdent))));
     }
     newField.Type = typ;
     // copy existing receiver field list and set new receiver field
@@ -849,7 +849,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
         // collect embedded methods for t
         if ((~t).isStruct){
             // struct
-            r.collectEmbeddedMethods((~t).methods, t, (~t).name, false, 1, new embeddedSet());
+            r.collectEmbeddedMethods((~t).methods, t, (~t).name, false, 1, new embeddedSet(0));
         } else {
         }
     }

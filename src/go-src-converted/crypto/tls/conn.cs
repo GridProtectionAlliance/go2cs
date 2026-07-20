@@ -748,7 +748,7 @@ Op: "remote error"u8, Err: ((alert)data[1])))));
         }
 
     }
-    if (exprᴛ1 == recordTypeChangeCipherSpec) {
+    else if (exprᴛ1 == recordTypeChangeCipherSpec) {
         if (len(data) != 1 || data[0] != 1) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertDecodeError));
         }
@@ -773,7 +773,7 @@ Op: "remote error"u8, Err: ((alert)data[1])))));
             }
         }
     }
-    if (exprᴛ1 == recordTypeApplicationData) {
+    else if (exprᴛ1 == recordTypeApplicationData) {
         if (!handshakeComplete || expectChangeCipherSpec) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
@@ -1330,9 +1330,9 @@ internal static error handleRenegotiation(this ж<Conn> Ꮡc) => func((defer, re
             return Ꮡc.sendAlert(alertNoRenegotiation);
         }
     }
-    if (exprᴛ1 == RenegotiateFreelyAsClient) {
+    else if (exprᴛ1 == RenegotiateFreelyAsClient) {
     }
-    { /* default: */
+    else { /* default: */
         Ꮡc.sendAlert(alertInternalError);
         return errors.New("tls: unknown Renegotiation value"u8);
     }

@@ -21,7 +21,7 @@ internal static ΔAddr sockaddrToIP(syscallꓸSockaddr sa) {
 }
 
 internal static nint family(this ж<IPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
@@ -33,7 +33,7 @@ internal static nint family(this ж<IPAddr> Ꮡa) {
 }
 
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint family) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return (default!, default!);
@@ -71,7 +71,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if (20 > l || l > len(b)) {
         return n;
     }
-    if ((b[0] >> (int)(4)) != 4) {
+    if ((byte)((b[0] >> (int)(4))) != 4) {
         return n;
     }
     copy(b, b[(int)(l)..]);

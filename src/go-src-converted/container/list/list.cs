@@ -154,7 +154,7 @@ internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> �
 // It returns the element value e.Value.
 // The element must not be nil.
 public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var e = ref Ꮡe.Value;
 
     if (e.list == Ꮡl) {
@@ -183,7 +183,7 @@ public static ж<Element> PushBack(this ж<List> Ꮡl, any v) {
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
 public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var mark = ref Ꮡmark.Value;
 
     if (mark.list != Ꮡl) {
@@ -197,7 +197,7 @@ public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> �
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
 public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var mark = ref Ꮡmark.Value;
 
     if (mark.list != Ꮡl) {
@@ -211,7 +211,7 @@ public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡ
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
 public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var e = ref Ꮡe.DerefOrNil();
 
     if (e.list != Ꮡl || l.root.next == Ꮡe) {
@@ -225,7 +225,7 @@ public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) {
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
 public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var e = ref Ꮡe.DerefOrNil();
 
     if (e.list != Ꮡl || l.root.prev == Ꮡe) {
@@ -239,7 +239,7 @@ public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) {
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
 public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var e = ref Ꮡe.DerefOrNil();
     ref var mark = ref Ꮡmark.DerefOrNil();
 
@@ -253,7 +253,7 @@ public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> 
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
 public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
     ref var e = ref Ꮡe.DerefOrNil();
     ref var mark = ref Ꮡmark.DerefOrNil();
 

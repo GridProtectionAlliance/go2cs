@@ -732,7 +732,7 @@ public static rune Scan(this ж<Scanner> Ꮡs) {
     s.tokPos = -1;
     s.Line = 0;
 redo:
-    while ((uint64)(s.Whitespace & (((uint64)1 << (int)((nuint)ch)))) != 0) {
+    while ((uint64)(s.Whitespace & (((uint64)1).Lsh((nuint)ch))) != 0) {
         // skip white space
         ch = Ꮡs.next();
 continue_redo:;

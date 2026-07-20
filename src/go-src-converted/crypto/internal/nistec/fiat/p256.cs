@@ -48,7 +48,7 @@ public static ж<P256Element> Set(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡ
     ref var e = ref Ꮡe.Value;
     ref var t = ref Ꮡt.Value;
 
-    e.x = t.x;
+    e.x = t.x.Clone();
     return Ꮡe;
 }
 

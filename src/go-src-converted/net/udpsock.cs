@@ -32,7 +32,7 @@ partial class net_package {
 //
 // If a is nil, a zero value is returned.
 public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return new netip.AddrPort(nil);
@@ -48,7 +48,7 @@ public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
 }
 
 public static @string String(this ж<UDPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return "<nil>"u8;
@@ -61,7 +61,7 @@ public static @string String(this ж<UDPAddr> Ꮡa) {
 }
 
 internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil || a.IP == default!) {
         return true;

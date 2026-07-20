@@ -242,9 +242,9 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
                 return ("", 0, ((UnknownNetworkError)network));
             }
         }
-        if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
+        else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
         }
-        { /* default: */
+        else { /* default: */
             return ("", 0, ((UnknownNetworkError)network));
         }
 

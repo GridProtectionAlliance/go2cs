@@ -53,7 +53,7 @@ public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
 
 // Debugging support
 public static @string String(this ж<Scope> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "scope %p {"u8, Ꮡs);

@@ -207,9 +207,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, 
         sΔ1.Value.Path.Value.ValuePos = pos[i].Start;
         sΔ1.Value.EndPos = pos[i].End;
         foreach (var (_, g) in importComments[sΔ1]) {
-            foreach (var (_, vᴛ1) in (~g.cg).List) {
-                var c = vᴛ1;
-
+            foreach (var (_, c) in (~g.cg).List) {
                 if (g.left){
                     c.Value.Slash = pos[i].Start - 1;
                 } else {

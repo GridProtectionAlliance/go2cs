@@ -38,6 +38,12 @@ using static go.bufio_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<ReadWriter, io_package.ReaderFrom>]
+[assembly: GoImplement<ReadWriter, io_package.StringWriter>]
+[assembly: GoImplement<ReadWriter, io_package.WriterTo>]
+[assembly: GoImplement<Reader, io_package.WriterTo>(Pointer = true)]
+[assembly: GoImplement<Writer, io_package.ReaderFrom>(Pointer = true)]
+[assembly: GoImplement<Writer, io_package.StringWriter>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

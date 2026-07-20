@@ -758,7 +758,7 @@ internal static readonly time.Duration maxSessionTicketLifetime = /* 7 * 24 * ti
 // Clone returns a shallow clone of c or nil if c is nil. It is safe to clone a [Config] that is
 // being used concurrently by a TLS client or server.
 public static ж<Config> Clone(this ж<Config> Ꮡc) => func<ж<Config>>((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     if (Ꮡc == nil) {
         return default!;
@@ -784,7 +784,7 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) => func<ж<Config>>((defer,
         CipherSuites: c.CipherSuites,
         PreferServerCipherSuites: c.PreferServerCipherSuites,
         SessionTicketsDisabled: c.SessionTicketsDisabled,
-        SessionTicketKey: c.SessionTicketKey,
+        SessionTicketKey: c.SessionTicketKey.Clone(),
         ClientSessionCache: c.ClientSessionCache,
         UnwrapSession: c.UnwrapSession,
         WrapSession: c.WrapSession,
@@ -812,7 +812,7 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) => 
 
     // Don't write if SessionTicketKey is already defined as our deprecated string,
     // or if it is defined by the user but sessionTicketKeys is already set.
-    if (c.SessionTicketKey != new byte[]{}.array() && (bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) || len(c.sessionTicketKeys) > 0)) {
+    if (c.SessionTicketKey != new byte[]{}.array(32) && (bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) || len(c.sessionTicketKeys) > 0)) {
         return;
     }
     // We need to write some data, so get an exclusive lock and re-check any conditions.
@@ -820,7 +820,7 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) => 
     defer(Ꮡc.of(Config.Ꮡmutex).RLock);
     Ꮡc.of(Config.Ꮡmutex).Lock();
     defer(Ꮡc.of(Config.Ꮡmutex).Unlock);
-    if (c.SessionTicketKey == new byte[]{}.array()){
+    if (c.SessionTicketKey == new byte[]{}.array(32)){
         {
             var (_, err) = io.ReadFull(c.rand(), c.SessionTicketKey[..]); if (err != default!) {
                 throw panic(fmt.Sprintf("tls: unable to generate random session ticket key: %v"u8, err));
@@ -924,7 +924,9 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
         throw panic("tls: keys must have at least one key");
     }
     var newKeys = new slice<ticketKey>(len(keys));
-    foreach (var (i, bytes) in keys) {
+    foreach (var (i, vᴛ1) in keys) {
+        var bytes = vᴛ1.Clone();
+
         newKeys[i] = c.ticketKeyFromBytes(bytes);
     }
     Ꮡc.of(Config.Ꮡmutex).Lock();
@@ -978,7 +980,7 @@ internal const bool roleServer = false;
 internal static ж<godebug.Setting> tls10server = godebug.New("tls10server"u8);
 
 internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isClient) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     var versions = new slice<uint16>(0, len(ΔsupportedVersions));
     foreach (var (_, v) in ΔsupportedVersions) {
@@ -1027,7 +1029,7 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
 }
 
 internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 version) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     slice<CurveID> curvePreferences = default!;
     if (Ꮡc != nil && len(c.CurvePreferences) != 0){
@@ -1079,7 +1081,7 @@ internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient
 // See go.dev/issue/67401.
 //
 //go:linkname errNoCertificates
-internal static error errNoCertificates = errors.New("tls: no certificates configured"u8);
+public static error errNoCertificates = errors.New("tls: no certificates configured"u8);
 
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
@@ -1517,7 +1519,7 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
     return (default!, false);
 });
 
-internal static ж<Config> ᏑemptyConfig = new(default(Config));
+internal static ж<Config> ᏑemptyConfig = new(new Config());
 internal static ref Config emptyConfig => ref ᏑemptyConfig.Value;
 
 internal static ж<Config> defaultConfig() {

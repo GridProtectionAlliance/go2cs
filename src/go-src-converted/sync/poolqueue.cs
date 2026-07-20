@@ -80,7 +80,7 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
 
     var ptrs = Ꮡd.of(poolDequeue.ᏑheadTail).Load();
     var (head, tail) = d.unpack(ptrs);
-    if ((uint32)((tail + (uint32)len(d.vals)) & (uint32)((4294967296L - 1))) == head) {
+    if ((uint32)((tail + (uint32)len(d.vals)) & (uint32)(((uint32)(4294967296L - 1)))) == head) {
         // Queue is full.
         return false;
     }

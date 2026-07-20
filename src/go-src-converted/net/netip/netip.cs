@@ -95,7 +95,7 @@ public static ΔAddr IPv6Unspecified() {
 
 // IPv4Unspecified returns the IPv4 unspecified address "0.0.0.0".
 public static ΔAddr IPv4Unspecified() {
-    return AddrFrom4(new byte[]{}.array());
+    return AddrFrom4(new byte[]{}.array(4));
 }
 
 // AddrFrom4 returns the address of the IPv4 address given by the bytes in addr.
@@ -381,19 +381,19 @@ public static (ΔAddr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // v4 returns the i'th byte of ip. If ip is not an IPv4, v4 returns
 // unspecified garbage.
 internal static uint8 v4(this ΔAddr ip, uint8 i) {
-    return (uint8)((ip.addr.lo >> (int)(((3 - i) * 8))));
+    return (uint8)(ip.addr.lo.Rsh((uint64)(((3 - i) * 8))));
 }
 
 // v6 returns the i'th byte of ip. If ip is an IPv4 address, this
 // accesses the IPv4-mapped IPv6 address form of the IP.
 internal static uint8 v6(this ΔAddr ip, uint8 i) {
-    return (uint8)(((Ꮡ(ip).of(netip_package.ΔAddr.Ꮡaddr).halves()[(i / 8) % 2]).Value >> (int)(((7 - i % 8) * 8))));
+    return (uint8)(((Ꮡ(ip).of(netip_package.ΔAddr.Ꮡaddr).halves()[(i / 8) % 2]).Value).Rsh((uint64)(((7 - i % 8) * 8))));
 }
 
 // v6u16 returns the i'th 16-bit word of ip. If ip is an IPv4 address,
 // this accesses the IPv4-mapped IPv6 address form of the IP.
 internal static uint16 v6u16(this ΔAddr ip, uint8 i) {
-    return (uint16)(((Ꮡ(ip).of(netip_package.ΔAddr.Ꮡaddr).halves()[(i / 4) % 2]).Value >> (int)(((3 - i % 4) * 16))));
+    return (uint16)(((Ꮡ(ip).of(netip_package.ΔAddr.Ꮡaddr).halves()[(i / 4) % 2]).Value).Rsh((uint64)(((3 - i % 4) * 16))));
 }
 
 // isZero reports whether ip is the zero value of the IP type.
@@ -735,7 +735,7 @@ public static array<byte> /*a16*/ As16(this ΔAddr ip) {
 
     byteorder.BePutUint64(a16[..8], ip.addr.hi);
     byteorder.BePutUint64(a16[8..], ip.addr.lo);
-    return a16;
+    return a16.Clone();
 }
 
 // As4 returns an IPv4 or IPv4-in-IPv6 address in its 4-byte representation.
@@ -746,7 +746,7 @@ public static array<byte> /*a4*/ As4(this ΔAddr ip) {
 
     if (ip.z == z4 || ip.Is4In6()) {
         byteorder.BePutUint32(a4[..], (uint32)ip.addr.lo);
-        return a4;
+        return a4.Clone();
     }
     if (ip.z == z0) {
         throw panic("As4 called on IP zero value");
@@ -956,7 +956,7 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
             j++;
         }
         {
-            var l = (uint8)(j - i); if (l >= 2 && l > zeroEnd - zeroStart) {
+            var l = (uint8)(j - i); if (l >= 2 && l > (uint8)(zeroEnd - zeroStart)) {
                 (zeroStart, zeroEnd) = (i, j);
             }
         }

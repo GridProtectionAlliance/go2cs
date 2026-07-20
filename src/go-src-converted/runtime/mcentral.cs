@@ -39,8 +39,8 @@ partial class runtime_package {
     // to the appropriate swept list. As a result, the parts of the
     // sweeper and mcentral that do consume from the unswept list may
     // encounter swept spans, and these should be ignored.
-    internal array<spanSet> partial = new(2); // list of spans with a free object
-    internal array<spanSet> full = new(2); // list of spans with no free objects
+    internal array<spanSet> partial = new(2, () => new()); // list of spans with a free object
+    internal array<spanSet> full = new(2, () => new()); // list of spans with no free objects
 }
 
 // Initialize a single central free list.

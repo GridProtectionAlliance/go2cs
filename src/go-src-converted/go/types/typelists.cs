@@ -27,7 +27,7 @@ public static nint Len(this ж<TypeParamList> Ꮡl) {
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeParamList instead.
 internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
 
     if (Ꮡl == nil) {
         return default!;
@@ -63,7 +63,7 @@ public static nint Len(this ж<TypeList> Ꮡl) {
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeList instead.
 internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
 
     if (Ꮡl == nil) {
         return default!;
@@ -77,9 +77,7 @@ internal static ж<TypeParamList> bindTParams(slice<ж<TypeParam>> list) {
     if (len(list) == 0) {
         return default!;
     }
-    foreach (var (i, vᴛ1) in list) {
-        var typ = vᴛ1;
-
+    foreach (var (i, typ) in list) {
         if ((~typ).index >= 0) {
             throw panic("type parameter bound more than once");
         }

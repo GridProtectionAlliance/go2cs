@@ -242,7 +242,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
                 }
             }
         }
-        if (exprᴛ1 == sImageDescriptor) {
+        else if (exprᴛ1 == sImageDescriptor) {
             {
                 errΔ1 = Ꮡd.readImageDescriptor(keepAllFrames); if (errΔ1 != default!) {
                     return errΔ1;
@@ -252,13 +252,13 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
                 return default!;
             }
         }
-        if (exprᴛ1 == sTrailer) {
+        else if (exprᴛ1 == sTrailer) {
             if (len(d.image) == 0) {
                 return fmt.Errorf("gif: missing image data"u8);
             }
             return default!;
         }
-        { /* default: */
+        else { /* default: */
             return fmt.Errorf("gif: unknown block type: 0x%.2x"u8, c);
         }
 
@@ -292,7 +292,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
 }
 
 [GoRecv] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
-    nint n = (1 << (int)((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask)))));
+    nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
     var err = readFull(d.r, d.tmp[..(int)(3 * n)]);
     if (err != default!) {
         return (default!, fmt.Errorf("gif: reading color table: %s"u8, err));
@@ -319,9 +319,9 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     else if (exprᴛ1 == eGraphicControl) {
         return d.readGraphicControl();
     }
-    if (exprᴛ1 == eComment) {
+    else if (exprᴛ1 == eComment) {
     }
-    if (exprᴛ1 == eApplication) {
+    else if (exprᴛ1 == eApplication) {
         var (b, errΔ2) = readByte(d.r);
         if (errΔ2 != default!) {
             // nothing to do but read the data.

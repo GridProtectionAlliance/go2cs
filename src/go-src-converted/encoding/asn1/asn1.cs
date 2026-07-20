@@ -186,7 +186,7 @@ public static nint At(this BitString b, nint i) {
     }
     nint x = i / 8;
     nuint y = 7 - (nuint)(i % 8);
-    return (nint)((nint)((b.Bytes[x] >> (int)(y))) & 1);
+    return (nint)((nint)(b.Bytes[x].Rsh(y)) & 1);
 }
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
@@ -197,10 +197,10 @@ public static slice<byte> RightAlign(this BitString b) {
         return b.Bytes;
     }
     var a = new slice<byte>(len(b.Bytes));
-    a[0] = (byte)((b.Bytes[0] >> (int)(shift)));
+    a[0] = (byte)(b.Bytes[0].Rsh(shift));
     for (nint i = 1; i < len(b.Bytes); i++) {
-        a[i] = (byte)(b.Bytes[i - 1] << (int)((8 - shift)));
-        a[i] |= (byte)((b.Bytes[i] >> (int)(shift)));
+        a[i] = (byte)(b.Bytes[i - 1].Lsh((8 - shift)));
+        a[i] |= (byte)(b.Bytes[i].Rsh(shift));
     }
     return a;
 }
@@ -215,7 +215,7 @@ internal static (BitString ret, error err) parseBitString(slice<byte> bytes) {
         return (ret, err);
     }
     nint paddingBits = (nint)bytes[0];
-    if (paddingBits > 7 || len(bytes) == 1 && paddingBits > 0 || (byte)(bytes[len(bytes) - 1] & (((byte)(1 << (int)(bytes[0]))) - 1)) != 0) {
+    if (paddingBits > 7 || len(bytes) == 1 && paddingBits > 0 || (byte)(bytes[len(bytes) - 1] & ((((byte)1).Lsh((uint64)(bytes[0]))) - 1)) != 0) {
         err = new SyntaxError("invalid padding bits in BIT STRING");
         return (ret, err);
     }

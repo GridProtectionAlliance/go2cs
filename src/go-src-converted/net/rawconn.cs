@@ -22,7 +22,7 @@ partial class net_package {
 }
 
 internal static bool ok(this ж<rawConn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     return Ꮡc != nil && c.fd != nil;
 }

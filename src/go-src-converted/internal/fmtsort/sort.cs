@@ -105,10 +105,10 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }}
 
     }
-    if (exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer) {
+    else if (exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer) {
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
     }
-    if (exprᴛ1 == reflect.Chan) {
+    else if (exprᴛ1 == reflect.Chan) {
         {
             var (c, ok) = nilCompare(aVal, bVal); if (ok) {
                 return c;
@@ -116,7 +116,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
     }
-    if (exprᴛ1 == reflect.Struct) {
+    else if (exprᴛ1 == reflect.Struct) {
         for (nint i = 0; i < aVal.NumField(); i++) {
             {
                 nint c = compare(aVal.Field(i), bVal.Field(i)); if (c != 0) {
@@ -126,7 +126,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return 0;
     }
-    if (exprᴛ1 == reflect.Array) {
+    else if (exprᴛ1 == reflect.Array) {
         for (nint i = 0; i < aVal.Len(); i++) {
             {
                 nint c = compare(aVal.Index(i), bVal.Index(i)); if (c != 0) {
@@ -136,7 +136,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return 0;
     }
-    if (exprᴛ1 == reflect.ΔInterface) {
+    else if (exprᴛ1 == reflect.ΔInterface) {
         {
             var (cΔ1, ok) = nilCompare(aVal, bVal); if (ok) {
                 return cΔ1;
@@ -148,7 +148,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return compare(aVal.Elem(), bVal.Elem());
     }
-    { /* default: */
+    else { /* default: */
         throw panic("bad type in compare: " + aType.String());
     }
 

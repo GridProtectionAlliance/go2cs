@@ -79,10 +79,10 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
     }
     d.bits.n -= (int32)t;
     d.bits.m >>= (int)(t);
-    var s = ((int32)1 << (int)(t));
-    var x = (int32)((int32)((d.bits.a >> (int)((uint8)d.bits.n))) & (s - 1));
+    var s = ((int32)1).Lsh((uint64)(t));
+    var x = (int32)((int32)(d.bits.a.Rsh((uint64)((uint8)d.bits.n))) & (s - 1));
     if (x < (s >> (int)(1))) {
-        x += (((-1) << (int)(t))) + 1;
+        x += ((-1).Lsh((uint64)(t))) + 1;
     }
     return (x, default!);
 }
@@ -145,9 +145,9 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
                 // whose codeLength's high bits matches code.
                 // The high 8 bits of lutValue are the encoded value.
                 // The low 8 bits are 1 plus the codeLength.
-                var @base = (uint8)((code << (int)((7 - i))));
+                var @base = (uint8)(code.Lsh((uint64)((7 - i))));
                 var lutValue = (uint16)((uint16)((uint16)(~h).vals[(nint)(x)] << (int)(8)) | (uint16)(2 + i));
-                for (var k = (uint8)0; k < (uint8)(1 << (int)((7 - i))); k++) {
+                for (var k = (uint8)0; k < (uint8)(((uint8)1).Lsh((uint64)((7 - i)))); k++) {
                     h.Value.lut[(uint8)(@base | k)] = lutValue;
                 }
                 code++;
@@ -200,7 +200,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
         }
     }
     {
-        var v = h.lut[(nint)((uint32)(((d.bits.a >> (int)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff))]; if (v != 0) {
+        var v = h.lut[(nint)((uint32)((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff))]; if (v != 0) {
             var n = (uint16)(((uint16)(v & 0xff)) - 1);
             d.bits.n -= (int32)n;
             d.bits.m >>= (int)(n);
@@ -253,8 +253,8 @@ break_slowPath:;
             }
         }
     }
-    var ret = (d.bits.a >> (int)((uint32)(d.bits.n - n)));
-    ret &= (uint32)((((uint32)1 << (int)((uint32)n))) - 1);
+    var ret = d.bits.a.Rsh((uint64)((uint32)(d.bits.n - n)));
+    ret &= (uint32)((((uint32)1).Lsh((uint64)((uint32)n))) - 1);
     d.bits.n -= n;
     d.bits.m >>= (int)((uint32)n);
     return (ret, default!);

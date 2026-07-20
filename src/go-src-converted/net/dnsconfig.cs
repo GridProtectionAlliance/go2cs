@@ -24,7 +24,7 @@ partial class net_package {
 // See go.dev/issue/67401.
 //
 //go:linkname defaultNS
-internal static slice<@string> defaultNS = new @string[]{"127.0.0.1:53", "[::1]:53"}.slice();
+public static slice<@string> defaultNS = new @string[]{"127.0.0.1:53", "[::1]:53"}.slice();
 
 internal static Func<(@string, error)> getHostname = os.Hostname;      // variable for testing
 

@@ -71,7 +71,7 @@ public static ж<Template> New(@string name) {
     if (t.common == nil) {
         var c = @new<common>();
         c.Value.tmpl = new map<@string, ж<Template>>();
-        c.Value.parseFuncs = new FuncMap();
+        c.Value.parseFuncs = new FuncMap(0);
         c.Value.execFuncs = new map<@string, reflectꓸValue>();
         t.common = c;
     }

@@ -113,7 +113,7 @@ internal static readonly UntypedInt typeCacheAssoc = 4;
     internal array<ж<_type>> t = new(typeCacheAssoc);
 }
 
-internal static ж<array<typeCacheBucket>> Ꮡtypecache = new(new array<typeCacheBucket>(256));
+internal static ж<array<typeCacheBucket>> Ꮡtypecache = new(new array<typeCacheBucket>(256, () => new()));
 internal static ref array<typeCacheBucket> typecache => ref Ꮡtypecache.Value;
 
 // dump a uint64 in a varint format parseable by encoding/binary.
@@ -608,9 +608,7 @@ internal static void dumpmemstats(ж<MemStats> Ꮡm) {
 }
 
 internal static void dumpmemprof_callback(ж<bucket> Ꮡb, uintptr nstk, ж<uintptr> Ꮡpstk, uintptr size, uintptr allocs, uintptr frees) {
-    ref var pstk = ref Ꮡpstk.Value;
-
-    var stk = (ж<array<uintptr>>)(uintptr)(@unsafe.Pointer.FromRef(ref pstk));
+    var stk = (ж<array<uintptr>>)(uintptr)(new @unsafe.Pointer(Ꮡpstk));
     dumpint(tagMemProf);
     dumpint((uint64)(uintptr)new @unsafe.Pointer(Ꮡb));
     dumpint((uint64)size);

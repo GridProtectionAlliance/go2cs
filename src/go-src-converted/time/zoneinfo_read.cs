@@ -166,7 +166,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     //	number of transition times
     //	number of local time zones
     //	number of characters of time zone abbrev strings
-    const nint NUTCLocal = /* iota */ 0;
+    const nint NUTCLocal = iota;
     
     const nint NStdWall = 1;
     

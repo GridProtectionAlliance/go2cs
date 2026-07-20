@@ -128,7 +128,7 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
     if (w.err != default!) {
         return;
     }
-    w.bits |= ((uint64)b << (int)(w.nbits));
+    w.bits |= ((uint64)b).Lsh(w.nbits);
     w.nbits += nb;
     if (w.nbits >= 48) {
         var bits = w.bits;
@@ -312,7 +312,7 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
     if (w.err != default!) {
         return;
     }
-    w.bits |= ((uint64)c.code << (int)(w.nbits));
+    w.bits |= ((uint64)c.code).Lsh(w.nbits);
     w.nbits += (nuint)c.len;
     if (w.nbits >= 48) {
         var bits = w.bits;
@@ -629,7 +629,7 @@ internal static ж<huffmanEncoder> huffOffset;
     foreach (var (_, t) in input) {
         // Bitwriting inlined, ~30% speedup
         var c = encoding[t];
-        w.bits |= ((uint64)c.code << (int)(w.nbits));
+        w.bits |= ((uint64)c.code).Lsh(w.nbits);
         w.nbits += (nuint)c.len;
         if (w.nbits < 48) {
             continue;

@@ -103,7 +103,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    return saferio.ReadDataAt(new io_SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
+    return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the PE section s.
@@ -111,7 +111,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
 [GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // Section characteristics flags.

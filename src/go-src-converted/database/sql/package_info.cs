@@ -53,6 +53,14 @@ using static go.database.sql_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<IsolationLevel, fmt_package.Stringer>]
+[assembly: GoImplement<NullBool, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullByte, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullFloat64, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullInt16, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullInt32, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullInt64, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullString, Scanner>(Pointer = true)]
+[assembly: GoImplement<NullTime, Scanner>(Pointer = true)]
 [assembly: GoImplement<Tx, stmtConnGrabber>(Pointer = true)]
 [assembly: GoImplement<driverConn, finalCloser>(Pointer = true)]
 [assembly: GoImplement<driverConn, sync_package.Locker>(Pointer = true)]

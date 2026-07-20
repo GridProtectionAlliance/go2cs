@@ -29,7 +29,7 @@ partial class net_package {
 }
 
 public static @string String(this ж<UnixAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return "<nil>"u8;
@@ -38,7 +38,7 @@ public static @string String(this ж<UnixAddr> Ꮡa) {
 }
 
 internal static bool isWildcard(this ж<UnixAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     return Ꮡa == nil || a.Name == ""u8;
 }
@@ -263,7 +263,7 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡla
 }
 
 internal static bool ok(this ж<UnixListener> Ꮡln) {
-    ref var ln = ref Ꮡln.Value;
+    ref var ln = ref Ꮡln.DerefOrNil();
 
     return Ꮡln != nil && ln.fd != nil;
 }

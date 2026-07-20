@@ -43,6 +43,7 @@ using static go.compress.flate_package;
 [assembly: GoImplement<bufio_package.Reader, Reader>(Pointer = true)]
 [assembly: GoImplement<byFreq, sort_package.Interface>(Pointer = true)]
 [assembly: GoImplement<byLiteral, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<decompressor, Resetter>(Pointer = true)]
 [assembly: GoImplement<decompressor, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<dictWriter, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>

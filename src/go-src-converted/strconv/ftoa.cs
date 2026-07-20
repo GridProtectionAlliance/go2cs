@@ -548,7 +548,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
     // Round if requested.
     if (prec >= 0 && prec < 15) {
         nuint shift = (nuint)(prec * 4);
-        var extra = (uint64)((mant.Lsh(shift)) & (1152921504606846976L - 1));
+        var extra = (uint64)((mant.Lsh(shift)) & ((uint64)(1152921504606846976L - 1)));
         mant >>= (int)(60 - shift);
         if ((uint64)(extra | ((uint64)(mant & 1))) > ((uint64)1 << (int)(59))) {
             mant++;

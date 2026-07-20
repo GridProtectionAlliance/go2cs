@@ -342,7 +342,7 @@ internal static @string defaultGOPATH() {
 // See go.dev/issue/67401.
 //
 //go:linkname defaultToolTags
-internal static slice<@string> defaultToolTags;
+public static slice<@string> defaultToolTags;
 
 // defaultReleaseTags should be an internal detail,
 // but widely used packages access it using linkname.
@@ -353,7 +353,7 @@ internal static slice<@string> defaultToolTags;
 // See go.dev/issue/67401.
 //
 //go:linkname defaultReleaseTags
-internal static slice<@string> defaultReleaseTags;
+public static slice<@string> defaultReleaseTags;
 
 internal static Context defaultContext() {
     Context c = default!;

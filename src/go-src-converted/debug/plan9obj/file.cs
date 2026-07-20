@@ -67,12 +67,12 @@ partial class plan9obj_package {
 
 // Data reads and returns the contents of the Plan 9 a.out section.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    return saferio.ReadDataAt(new io_SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
+    return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
 [GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
@@ -162,7 +162,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     var ph = @new<prog>();
     {
-        var errΔ2 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), ph); if (errΔ2 != default!) {
+        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), ph); if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
     }
@@ -177,7 +177,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     ));
     if ((uint32)((~ph).Magic & (uint32)Magic64) != 0) {
         {
-            var errΔ3 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), f.of(File.ᏑEntry)); if (errΔ3 != default!) {
+            var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), f.of(File.ᏑEntry)); if (errΔ3 != default!) {
                 return (default!, errΔ3);
             }
         }
@@ -203,7 +203,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         );
         off += sect.size;
         s.Value.sr = io.NewSectionReader(r, (int64)(~s).Offset, (int64)(~s).Size);
-        s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+        s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         f.Value.Sections[i] = s;
     }
     return (f, default!);

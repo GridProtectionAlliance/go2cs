@@ -44,19 +44,27 @@ using static go.context_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<afterFuncCtx, canceler>(Pointer = true)]
+[assembly: GoImplement<afterFuncCtx, stringer>(Pointer = true)]
 [assembly: GoImplement<backgroundCtx, Context>]
+[assembly: GoImplement<backgroundCtx, stringer>]
 [assembly: GoImplement<cancelCtx, Context>(Pointer = true)]
 [assembly: GoImplement<cancelCtx, Context>(Promoted = true)]
 [assembly: GoImplement<cancelCtx, canceler>(Pointer = true)]
+[assembly: GoImplement<cancelCtx, stringer>(Pointer = true)]
 [assembly: GoImplement<deadlineExceededError, error>]
+[assembly: GoImplement<emptyCtx, Context>]
 [assembly: GoImplement<stopCtx, Context>(Promoted = true)]
 [assembly: GoImplement<stopCtx, Context>]
 [assembly: GoImplement<timerCtx, Context>(Pointer = true)]
 [assembly: GoImplement<timerCtx, canceler>(Pointer = true)]
+[assembly: GoImplement<timerCtx, stringer>(Pointer = true)]
 [assembly: GoImplement<todoCtx, Context>]
+[assembly: GoImplement<todoCtx, stringer>]
 [assembly: GoImplement<valueCtx, Context>(Pointer = true)]
 [assembly: GoImplement<valueCtx, Context>(Promoted = true)]
+[assembly: GoImplement<valueCtx, stringer>(Pointer = true)]
 [assembly: GoImplement<withoutCancelCtx, Context>]
+[assembly: GoImplement<withoutCancelCtx, stringer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

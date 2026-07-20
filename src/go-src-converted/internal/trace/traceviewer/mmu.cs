@@ -126,7 +126,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     slice<float64> quantiles = default!;
     foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue("flags"u8), "|"u8)) {
         if (flagStr == "mut"u8) {
-            quantiles = new float64[]{0, 1 - .999D, 1 - .99D, 1 - .95D}.slice();
+            quantiles = new float64[]{0, 1D - .999D, 1D - .99D, 1D - .95D}.slice();
             break;
         }
     }
@@ -162,7 +162,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     UntypedInt samples = 100;
     var plot = new slice<slice<float64>>(samples);
     for (nint i = 0; i < samples; i++) {
-        var window = ((time.Duration)(int64)math.Exp((float64)i / (float64)(samples - 1) * (logMax - logMin) + logMin));
+        var window = ((time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin));
         if (quantiles == default!){
             plot[i] = new slice<float64>(2);
             plot[i][1] = mmuCurve.MMU(window);

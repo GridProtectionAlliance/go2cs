@@ -58,7 +58,7 @@ partial class types_package {
         return check.isTerminatingList((~sΔ1).List, ""u8);
     }
     case ж<ast.IfStmt> sΔ1: {
-        if ((~sΔ1).Else != default! && check.isTerminating(new ast_BlockStmtжStmt((~sΔ1).Body), ""u8) && check.isTerminating((~sΔ1).Else, ""u8)) {
+        if ((~sΔ1).Else != default! && check.isTerminating(new ast.BlockStmtжStmt((~sΔ1).Body), ""u8) && check.isTerminating((~sΔ1).Else, ""u8)) {
             return true;
         }
         break;
@@ -79,7 +79,7 @@ partial class types_package {
         return true;
     }
     case ж<ast.ForStmt> sΔ1: {
-        if ((~sΔ1).Cond == default! && !hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, true)) {
+        if ((~sΔ1).Cond == default! && !hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, true)) {
             return true;
         }
         break;
@@ -162,7 +162,7 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
         return hasBreakList((~sΔ1).List, label, @implicit);
     }
     case ж<ast.IfStmt> sΔ1: {
-        if (hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, @implicit) || (~sΔ1).Else != default! && hasBreak((~sΔ1).Else, label, @implicit)) {
+        if (hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, @implicit) || (~sΔ1).Else != default! && hasBreak((~sΔ1).Else, label, @implicit)) {
             return true;
         }
         break;
@@ -171,13 +171,13 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
         return hasBreakList((~sΔ1).Body, label, @implicit);
     }
     case ж<ast.SwitchStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.TypeSwitchStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
@@ -186,19 +186,19 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
         return hasBreakList((~sΔ1).Body, label, @implicit);
     }
     case ж<ast.SelectStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.ForStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.RangeStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;

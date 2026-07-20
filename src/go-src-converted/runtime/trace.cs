@@ -61,9 +61,9 @@ partial class runtime_package {
     internal array<uint32> doneSema = new(2);
     // Trace data tables for deduplicating data going into the trace.
     // There are 2 of each: one for gen%2, one for 1-gen%2.
-    internal array<traceStackTable> stackTab = new(2); // maps stack traces to unique ids
-    internal array<traceStringTable> stringTab = new(2); // maps strings to unique ids
-    internal array<traceTypeTable> typeTab = new(2); // maps type pointers to unique ids
+    internal array<traceStackTable> stackTab = new(2, () => new()); // maps stack traces to unique ids
+    internal array<traceStringTable> stringTab = new(2, () => new()); // maps strings to unique ids
+    internal array<traceTypeTable> typeTab = new(2, () => new()); // maps type pointers to unique ids
     // cpuLogRead accepts CPU profile samples from the signal handler where
     // they're generated. There are two profBufs here: one for gen%2, one for
     // 1-gen%2. These profBufs use a three-word header to hold the IDs of the P, G,
@@ -86,9 +86,9 @@ partial class runtime_package {
     internal atomic.Pointer<g> reader; // goroutine that called ReadTrace, or nil
     // Fast mappings from enumerations to string IDs that are prepopulated
     // in the trace.
-    internal array<array<traceArg>> markWorkerLabels = new(2);
-    internal array<array<traceArg>> goStopReasons = new(2);
-    internal array<array<traceArg>> goBlockReasons = new(2);
+    internal array<array<traceArg>> markWorkerLabels = new(2, () => new(4));
+    internal array<array<traceArg>> goStopReasons = new(2, () => new(3));
+    internal array<array<traceArg>> goBlockReasons = new(2, () => new(15));
     // enabled indicates whether tracing is enabled, but it is only an optimization,
     // NOT the source of truth on whether tracing is enabled. Tracing is only truly
     // enabled if gen != 0. This is used as an optimistic fast path check.
@@ -989,7 +989,7 @@ internal static void wake(this ж<wakeableSleep> Ꮡs) {
         // want to block on the receiver waking up. This also
         // effectively batches together wakeup notifications.
         switch (ᐧ) {
-        case ᐧ: {
+        case ᐧ when s.wakeup.ᐸꟷ(new EmptyStruct(), ꟷ): {
             break;
         }
         default: {

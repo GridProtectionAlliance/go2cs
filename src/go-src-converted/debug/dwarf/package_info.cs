@@ -43,6 +43,7 @@ using static go.debug.dwarf_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<AddrType, ΔType>(Pointer = true)]
 [assembly: GoImplement<ArrayType, ΔType>(Pointer = true)]
+[assembly: GoImplement<BasicType, ΔType>(Pointer = true)]
 [assembly: GoImplement<BoolType, ΔType>(Pointer = true)]
 [assembly: GoImplement<CharType, ΔType>(Pointer = true)]
 [assembly: GoImplement<ComplexType, ΔType>(Pointer = true)]

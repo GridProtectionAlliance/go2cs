@@ -62,7 +62,7 @@ internal static bitReader newBitReader(io.Reader r) {
     //
     // The next line right shifts the desired bits into the
     // least-significant places and masks off anything above.
-    n = (uint64)(((br.n >> (int)((br.bits - bits)))) & ((((uint64)1 << (int)(bits))) - 1));
+    n = (uint64)((br.n.Rsh((br.bits - bits))) & ((((uint64)1).Lsh(bits)) - 1));
     br.bits -= bits;
     return n;
 }

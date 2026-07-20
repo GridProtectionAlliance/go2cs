@@ -287,14 +287,14 @@ internal static array<bidi.Properties> asciiTable = new(128);
         // incomplete UTF-8 encoding
         // TODO: using CompactClass would result in noticeable speedup.
         // See unicode/bidi/prop.go:Properties.CompactClass.
-        var c = (uint16)((uint16)(1 << (int)(nuint)(e.Class())));
+        var c = (uint16)(((uint16)1).Lsh(e.Class()));
         t.seen |= c;
         if ((uint16)(t.seen & exclusiveRTL) == exclusiveRTL) {
             t.state = ruleInvalid;
             return (n, false);
         }
         {
-            var tr = transitions[t.state];
+            var tr = transitions[t.state].Clone();
             switch (ᐧ) {
             case {} when (uint16)(tr[0].mask & c) != 0: {
                 t.state = tr[0].next;
@@ -340,14 +340,14 @@ internal static array<bidi.Properties> asciiTable = new(128);
         // incomplete UTF-8 encoding
         // TODO: using CompactClass results in noticeable speedup.
         // See unicode/bidi/prop.go:Properties.CompactClass.
-        var c = (uint16)((uint16)(1 << (int)(nuint)(e.Class())));
+        var c = (uint16)(((uint16)1).Lsh(e.Class()));
         t.seen |= c;
         if ((uint16)(t.seen & exclusiveRTL) == exclusiveRTL) {
             t.state = ruleInvalid;
             return (n, false);
         }
         {
-            var tr = transitions[t.state];
+            var tr = transitions[t.state].Clone();
             switch (ᐧ) {
             case {} when (uint16)(tr[0].mask & c) != 0: {
                 t.state = tr[0].next;

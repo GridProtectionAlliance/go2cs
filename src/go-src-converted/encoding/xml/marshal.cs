@@ -844,7 +844,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
             return ("", bytes, default!);
         } while (false);
     }
-    if (exprᴛ1 == reflect.ΔSlice) {
+    else if (exprᴛ1 == reflect.ΔSlice) {
         do {
             if (typ.Elem().Kind() != reflect.Uint8) {
                 break;
@@ -937,35 +937,35 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                     }
                 }
             }
-            if (exprᴛ2 == reflect.ΔUint || exprᴛ2 == reflect.Uint8 || exprᴛ2 == reflect.Uint16 || exprᴛ2 == reflect.Uint32 || exprᴛ2 == reflect.Uint64 || exprᴛ2 == reflect.Uintptr) {
+            else if (exprᴛ2 == reflect.ΔUint || exprᴛ2 == reflect.Uint8 || exprᴛ2 == reflect.Uint16 || exprᴛ2 == reflect.Uint32 || exprᴛ2 == reflect.Uint64 || exprᴛ2 == reflect.Uintptr) {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendUint(scratch[..0], vf.Uint(), 10)); if (err != default!) {
                         return err;
                     }
                 }
             }
-            if (exprᴛ2 == reflect.Float32 || exprᴛ2 == reflect.Float64) {
+            else if (exprᴛ2 == reflect.Float32 || exprᴛ2 == reflect.Float64) {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendFloat(scratch[..0], vf.Float(), (rune)'g', -1, vf.Type().Bits())); if (err != default!) {
                         return err;
                     }
                 }
             }
-            if (exprᴛ2 == reflect.ΔBool) {
+            else if (exprᴛ2 == reflect.ΔBool) {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendBool(scratch[..0], vf.Bool())); if (err != default!) {
                         return err;
                     }
                 }
             }
-            if (exprᴛ2 == reflect.ΔString) {
+            else if (exprᴛ2 == reflect.ΔString) {
                 {
                     var err = emit(new printerжWriter(Ꮡp), slice<byte>(vf.String())); if (err != default!) {
                         return err;
                     }
                 }
             }
-            if (exprᴛ2 == reflect.ΔSlice) {
+            else if (exprᴛ2 == reflect.ΔSlice) {
                 {
                     var (elem, ok) = vf.Interface()._<slice<byte>>(ᐧ); if (ok) {
                         {

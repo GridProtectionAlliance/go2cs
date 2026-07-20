@@ -691,7 +691,7 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
     // of 2: one is for the writers, one contains the most recent
     // data, and the last one is clear so writers can begin writing
     // to it the moment gen is updated.
-    internal array<heapStatsDelta> stats = new(3);
+    internal array<heapStatsDelta> stats = new(3, () => new());
     // gen represents the current index into which writers
     // are writing, and can take on the value of 0, 1, or 2.
     internal atomic.Uint32 gen;

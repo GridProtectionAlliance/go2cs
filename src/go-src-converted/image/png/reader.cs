@@ -280,7 +280,7 @@ public static @string Error(this UnsupportedError e) {
 [GoRecv] internal static error parsePLTE(this ref decoder d, uint32 length) {
     nint np = (nint)(length / 3);
     // The number of palette entries.
-    if (length % 3 != 0 || np <= 0 || np > 256 || np > (1 << (int)((nuint)d.depth))) {
+    if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
         return ((FormatError)(@string)"bad PLTE length"u8);
     }
     var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(3 * np)]);
@@ -1040,7 +1040,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
             return Ꮡd.parseIDAT(length);
         } while (false);
     }
-    if (exprᴛ1 == "IEND"u8) {
+    else if (exprᴛ1 == "IEND"u8) {
         if (d.stage != dsSeenIDAT) {
             return chunkOrderError;
         }

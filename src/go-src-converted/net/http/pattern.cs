@@ -396,7 +396,7 @@ internal static relationship combineRelationships(relationship r1, relationship 
         }
 
     }
-    { /* default: */
+    else { /* default: */
         throw panic(fmt.Sprintf("unknown relationship %q"u8, r1));
     }
 

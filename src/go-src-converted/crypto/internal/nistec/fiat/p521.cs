@@ -48,7 +48,7 @@ public static ж<P521Element> Set(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡ
     ref var e = ref Ꮡe.Value;
     ref var t = ref Ꮡt.Value;
 
-    e.x = t.x;
+    e.x = t.x.Clone();
     return Ꮡe;
 }
 

@@ -16,7 +16,7 @@ public static ast.Expr PackIndexExpr(ast.Expr x, tokenꓸPos lbrack, slice<ast.E
         break;
     }
     case 1: {
-        return new ast_IndexExprжExpr(Ꮡ(new ast.IndexExpr(
+        return new ast.IndexExprжExpr(Ꮡ(new ast.IndexExpr(
             X: x,
             Lbrack: lbrack,
             Index: exprs[0],
@@ -24,7 +24,7 @@ public static ast.Expr PackIndexExpr(ast.Expr x, tokenꓸPos lbrack, slice<ast.E
         )));
     }
     default: {
-        return new ast_IndexListExprжExpr(Ꮡ(new ast.IndexListExpr(
+        return new ast.IndexListExprжExpr(Ꮡ(new ast.IndexListExpr(
             X: x,
             Lbrack: lbrack,
             Indices: exprs,
@@ -59,7 +59,7 @@ public static ж<IndexExpr> UnpackIndexExpr(ast.Node n) {
     switch (n.type()) {
     case ж<ast.IndexExpr> e: {
         return Ꮡ(new IndexExpr(
-            Orig: new ast_IndexExprжExpr(e),
+            Orig: new ast.IndexExprжExpr(e),
             X: (~e).X,
             Lbrack: (~e).Lbrack,
             Indices: new ast.Expr[]{(~e).Index}.slice(),
@@ -68,7 +68,7 @@ public static ж<IndexExpr> UnpackIndexExpr(ast.Node n) {
     }
     case ж<ast.IndexListExpr> e: {
         return Ꮡ(new IndexExpr(
-            Orig: new ast_IndexListExprжExpr(e),
+            Orig: new ast.IndexListExprжExpr(e),
             X: (~e).X,
             Lbrack: (~e).Lbrack,
             Indices: (~e).Indices,

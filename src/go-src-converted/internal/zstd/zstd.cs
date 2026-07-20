@@ -201,7 +201,7 @@ retry:
     }
     var descriptor = r.scratch[0];
     var singleSegment = (byte)(descriptor & ((byte)(1 << (int)(5)))) != 0;
-    nint fcsFieldSize = (1 << (int)(((descriptor >> (int)(6)))));
+    nint fcsFieldSize = ((nint)1).Lsh((uint64)(((descriptor >> (int)(6)))));
     if (fcsFieldSize == 1 && !singleSegment) {
         fcsFieldSize = 0;
     }
@@ -222,7 +222,7 @@ retry:
     nint dictionaryIdSize = 0;
     {
         var dictIdFlag = (byte)(descriptor & 3); if (dictIdFlag != 0) {
-            dictionaryIdSize = (1 << (int)((dictIdFlag - 1)));
+            dictionaryIdSize = ((nint)1).Lsh((uint64)((dictIdFlag - 1)));
         }
     }
     relativeOffset++;
@@ -241,7 +241,7 @@ retry:
         var exponent = (uint64)((windowDescriptor >> (int)(3)));
         var mantissa = (uint64)((byte)(windowDescriptor & 7));
         var windowLog = exponent + 10;
-        var windowBase = ((uint64)1 << (int)(windowLog));
+        var windowBase = ((uint64)1).Lsh(windowLog);
         var windowAdd = (windowBase / 8) * mantissa;
         windowSize = windowBase + windowAdd;
         // Default zstd sets limits on the window size.

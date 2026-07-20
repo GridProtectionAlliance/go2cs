@@ -41,10 +41,6 @@ using static go.crypto.aes_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<KeySizeError, error>]
 [assembly: GoImplement<aesCipher, go.crypto.cipher_package.Block>(Pointer = true)]
-[assembly: GoImplement<aesCipherAsm, go.crypto.cipher_package.Block>(Pointer = true)]
-[assembly: GoImplement<aesCipherGCM, gcmAble>(Pointer = true)]
-[assembly: GoImplement<aesCipherGCM, go.crypto.cipher_package.Block>(Pointer = true)]
-[assembly: GoImplement<gcmAsm, go.crypto.cipher_package.AEAD>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

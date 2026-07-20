@@ -311,7 +311,7 @@ internal static readonly UntypedInt maxDepth = 125;
 
 // Determine explicit levels using rules X1 - X8
 [GoRecv] internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
-    directionalStatusStack stack = default!;
+    directionalStatusStack stack = new();
     nint overflowIsolateCount = default!;
     nint overflowEmbeddingCount = default!;
     nint validIsolateCount = default!;

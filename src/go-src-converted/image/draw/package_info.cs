@@ -41,6 +41,7 @@ using static go.image.draw_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Op, Drawer>]
 [assembly: GoImplement<floydSteinberg, Drawer>]
 [assembly: GoImplement<go.image.color_package.Alpha16, go.image.color_package.Color>]
 [assembly: GoImplement<go.image.color_package.RGBA64, go.image.color_package.Color>(Pointer = true)]

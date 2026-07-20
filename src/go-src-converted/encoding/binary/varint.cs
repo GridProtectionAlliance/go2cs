@@ -78,9 +78,9 @@ public static (uint64, nint) Uvarint(slice<byte> buf) {
                 return (0, -(i + 1));
             }
             // overflow
-            return ((uint64)(x | ((uint64)b << (int)(s))), i + 1);
+            return ((uint64)(x | ((uint64)b).Lsh(s)), i + 1);
         }
-        x |= (uint64)(((uint64)((byte)(b & 0x7f)) << (int)(s)));
+        x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;
     }
     return (0, 0);
@@ -143,9 +143,9 @@ public static (uint64, error) ReadUvarint(io.ByteReader r) {
             if (i == MaxVarintLen64 - 1 && b > 1) {
                 return (x, errOverflow);
             }
-            return ((uint64)(x | ((uint64)b << (int)(s))), default!);
+            return ((uint64)(x | ((uint64)b).Lsh(s)), default!);
         }
-        x |= (uint64)(((uint64)((byte)(b & 0x7f)) << (int)(s)));
+        x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;
     }
     return (x, errOverflow);

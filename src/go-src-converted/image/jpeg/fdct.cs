@@ -152,7 +152,7 @@ internal static void fdct(ж<block> Ꮡb) {
         var tmp1 = b[1 * 8 + x] + b[6 * 8 + x];
         var tmp2 = b[2 * 8 + x] + b[5 * 8 + x];
         var tmp3 = b[3 * 8 + x] + b[4 * 8 + x];
-        var tmp10 = tmp0 + tmp3 + (int32)((int32)(1 << (int)((pass1Bits - 1))));
+        var tmp10 = tmp0 + tmp3 + (int32)(1 << (int)((pass1Bits - 1)));
         var tmp12 = tmp0 - tmp3;
         var tmp11 = tmp1 + tmp2;
         var tmp13 = tmp1 - tmp2;

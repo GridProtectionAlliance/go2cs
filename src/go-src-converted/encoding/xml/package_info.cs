@@ -47,6 +47,7 @@ using static go.encoding.xml_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Decoder, TokenReader>(Pointer = true)]
 [assembly: GoImplement<SyntaxError, error>(Pointer = true)]
 [assembly: GoImplement<TagPathError, error>(Pointer = true)]
 [assembly: GoImplement<UnmarshalError, error>]

@@ -74,7 +74,7 @@ internal static nint base128IntLength(uint64 n) {
 
 internal static slice<byte> appendBase128Int(slice<byte> dst, uint64 n) {
     for (nint i = base128IntLength(n) - 1; i >= 0; i--) {
-        var o = (byte)((n >> (int)((nuint)(i * 7))));
+        var o = (byte)(n.Rsh((nuint)(i * 7)));
         o &= (byte)(0x7f);
         if (i != 0) {
             o |= (byte)(0x80);

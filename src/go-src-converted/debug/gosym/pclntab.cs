@@ -387,7 +387,7 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
     for (shift = 0; ᐧ ; shift += 7) {
         var b = p[0];
         p = p[1..];
-        v |= (uint32)((((uint32)((uint32)b & 0x7F)) << (int)(shift)));
+        v |= (uint32)(((uint32)((uint32)b & 0x7F)).Lsh((uint64)(shift)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }

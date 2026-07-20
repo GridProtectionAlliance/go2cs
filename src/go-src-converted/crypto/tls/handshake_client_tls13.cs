@@ -779,7 +779,7 @@ internal static error processServerHello(this ж<clientHandshakeStateTLS13> Ꮡh
         return c.sendAlert(alertInternalError);
     }
     var signed = signedMessage(sigHash, clientSignatureContext, hs.transcript);
-    var signOpts = ((crypto.SignerOpts)new crypto_HashᴠSignerOpts(sigHash));
+    var signOpts = ((crypto.SignerOpts)sigHash);
     if (sigType == signatureRSAPSS) {
         signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
     }

@@ -155,7 +155,7 @@ public static error Serve(httpꓸHandler handler) {
     }
     var rw = Ꮡ(new response(
         req: req,
-        header: new httpꓸHeader(),
+        header: new httpꓸHeader(0),
         bufw: bufio.NewWriter(new os.FileжWriter(os.Stdout))
     ));
     handler.ServeHTTP(new responseжResponseWriter(rw), req);

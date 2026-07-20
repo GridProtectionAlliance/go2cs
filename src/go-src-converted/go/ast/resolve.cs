@@ -112,9 +112,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
     // package global mapping of imported package ids to package objects
     var imports = new map<@string, ж<Object>>();
     // complete file scopes with imports and resolve identifiers
-    foreach (var (_, vᴛ1) in files) {
-        var @file = vᴛ1;
-
+    foreach (var (_, @file) in files) {
         // ignore file if it belongs to a different package
         // (error has already been reported)
         if ((~(~@file).Name).Name != pkgName) {

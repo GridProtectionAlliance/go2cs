@@ -41,7 +41,8 @@ using static go.image.gif_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<blockReader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<blockWriter, io_package.Writer>]
+[assembly: GoImplement<blockReader, reader>(Pointer = true)]
+[assembly: GoImplement<blockWriter, writer>]
 [assembly: GoImplement<bufio_package.Reader, reader>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Writer, writer>(Pointer = true)]
 [assembly: GoImplement<go.image.color_package.Palette, go.image.color_package.Model>]

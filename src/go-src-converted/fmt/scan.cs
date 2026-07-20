@@ -339,7 +339,9 @@ internal static bool isSpace(rune r) {
         return false;
     }
     var rx = (uint16)r;
-    foreach (var (_, rng) in space) {
+    foreach (var (_, vᴛ1) in space) {
+        var rng = vᴛ1.Clone();
+
         if (rx < rng[0]) {
             return false;
         }
@@ -698,7 +700,7 @@ internal static readonly @string exponent = "eEpP"u8;
     s.notEOF();
     var r = s.getRune();
     nuint n = (nuint)bitSize;
-    var x = ((((int64)r << (int)((64 - n)))) >> (int)((64 - n)));
+    var x = (((int64)r).Lsh((64 - n))).Rsh((64 - n));
     if (x != (int64)r) {
         s.errorString("overflow on character value "u8 + ((@string)r));
     }
@@ -764,7 +766,7 @@ internal static readonly @string exponent = "eEpP"u8;
         s.error(err);
     }
     nuint n = (nuint)bitSize;
-    var x = (((i << (int)((64 - n)))) >> (int)((64 - n)));
+    var x = (i.Lsh((64 - n))).Rsh((64 - n));
     if (x != i) {
         s.errorString("integer overflow on token "u8 + tok);
     }
@@ -795,7 +797,7 @@ internal static readonly @string exponent = "eEpP"u8;
         s.error(err);
     }
     nuint n = (nuint)bitSize;
-    var x = (((i << (int)((64 - n)))) >> (int)((64 - n)));
+    var x = (i.Lsh((64 - n))).Rsh((64 - n));
     if (x != i) {
         s.errorString("unsigned integer overflow on token "u8 + tok);
     }

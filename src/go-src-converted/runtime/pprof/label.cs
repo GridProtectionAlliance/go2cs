@@ -38,7 +38,7 @@ internal static labelMap labelValue(context.Context ctx) {
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
 internal static @string String(this ж<labelMap> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
+    ref var l = ref Ꮡl.DerefOrNil();
 
     if (Ꮡl == nil) {
         return ""u8;

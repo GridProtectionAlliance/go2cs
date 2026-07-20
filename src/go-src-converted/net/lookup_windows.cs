@@ -174,12 +174,12 @@ internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.
             var exprᴛ1 = (~result).Family;
             if (exprᴛ1 == syscall.AF_INET) {
                 ref var a = ref heap<array<byte>>(out var Ꮡa);
-                a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).Value.Addr;
+                a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).Value.Addr.Clone();
                 addrs = append(addrs, new IPAddr(IP: copyIP(a[..])));
             }
             else if (exprᴛ1 == syscall.AF_INET6) {
                 ref var a = ref heap<array<byte>>(out var Ꮡa);
-                a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Addr;
+                a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Addr.Clone();
                 @string zone = zoneCache.name((nint)((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Scope_id);
                 addrs = append(addrs, new IPAddr(IP: copyIP(a[..]), Zone: zone));
             }

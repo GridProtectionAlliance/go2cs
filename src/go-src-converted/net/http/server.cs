@@ -470,7 +470,7 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
         {
             var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
                 if (t == default!) {
-                    t = new ΔHeader();
+                    t = new ΔHeader(0);
                 }
                 t[kk] = vv;
             }
@@ -478,7 +478,7 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
     }
     foreach (var (_, k) in w.trailers) {
         if (t == default!) {
-            t = new ΔHeader();
+            t = new ΔHeader(0);
         }
         foreach (var (_, v) in w.handlerHeader[k]) {
             t.Add(k, v);
@@ -613,7 +613,7 @@ internal static void @lock(this ж<connReader> Ꮡcr) {
 
     Ꮡcr.of(connReader.Ꮡmu).Lock();
     if (cr.cond == nil) {
-        cr.cond = sync.NewCond(new sync_MutexжLocker(Ꮡcr.of(connReader.Ꮡmu)));
+        cr.cond = sync.NewCond(new sync.MutexжLocker(Ꮡcr.of(connReader.Ꮡmu)));
     }
 }
 
@@ -1089,7 +1089,7 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
             cancelCtx: cancelCtx,
             req: req,
             reqBody: (~req).Body,
-            handlerHeader: new ΔHeader(),
+            handlerHeader: new ΔHeader(0),
             contentLength: -1,
             closeNotifyCh: new channel<bool>(1), // We populate these ahead of time so we're not
  // reading from req.Header after their Handler starts
@@ -1170,7 +1170,7 @@ internal static runtime.Frame relevantCaller() {
     var pc = new slice<uintptr>(16);
     nint n = runtime.Callers(1, pc);
     var frames = runtime.CallersFrames(pc[..(int)(n)]);
-    runtime.Frame frame = default!;
+    runtime.Frame frame = new();
     while (ᐧ) {
         var (frameΔ1, more) = frames.Next();
         if (!strings.HasPrefix(frameΔ1.Function, "net/http."u8)) {
@@ -3719,7 +3719,7 @@ internal static void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, �
     var done = new channel<EmptyStruct>(1);
     var tw = Ꮡ(new timeoutWriter(
         w: w,
-        h: new ΔHeader(),
+        h: new ΔHeader(0),
         req: Ꮡr
     ));
     var panicChan = new channel<any>(1);

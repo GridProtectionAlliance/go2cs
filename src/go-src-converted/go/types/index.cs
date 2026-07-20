@@ -258,7 +258,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
             if (e.Slice3) {
                 var at = e.Max;
                 if (at == default!) {
-                    at = new ast_SliceExprжExpr(Ꮡe);
+                    at = new ast.SliceExprжExpr(Ꮡe);
                 }
                 // e.Index[2] should be present but be careful
                 Ꮡcheck.error(new ast_Exprᴠpositioner(at), InvalidSliceExpr, invalidOp + "3-index slice of string");
@@ -311,7 +311,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     x.mode = value;
     // spec: "Only the first index may be omitted; it defaults to 0."
     if (e.Slice3 && (e.High == default! || e.Max == default!)) {
-        Ꮡcheck.error(inNode(new ast_SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, "2nd and 3rd index required in 3-index slice"u8);
+        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, "2nd and 3rd index required in 3-index slice"u8);
         x.mode = invalid;
         return;
     }

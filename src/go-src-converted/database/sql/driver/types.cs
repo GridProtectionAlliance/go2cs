@@ -126,7 +126,7 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
     }
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64) {
         var u64 = rv.Uint();
-        if (u64 > (2147483648L) - 1) {
+        if (u64 > (uint64)((2147483648L) - 1)) {
             return (default!, fmt.Errorf("sql/driver: value %d overflows int32"u8, v));
         }
         return ((int64)u64, default!);

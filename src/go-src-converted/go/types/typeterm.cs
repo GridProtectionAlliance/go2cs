@@ -19,7 +19,7 @@ partial class types_package {
 }
 
 public static @string String(this ж<term> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     switch (ᐧ) {
     case {} when Ꮡx == nil: {
@@ -39,7 +39,7 @@ public static @string String(this ж<term> Ꮡx) {
 
 // equal reports whether x and y represent the same type set.
 internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
@@ -57,7 +57,7 @@ internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
 // union returns the union x ∪ y: zero, one, or two non-nil terms.
 internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
@@ -101,7 +101,7 @@ internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
 // intersect returns the intersection x ∩ y.
 internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
@@ -137,7 +137,7 @@ internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
 // includes reports whether t ∈ x.
 internal static bool includes(this ж<term> Ꮡx, ΔType t) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
     // easy cases
     switch (ᐧ) {
@@ -160,7 +160,7 @@ internal static bool includes(this ж<term> Ꮡx, ΔType t) {
 
 // subsetOf reports whether x ⊆ y.
 internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
     ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases

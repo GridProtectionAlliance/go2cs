@@ -252,7 +252,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
     // Transport that this has been initialized, though.
     if ((~req).Header == default!) {
         forkReq();
-        req.Value.Header = new ΔHeader();
+        req.Value.Header = new ΔHeader(0);
     }
     {
         var u = req.Value.URL.Value.User; if (u != nil && (~req).Header.Get("Authorization"u8) == ""u8) {
@@ -722,7 +722,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                     Method: redirectMethod,
                     Response: resp,
                     URL: u,
-                    Header: new ΔHeader(),
+                    Header: new ΔHeader(0),
                     Host: host,
                     Cancel: (~ireq).Cancel,
                     ctx: (~ireq).ctx

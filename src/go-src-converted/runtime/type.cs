@@ -276,9 +276,7 @@ internal static void typelinksinit() {
     var typehash = new map<uint32, slice<ж<_type>>>(len(firstmoduledata.typelinks));
     var modules = activeModules();
     var prev = modules[0];
-    foreach (var (_, vᴛ1) in modules[1..]) {
-        var md = vᴛ1;
-
+    foreach (var (_, md) in modules[1..]) {
         // Collect types from the previous module into typehash.
 collect:
         foreach (var (_, tl) in (~prev).typelinks) {

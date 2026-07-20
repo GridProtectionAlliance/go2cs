@@ -223,7 +223,7 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
     else if (exprᴛ1 == "builtin"u8) {
         return default!;
     }
-    if (exprᴛ1 == "unsafe"u8) {
+    else if (exprᴛ1 == "unsafe"u8) {
         return types.Unsafe;
     }
 

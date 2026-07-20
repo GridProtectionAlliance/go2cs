@@ -244,7 +244,7 @@ internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 // If the provided cause is non-nil, it may be set to an error string
 // explaining why V does not implement (or satisfy, for constraints) T.
 internal static bool implements(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType V, ΔType T, bool constraint, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var cause = ref Ꮡcause.DerefOrNil();
 
     var Vu = under(V);

@@ -61,6 +61,7 @@ using static go.testing_package;
 [assembly: GoImplement<T, TB>(Pointer = true)]
 [assembly: GoImplement<alternationMatch, filterMatch>]
 [assembly: GoImplement<chattyFlag, flag_package.Value>(Pointer = true)]
+[assembly: GoImplement<common, TB>(Pointer = true)]
 [assembly: GoImplement<discard, io_package.Writer>]
 [assembly: GoImplement<durationOrCountFlag, flag_package.Value>(Pointer = true)]
 [assembly: GoImplement<indenter, io_package.Writer>]

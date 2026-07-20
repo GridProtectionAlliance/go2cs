@@ -55,7 +55,6 @@ using static go.net.http.fcgi_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
 [assembly: GoImplement<go.net.http_package.ServeMux, go.net.http_package.ΔHandler>(Pointer = true)]
-[assembly: GoImplement<io_package.PipeReader, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
 [assembly: GoImplement<response, go.net.http_package.ResponseWriter>(Pointer = true)]
 [assembly: GoImplement<streamWriter, io_package.Closer>(Pointer = true)]

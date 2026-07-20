@@ -53,7 +53,7 @@ internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k)
     V v = default!;
     bool found = default!;
 
-    ref var h = ref Ꮡh.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
     if (Ꮡh == nil) {
         return (v, false);
     }
@@ -74,7 +74,7 @@ internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k)
 internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f)
     where K : /* comparable */ new()
 {
-    ref var h = ref Ꮡh.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
     if (Ꮡh == nil) {
         return;

@@ -255,7 +255,7 @@ internal static @string String(this floatVal x) {
     // f ~ m * 10**d
     var (m, _) = Ꮡmant.Float64();
     // 0.5 <= |m| < 1.0
-    var d = (float64)exp * (float64)(math.Ln2 / math.Ln10);
+    var d = (float64)exp * /* (math.Ln2 / math.Ln10) */ 0.3010299956639812D;
     // log_10(2)
     // adjust m for truncated (integer) decimal exponent e
     var e = (int64)d;
@@ -264,7 +264,7 @@ internal static @string String(this floatVal x) {
     {
         var am = math.Abs(m);
         switch (ᐧ) {
-        case {} when am < 1 - 0.5e-6D: {
+        case {} when am < 1D - 0.5e-6D: {
             m *= 10;
             e--;
             break;
@@ -564,14 +564,14 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             }
         }
     }
-    if (exprᴛ1 == token.FLOAT) {
+    else if (exprᴛ1 == token.FLOAT) {
         {
             var x = makeFloatFromLiteral(lit); if (x != default!) {
                 return x;
             }
         }
     }
-    if (exprᴛ1 == token.IMAG) {
+    else if (exprᴛ1 == token.IMAG) {
         {
             nint n = len(lit); if (n > 0 && lit[n - 1] == (rune)'i') {
                 {
@@ -582,7 +582,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             }
         }
     }
-    if (exprᴛ1 == token.CHAR) {
+    else if (exprᴛ1 == token.CHAR) {
         {
             nint n = len(lit); if (n >= 2) {
                 {
@@ -593,14 +593,14 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             }
         }
     }
-    if (exprᴛ1 == token.STRING) {
+    else if (exprᴛ1 == token.STRING) {
         {
             var (s, err) = strconv.Unquote(lit); if (err == default!) {
                 return MakeString(s);
             }
         }
     }
-    { /* default: */
+    else { /* default: */
         throw panic(fmt.Sprintf("%v is not a valid token"u8, tok));
     }
 
@@ -1236,7 +1236,7 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
         }}
 
     }
-    if (exprᴛ1 == token.SUB) {
+    else if (exprᴛ1 == token.SUB) {
         switch (y.type()) {
         case unknownVal yΔ4: {
             return yΔ4;
@@ -1265,7 +1265,7 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
             return makeComplex(re, im);
         }}
     }
-    if (exprᴛ1 == token.XOR) {
+    else if (exprᴛ1 == token.XOR) {
         var z = newInt();
         switch (y.type()) {
         case unknownVal yΔ5: {
@@ -1292,7 +1292,7 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
         }
         return makeInt(z);
     }
-    if (exprᴛ1 == token.NOT) {
+    else if (exprᴛ1 == token.NOT) {
         switch (y.type()) {
         case unknownVal yΔ6: {
             return yΔ6;
@@ -1460,7 +1460,7 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else if (exprᴛ2 == token.QUO) {
             return makeRat(big.NewRat(a, b));
         }
-        if (exprᴛ2 == token.QUO_ASSIGN) {
+        else if (exprᴛ2 == token.QUO_ASSIGN) {
             c = a / b;
         }
         else if (exprᴛ2 == token.REM) {
@@ -1502,7 +1502,7 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else if (exprᴛ3 == token.QUO) {
             return makeRat(newRat().SetFrac(a, b));
         }
-        if (exprᴛ3 == token.QUO_ASSIGN) {
+        else if (exprᴛ3 == token.QUO_ASSIGN) {
             c.Quo(a, // force integer division
  b);
         }

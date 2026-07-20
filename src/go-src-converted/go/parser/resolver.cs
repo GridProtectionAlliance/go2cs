@@ -43,9 +43,7 @@ internal static void resolveFile(ж<ast.File> Ꮡfile, ж<tokenꓸFile> Ꮡhandl
     assert((~r).labelScope == nil, "unbalanced label scopes"u8);
     // resolve global identifiers within the same file
     nint i = 0;
-    foreach (var (_, vᴛ1) in (~r).unresolved) {
-        var ident = vᴛ1;
-
+    foreach (var (_, ident) in (~r).unresolved) {
         // i <= index for current ident
         assert((~ident).Obj == unresolved, "object already resolved"u8);
         ident.Value.Obj = (~r).pkgScope.Lookup((~ident).Name);
@@ -126,9 +124,7 @@ internal const nint maxScopeDepth = 1000;
     // resolve labels
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
-    foreach (var (_, vᴛ1) in r.targetStack[n]) {
-        var ident = vᴛ1;
-
+    foreach (var (_, ident) in r.targetStack[n]) {
         ident.Value.Obj = scope.Lookup((~ident).Name);
         if ((~ident).Obj == nil && r.declErr != default!) {
             r.declErr(ident.Pos(), fmt.Sprintf("label %s undefined"u8, (~ident).Name));
@@ -143,9 +139,7 @@ internal const nint maxScopeDepth = 1000;
     var idents = identsʗp.slice();
 
     ref var scope = ref Ꮡscope.Value;
-    foreach (var (_, vᴛ1) in idents) {
-        var ident = vᴛ1;
-
+    foreach (var (_, ident) in idents) {
         if ((~ident).Obj != nil) {
             throw panic(fmt.Sprintf("%v: identifier %s already declared or resolved"u8, ident.Pos(), (~ident).Name));
         }
@@ -497,7 +491,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) => func
                     Lhs: lhs,
                     Tok: token.DEFINE,
                     TokPos: (~n).TokPos,
-                    Rhs: new ast.Expr[]{new ast_UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: (~n).X)))}.slice()
+                    Rhs: new ast.Expr[]{new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: (~n).X)))}.slice()
                 ));
                 // TODO(rFindley): this walkLHS reproduced the parser resolution, but
                 // is it necessary? By comparison, for a normal AssignStmt we don't

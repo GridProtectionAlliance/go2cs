@@ -52,7 +52,7 @@ internal static error errUnrecognizedFormat = errors.New("unrecognized file form
 // See go.dev/issue/67401.
 //
 //go:linkname errNotGoExe
-internal static error errNotGoExe = errors.New("not a Go executable"u8);
+public static error errNotGoExe = errors.New("not a Go executable"u8);
 
 // The build info blob left by the linker is identified by
 // a 16-byte header, consisting of buildInfoMagic (14 bytes),

@@ -78,7 +78,7 @@ public static IPMask CIDRMask(nint ones, nint bits) {
             n -= 8;
             continue;
         }
-        m[i] = (byte)(~(byte)((byte)(0xff >> (int)(n))));
+        m[i] = (byte)(~(byte)(((byte)0xff).Rsh(n)));
         n = 0;
     }
     return m;
@@ -445,7 +445,7 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
             return (default!, default!);
         }
     }
-    if (exprᴛ1 == IPv6len) {
+    else if (exprᴛ1 == IPv6len) {
         if (len(ip) == IPv4len) {
             m = m[12..];
         }
@@ -521,7 +521,7 @@ public static IP ParseIP(@string s) {
 internal static (array<byte>, bool) parseIP(@string s) {
     var (ip, err) = netip.ParseAddr(s);
     if (err != default! || ip.Zone() != ""u8) {
-        return (new byte[]{}.array(), false);
+        return (new byte[]{}.array(16), false);
     }
     return (ip.As16(), true);
 }

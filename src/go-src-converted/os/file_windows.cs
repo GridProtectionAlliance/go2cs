@@ -42,7 +42,7 @@ internal static readonly UntypedInt _UTIME_OMIT = -1;
 // a finalizer might be run. On Unix systems this will cause the [File.SetDeadline]
 // methods to stop working.
 public static uintptr Fd(this ж<File> Ꮡfile) {
-    ref var @file = ref Ꮡfile.Value;
+    ref var @file = ref Ꮡfile.DerefOrNil();
 
     if (Ꮡfile == nil) {
         return (uintptr)syscall.InvalidHandle;
@@ -132,7 +132,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
 }
 
 internal static error close(this ж<@file> Ꮡfile) {
-    ref var @file = ref Ꮡfile.Value;
+    ref var @file = ref Ꮡfile.DerefOrNil();
 
     if (Ꮡfile == nil) {
         return syscall.EINVAL;

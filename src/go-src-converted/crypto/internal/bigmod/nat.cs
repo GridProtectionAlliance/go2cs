@@ -211,7 +211,7 @@ internal static error setBytes(this ж<ΔNat> Ꮡx, slice<byte> b, ж<Modulus> �
         k++;
     }
     for (nint s = 0; s < _W && k < len(x.limbs) && i > 0; s += 8) {
-        x.limbs[k] |= (nuint)(((nuint)b[i - 1] << (int)(s)));
+        x.limbs[k] |= (nuint)(((nuint)b[i - 1]).Lsh((uint64)(s)));
         i--;
     }
     if (i > 0) {
@@ -363,10 +363,10 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
     // We calculate how many of the most-significant bits of the exponent we can
     // compute before crossing the threshold, and we do it with doublings.
     nint i = bits.UintSize;
-    while ((logR >> (int)(i)) <= threshold) {
+    while (logR.Rsh((uint64)(i)) <= threshold) {
         i--;
     }
-    for (nuint k = (nuint)0; k < (logR >> (int)(i)); k++) {
+    for (nuint k = (nuint)0; k < logR.Rsh((uint64)(i)); k++) {
         rr.Add(rr, Ꮡm);
     }
     // Then we process the remaining bits of the exponent with a
@@ -374,7 +374,7 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
     while (i > 0) {
         rr.montgomeryMul(rr, rr, Ꮡm);
         i--;
-        if ((nuint)((logR >> (int)(i)) & 1) != 0) {
+        if ((nuint)(logR.Rsh((uint64)(i)) & 1) != 0) {
             rr.Add(rr, Ꮡm);
         }
     }
@@ -473,7 +473,7 @@ internal static ж<ΔNat> shiftIn(this ж<ΔNat> Ꮡx, nuint y, ж<Modulus> Ꮡm
     // based on whether 2x + b overflows m.
     choice needSubtraction = no;
     for (nint i = _W - 1; i >= 0; i--) {
-        nuint carry = (nuint)(((y >> (int)(i))) & 1);
+        nuint carry = (nuint)((y.Rsh((uint64)(i))) & 1);
         nuint borrow = default!;
         nuint mask = ctMask(needSubtraction);
         for (nint iΔ1 = 0; iΔ1 < size; iΔ1++) {
@@ -817,7 +817,7 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
             // Select x^k in constant time from the table.
-            nuint k = (nuint)((byte)(((b >> (int)(j))) & 0b1111));
+            nuint k = (nuint)((byte)((b.Rsh((uint64)(j))) & 0b1111));
             foreach (var (i, _) in table) {
                 tmp.assign(ctEq(k, (nuint)(i + 1)), table[i]);
             }
@@ -842,7 +842,7 @@ public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, n
     for (nint i = (nint)bits.UintSize - bitLen(e) + 1; i < bits.UintSize; i++) {
         Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
         {
-            nuint k = (nuint)(((e >> (int)(((nint)bits.UintSize - i - 1)))) & 1); if (k != 0) {
+            nuint k = (nuint)((e.Rsh((uint64)(((nint)bits.UintSize - i - 1)))) & 1); if (k != 0) {
                 Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
             }
         }

@@ -64,7 +64,7 @@ internal static slice<uint16> defaultCipherSuites() {
 // See go.dev/issue/67401.
 //
 //go:linkname defaultCipherSuitesTLS13
-internal static slice<uint16> defaultCipherSuitesTLS13 = new uint16[]{
+public static slice<uint16> defaultCipherSuitesTLS13 = new uint16[]{
     TLS_AES_128_GCM_SHA256,
     TLS_AES_256_GCM_SHA384,
     TLS_CHACHA20_POLY1305_SHA256
@@ -80,7 +80,7 @@ internal static slice<uint16> defaultCipherSuitesTLS13 = new uint16[]{
 // See go.dev/issue/67401.
 //
 //go:linkname defaultCipherSuitesTLS13NoAES
-internal static slice<uint16> defaultCipherSuitesTLS13NoAES = new uint16[]{
+public static slice<uint16> defaultCipherSuitesTLS13NoAES = new uint16[]{
     TLS_CHACHA20_POLY1305_SHA256,
     TLS_AES_128_GCM_SHA256,
     TLS_AES_256_GCM_SHA384

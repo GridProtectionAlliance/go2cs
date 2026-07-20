@@ -29,7 +29,7 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
     bool nan = default!;
 
     sign = (uint64)(f & (((uint64)1 << (int)((mantbits64 + expbits64)))));
-    mant = (uint64)(f & (4503599627370496L - 1));
+    mant = (uint64)(f & ((uint64)(4503599627370496L - 1)));
     exp = (nint)((nint)((f >> (int)(mantbits64))) & (nint)((1 << (int)(expbits64)) - 1));
     var exprᴛ1 = exp;
     if (exprᴛ1 == (1 << (int)(expbits64)) - 1) {
@@ -147,7 +147,7 @@ internal static uint64 fpack64(uint64 sign, uint64 mant, nint exp, uint64 trunc)
             return (uint64)(sign | mant);
         }
     }
-    return (uint64)((uint64)(sign | ((uint64)(exp - (nint)bias64) << (int)(mantbits64))) | (uint64)(mant & (4503599627370496L - 1)));
+    return (uint64)((uint64)(sign | ((uint64)(exp - (nint)bias64) << (int)(mantbits64))) | (uint64)(mant & ((uint64)(4503599627370496L - 1))));
 }
 
 internal static uint32 fpack32(uint32 sign, uint32 mant, nint exp, uint32 trunc) {
@@ -513,11 +513,11 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
         v <<= (int)(1);
     }
     var vn1 = (v >> (int)(32));
-    var vn0 = (uint64)(v & (4294967296L - 1));
+    var vn0 = (uint64)(v & ((uint64)(4294967296L - 1)));
     var un32 = (uint64)(u1.Lsh(s) | u0.Rsh((64 - s)));
     var un10 = u0.Lsh(s);
     var un1 = (un10 >> (int)(32));
-    var un0 = (uint64)(un10 & (4294967296L - 1));
+    var un0 = (uint64)(un10 & ((uint64)(4294967296L - 1)));
     var q1 = un32 / vn1;
     var rhat = un32 - q1 * vn1;
 again1:

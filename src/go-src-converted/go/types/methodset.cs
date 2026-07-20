@@ -101,7 +101,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     //
     // We must use a lookup on identity rather than a simple map[*Named]bool as
     // instantiated types may be identical but not equal.
-    instanceLookup seen = default!;
+    instanceLookup seen = new();
     // collect methods at current depth
     while (len(current) > 0) {
         slice<embeddedType> next = default!;                          // embedded types found at current depth
@@ -169,7 +169,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                     }
                     // collision
                     if (@base == default!) {
-                        @base = new methodSet();
+                        @base = new methodSet(0);
                     }
                     @base[k] = m;
                 }
@@ -181,7 +181,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
             {
                 var (_, found) = @base[k, ꟷ]; if (!found) {
                     if (@base == default!) {
-                        @base = new methodSet();
+                        @base = new methodSet(0);
                     }
                     @base[k] = default!;
                 }
@@ -195,9 +195,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     }
     // collect methods
     slice<ж<Selection>> list = default!;
-    foreach (var (_, vᴛ2) in @base) {
-        var m = vᴛ2;
-
+    foreach (var (_, m) in @base) {
         if (m != nil) {
             m.Value.recv = T;
             list = append(list, m);
@@ -228,7 +226,7 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
     ref var f = ref Ꮡf.Value;
 
     if (s == default!) {
-        s = new methodSet();
+        s = new methodSet(0);
     }
     @string key = Ꮡf.of(Func.Ꮡobject).Id();
     // if f is not in the set, add it

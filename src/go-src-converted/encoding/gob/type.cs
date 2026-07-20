@@ -479,7 +479,7 @@ internal static void init(this ж<sliceType> Ꮡs, ΔgobType elem) {
 }
 
 internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> seen) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     if (Ꮡs == nil) {
         return "<nil>"u8;
@@ -735,7 +735,7 @@ internal static typeId bootstrapType(@string name, any e) {
 }
 
 internal static @string @string(this ж<wireType> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
+    ref var w = ref Ꮡw.DerefOrNil();
 
     @string unknown = "unknown type"u8;
     if (Ꮡw == nil) {

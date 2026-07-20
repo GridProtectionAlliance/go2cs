@@ -235,7 +235,7 @@ internal static Δcolor colorFor(ΔType t) {
 // non-exported, then by name, and finally (for non-exported
 // functions) by package path.
 internal static bool less(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
     ref var b = ref Ꮡb.DerefOrNil();
 
     if (Ꮡa == Ꮡb) {
@@ -332,7 +332,7 @@ internal static ж<TypeName> _NewTypeNameLazy(tokenꓸPos pos, ж<Package> Ꮡpk
 
 // IsAlias reports whether obj is an alias name for a type.
 public static bool IsAlias(this ж<TypeName> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
+    ref var obj = ref Ꮡobj.DerefOrNil();
 
     switch (obj.typ.type()) {
     case null: {

@@ -295,7 +295,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
     for (nint i = 0; i < 4; i++) {
         digits[i] = byteorder.LeUint64(b[(int)(i * 8)..]);
     }
-    var width = (uint64)(((uint64)1 << (int)(w)));
+    var width = (uint64)(((uint64)1).Lsh(w));
     var windowMask = (uint64)(width - 1);
     nuint pos = (nuint)0;
     var carry = (uint64)0;
@@ -305,10 +305,10 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
         uint64 bitBuf = default!;
         if (indexBit < 64 - w){
             // This window's bits are contained in a single u64
-            bitBuf = (digits[(nint)(indexU64)] >> (int)(indexBit));
+            bitBuf = digits[(nint)(indexU64)].Rsh(indexBit);
         } else {
             // Combine the current 64 bits with bits from the next 64
-            bitBuf = (uint64)(((digits[(nint)(indexU64)] >> (int)(indexBit))) | ((digits[(nint)(1 + indexU64)] << (int)((64 - indexBit)))));
+            bitBuf = (uint64)((digits[(nint)(indexU64)].Rsh(indexBit)) | (digits[(nint)(1 + indexU64)].Lsh((64 - indexBit))));
         }
         // Add carry into the current window
         var window = carry + ((uint64)(bitBuf & windowMask));
@@ -331,7 +331,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
         }
         pos += w;
     }
-    return naf;
+    return naf.Clone();
 }
 
 internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
@@ -351,7 +351,7 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
         digits[i] -= (int8)(carry << (int)(4));
         digits[i + 1] += carry;
     }
-    return digits;
+    return digits.Clone();
 }
 
 } // end edwards25519_package

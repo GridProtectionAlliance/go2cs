@@ -195,7 +195,7 @@ internal static (uint64, slice<byte>, error) decodeVarint(slice<byte> data) {
         if (i >= 10 || i >= len(data)) {
             return (0, default!, errors.New("bad varint"u8));
         }
-        u |= (uint64)(((uint64)((byte)(data[i] & 0x7F)) << (int)((nuint)(7 * i))));
+        u |= (uint64)(((uint64)((byte)(data[i] & 0x7F))).Lsh((nuint)(7 * i)));
         if ((byte)(data[i] & 0x80) == 0) {
             return (u, data[(int)(i + 1)..], default!);
         }

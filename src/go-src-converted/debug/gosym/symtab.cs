@@ -258,14 +258,14 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
                 s.value = 0;
                 nuint shift = (nuint)0;
                 while (len(p) > 0 && (byte)(p[0] & 0x80) != 0) {
-                    s.value |= ((uint64)((byte)(p[0] & 0x7F)) << (int)(shift));
+                    s.value |= ((uint64)((byte)(p[0] & 0x7F))).Lsh(shift);
                     shift += 7;
                     p = p[1..];
                 }
                 if (len(p) == 0) {
                     return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF", default!)));
                 }
-                s.value |= ((uint64)p[0] << (int)(shift));
+                s.value |= ((uint64)p[0]).Lsh(shift);
                 p = p[1..];
             }
             if (goType) {

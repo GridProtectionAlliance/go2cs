@@ -400,7 +400,7 @@ internal static nint karatsubaLen(nint n, nint threshold) {
         n >>= (int)(1);
         i++;
     }
-    return (n << (int)(i));
+    return n.Lsh(i);
 }
 
 internal static nat mul(this nat z, nat x, nat y) {

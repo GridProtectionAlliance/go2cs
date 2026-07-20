@@ -145,7 +145,7 @@ internal static @string Error(this importError e) {
     Ꮡb.WriteString(p.scanner.TokenText());
     // This loop needs to examine each character before deciding whether to consume it. If we see a semicolon,
     // we need to let it be consumed by p.next().
-    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && (uint64)((~p.scanner).Whitespace & (((uint64)1 << (int)((nuint)ch)))) == 0; ch = p.scanner.Peek()) {
+    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && (uint64)((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
         Ꮡb.WriteRune(ch);
         p.scanner.Next();
     }
@@ -405,7 +405,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
         else if (exprᴛ2 == "convert"u8) {
             return Ꮡp.parseConversion(Ꮡpkg);
         }
-        { /* default: */
+        else { /* default: */
             p.errorf("expected const value, got %s (%q)"u8, scanner.TokenString(p.tok), p.lit);
         }
 
@@ -936,13 +936,13 @@ internal static typesꓸType parseTypeSpec(this ж<parser> Ꮡp, ж<types.Packag
         }
 
     }
-    if (exprᴛ1 is (rune)'*') {
+    else if (exprᴛ1 is (rune)'*') {
         return Ꮡp.parsePointerType(Ꮡpkg, nlist);
     }
-    if (exprᴛ1 is (rune)'[') {
+    else if (exprᴛ1 is (rune)'[') {
         return Ꮡp.parseArrayOrSliceType(Ꮡpkg, nlist);
     }
-    if (exprᴛ1 is (rune)'(') {
+    else if (exprᴛ1 is (rune)'(') {
         return new types_ΔSignatureжΔType(Ꮡp.parseFunctionType(Ꮡpkg, nlist));
     }
 
@@ -974,7 +974,7 @@ internal static readonly UntypedInt gccgoBuiltinANY = 22;
 
 internal static typesꓸType lookupBuiltinType(nint typ) {
     return new golib.SparseArray<typesꓸType>{[gccgoBuiltinINT8] = new types.BasicжΔType(types.Typ[types.Int8]), [gccgoBuiltinINT16] = new types.BasicжΔType(types.Typ[types.Int16]), [gccgoBuiltinINT32] = new types.BasicжΔType(types.Typ[types.Int32]), [gccgoBuiltinINT64] = new types.BasicжΔType(types.Typ[types.Int64]), [gccgoBuiltinUINT8] = new types.BasicжΔType(types.Typ[types.Uint8]), [gccgoBuiltinUINT16] = new types.BasicжΔType(types.Typ[types.Uint16]), [gccgoBuiltinUINT32] = new types.BasicжΔType(types.Typ[types.Uint32]), [gccgoBuiltinUINT64] = new types.BasicжΔType(types.Typ[types.Uint64]), [gccgoBuiltinFLOAT32] = new types.BasicжΔType(types.Typ[types.Float32]), [gccgoBuiltinFLOAT64] = new types.BasicжΔType(types.Typ[types.Float64]), [gccgoBuiltinINT] = new types.BasicжΔType(types.Typ[types.Int]), [gccgoBuiltinUINT] = new types.BasicжΔType(types.Typ[types.Uint]), [gccgoBuiltinUINTPTR] = new types.BasicжΔType(types.Typ[types.Uintptr]), [gccgoBuiltinBOOL] = new types.BasicжΔType(types.Typ[types.Bool]), [gccgoBuiltinSTRING] = new types.BasicжΔType(types.Typ[types.ΔString]), [gccgoBuiltinCOMPLEX64] = new types.BasicжΔType(types.Typ[types.Complex64]), [gccgoBuiltinCOMPLEX128] = new types.BasicжΔType(types.Typ[types.Complex128]), [gccgoBuiltinERROR] = types.Universe.Lookup("error"u8).Type(), [gccgoBuiltinBYTE] = types.Universe.Lookup("byte"u8).Type(), [gccgoBuiltinRUNE] = types.Universe.Lookup("rune"u8).Type(), [gccgoBuiltinANY] = types.Universe.Lookup("any"u8).Type()
-    }.array()[typ];
+    }.array(23)[typ];
 }
 
 // Type = "<" "type" ( "-" int | int [ TypeSpec ] ) ">" .

@@ -85,12 +85,12 @@ public static slice<byte> Raw(this LoadBytes b) {
 
 // Data reads and returns the contents of the segment.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSegment s) {
-    return saferio.ReadDataAt(new io_SectionReaderжReaderAt(s.sr), s.Filesz, 0);
+    return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Filesz, 0);
 }
 
 // Open returns a new ReadSeeker reading the segment.
 [GoRecv] public static io.ReadSeeker Open(this ref ΔSegment s) {
-    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 [GoType] partial struct SectionHeader {
@@ -134,12 +134,12 @@ public static slice<byte> Raw(this LoadBytes b) {
 
 // Data reads and returns the contents of the Mach-O section.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    return saferio.ReadDataAt(new io_SectionReaderжReaderAt(s.sr), s.Size, 0);
+    return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
 [GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // A Dylib represents a Mach-O load dynamic library command.
@@ -258,7 +258,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
     // Read entire file header.
     {
-        var errΔ2 = binary.Read(new io_SectionReaderжReader(sr), (~f).ByteOrder, f.of(File.ᏑFileHeader)); if (errΔ2 != default!) {
+        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), (~f).ByteOrder, f.of(File.ᏑFileHeader)); if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
     }
@@ -440,7 +440,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 }
             }
         }
-        if (exprᴛ2 == LoadCmdSegment64) {
+        else if (exprᴛ2 == LoadCmdSegment64) {
             ref var seg64 = ref heap(new Segment64(), out var Ꮡseg64);
             var b = bytes.NewReader(cmddat);
             {
@@ -486,7 +486,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 }
             }
         }
-        { /* default: */
+        else { /* default: */
             f.Value.Loads = append((~f).Loads, (Load)(((LoadBytes)cmddat)));
         }
 
@@ -498,7 +498,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid section file size", (~s).Filesz))));
             }
             s.Value.sr = io.NewSectionReader(r, (int64)(~s).Offset, (int64)(~s).Filesz);
-            s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+            s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         }
     }
     return (f, default!);
@@ -567,7 +567,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
     f.Sections = append(f.Sections, Ꮡsh);
     sh.sr = io.NewSectionReader(r, (int64)sh.Offset, (int64)sh.Size);
-    sh.ReaderAt = new io_SectionReaderжReaderAt(sh.sr);
+    sh.ReaderAt = new io.SectionReaderжReaderAt(sh.sr);
     if (sh.Nreloc > 0) {
         var (reldat, err) = saferio.ReadDataAt(r, (uint64)sh.Nreloc * 8, (int64)sh.Reloff);
         if (err != default!) {

@@ -123,7 +123,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 [GoRecv] public static array<byte> Fingerprint(this ref PkgDecoder pr) {
     array<byte> fp = new(8);
     copy(fp[..], pr.elemData[(int)(len(pr.elemData) - 8)..]);
-    return fp;
+    return fp.Clone();
 }
 
 // AbsIdx returns the absolute index for the given (section, index)
@@ -274,9 +274,9 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
             if (i == binary.MaxVarintLen64 - 1 && b > 1) {
                 return (x, overflow);
             }
-            return ((uint64)(x | ((uint64)b << (int)(s))), default!);
+            return ((uint64)(x | ((uint64)b).Lsh(s)), default!);
         }
-        x |= (uint64)(((uint64)((byte)(b & 0x7f)) << (int)(s)));
+        x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;
     }
     return (x, overflow);

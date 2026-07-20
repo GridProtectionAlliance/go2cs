@@ -9,8 +9,8 @@ using abi = @internal.abi_package;
 partial class reflect_package {
 
 internal static iter.Seq<ΔValue> rangeNum<T, N>(N v)
-    where T : /* int8 | int16 | int32 | int64 | int | uint8 | uint16 | uint32 | uint64 | uint | uintptr */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-    where N : /* int64 | uint64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IIncrementOperators<N>, IDecrementOperators<N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
+    where T : /* int8 | int16 | int32 | int64 | int | uint8 | uint16 | uint32 | uint64 | uint | uintptr */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
+    where N : /* int64 | uint64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IIncrementOperators<N>, IDecrementOperators<N>, IUnaryNegationOperators<N, N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
 {
     return (Func<ΔValue, bool> yield) => {
         // cannot use range T(v) because no core type.
@@ -86,7 +86,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             };
         } while (false);
     }
-    if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
         return (Func<ΔValue, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i))) {
@@ -95,7 +95,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    if (exprᴛ1 == ΔString) {
+    else if (exprᴛ1 == ΔString) {
         return (Func<ΔValue, bool> yield) => {
             foreach (var (i, _) in v.String()) {
                 if (!yield(ValueOf(i))) {
@@ -104,7 +104,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    if (exprᴛ1 == Map) {
+    else if (exprᴛ1 == Map) {
         return (Func<ΔValue, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {
@@ -114,7 +114,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    if (exprᴛ1 == Chan) {
+    else if (exprᴛ1 == Chan) {
         return (Func<ΔValue, bool> yield) => {
             for (var (valueᴛ1, ok) = v.Recv(); ok; (valueᴛ1, ok) = v.Recv()) {
                 ref var value = ref heap<ΔValue>(out var Ꮡvalue);
@@ -159,7 +159,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             };
         } while (false);
     }
-    if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i), v.Index(i))) {
@@ -168,7 +168,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             }
         };
     }
-    if (exprᴛ1 == ΔString) {
+    else if (exprᴛ1 == ΔString) {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             foreach (var (i, vΔ2) in v.String()) {
                 if (!yield(ValueOf(i), ValueOf(vΔ2))) {
@@ -177,7 +177,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             }
         };
     }
-    if (exprᴛ1 == Map) {
+    else if (exprᴛ1 == Map) {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {

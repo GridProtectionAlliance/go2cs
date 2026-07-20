@@ -366,7 +366,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         e.cr[i][0] = (uint8)i;
     }
     ref var cr = ref heap<array<slice<uint8>>>(out var Ꮡcr);
-    cr = e.cr;
+    cr = e.cr.Clone();
     if (cap(e.pr) < sz){
         e.pr = new slice<uint8>(sz);
     } else {
@@ -442,7 +442,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             nint c = default!;
             nint pixelsPerByte = 8 / bitsPerPixel;
             for (nint x = b.Min.X; x < b.Max.X; x++) {
-                a = (uint8)((uint8)(a << (int)((nuint)bitsPerPixel)) | pi.ColorIndexAt(x, y));
+                a = (uint8)(a.Lsh((nuint)bitsPerPixel) | pi.ColorIndexAt(x, y));
                 c++;
                 if (c == pixelsPerByte) {
                     cr[0][i] = a;
@@ -453,7 +453,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             }
             if (c != 0) {
                 while (c != pixelsPerByte) {
-                    a = (uint8)(a << (int)((nuint)bitsPerPixel));
+                    a = (uint8)(a.Lsh((nuint)bitsPerPixel));
                     c++;
                 }
                 cr[0][i] = a;

@@ -246,9 +246,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) => func((defer, re
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
 [GoRecv] public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
-    foreach (var (_, vᴛ1) in p.Mapping) {
-        var m = vᴛ1;
-
+    foreach (var (_, m) in p.Mapping) {
         m.Value.HasInlineFrames = (~m).HasInlineFrames && inlineFrame;
         m.Value.HasFunctions = (~m).HasFunctions && function;
         m.Value.HasFilenames = (~m).HasFilenames && filename;
@@ -256,9 +254,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) => func((defer, re
     }
     // Aggregate functions
     if (!function || !filename) {
-        foreach (var (_, vᴛ2) in p.Function) {
-            var f = vᴛ2;
-
+        foreach (var (_, f) in p.Function) {
             if (!function) {
                 f.Value.Name = ""u8;
                 f.Value.SystemName = ""u8;
@@ -270,9 +266,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) => func((defer, re
     }
     // Aggregate locations
     if (!inlineFrame || !address || !linenumber) {
-        foreach (var (_, vᴛ3) in p.Location) {
-            var l = vᴛ3;
-
+        foreach (var (_, l) in p.Location) {
             if (!inlineFrame && len((~l).Line) > 1) {
                 l.Value.Line = (~l).Line[(int)(len((~l).Line) - 1)..];
             }
@@ -411,21 +405,15 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) => func((defer, re
     }
     p.DurationNanos += pb.DurationNanos;
     p.Mapping = append(p.Mapping, pb.Mapping.ꓸꓸꓸ);
-    foreach (var (i, vᴛ1) in p.Mapping) {
-        var m = vᴛ1;
-
+    foreach (var (i, m) in p.Mapping) {
         m.Value.ID = (uint64)(i + 1);
     }
     p.Location = append(p.Location, pb.Location.ꓸꓸꓸ);
-    foreach (var (i, vᴛ2) in p.Location) {
-        var l = vᴛ2;
-
+    foreach (var (i, l) in p.Location) {
         l.Value.ID = (uint64)(i + 1);
     }
     p.Function = append(p.Function, pb.Function.ꓸꓸꓸ);
-    foreach (var (i, vᴛ3) in p.Function) {
-        var f = vᴛ3;
-
+    foreach (var (i, f) in p.Function) {
         f.Value.ID = (uint64)(i + 1);
     }
     if (r != 1.0D) {
@@ -528,9 +516,7 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
     if (err != default!) {
         return err;
     }
-    foreach (var (_, vᴛ1) in p.Function) {
-        var fn = vᴛ1;
-
+    foreach (var (_, fn) in p.Function) {
         {
             var (dd, ok) = demangled[(~fn).SystemName, ꟷ]; if (ok) {
                 fn.Value.Name = dd;

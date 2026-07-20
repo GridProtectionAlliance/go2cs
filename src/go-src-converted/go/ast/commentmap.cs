@@ -144,7 +144,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
         return default!;
     }
     // no comments to map
-    var cmap = new CommentMap();
+    var cmap = new CommentMap(0);
     // set up comment reader r
     var tmp = new slice<ж<CommentGroup>>(len(comments));
     copy(tmp, comments);
@@ -262,7 +262,7 @@ public static Node Update(this CommentMap cmap, Node old, Node @new) {
 // entries of cmap for which a corresponding node exists in
 // the AST specified by node.
 public static CommentMap Filter(this CommentMap cmap, Node node) {
-    var umap = new CommentMap();
+    var umap = new CommentMap(0);
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
     Inspect(node, (Node n) => {

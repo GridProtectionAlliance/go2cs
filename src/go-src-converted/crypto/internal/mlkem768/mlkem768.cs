@@ -205,7 +205,7 @@ internal static ж<DecapsulationKey> kemKeyGen(ж<DecapsulationKey> Ꮡdk, ж<ar
     var t = Ꮡdk.of(DecapsulationKey.Ꮡt);
     foreach (var (i, _) in t.Value) {
         // t = A ◦ s + e
-        t.Value[i] = e[i];
+        t.Value[i] = e[i].Clone();
         foreach (var (j, _) in s.Value) {
             t.Value[i] = polyAdd(t.Value[i], nttMul(A.Value[i * (nint)k + j], s.Value[j]));
         }
@@ -275,7 +275,7 @@ internal static (slice<byte> c, slice<byte> K, error err) kemEncaps(ж<array<byt
     ref var cc = ref Ꮡcc.DerefOrNil();
     ref var m = ref Ꮡm.Value;
     if (Ꮡcc == nil) {
-        Ꮡcc = Ꮡ(new byte[]{}.array()); cc = ref Ꮡcc.DerefOrNil();
+        Ꮡcc = Ꮡ(new byte[]{}.array(1088)); cc = ref Ꮡcc.DerefOrNil();
     }
     var H = sha3.Sum256(ek[..]);
     var g = sha3.New512();
@@ -345,7 +345,7 @@ internal static slice<byte> pkeEncrypt(ж<array<byte>> Ꮡcc, ж<encryptionKey> 
     var u = new slice<ringElement>(k);
     // NTT⁻¹(AT ◦ r) + e1
     foreach (var (i, _) in u) {
-        u[i] = e1[i];
+        u[i] = e1[i].Clone();
         foreach (var (j, _) in r) {
             // Note that i and j are inverted, as we need the transposed of A.
             u[i] = polyAdd(u[i], inverseNTT(nttMul(ex.A[j * (nint)k + i], r[j])));
@@ -358,7 +358,9 @@ internal static slice<byte> pkeEncrypt(ж<array<byte>> Ꮡcc, ж<encryptionKey> 
     }
     var v = polyAdd(polyAdd(inverseNTT(vNTT), e2), μ);
     var c = cc[..0];
-    foreach (var (_, f) in u) {
+    foreach (var (_, vᴛ1) in u) {
+        var f = vᴛ1.Clone();
+
         c = ringCompressAndEncode10(c, f);
     }
     c = ringCompressAndEncode4(c, v);
@@ -422,7 +424,7 @@ internal static error parseDK(ж<decryptionKey> Ꮡdx, slice<byte> dkPKE) {
         if (err != default!) {
             return err;
         }
-        dx.s[i] = f;
+        dx.s[i] = f.Clone();
         dkPKE = dkPKE[(int)(encodingSize12)..];
     }
     return default!;
@@ -516,7 +518,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     // rounding up (see FIPS 203 (DRAFT), Section 2.3).
     // Barrett reduction produces a quotient and a remainder in the range [0, 2q),
     // such that dividend = quotient * q + remainder.
-    var dividend = ((uint32)(uint16)x << (int)(d));
+    var dividend = ((uint32)(uint16)x).Lsh((uint64)(d));
     // x * 2ᵈ
     var quotient = (uint32)(((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift)));
     var remainder = dividend - quotient * (uint32)q;
@@ -535,7 +537,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     quotient += (uint32)((((uint32)(q / 2) - remainder) >> (int)(31)) & 1);
     quotient += (uint32)((((uint32)(q + q / 2) - remainder) >> (int)(31)) & 1);
     // quotient might have overflowed at this point, so reduce it by masking.
-    uint32 mask = (((uint32)1 << (int)(d))) - 1;
+    uint32 mask = (((uint32)1).Lsh((uint64)(d))) - 1;
     return (uint16)((uint32)(quotient & mask));
 }
 
@@ -545,12 +547,12 @@ internal static fieldElement decompress(uint16 y, uint8 d) {
     // We want to compute (y * q) / 2ᵈ, rounded to nearest integer, with 1/2
     // rounding up (see FIPS 203 (DRAFT), Section 2.3).
     var dividend = (uint32)y * (uint32)q;
-    var quotient = (dividend >> (int)(d));
+    var quotient = dividend.Rsh((uint64)(d));
     // (y * q) / 2ᵈ
     // The d'th least-significant bit of the dividend (the most significant bit
     // of the remainder) is 1 for the top half of the values that divide to the
     // same quotient, which are the ones that round up.
-    quotient += (uint32)((dividend >> (int)((d - 1))) & 1);
+    quotient += (uint32)(dividend.Rsh((uint64)((d - 1))) & 1);
     // quotient is at most (2¹¹-1) * q / 2¹¹ + 1 = 3328, so it didn't overflow.
     return ((fieldElement)(uint16)quotient);
 }
@@ -659,6 +661,8 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 // It implements Compress₁, according to FIPS 203 (DRAFT), Definition 4.5,
 // followed by ByteEncode₁, according to FIPS 203 (DRAFT), Algorithm 4.
 internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f) {
+    f = f.Clone();
+
     (s, var b) = sliceForAppend(s, encodingSize1);
     foreach (var (i, _) in b) {
         b[i] = 0;
@@ -684,7 +688,7 @@ internal static ringElement ringDecodeAndDecompress1(ж<array<byte>> Ꮡb) {
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ);
     }
     // 0 decompresses to 0, and 1 to ⌈q/2⌋
-    return f;
+    return f.Clone();
 }
 
 // ringCompressAndEncode4 appends a 128-byte encoding of a ring element to s,
@@ -693,6 +697,8 @@ internal static ringElement ringDecodeAndDecompress1(ж<array<byte>> Ꮡb) {
 // It implements Compress₄, according to FIPS 203 (DRAFT), Definition 4.5,
 // followed by ByteEncode₄, according to FIPS 203 (DRAFT), Algorithm 4.
 internal static slice<byte> ringCompressAndEncode4(slice<byte> s, ringElement f) {
+    f = f.Clone();
+
     (s, var b) = sliceForAppend(s, encodingSize4);
     for (nint i = 0; i < n; i += 2) {
         b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << (int)(4))));
@@ -713,7 +719,7 @@ internal static ringElement ringDecodeAndDecompress4(ж<array<byte>> Ꮡb) {
         f[i] = decompress((uint16)((byte)(b[i / 2] & 0b1111)), 4);
         f[i + 1] = decompress((uint16)((b[i / 2] >> (int)(4))), 4);
     }
-    return f;
+    return f.Clone();
 }
 
 // ringCompressAndEncode10 appends a 320-byte encoding of a ring element to s,
@@ -722,6 +728,8 @@ internal static ringElement ringDecodeAndDecompress4(ж<array<byte>> Ꮡb) {
 // It implements Compress₁₀, according to FIPS 203 (DRAFT), Definition 4.5,
 // followed by ByteEncode₁₀, according to FIPS 203 (DRAFT), Algorithm 4.
 internal static slice<byte> ringCompressAndEncode10(slice<byte> s, ringElement f) {
+    f = f.Clone();
+
     (s, var b) = sliceForAppend(s, encodingSize10);
     for (nint i = 0; i < n; i += 4) {
         uint64 x = default!;
@@ -757,7 +765,7 @@ internal static ringElement ringDecodeAndDecompress10(ж<array<byte>> Ꮡbb) {
         f[i + 2] = decompress((uint16)((uint64)((x >> (int)(20)) & 0b11_1111_1111)), 10);
         f[i + 3] = decompress((uint16)((uint64)((x >> (int)(30)) & 0b11_1111_1111)), 10);
     }
-    return f;
+    return f.Clone();
 }
 
 // samplePolyCBD draws a ringElement from the special Dη distribution given a
@@ -779,7 +787,7 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
         f[i] = fieldSub(((fieldElement)(uint16)(b_0 + b_1)), ((fieldElement)(uint16)(b_2 + b_3)));
         f[i + 1] = fieldSub(((fieldElement)(uint16)(b_4 + b_5)), ((fieldElement)(uint16)(b_6 + b_7)));
     }
-    return f;
+    return f.Clone();
 }
 
 [GoType("[256]fieldElement")] /* [n]fieldElement */
@@ -792,6 +800,9 @@ internal static array<fieldElement> gammas = new fieldElement[]{17, 3312, 2761, 
 //
 // It implements MultiplyNTTs, according to FIPS 203 (DRAFT), Algorithm 10.
 internal static nttElement nttMul(nttElement f, nttElement g) {
+    f = f.Clone();
+    g = g.Clone();
+
     nttElement h = default!;
     // We use i += 2 for bounds check elimination. See https://go.dev/issue/66826.
     for (nint i = 0; i < 256; i += 2) {
@@ -800,7 +811,7 @@ internal static nttElement nttMul(nttElement f, nttElement g) {
         h[i] = fieldAddMul(a0, b0, fieldMul(a1, b1), gammas[i / 2]);
         h[i + 1] = fieldAddMul(a0, b1, a1, b0);
     }
-    return h;
+    return h.Clone();
 }
 
 // zetas are the values ζ^BitRev7(k) mod q for each index k.
@@ -810,6 +821,8 @@ internal static array<fieldElement> zetas = new fieldElement[]{1, 1729, 2580, 32
 //
 // It implements NTT, according to FIPS 203 (DRAFT), Algorithm 8.
 internal static nttElement ntt(ringElement f) {
+    f = f.Clone();
+
     nint k = 1;
     for (nint len = 128; len >= 2; len /= 2) {
         for (nint start = 0; start < 256; start += 2 * len) {
@@ -831,6 +844,8 @@ internal static nttElement ntt(ringElement f) {
 //
 // It implements NTT⁻¹, according to FIPS 203 (DRAFT), Algorithm 9.
 internal static ringElement inverseNTT(nttElement f) {
+    f = f.Clone();
+
     nint k = 127;
     for (nint len = 2; len <= 128; len *= 2) {
         for (nint start = 0; start < 256; start += 2 * len) {
@@ -910,7 +925,7 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
             break;
         }
     }
-    return a;
+    return a.Clone();
 }
 
 } // end mlkem768_package

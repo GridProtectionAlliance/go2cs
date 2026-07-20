@@ -41,6 +41,7 @@ using static go.text.template.parse_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<ActionNode, Node>(Pointer = true)]
 [assembly: GoImplement<BoolNode, Node>(Pointer = true)]
+[assembly: GoImplement<BranchNode, Node>(Pointer = true)]
 [assembly: GoImplement<BreakNode, Node>(Pointer = true)]
 [assembly: GoImplement<ChainNode, Node>(Pointer = true)]
 [assembly: GoImplement<CommandNode, Node>(Pointer = true)]

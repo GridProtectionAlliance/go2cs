@@ -23,7 +23,7 @@ partial class runtime_package {
     internal uintptr nextPC;
     // frames is a slice of Frames that have yet to be returned.
     internal slice<Frame> frames;
-    internal array<Frame> frameStore = new(2);
+    internal array<Frame> frameStore = new(2, () => new());
 }
 
 // Frame is the information returned by [Frames] for each call frame.
@@ -937,7 +937,7 @@ internal static @string name(this ΔsrcFunc s) {
 internal static partial @string badSrcFuncName(ΔsrcFunc _);
 
 [GoType] partial struct pcvalueCache {
-    internal array<array<pcvalueCacheEnt>> entries = new(2);
+    internal array<array<pcvalueCacheEnt>> entries = new(2, () => new(8));
     internal nint inUse;
 }
 

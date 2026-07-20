@@ -1586,7 +1586,7 @@ internal static void clearpools() {
     // clear unique maps
     if (uniqueMapCleanup != default!) {
         switch (ᐧ) {
-        case ᐧ: {
+        case ᐧ when uniqueMapCleanup.ᐸꟷ(new EmptyStruct(), ꟷ): {
             break;
         }
         default: {

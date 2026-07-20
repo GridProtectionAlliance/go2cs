@@ -178,7 +178,7 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
     // lvl = 0,2,4,...: left to right
     // lvl = 1,3,5,...: right to left
     foreach (var (i, lvl) in levels) {
-        if (lvl % 2 == 0){
+        if ((level)(lvl % 2) == 0){
             curDir = LeftToRight;
         } else {
             curDir = RightToLeft;

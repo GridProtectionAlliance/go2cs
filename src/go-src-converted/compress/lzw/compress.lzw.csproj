@@ -80,7 +80,7 @@
     <Using Include="go.builtin" Static="True" />
     <Using Include="System" />
     <Using Include="System.Numerics" />
-    <Using Include="System.Object" Alias="any" />    
+    <Using Include="System.Object" Alias="any" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />
     <Using Include="System.UInt32" Alias="uint32" />
@@ -97,20 +97,23 @@
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
     <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" />
-    <!-- Remove test files from current folder -->
-    <Compile Remove="*._test.cs" />
+    <!-- Remove converted test artifacts from current folder (compiled by the colocated
+         <name>.tests.csproj instead; the old `*._test.cs` pattern matched nothing the
+         converter emits — Go test files are `*_test.go` so their outputs are `*_test.cs`) -->
+    <Compile Remove="*_test.cs;package_test_info.cs;go2cs_test_host.cs" />
     <!--Remove all sub-folders -->
     <None Remove="*/**/*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+
     <ProjectReference Include="$(go2csPath)go-src-converted\bufio\bufio.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\errors\errors.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />

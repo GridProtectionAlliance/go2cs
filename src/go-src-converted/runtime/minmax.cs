@@ -44,7 +44,7 @@ partial interface floaty<ΔT> {
 }
 
 internal static F fmin<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IUnaryNegationOperators<F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     if (!AreEqual(y, y) || y < x) {
         return y;
@@ -58,7 +58,7 @@ internal static F fmin<F>(F x, F y)
 }
 
 internal static F fmax<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IUnaryNegationOperators<F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     if (!AreEqual(y, y) || y > x) {
         return y;
@@ -72,7 +72,7 @@ internal static F fmax<F>(F x, F y)
 }
 
 internal static F forbits<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IUnaryNegationOperators<F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     var exprᴛ1 = @unsafe.Sizeof(x);
     if (exprᴛ1 == 4) {
@@ -86,7 +86,7 @@ internal static F forbits<F>(F x, F y)
 }
 
 internal static F fandbits<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IUnaryNegationOperators<F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     var exprᴛ1 = @unsafe.Sizeof(x);
     if (exprᴛ1 == 4) {

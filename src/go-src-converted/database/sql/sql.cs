@@ -795,7 +795,7 @@ internal static void addDep(this ж<DB> Ꮡdb, finalCloser x, any dep) => func((
     }
     var xdep = db.dep[x];
     if (xdep == default!) {
-        xdep = new depSet();
+        xdep = new depSet(0);
         db.dep[x] = xdep;
     }
     xdep[dep] = true;
@@ -1116,7 +1116,7 @@ public static void SetConnMaxLifetime(this ж<DB> Ꮡdb, time.Duration d) {
     // Wake cleaner up when lifetime is shortened.
     if (d > 0 && d < db.maxLifetime && db.cleanerCh != default!) {
         switch (ᐧ) {
-        case ᐧ: {
+        case ᐧ when db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꟷ): {
             break;
         }
         default: {
@@ -1144,7 +1144,7 @@ public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) => fun
     // Wake cleaner up when idle time is shortened.
     if (d > 0 && d < db.maxIdleTime && db.cleanerCh != default!) {
         switch (ᐧ) {
-        case ᐧ: {
+        case ᐧ when db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꟷ): {
             break;
         }
         default: {
@@ -2218,11 +2218,11 @@ public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
             return;
         }
         var fPanic = true;
-        dc.of(driverConn.ᏑMutex).Lock();
+        dc.of(sql_package.driverConn.ᏑMutex).Lock();
         var dcʗ1 = dc;
         var releaseʗ1 = release;
         defer(() => {
-            dcʗ1.of(driverConn.ᏑMutex).Unlock();
+            dcʗ1.of(sql_package.driverConn.ᏑMutex).Unlock();
             // If f panics fPanic will remain true.
             // Ensure an error is passed to release so the connection
             // may be discarded.
@@ -3342,7 +3342,7 @@ public static error Err(this ж<Rows> Ꮡrs) => func((defer, recover) => {
 //
 //	rawBytes = rows.setrawbuf(append(rows.rawbuf(), value...))
 internal static slice<byte> rawbuf(this ж<Rows> Ꮡrs) {
-    ref var rs = ref Ꮡrs.Value;
+    ref var rs = ref Ꮡrs.DerefOrNil();
 
     if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
@@ -3354,7 +3354,7 @@ internal static slice<byte> rawbuf(this ж<Rows> Ꮡrs) {
 // setrawbuf updates the RawBytes buffer with the result of appending a new value to it.
 // It returns the new value.
 internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
-    ref var rs = ref Ꮡrs.Value;
+    ref var rs = ref Ꮡrs.DerefOrNil();
 
     if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here

@@ -293,7 +293,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
                 if (p[start] == (rune)'y') {
                     n = 0;
                 }
-                var mask = ((uint64)1 << (int)(n)) - 1;
+                var mask = ((uint64)1).Lsh((uint64)(n)) - 1;
                 m.Value.list = append((~m).list, new cond(mask, bits, result));
             } else 
             if (c == (rune)'-') {
@@ -338,7 +338,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 
 // ShouldEnable reports whether the change with the given id should be enabled.
 public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
-    ref var m = ref Ꮡm.Value;
+    ref var m = ref Ꮡm.DerefOrNil();
 
     if (Ꮡm == nil) {
         return true;
@@ -348,7 +348,7 @@ public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
 
 // ShouldPrint reports whether to print identifying information about the change with the given id.
 public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
-    ref var m = ref Ꮡm.Value;
+    ref var m = ref Ꮡm.DerefOrNil();
 
     if (Ꮡm == nil || m.quiet) {
         return false;
@@ -807,7 +807,7 @@ internal static uint64 fnvUint32(uint64 h, uint32 x) {
 // a lock and never emits duplicates.
 [GoType] partial struct dedup {
     // 128-entry 4-way, lossy cache for seenLossy
-    internal array<array<uint64>> recent = new(128);
+    internal array<array<uint64>> recent = new(128, () => new(4));
     // complete history for seen
     internal sync.Mutex mu;
     internal map<uint64, bool> m;

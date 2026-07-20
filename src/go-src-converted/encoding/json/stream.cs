@@ -266,7 +266,7 @@ public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
 
 // UnmarshalJSON sets *m to a copy of data.
 public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
-    ref var m = ref Ꮡm.Value;
+    ref var m = ref Ꮡm.DerefOrNil();
 
     if (Ꮡm == nil) {
         return errors.New("json.RawMessage: UnmarshalJSON on nil pointer"u8);
@@ -427,7 +427,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             return dec.tokenError(c);
         }
-        if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
+        else if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
             if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey) {
                 ref var x = ref heap(new @string(), out var Ꮡx);
                 nint old = dec.tokenState;

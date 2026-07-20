@@ -47,6 +47,7 @@ using static go.image.color_package;
 [assembly: GoImplement<NRGBA, Color>]
 [assembly: GoImplement<NRGBA64, Color>]
 [assembly: GoImplement<NYCbCrA, Color>]
+[assembly: GoImplement<Palette, Model>]
 [assembly: GoImplement<RGBA64, Color>]
 [assembly: GoImplement<YCbCr, Color>]
 [assembly: GoImplement<modelFunc, Model>(Pointer = true)]

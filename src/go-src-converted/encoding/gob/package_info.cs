@@ -51,6 +51,7 @@ using static go.encoding.gob_package;
 [assembly: GoImplement<CommonType, ΔgobType>(Pointer = true)]
 [assembly: GoImplement<arrayType, ΔgobType>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<decBuffer, io_package.ByteReader>(Pointer = true)]
 [assembly: GoImplement<decBuffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<encBuffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<gobEncoderType, ΔgobType>(Pointer = true)]

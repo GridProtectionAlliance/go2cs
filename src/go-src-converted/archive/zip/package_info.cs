@@ -50,6 +50,7 @@ using static go.archive.zip_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<checksumReader, go.io.fs_package.File>(Pointer = true)]
 [assembly: GoImplement<checksumReader, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<countWriter, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<dirReader, io_package.ReadCloser>(Pointer = true)]
@@ -60,7 +61,6 @@ using static go.archive.zip_package;
 [assembly: GoImplement<fileWriter, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
 [assembly: GoImplement<headerFileInfo, fileInfoDirEntry>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<nopCloser, io_package.WriteCloser>(Pointer = true)]
 [assembly: GoImplement<nopCloser, io_package.Writer>(Promoted = true)]
 [assembly: GoImplement<openDir, go.io.fs_package.File>(Pointer = true)]

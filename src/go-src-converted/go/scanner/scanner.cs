@@ -879,7 +879,7 @@ scanAgain:
                 s.insertSemi = false;
                 return (pos, token.SEMICOLON, "\n");
             }
-            if (exprᴛ2 is (rune)'"') {
+            else if (exprᴛ2 is (rune)'"') {
                 insertSemi = true;
                 tok = token.STRING;
                 lit = s.scanString();

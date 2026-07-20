@@ -41,8 +41,6 @@ using static go.go.@internal.typeparams_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.go.ast_package.IndexExpr, go.go.ast_package.Expr>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.IndexListExpr, go.go.ast_package.Expr>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -574,7 +574,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
                         }
                     }
                 }
-                if (exprᴛ1 == nameTypeDNS) {
+                else if (exprᴛ1 == nameTypeDNS) {
                     @string name = ((@string)data);
                     {
                         var (_, ok) = domainToReverseLabels(name); if (!ok) {
@@ -588,7 +588,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
                         }
                     }
                 }
-                if (exprᴛ1 == nameTypeURI) {
+                else if (exprᴛ1 == nameTypeURI) {
                     @string name = ((@string)data);
                     var (uri, errΔ8) = url.Parse(name);
                     if (errΔ8 != default!) {
@@ -601,7 +601,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
                         }
                     }
                 }
-                if (exprᴛ1 == nameTypeIP) {
+                else if (exprᴛ1 == nameTypeIP) {
                     var ip = ((net.IP)data);
                     {
                         nint l = builtin.len(ip); if (l != net.IPv4len && l != net.IPv6len) {
@@ -615,7 +615,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
                         }
                     }
                 }
-                { /* default: */
+                else { /* default: */
                 }
 
                 // Unknown SAN types are ignored.

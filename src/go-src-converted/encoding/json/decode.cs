@@ -437,7 +437,7 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
             }
         }
     }
-    { /* default: */
+    else { /* default: */
         throw panic(phasePanicMsg);
     }
 
@@ -468,7 +468,7 @@ internal static any valueQuoted(this ж<decodeState> Ꮡd) {
         }}
 
     }
-    { /* default: */
+    else { /* default: */
         throw panic(phasePanicMsg);
     }
 

@@ -374,9 +374,9 @@ internal static void serveContent(ResponseWriter w, ж<Request> Ꮡr, @string na
         sendSize = rangesMIMESize(ranges, ctype, size);
         code = StatusPartialContent;
         var (pr, pw) = io.Pipe();
-        var mw = multipart.NewWriter(new io_PipeWriterжWriter(pw));
+        var mw = multipart.NewWriter(new io.PipeWriterжWriter(pw));
         w.Header().Set("Content-Type"u8, "multipart/byteranges; boundary="u8 + mw.Boundary());
-        sendContent = new io_PipeReaderжReader(pr);
+        sendContent = new io.PipeReaderжReader(pr);
         var prʗ1 = pr;
         defer(() => prʗ1.Close());
         var mwʗ1 = mw;

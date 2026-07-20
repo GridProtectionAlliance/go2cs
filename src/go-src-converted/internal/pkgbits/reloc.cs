@@ -33,6 +33,6 @@ public static readonly RelocKind RelocObj = 6;
 public static readonly RelocKind RelocObjExt = 7;
 public static readonly RelocKind RelocObjDict = 8;
 public static readonly RelocKind RelocBody = 9;
-internal static readonly UntypedInt numRelocs = iota;
+internal static readonly UntypedInt numRelocs = /* iota */ 10;
 
 } // end pkgbits_package

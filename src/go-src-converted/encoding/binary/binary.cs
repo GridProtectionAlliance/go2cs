@@ -864,7 +864,7 @@ internal static nint dataSize(reflectꓸValue v) {
             return size * v.Len();
         }
     }
-    if (exprᴛ1 == reflect.Struct) {
+    else if (exprᴛ1 == reflect.Struct) {
         var t = v.Type();
         {
             var (sizeΔ1, ok) = ᏑstructSize.Load(t); if (ok) {
@@ -875,7 +875,7 @@ internal static nint dataSize(reflectꓸValue v) {
         ᏑstructSize.Store(t, size);
         return size;
     }
-    { /* default: */
+    else { /* default: */
         if (v.IsValid()) {
             return @sizeof(v.Type());
         }
@@ -894,7 +894,7 @@ internal static nint @sizeof(reflectꓸType t) {
             }
         }
     }
-    if (exprᴛ1 == reflect.Struct) {
+    else if (exprᴛ1 == reflect.Struct) {
         nint sum = 0;
         for ((nint i, nint n) = (0, t.NumField()); i < n; i++) {
             nint s = @sizeof(t.Field(i).Type);
@@ -905,7 +905,7 @@ internal static nint @sizeof(reflectꓸType t) {
         }
         return sum;
     }
-    if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
+    else if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
         return (nint)t.Size();
     }
 

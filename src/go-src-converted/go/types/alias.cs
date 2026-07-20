@@ -132,7 +132,7 @@ internal static ж<Named> asNamed(ΔType t) {
 // newAlias creates a new Alias type with the given type name and rhs.
 // rhs must not be nil.
 internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType rhs) {
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var obj = ref Ꮡobj.Value;
 
     assert(rhs != default!);

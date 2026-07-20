@@ -150,14 +150,14 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
         ModulePath: (uint32)b.modpath,
         NumFiles: (uint32)b.stab.Nentries(),
         NumFuncs: (uint32)len(b.funcs),
-        MetaHash: digest
+        MetaHash: digest.Clone()
     );
     if (b.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= writing header: %+v\n"u8, mh);
     }
     {
         var err = binary.Write(w, new binary_littleEndianᴠByteOrder(binary.LittleEndian), mh); if (err != default!) {
-            return (digest, fmt.Errorf("error writing meta-file header: %v"u8, err));
+            return (digest.Clone(), fmt.Errorf("error writing meta-file header: %v"u8, err));
         }
     }
     var off = (int64)coverage.CovMetaHeaderSize;
@@ -165,12 +165,12 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     off = b.emitFuncOffsets(w, off);
     // Check for any errors up to this point.
     if (b.werr != default!) {
-        return (digest, b.werr);
+        return (digest.Clone(), b.werr);
     }
     // Write string table.
     {
         var err = Ꮡb.of(CoverageMetaDataBuilder.Ꮡstab).Write(w); if (err != default!) {
-            return (digest, err);
+            return (digest.Clone(), err);
         }
     }
     off += (int64)b.stab.Size();
@@ -179,21 +179,21 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
         error err = default!;
         (off, err) = b.emitFunc(w, off, f);
         if (err != default!) {
-            return (digest, err);
+            return (digest.Clone(), err);
         }
     }
     // Back-patch the length.
     var totalLength = (uint32)off;
     {
         var (_, err) = w.Seek(0, io.SeekStart); if (err != default!) {
-            return (digest, err);
+            return (digest.Clone(), err);
         }
     }
     b.wrUint32(w, totalLength);
     if (b.werr != default!) {
-        return (digest, b.werr);
+        return (digest.Clone(), b.werr);
     }
-    return (digest, default!);
+    return (digest.Clone(), default!);
 }
 
 // HashFuncDesc computes an md5 sum of a coverage.FuncDesc and returns
@@ -204,7 +204,7 @@ public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> Ꮡf) {
     hashFuncDesc(h, Ꮡf, tmp);
     array<byte> r = new(16);
     copy(r[..], h.Sum(default!));
-    return r;
+    return r.Clone();
 }
 
 // hashFuncDesc incorporates a given function 'f' into the hash 'h'.

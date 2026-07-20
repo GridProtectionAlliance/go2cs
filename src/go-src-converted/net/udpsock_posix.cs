@@ -23,7 +23,7 @@ internal static ΔAddr sockaddrToUDP(syscallꓸSockaddr sa) {
 }
 
 internal static nint family(this ж<UDPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
@@ -35,7 +35,7 @@ internal static nint family(this ж<UDPAddr> Ꮡa) {
 }
 
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint family) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return (default!, default!);
@@ -57,7 +57,7 @@ internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint
         ref var from = ref heap(new syscall.SockaddrInet4(), out var Ꮡfrom);
         (n, err) = c.fd.readFromInet4(b, Ꮡfrom);
         if (err == default!) {
-            var ip = from.Addr;
+            var ip = from.Addr.Clone();
             // copy from.Addr; ip escapes, so this line allocates 4 bytes
             addr = new UDPAddr(IP: ip[..], Port: from.Port);
         }
@@ -66,7 +66,7 @@ internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint
         ref var from = ref heap(new syscall.SockaddrInet6(), out var Ꮡfrom);
         (n, err) = c.fd.readFromInet6(b, Ꮡfrom);
         if (err == default!) {
-            var ip = from.Addr;
+            var ip = from.Addr.Clone();
             // copy from.Addr; ip escapes, so this line allocates 16 bytes
             addr = new UDPAddr(IP: ip[..], Port: from.Port, Zone: zoneCache.name((nint)from.ZoneId));
         }

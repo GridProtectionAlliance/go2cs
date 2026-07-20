@@ -461,7 +461,7 @@ public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> Ꮡfi
 
 [GoRecv] internal static ΔHeader extraHeaders(this ref transportRequest tr) {
     if (tr.extra == default!) {
-        tr.extra = new ΔHeader();
+        tr.extra = new ΔHeader(0);
     }
     return tr.extra;
 }
@@ -1906,7 +1906,7 @@ internal static (ж<persistConn> pconn, error err) dialConn(this ж<Transport> �
                 hdr = t.ProxyConnectHeader;
             }
             if (hdr == default!) {
-                hdr = new ΔHeader();
+                hdr = new ΔHeader(0);
             }
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {

@@ -1135,7 +1135,9 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 // TODO(nigeltao): consider smarter algorithms.
                 nint bestIndex = 0;
                 var bestSum = (uint32)(4294967296L - 1);
-                foreach (var (index, p) in palette) {
+                foreach (var (index, vᴛ1) in palette) {
+                    var p = vᴛ1.Clone();
+
                     var sum = sqDiff(er, p[0]) + sqDiff(eg, p[1]) + sqDiff(eb, p[2]) + sqDiff(ea, p[3]);
                     if (sum < bestSum) {
                         (bestIndex, bestSum) = (index, sum);

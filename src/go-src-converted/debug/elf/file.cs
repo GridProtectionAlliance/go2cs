@@ -130,17 +130,17 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
     if (s.Type == SHT_NOBITS) {
-        return new io_SectionReaderжReadSeeker(io.NewSectionReader(new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil))), 0, (int64)s.Size));
+        return new io.SectionReaderжReadSeeker(io.NewSectionReader(new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil))), 0, (int64)s.Size));
     }
     Func<io.Reader, (io.ReadCloser, error)> zrd = default!;
     if ((SectionFlag)(s.Flags & SHF_COMPRESSED) == 0){
         if (!strings.HasPrefix(s.Name, ".zdebug"u8)) {
-            return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+            return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
         var b = new slice<byte>(12);
         var (n, _) = s.sr.ReadAt(b, 0);
         if (n != 12 || ((sstring)(b[..4])) != "ZLIB"u8) {
-            return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
+            return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
         s.compressionOffset = 12;
         s.compressionType = COMPRESS_ZLIB;
@@ -166,8 +166,8 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
         var zrdʗ1 = zrd;
     return new readSeekerFromReaderжReadSeeker(Ꮡ(new readSeekerFromReader(
         reset: () => {
-            var fr = io.NewSectionReader(new io_SectionReaderжReaderAt(Ꮡs.Value.sr), Ꮡs.Value.compressionOffset, (int64)Ꮡs.Value.FileSize - Ꮡs.Value.compressionOffset);
-            return zrdʗ1(new io_SectionReaderжReader(fr));
+            var fr = io.NewSectionReader(new io.SectionReaderжReaderAt(Ꮡs.Value.sr), Ꮡs.Value.compressionOffset, (int64)Ꮡs.Value.FileSize - Ꮡs.Value.compressionOffset);
+            return zrdʗ1(new io.SectionReaderжReader(fr));
         },
         size: (int64)s.Size
     )));
@@ -200,7 +200,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
 
 // Open returns a new ReadSeeker reading the ELF program body.
 [GoRecv] public static io.ReadSeeker Open(this ref Prog p) {
-    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L));
+    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L));
 }
 
 // A Symbol represents an entry in an ELF symbol table section.
@@ -327,7 +327,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     ref var shstrndx = ref heap(new nint(), out var Ꮡshstrndx);
     var exprᴛ3 = (~f).Class;
     if (exprᴛ3 == ELFCLASS32) {
-        Header32 hdr = default!;
+        Header32 hdr = new();
         var data = new slice<byte>((nint)(@unsafe.Sizeof(hdr)));
         {
             var (_, errΔ4) = sr.ReadAt(data, 0); if (errΔ4 != default!) {
@@ -352,7 +352,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         shstrndx = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shstrndx"))..]);
     }
     else if (exprᴛ3 == ELFCLASS64) {
-        Header64 hdr = default!;
+        Header64 hdr = new();
         var data = new slice<byte>((nint)(@unsafe.Sizeof(hdr)));
         {
             var (_, errΔ5) = sr.ReadAt(data, 0); if (errΔ5 != default!) {
@@ -406,7 +406,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     // Read program headers
     f.Value.Progs = new slice<ж<Prog>>(phnum);
-    var (phdata, err) = saferio.ReadDataAt(new io_SectionReaderжReaderAt(sr), (uint64)phnum * (uint64)phentsize, phoff);
+    var (phdata, err) = saferio.ReadDataAt(new io.SectionReaderжReaderAt(sr), (uint64)phnum * (uint64)phentsize, phoff);
     if (err != default!) {
         return (default!, err);
     }
@@ -448,7 +448,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(phoff + (int64)off, "invalid program header file size", (~p).Filesz))));
         }
         p.Value.sr = io.NewSectionReader(r, (int64)(~p).Off, (int64)(~p).Filesz);
-        p.Value.ReaderAt = new io_SectionReaderжReaderAt(p.Value.sr);
+        p.Value.ReaderAt = new io.SectionReaderжReaderAt(p.Value.sr);
         f.Value.Progs[i] = p;
     }
     // If the number of sections is greater than or equal to SHN_LORESERVE
@@ -463,7 +463,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (exprᴛ6 == ELFCLASS32) {
             var sh = @new<Section32>();
             {
-                var errΔ8 = binary.Read(new io_SectionReaderжReader(sr), bo, sh); if (errΔ8 != default!) {
+                var errΔ8 = binary.Read(new io.SectionReaderжReader(sr), bo, sh); if (errΔ8 != default!) {
                     return (default!, errΔ8);
                 }
             }
@@ -474,7 +474,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         else if (exprᴛ6 == ELFCLASS64) {
             var sh = @new<Section64>();
             {
-                var errΔ9 = binary.Read(new io_SectionReaderжReader(sr), bo, sh); if (errΔ9 != default!) {
+                var errΔ9 = binary.Read(new io.SectionReaderжReader(sr), bo, sh); if (errΔ9 != default!) {
                     return (default!, errΔ9);
                 }
             }
@@ -511,7 +511,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     f.Value.Sections = new slice<ж<ΔSection>>(0, c);
     var names = new slice<uint32>(0, c);
-    (var shdata, err) = saferio.ReadDataAt(new io_SectionReaderжReaderAt(sr), (uint64)shnum * (uint64)shentsize, shoff);
+    (var shdata, err) = saferio.ReadDataAt(new io.SectionReaderжReaderAt(sr), (uint64)shnum * (uint64)shentsize, shoff);
     if (err != default!) {
         return (default!, err);
     }
@@ -558,7 +558,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         }
         s.Value.sr = io.NewSectionReader(r, (int64)(~s).Offset, (int64)(~s).FileSize);
         if ((SectionFlag)((~s).Flags & SHF_COMPRESSED) == 0){
-            s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+            s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
             s.Value.Size = s.Value.FileSize;
         } else {
             // Read the compression header.
@@ -610,9 +610,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (err != default!) {
         return (default!, err);
     }
-    foreach (var (i, vᴛ1) in (~f).Sections) {
-        var s = vᴛ1;
-
+    foreach (var (i, s) in (~f).Sections) {
         bool ok = default!;
         (s.Value.Name, ok) = getString(shstrtab, (nint)names[i]);
         if (!ok) {

@@ -44,6 +44,10 @@ using static go.io.fs_package;
 [assembly: GoImplement<PathError, error>(Pointer = true)]
 [assembly: GoImplement<dirInfo, DirEntry>]
 [assembly: GoImplement<subFS, FS>(Pointer = true)]
+[assembly: GoImplement<subFS, GlobFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadDirFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadFileFS>(Pointer = true)]
+[assembly: GoImplement<subFS, SubFS>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

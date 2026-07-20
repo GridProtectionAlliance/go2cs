@@ -353,7 +353,7 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
         else if (exprᴛ1 == ssOverflow) {
             return (lastSegStart, false);
         }
-        if (exprᴛ1 == ssSuccess) {
+        else if (exprᴛ1 == ssSuccess) {
             if (lastCC > info.ccc) {
                 return (lastSegStart, false);
             }

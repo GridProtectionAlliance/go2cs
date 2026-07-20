@@ -93,7 +93,7 @@ public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring
 // checkCanParse checks whether it is OK to parse templates.
 // If not, it returns an error.
 internal static error checkCanParse(this ж<Template> Ꮡt) => func<error>((defer, recover) => {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt == nil) {
         return default!;
@@ -298,9 +298,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => func<(ж<Te
         ns
     ));
     ret.Value.set[ret.Name()] = ret;
-    foreach (var (_, vᴛ1) in textClone.Templates()) {
-        var x = vᴛ1;
-
+    foreach (var (_, x) in textClone.Templates()) {
         @string name = x.Name();
         var src = t.set[name];
         if (src == nil || (~src).escapeErr != default!) {

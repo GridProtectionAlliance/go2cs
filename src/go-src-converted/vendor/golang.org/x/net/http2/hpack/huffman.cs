@@ -66,7 +66,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         cbits += 8;
         sbits += 8;
         while (cbits >= 8) {
-            var idx = (byte)((cur >> (int)((cbits - 8))));
+            var idx = (byte)(cur.Rsh((uint64)((cbits - 8))));
             n = (~n).children.Value[idx];
             if (n == nil) {
                 return ErrInvalidHuffman;
@@ -85,7 +85,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         }
     }
     while (cbits > 0) {
-        n = (~n).children.Value[(byte)((cur << (int)((8 - cbits))))];
+        n = (~n).children.Value[(byte)(cur.Lsh((uint64)((8 - cbits))))];
         if (n == nil) {
             return ErrInvalidHuffman;
         }
@@ -106,7 +106,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         return ErrInvalidHuffman;
     }
     {
-        nuint mask = (nuint)(((nuint)1 << (int)(cbits)) - 1); if ((nuint)(cur & mask) != mask) {
+        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((nuint)(cur & mask) != mask) {
             // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
             return ErrInvalidHuffman;
         }
@@ -150,15 +150,15 @@ internal static void buildRootHuffmanNode() {
         var cur = lazyRootHuffmanNode;
         while (codeLen > 8) {
             codeLen -= 8;
-            var i = (uint8)((code >> (int)(codeLen)));
+            var i = (uint8)(code.Rsh((uint64)(codeLen)));
             if ((~cur).children.Value[i] == nil) {
                 cur.Value.children.Value[i] = newInternalNode();
             }
             cur = (~cur).children.Value[i];
         }
         var shift = (uint8)(8 - codeLen);
-        nint start = (nint)(uint8)((code << (int)(shift)));
-        nint end = (nint)((1 << (int)(shift)));
+        nint start = (nint)(uint8)(code.Lsh((uint64)(shift)));
+        nint end = (nint)(((nint)1).Lsh((uint64)(shift)));
         leaves.Value[sym].sym = (byte)sym;
         leaves.Value[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
@@ -183,7 +183,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         if (n >= 32) {
             n %= 32;
             // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
-            var yΔ1 = (uint32)((x >> (int)(n)));
+            var yΔ1 = (uint32)(x.Rsh(n));
             // Compiler doesn't combine memory writes if y isn't uint32
             dst = append(dst, (byte)((yΔ1 >> (int)(24))), (byte)((yΔ1 >> (int)(16))), (byte)((yΔ1 >> (int)(8))), (byte)yΔ1);
         }
@@ -195,7 +195,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
             UntypedInt eosNBits = 30;
             const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
             nuint pad = 8 - over;
-            x = (uint64)(((x << (int)(pad))) | ((eosPadByte >> (int)(over))));
+            x = (uint64)((x.Lsh(pad)) | (eosPadByte.Rsh(over)));
             n += pad;
         }
     }

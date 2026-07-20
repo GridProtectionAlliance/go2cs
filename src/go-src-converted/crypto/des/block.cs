@@ -51,7 +51,7 @@ internal static (uint32 lout, uint32 rout) feistel(uint32 l, uint32 r, uint64 k0
 
 // feistelBox[s][16*i+j] contains the output of permutationFunction
 // for sBoxes[s][i][j] << 4*(7-s)
-internal static array<array<uint32>> feistelBox = new(8);
+internal static array<array<uint32>> feistelBox = new(8, () => new(64));
 
 internal static ж<sync.Once> ᏑfeistelBoxOnce = new(default(sync.Once));
 internal static ref sync.Once feistelBoxOnce => ref ᏑfeistelBoxOnce.Value;
@@ -61,8 +61,8 @@ internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutati
     uint64 block = default!;
 
     foreach (var (position, n) in permutation) {
-        var bit = (uint64)(((src >> (int)(n))) & 1);
-        block |= (uint64)((bit << (int)((nuint)((len(permutation) - 1) - position))));
+        var bit = (uint64)((src.Rsh((uint64)(n))) & 1);
+        block |= (uint64)(bit.Lsh((nuint)((len(permutation) - 1) - position)));
     }
     return block;
 }
@@ -71,7 +71,7 @@ internal static void initFeistelBox() {
     foreach (var (s, _) in sBoxes) {
         for (nint i = 0; i < 4; i++) {
             for (nint j = 0; j < 16; j++) {
-                var f = ((uint64)sBoxes[s][i][j] << (int)((4 * (7 - (nuint)s))));
+                var f = ((uint64)sBoxes[s][i][j]).Lsh((4 * (7 - (nuint)s)));
                 f = permuteBlock(f, permutationFunction[..]);
                 // Row is determined by the 1st and 6th bit.
                 // Column is the middle four bits.
@@ -178,8 +178,8 @@ internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
     var last = @in;
     for (nint i = 0; i < 16; i++) {
         // 28-bit circular left shift
-        var left = (((last << (int)((4 + ksRotations[i])))) >> (int)(4));
-        var right = (((last << (int)(4))) >> (int)((32 - ksRotations[i])));
+        var left = ((last.Lsh((uint64)((4 + ksRotations[i])))) >> (int)(4));
+        var right = ((last << (int)(4))).Rsh((uint64)((32 - ksRotations[i])));
         @out[i] = (uint32)(left | right);
         last = @out[i];
     }

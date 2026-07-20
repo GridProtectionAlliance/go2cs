@@ -24,10 +24,10 @@ internal static ж<array<affineLookupTable>> basepointTable() {
 
 
 [GoType("dyn")] partial struct basepointTablePrecompᴛ1 {
-    internal array<affineLookupTable> table = new(32);
+    internal array<affineLookupTable> table = new(32, () => new());
     internal sync.Once initOnce;
 }
-internal static ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new(default(basepointTablePrecompᴛ1));
+internal static ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new(new basepointTablePrecompᴛ1());
 internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ᏑbasepointTablePrecomp.Value;
 
 // ScalarBaseMult sets v = x * B, where B is the canonical generator, and
@@ -97,7 +97,7 @@ public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Poin
     ref var x = ref Ꮡx.Value;
 
     checkInitialized(Ꮡq);
-    projLookupTable table = default!;
+    projLookupTable table = new();
     table.FromP3(Ꮡq);
     // Write x = sum(x_i * 16^i)
     // so  x*Q = sum( Q*x_i*16^i )
@@ -156,7 +156,7 @@ internal static ж<nafLookupTable8> basepointNafTable() {
     internal nafLookupTable8 table;
     internal sync.Once initOnce;
 }
-internal static ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new(default(basepointNafTablePrecompᴛ1));
+internal static ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new(new basepointNafTablePrecompᴛ1());
 internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref ᏑbasepointNafTablePrecomp.Value;
 
 // VarTimeDoubleScalarBaseMult sets v = a * A + b * B, where B is the canonical
@@ -182,7 +182,7 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     // "mass" of the scalar onto sparse coefficients (meaning
     // fewer additions).
     var basepointNafTableΔ1 = basepointNafTable();
-    nafLookupTable5 aTable = default!;
+    nafLookupTable5 aTable = new();
     aTable.FromP3(ᏑA);
     // Because the basepoint is fixed, we can use a wider NAF
     // corresponding to a bigger table.

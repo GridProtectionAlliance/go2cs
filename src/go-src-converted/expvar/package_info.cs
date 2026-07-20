@@ -51,11 +51,15 @@ using static go.expvar_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<Float, Var>(Pointer = true)]
+[assembly: GoImplement<Float, jsonVar>(Pointer = true)]
 [assembly: GoImplement<Int, Var>(Pointer = true)]
+[assembly: GoImplement<Int, jsonVar>(Pointer = true)]
 [assembly: GoImplement<Map, Var>(Pointer = true)]
+[assembly: GoImplement<Map, jsonVar>(Pointer = true)]
 [assembly: GoImplement<go.expvar_package.Func, Var>]
 [assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
 [assembly: GoImplement<ΔString, Var>(Pointer = true)]
+[assembly: GoImplement<ΔString, jsonVar>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -347,9 +347,7 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
         c.fractionalUtilizationGoal = 0;
     }
     // Clear per-P state
-    foreach (var (_, vᴛ1) in allp) {
-        var Δp = vᴛ1;
-
+    foreach (var (_, Δp) in allp) {
         Δp.Value.gcAssistTime = 0;
         Δp.Value.gcFractionalMarkTime = 0;
     }

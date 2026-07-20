@@ -206,7 +206,7 @@ internal static slice<rune> stringtoslicerune(ж<array<rune>> Ꮡbuf, @string s)
     }
     slice<rune> a = default!;
     if (Ꮡbuf != nil && n <= len(buf)){
-        buf = new rune[]{}.array();
+        buf = new rune[]{}.array(32);
         a = buf[..(int)(n)];
     } else {
         a = rawruneslice(n);

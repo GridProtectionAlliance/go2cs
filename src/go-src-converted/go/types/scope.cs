@@ -105,10 +105,10 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // time (see Insert). This can only happen for dot-imported objects
 // whose scope is the scope of the package that exported them.
 public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string name, tokenꓸPos pos) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     for (; Ꮡs != nil; Ꮡs = s.parent) {
-        s = ref Ꮡs.Value;
+        s = ref Ꮡs.DerefOrNil();
         {
             var obj = s.Lookup(name); if (obj != default! && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
                 return (Ꮡs, obj);
@@ -170,7 +170,7 @@ internal static bool _InsertLazy(this ж<ΔScope> Ꮡs, @string name, Func<Objec
 // has an object alt in p. s should be discarded after
 // having been squashed.
 internal static void squash(this ж<ΔScope> Ꮡs, Action<Object, Object> err) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     var p = s.parent;
     assert(p != nil);

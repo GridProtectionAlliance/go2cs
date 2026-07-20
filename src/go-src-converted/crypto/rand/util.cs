@@ -32,13 +32,13 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
             }
         }
         // Clear bits in the first byte to make sure the candidate has a size <= bits.
-        bytes[0] &= (uint8)((uint8)((nint)((1 << (int)(b))) - 1));
+        bytes[0] &= (uint8)((uint8)((nint)(((nint)1).Lsh(b)) - 1));
         // Don't let the value be too small, i.e, set the most significant two bits.
         // Setting the top two bits, rather than just the top bit,
         // means that when two of these values are multiplied together,
         // the result isn't ever one bit short.
         if (b >= 2){
-            bytes[0] |= (byte)((byte)(3 << (int)((b - 2))));
+            bytes[0] |= (byte)(((byte)3).Lsh((b - 2)));
         } else {
             // Here b==1, because b cannot be zero.
             bytes[0] |= (byte)(1);
@@ -87,7 +87,7 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
         }
         // Clear bits in the first byte to increase the probability
         // that the candidate is < max.
-        bytes[0] &= (uint8)((uint8)((nint)((1 << (int)(b))) - 1));
+        bytes[0] &= (uint8)((uint8)((nint)(((nint)1).Lsh(b)) - 1));
         n.SetBytes(bytes);
         if (n.Cmp(Ꮡmax) < 0) {
             return (n, err);

@@ -59,7 +59,7 @@ internal static void checkSetFileCompletionNotificationModes() {
 // It is called from the net package at init time to avoid
 // loading ws2_32.dll when net is not used.
 public static Action InitWSA = sync.OnceFunc(() => {
-    Δsyscall.WSAData d = default!;
+    Δsyscall.WSAData d = new();
     var e = Δsyscall.WSAStartup((uint32)0x202, Ꮡ(d));
     if (e != default!) {
         initErr = e;
@@ -172,7 +172,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
             return ((nint)o.qty, default!);
         }
     }
-    if (AreEqual(exprᴛ1, Δsyscall.ERROR_IO_PENDING)) {
+    else if (AreEqual(exprᴛ1, Δsyscall.ERROR_IO_PENDING)) {
         err = default!;
     }
     else { /* default: */
@@ -996,7 +996,7 @@ public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @strin
     }
     defer(Ꮡfd.readUnlock);
     var o = Ꮡfd.of(FD.Ꮡrop);
-    array<Δsyscall.RawSockaddrAny> rawsa = new(2);
+    array<Δsyscall.RawSockaddrAny> rawsa = new(2, () => new());
     while (ᐧ) {
         var (s, err) = sysSocket();
         if (err != default!) {
@@ -1172,7 +1172,7 @@ internal static int32 sockaddrInet4ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(raw.of(Δsyscall.RawSockaddrInet4.ᏑPort)));
     p.Value[0] = (byte)((sa.Port >> (int)(8)));
     p.Value[1] = (byte)sa.Port;
-    raw.Value.Addr = sa.Addr;
+    raw.Value.Addr = sa.Addr.Clone();
     return (int32)@unsafe.Sizeof(raw.Value);
 }
 
@@ -1187,7 +1187,7 @@ internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж
     p.Value[0] = (byte)((sa.Port >> (int)(8)));
     p.Value[1] = (byte)sa.Port;
     raw.Value.Scope_id = sa.ZoneId;
-    raw.Value.Addr = sa.Addr;
+    raw.Value.Addr = sa.Addr.Clone();
     return (int32)@unsafe.Sizeof(raw.Value);
 }
 
@@ -1197,7 +1197,7 @@ internal static void rawToSockaddrInet4(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<
     var pp = (ж<Δsyscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(Δsyscall.RawSockaddrInet4.ᏑPort)));
     sa.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
-    sa.Addr = pp.Value.Addr;
+    sa.Addr = pp.Value.Addr.Clone();
 }
 
 internal static void rawToSockaddrInet6(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet6> Ꮡsa) {
@@ -1207,7 +1207,7 @@ internal static void rawToSockaddrInet6(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(Δsyscall.RawSockaddrInet6.ᏑPort)));
     sa.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
     sa.ZoneId = pp.Value.Scope_id;
-    sa.Addr = pp.Value.Addr;
+    sa.Addr = pp.Value.Addr.Clone();
 }
 
 internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, syscallꓸSockaddr sa) {

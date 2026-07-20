@@ -768,7 +768,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             if (x.mode == variable || indirect) {
                 mode = variable;
             }
-            check.record(Ꮡ(new operand(mode, new ast_SelectorExprжExpr(selx), obj.Type(), default!, 0)));
+            check.record(Ꮡ(new operand(mode, new ast.SelectorExprжExpr(selx), obj.Type(), default!, 0)));
         }
         if (hasVarSize(@base, // The field offset is considered a variable even if the field is declared before
  // the part of the struct which is variable-sized. This makes both the rules
@@ -920,7 +920,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         } while (false);
     }
-    { /* default: */
+    else { /* default: */
         throw panic("unreachable");
     }
 

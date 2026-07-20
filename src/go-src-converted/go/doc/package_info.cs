@@ -43,14 +43,6 @@ using static go.go.doc_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.go.ast_package.FuncDecl, go.go.ast_package.Decl>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.GenDecl, go.go.ast_package.Decl>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.Ident, go.go.ast_package.Expr>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.ImportSpec, go.go.ast_package.Spec>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.SelectorExpr, go.go.ast_package.Expr>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.StarExpr, go.go.ast_package.Expr>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.TypeSpec, go.go.ast_package.Spec>(Pointer = true)]
-[assembly: GoImplement<go.go.ast_package.ValueSpec, go.go.ast_package.Spec>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -294,7 +294,7 @@ internal static readonly socksReply socksStatusSucceeded = 0x00;
 }
 
 internal static @string String(this ж<socksAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return "<nil>"u8;
@@ -315,7 +315,7 @@ internal static @string String(this ж<socksAddr> Ꮡa) {
 // BoundAddr returns the address assigned by the proxy server for
 // connecting to the command target address from the proxy server.
 internal static netꓸAddr BoundAddr(this ж<socksConn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
     if (Ꮡc == nil) {
         return default!;

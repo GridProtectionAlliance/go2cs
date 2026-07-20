@@ -403,7 +403,7 @@ public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw,
         defer(() => (~outreqʗ1).Body.Close());
     }
     if ((~outreq).Header == default!) {
-        outreq.Value.Header = new httpꓸHeader();
+        outreq.Value.Header = new httpꓸHeader(0);
     }
     // Issue 33142: historical behavior was to always allocate
     if ((p.Director != default!) == (p.Rewrite != default!)) {

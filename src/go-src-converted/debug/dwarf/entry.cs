@@ -52,7 +52,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
     b = makeBuf(Ꮡd, new unknownFormat(nil), "abbrev"u8, 0, data);
     // Error handling is simplified by the buf getters
     // returning an endless stream of 0s after an error.
-    var m = new abbrevTable();
+    var m = new abbrevTable(0);
     while (ᐧ) {
         // Table ends with id == 0.
         var id = (uint32)b.@uint();
@@ -481,7 +481,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 }
             } while (false);
         }
-        if (exprᴛ1 == formDwarfBlock1) {
+        else if (exprᴛ1 == formDwarfBlock1) {
             val = b.bytes((nint)b.uint8());
         }
         else if (exprᴛ1 == formDwarfBlock2) {
@@ -602,7 +602,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 return default!;
             }
         }
-        if (exprᴛ1 == formStrx || exprᴛ1 == formStrx1 || exprᴛ1 == formStrx2 || exprᴛ1 == formStrx3 || exprᴛ1 == formStrx4) {
+        else if (exprᴛ1 == formStrx || exprᴛ1 == formStrx1 || exprᴛ1 == formStrx2 || exprᴛ1 == formStrx3 || exprᴛ1 == formStrx4) {
             do {
                 uint64 offΔ8 = default!;
                 var exprᴛ3 = fmt;
@@ -745,7 +745,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 return default!;
             }
         }
-        if (exprᴛ4 == formRnglistx) {
+        else if (exprᴛ4 == formRnglistx) {
             var (rnglistsBase, _) = e.Val(AttrRnglistsBase)._<int64>(ᐧ);
             (~e).Field[del.idx].Val = resolveRnglistx((uint64)rnglistsBase, del.off);
             if (b.err != default!) {
@@ -955,7 +955,9 @@ public static (ж<Entry>, error) SeekPC(this ж<ΔReader> Ꮡr, uint64 pc) {
         if (err != default!) {
             return (default!, err);
         }
-        foreach (var (_, pcs) in ranges) {
+        foreach (var (_, vᴛ1) in ranges) {
+            var pcs = vᴛ1.Clone();
+
             if (pcs[0] <= pc && pc < pcs[1]) {
                 return (e, default!);
             }
@@ -1098,7 +1100,7 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
         if (low == 0 && high == 0) {
             break;
         }
-        if (low == (~(uint64)0 >> (int)((nuint)((8 - u.addrsize()) * 8)))){
+        if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))){
             @base = high;
         } else {
             ret = append(ret, new uint64[]{@base + low, @base + high}.array());
@@ -1139,7 +1141,7 @@ internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, �
                 return (default!, err);
             }
         }
-        if (exprᴛ1 == rleStartxEndx) {
+        else if (exprᴛ1 == rleStartxEndx) {
             var startIdx = buf.@uint();
             var endIdx = buf.@uint();
             var (start, err) = Ꮡd.debugAddr(new unitжdataFormat(Ꮡu), (uint64)addrBase, startIdx);

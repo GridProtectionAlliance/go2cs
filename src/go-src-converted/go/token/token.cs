@@ -279,7 +279,7 @@ internal static array<@string> tokens = new golib.SparseArray<@string>{
     [(int)TYPE] = "type"u8,
     [(int)VAR] = "var"u8,
     [(int)TILDE] = "~"u8
-}.array();
+}.array(89);
 
 // String returns the string corresponding to the token tok.
 // For operators, delimiters, and keywords the string is the actual

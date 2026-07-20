@@ -67,9 +67,7 @@ internal static ж<ж<byte>> argv;
 //
 //go:nosplit
 internal static ж<byte> argv_index(ж<ж<byte>> Ꮡargv, int32 i) {
-    ref var argv = ref Ꮡargv.Value;
-
-    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromRef(ref argv), (uintptr)i * (uintptr)goarch.PtrSize));
+    return ~(ж<ж<byte>>)(uintptr)(add(new @unsafe.Pointer(Ꮡargv), (uintptr)i * (uintptr)goarch.PtrSize));
 }
 
 internal static void args(int32 c, ж<ж<byte>> Ꮡv) {
@@ -131,20 +129,20 @@ internal static void testAtomic64() {
     if (atomic.Load64(Ꮡtest_z64) != 1) {
         @throw("load64 failed"u8);
     }
-    atomic.Store64(Ꮡtest_z64, (1099511627776L) + 1);
-    if (atomic.Load64(Ꮡtest_z64) != (1099511627776L) + 1) {
+    atomic.Store64(Ꮡtest_z64, (uint64)((1099511627776L) + 1));
+    if (atomic.Load64(Ꮡtest_z64) != (uint64)((1099511627776L) + 1)) {
         @throw("store64 failed"u8);
     }
-    if (atomic.Xadd64(Ꮡtest_z64, 1099511627777L) != (2199023255552L) + 2) {
+    if (atomic.Xadd64(Ꮡtest_z64, 1099511627777L) != (uint64)((2199023255552L) + 2)) {
         @throw("xadd64 failed"u8);
     }
-    if (atomic.Load64(Ꮡtest_z64) != (2199023255552L) + 2) {
+    if (atomic.Load64(Ꮡtest_z64) != (uint64)((2199023255552L) + 2)) {
         @throw("xadd64 failed"u8);
     }
-    if (atomic.Xchg64(Ꮡtest_z64, (3298534883328L) + 3) != (2199023255552L) + 2) {
+    if (atomic.Xchg64(Ꮡtest_z64, (uint64)((3298534883328L) + 3)) != (uint64)((2199023255552L) + 2)) {
         @throw("xchg64 failed"u8);
     }
-    if (atomic.Load64(Ꮡtest_z64) != (3298534883328L) + 3) {
+    if (atomic.Load64(Ꮡtest_z64) != (uint64)((3298534883328L) + 3)) {
         @throw("xchg64 failed"u8);
     }
 }

@@ -28,7 +28,7 @@ partial class net_package {
 internal static error errInvalidInterface = errors.New("invalid network interface"u8);
 internal static error errInvalidInterfaceIndex = errors.New("invalid network interface index"u8);
 internal static error errInvalidInterfaceName = errors.New("invalid network interface name"u8);
-internal static error errNoSuchInterface = errors.New("no such network interface"u8);
+public static error errNoSuchInterface = errors.New("no such network interface"u8);
 internal static error errNoSuchMulticastInterface = errors.New("no such multicast network interface"u8);
 
 // Interface represents a mapping between network interface name

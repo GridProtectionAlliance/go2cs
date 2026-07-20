@@ -189,9 +189,9 @@ Loop:
         else if (exprᴛ1 == InstFail) {
             return (EmptyOp)(~((EmptyOp)((EmptyOp)0)));
         }
-        if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
+        else if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
         }
-        { /* default: */
+        else { /* default: */
             goto break_Loop;
         }
 

@@ -112,7 +112,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
 }
 
 internal static error Close(this ж<dotWriter> Ꮡd) {
-    ref var d = ref Ꮡd.Value;
+    ref var d = ref Ꮡd.DerefOrNil();
 
     if ((~d.w).dot == Ꮡd) {
         d.w.Value.dot = default!;

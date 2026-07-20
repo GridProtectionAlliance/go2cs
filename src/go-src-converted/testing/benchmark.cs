@@ -68,7 +68,7 @@ internal static ж<Δsync.Mutex> ᏑbenchmarkLock = new(default(Δsync.Mutex));
 internal static ref Δsync.Mutex benchmarkLock => ref ᏑbenchmarkLock.Value;
 
 // Used for every benchmark for measuring memory.
-internal static ж<Δruntime.MemStats> ᏑmemStats = new(default(Δruntime.MemStats));
+internal static ж<Δruntime.MemStats> ᏑmemStats = new(new Δruntime.MemStats());
 internal static ref Δruntime.MemStats memStats => ref ᏑmemStats.Value;
 
 // InternalBenchmark is an internal type but exported because it is cross-package;

@@ -104,7 +104,7 @@ internal static error checkPub(ж<PublicKey> Ꮡpub) {
     if (pub.E < 2) {
         return errPublicExponentSmall;
     }
-    if (pub.E > 2147483648L - 1) {
+    if (pub.E > (nint)(2147483648L - 1)) {
         return errPublicExponentLarge;
     }
     return default!;
@@ -367,7 +367,7 @@ public static (ж<PrivateKey>, error) GenerateMultiPrimeKey(io.Reader random, ni
         return (default!, errors.New("crypto/rsa: GenerateMultiPrimeKey: nprimes must be >= 2"u8));
     }
     if (bits < 64) {
-        var primeLimit = (float64)(((uint64)1 << (int)((nuint)(bits / nprimes))));
+        var primeLimit = (float64)(((uint64)1).Lsh((nuint)(bits / nprimes)));
         // pi approximates the number of primes less than primeLimit
         var pi = primeLimit / (math.Log(primeLimit) - 1);
         // Generated primes start with 11 (in binary) so we can only

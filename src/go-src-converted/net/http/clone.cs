@@ -122,7 +122,7 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
 internal static ΔHeader cloneOrMakeHeader(ΔHeader hdr) {
     var clone = hdr.Clone();
     if (clone == default!) {
-        clone = new ΔHeader();
+        clone = new ΔHeader(0);
     }
     return clone;
 }

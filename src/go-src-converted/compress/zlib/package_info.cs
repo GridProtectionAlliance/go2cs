@@ -40,6 +40,7 @@ using static go.compress.zlib_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<bufio_package.Reader, go.compress.flate_package.Reader>(Pointer = true)]
 [assembly: GoImplement<go.compress.flate_package.Reader, io_package.Reader>]
+[assembly: GoImplement<reader, go.compress.flate_package.Resetter>(Pointer = true)]
 [assembly: GoImplement<reader, io_package.ReadCloser>(Pointer = true)]
 // </InterfaceImplementations>
 

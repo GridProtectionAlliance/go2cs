@@ -68,7 +68,7 @@ public static ж<CertPool> NewCertPool() {
 // len returns the number of certs in the set.
 // A nil set is a valid empty set.
 internal static nint len(this ж<CertPool> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     if (Ꮡs == nil) {
         return 0;
@@ -95,7 +95,9 @@ internal static nint len(this ж<CertPool> Ꮡs) {
         copy(indexes, v);
         p.Value.byName[k] = indexes;
     }
-    foreach (var (k, _) in s.haveSum) {
+    foreach (var (kᴛ1, _) in s.haveSum) {
+        var k = kᴛ1.Clone();
+
         p.Value.haveSum[k] = true;
     }
     copy((~p).lazyCerts, s.lazyCerts);
@@ -130,7 +132,7 @@ public static (ж<CertPool>, error) SystemCertPool() {
 // findPotentialParents returns the certificates in s which might have signed
 // cert.
 internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
     ref var cert = ref Ꮡcert.Value;
 
     if (Ꮡs == nil) {
@@ -178,7 +180,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
 }
 
 internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
     ref var cert = ref Ꮡcert.Value;
 
     if (Ꮡs == nil) {
@@ -203,6 +205,8 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
 // The rawSubject is Certificate.RawSubject and must be non-empty.
 // The getCert func may be called 0 or more times.
 [GoRecv] internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
+    rawSum224 = rawSum224.Clone();
+
     if (getCert == default!) {
         throw panic("getCert can't be nil");
     }
@@ -279,7 +283,7 @@ public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) {
 
 // Equal reports whether s and other are equal.
 public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
     ref var other = ref Ꮡother.DerefOrNil();
 
     if (Ꮡs == nil || Ꮡother == nil) {
@@ -288,7 +292,9 @@ public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
     if (s.systemPool != other.systemPool || builtin.len(s.haveSum) != builtin.len(other.haveSum)) {
         return false;
     }
-    foreach (var (h, _) in s.haveSum) {
+    foreach (var (kᴛ1, _) in s.haveSum) {
+        var h = kᴛ1.Clone();
+
         if (!other.haveSum[h]) {
             return false;
         }

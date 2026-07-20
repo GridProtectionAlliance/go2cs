@@ -83,7 +83,7 @@ public static (ж<CounterDataReader>, error) NewCounterDataReader(@string fn, io
 internal static bool checkMagic(array<byte> v) {
     v = v.Clone();
 
-    var g = coverage.CovCounterMagic;
+    var g = coverage.CovCounterMagic.Clone();
     return v[0] == g[0] && v[1] == g[1] && v[2] == g[2] && v[3] == g[3];
 }
 
@@ -336,7 +336,7 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
                     return ((uint32)(0), errΔ1);
                 }
                 var b = Ꮡcdr.Value.u8b[0];
-                value |= (uint64)((((uint64)((byte)(b & 0x7F)) << (int)(shift))));
+                value |= (uint64)((((uint64)((byte)(b & 0x7F))).Lsh(shift)));
                 if ((byte)(b & 0x80) == 0) {
                     break;
                 }

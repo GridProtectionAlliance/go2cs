@@ -81,10 +81,10 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
         if (err != default!) {
             return (0, err);
         }
-        r.bits |= ((uint32)x << (int)(r.nBits));
+        r.bits |= ((uint32)x).Lsh(r.nBits);
         r.nBits += 8;
     }
-    var code = (uint16)((uint32)(r.bits & (((uint32)1 << (int)(r.width)) - 1)));
+    var code = (uint16)((uint32)(r.bits & (((uint32)1).Lsh(r.width) - 1)));
     r.bits >>= (int)(r.width);
     r.nBits -= r.width;
     return (code, default!);
@@ -97,10 +97,10 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
         if (err != default!) {
             return (0, err);
         }
-        r.bits |= ((uint32)x << (int)((24 - r.nBits)));
+        r.bits |= ((uint32)x).Lsh((24 - r.nBits));
         r.nBits += 8;
     }
-    var code = (uint16)((r.bits >> (int)((32 - r.width))));
+    var code = (uint16)(r.bits.Rsh((32 - r.width)));
     r.bits <<= (int)(r.width);
     r.nBits -= r.width;
     return (code, default!);
@@ -155,7 +155,7 @@ loop:
         case {} when code == r.clear: {
             r.width = 1 + (nuint)r.litWidth;
             r.hi = r.eof;
-            r.overflow = (uint16)(1 << (int)(r.width));
+            r.overflow = (uint16)(((uint16)1).Lsh(r.width));
             r.last = decoderInvalidCode;
             continue;
             break;
@@ -215,7 +215,7 @@ loop:
                 r.hi--;
             } else {
                 r.width++;
-                r.overflow = (uint16)(1 << (int)(r.width));
+                r.overflow = (uint16)(((uint16)1).Lsh(r.width));
             }
         }
         if (r.o >= flushBuffer) {
@@ -292,10 +292,10 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
     r.r = br;
     r.litWidth = litWidth;
     r.width = 1 + (nuint)litWidth;
-    r.clear = (uint16)((uint16)1 << (int)((nuint)litWidth));
+    r.clear = (uint16)(((uint16)1).Lsh((nuint)litWidth));
     r.eof = (uint16)(r.clear + 1);
     r.hi = (uint16)(r.clear + 1);
-    r.overflow = (uint16)((uint16)1 << (int)(r.width));
+    r.overflow = (uint16)(((uint16)1).Lsh(r.width));
     r.last = decoderInvalidCode;
 }
 

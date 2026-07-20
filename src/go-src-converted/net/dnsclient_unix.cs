@@ -71,7 +71,7 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
                 return (0, default!, default!, errΔ3);
             }
         }
-        dnsmessage.ResourceHeader rh = default!;
+        dnsmessage.ResourceHeader rh = new();
         {
             var errΔ4 = rh.SetEDNS0(maxDNSPacketSize, dnsmessage.RCodeSuccess, false); if (errΔ4 != default!) {
                 return (0, default!, default!, errΔ4);
@@ -446,7 +446,7 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) =>
 
 [GoRecv] internal static bool tryAcquireSema(this ref resolverConfig conf) {
     switch (ᐧ) {
-    case ᐧ: {
+    case ᐧ when conf.ch.ᐸꟷ(new EmptyStruct(), ꟷ): {
         return true;
     }
     default: {

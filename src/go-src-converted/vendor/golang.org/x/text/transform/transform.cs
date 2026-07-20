@@ -622,7 +622,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     }
     // Allocate only once. Note that both dst and src escape when passed to
     // Transform.
-    var buf = new byte[]{}.array();
+    var buf = new byte[]{}.array(256);
     var dst = buf.slice(-1, initialBufSize, initialBufSize);
     var src = buf[(int)(initialBufSize)..(int)(2 * initialBufSize)];
     // The input string s is transformed in multiple chunks (starting with a

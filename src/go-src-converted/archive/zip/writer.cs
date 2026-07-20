@@ -91,9 +91,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
     w.closed = true;
     // write central directory
     var start = w.cw.Value.count;
-    foreach (var (_, vᴛ1) in w.dir) {
-        var h = vᴛ1;
-
+    foreach (var (_, h) in w.dir) {
         array<byte> bufΔ1 = new(46); /* directoryHeaderLen */
         var bΔ1 = ((writeBuf)(bufΔ1[..]));
         bΔ1.uint32((uint32)directoryHeaderSignature);

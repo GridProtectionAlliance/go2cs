@@ -65,7 +65,6 @@ using static go.go.@internal.gccgoimporter_package;
 [assembly: GoImplement<go.go.types_package.TypeName, go.go.types_package.Object>(Pointer = true)]
 [assembly: GoImplement<go.go.types_package.Var, go.go.types_package.Object>(Pointer = true)]
 [assembly: GoImplement<go.go.types_package.ΔSignature, go.go.types_package.ΔType>(Pointer = true)]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReadSeeker>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]

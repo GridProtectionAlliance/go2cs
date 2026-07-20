@@ -826,14 +826,14 @@ public static float64 Seconds(this Duration d) {
 public static float64 Minutes(this Duration d) {
     var min = d / ΔMinute;
     var nsec = d % ΔMinute;
-    return (float64)(int64)min + (float64)(int64)nsec / (60 * 1e9D);
+    return (float64)(int64)min + (float64)(int64)nsec / (60D * 1e9D);
 }
 
 // Hours returns the duration as a floating point number of hours.
 public static float64 Hours(this Duration d) {
     var hour = d / ΔHour;
     var nsec = d % ΔHour;
-    return (float64)(int64)hour + (float64)(int64)nsec / (60 * 60 * 1e9D);
+    return (float64)(int64)hour + (float64)(int64)nsec / (60D * 60D * 1e9D);
 }
 
 // Truncate returns the result of rounding d toward zero to a multiple of m.

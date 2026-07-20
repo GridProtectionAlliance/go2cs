@@ -125,7 +125,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         }
         weightMark[w]++;
         if (w > 0) {
-            weightMask += ((uint32)1 << (int)((w - 1)));
+            weightMask += ((uint32)1).Lsh((uint64)((w - 1)));
         }
     }
     if (weightMask == 0) {
@@ -135,17 +135,17 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     if (tableBits > maxHuffmanBits) {
         return (0, 0, r.makeError(off, "bad Huffman weights"u8));
     }
-    if (builtin.len(table) < (1 << (int)(tableBits))) {
+    if (builtin.len(table) < ((nint)1).Lsh((uint64)(tableBits))) {
         return (0, 0, r.makeError(off, "Huffman table too small"u8));
     }
     // Work out the last weight value, which is omitted because
     // the weights must sum to a power of two.
-    var left = (((uint32)1 << (int)(tableBits))) - weightMask;
+    var left = (((uint32)1).Lsh((uint64)(tableBits))) - weightMask;
     if (left == 0) {
         return (0, 0, r.makeError(off, "bad Huffman weights"u8));
     }
     nint highBit = 31 - bits.LeadingZeros32(left);
-    if (((uint32)1 << (int)(highBit)) != left) {
+    if (((uint32)1).Lsh((uint64)(highBit)) != left) {
         return (0, 0, r.makeError(off, "bad Huffman weights"u8));
     }
     if (count >= 256) {
@@ -163,14 +163,14 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     var next = (uint32)0;
     for (nint i = 0; i < tableBits; i++) {
         var cur = next;
-        next += (weightMark[i + 1] << (int)(i));
+        next += weightMark[i + 1].Lsh((uint64)(i));
         weightMark[i + 1] = cur;
     }
     foreach (var (i, w) in weights[..(int)(count)]) {
         if (w == 0) {
             continue;
         }
-        var length = ((uint32)1 << (int)((w - 1)));
+        var length = ((uint32)1).Lsh((uint64)((w - 1)));
         var tval = (uint16)((uint16)((uint16)i << (int)(8)) | ((uint16)tableBits + 1 - (uint16)w));
         var start = weightMark[w];
         for (var j = (uint32)0; j < length; j++) {

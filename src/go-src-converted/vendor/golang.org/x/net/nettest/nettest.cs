@@ -114,7 +114,7 @@ public static bool TestableNetwork(@string network) {
         }
 
     }
-    if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
+    else if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
         var exprᴛ3 = runtime.GOOS;
         if (exprᴛ3 == "fuchsia"u8 || exprᴛ3 == "hurd"u8 || exprᴛ3 == "js"u8 || exprᴛ3 == "nacl"u8 || exprᴛ3 == "plan9"u8 || exprᴛ3 == "wasip1"u8) {
             return false;
@@ -128,7 +128,7 @@ public static bool TestableNetwork(@string network) {
         }
 
     }
-    if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8) {
+    else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8) {
         var exprᴛ4 = runtime.GOOS;
         if (exprᴛ4 == "android"u8 || exprᴛ4 == "fuchsia"u8 || exprᴛ4 == "hurd"u8 || exprᴛ4 == "ios"u8 || exprᴛ4 == "js"u8 || exprᴛ4 == "nacl"u8 || exprᴛ4 == "plan9"u8 || exprᴛ4 == "wasip1"u8 || exprᴛ4 == "windows"u8) {
             return false;
@@ -138,7 +138,7 @@ public static bool TestableNetwork(@string network) {
         }
 
     }
-    if (exprᴛ1 == "unixpacket"u8) {
+    else if (exprᴛ1 == "unixpacket"u8) {
         var exprᴛ5 = runtime.GOOS;
         if (exprᴛ5 == "aix"u8 || exprᴛ5 == "android"u8 || exprᴛ5 == "fuchsia"u8 || exprᴛ5 == "hurd"u8 || exprᴛ5 == "darwin"u8 || exprᴛ5 == "ios"u8 || exprᴛ5 == "js"u8 || exprᴛ5 == "nacl"u8 || exprᴛ5 == "plan9"u8 || exprᴛ5 == "wasip1"u8 || exprᴛ5 == "windows"u8 || exprᴛ5 == "zos"u8) {
             return false;
@@ -194,17 +194,17 @@ public static (net.Listener, error) NewLocalListener(@string network) {
             return net.Listen("tcp6"u8, "[::1]:0"u8);
         }
     }
-    if (exprᴛ1 == "tcp4"u8) {
+    else if (exprᴛ1 == "tcp4"u8) {
         if (canListenTCP4OnLoopback) {
             return net.Listen("tcp4"u8, "127.0.0.1:0"u8);
         }
     }
-    if (exprᴛ1 == "tcp6"u8) {
+    else if (exprᴛ1 == "tcp6"u8) {
         if (canListenTCP6OnLoopback) {
             return net.Listen("tcp6"u8, "[::1]:0"u8);
         }
     }
-    if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
+    else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
         var (path, err) = LocalPath();
         if (err != default!) {
             return (default!, err);
@@ -234,17 +234,17 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
             return net.ListenPacket("udp6"u8, "[::1]:0"u8);
         }
     }
-    if (exprᴛ1 == "udp4"u8) {
+    else if (exprᴛ1 == "udp4"u8) {
         if (canListenTCP4OnLoopback) {
             return net.ListenPacket("udp4"u8, "127.0.0.1:0"u8);
         }
     }
-    if (exprᴛ1 == "udp6"u8) {
+    else if (exprᴛ1 == "udp6"u8) {
         if (canListenTCP6OnLoopback) {
             return net.ListenPacket("udp6"u8, "[::1]:0"u8);
         }
     }
-    if (exprᴛ1 == "unixgram"u8) {
+    else if (exprᴛ1 == "unixgram"u8) {
         var (path, err) = LocalPath();
         if (err != default!) {
             return (default!, err);
@@ -386,7 +386,7 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
             }
         }
     }
-    if (exprᴛ1 == "ip6"u8) {
+    else if (exprᴛ1 == "ip6"u8) {
         if (ip.IsLoopback()) {
             // addressing scope of the loopback address depends on each implementation
             return (default!, false);
@@ -397,7 +397,7 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
             }
         }
     }
-    { /* default: */
+    else { /* default: */
         {
             var ipΔ7 = ip.To4(); if (ipΔ7 != default!) {
                 return (ipΔ7, true);

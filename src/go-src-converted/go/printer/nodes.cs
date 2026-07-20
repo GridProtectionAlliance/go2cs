@@ -110,7 +110,7 @@ internal static void identList(this ж<printer> Ꮡp, slice<ж<ast.Ident>> list,
     // convert into an expression list so we can re-use exprList formatting
     var xlist = new slice<ast.Expr>(len(list));
     foreach (var (i, x) in list) {
-        xlist[i] = new ast_IdentжExpr(x);
+        xlist[i] = new ast.IdentжExpr(x);
     }
     exprListMode mode = default!;
     if (!indent) {
@@ -540,7 +540,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
                         // no comments so no need for comma position
                         Ꮡp.print(token.COMMA, blank);
                     }
-                    Ꮡp.expr(new ast_IdentжExpr(x));
+                    Ꮡp.expr(new ast.IdentжExpr(x));
                 }
                 if (len((~f).Names) > 0) {
                     Ꮡp.print(blank);
@@ -551,7 +551,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
                 if (len((~f).Names) > 0){
                     var name = (~f).Names[0];
                     // method name
-                    Ꮡp.expr(new ast_IdentжExpr(name));
+                    Ꮡp.expr(new ast.IdentжExpr(name));
                     Ꮡp.signature((~f).Type._<ж<ast.FuncType>>());
                 } else {
                     // don't print "func"
@@ -601,7 +601,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
                     Ꮡp.print(sep);
                 }
                 Ꮡp.print(sep);
-                Ꮡp.expr(new ast_BasicLitжExpr((~f).Tag));
+                Ꮡp.expr(new ast.BasicLitжExpr((~f).Tag));
                 extraTabs = 0;
             }
             if ((~f).Comment != nil) {
@@ -642,7 +642,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
             p.recordLine(Ꮡline);
             if (name != nil){
                 // method
-                Ꮡp.expr(new ast_IdentжExpr(name));
+                Ꮡp.expr(new ast.IdentжExpr(name));
                 Ꮡp.signature((~f).Type._<ж<ast.FuncType>>());
                 // don't print "func"
                 prev = default!;
@@ -811,7 +811,7 @@ internal static void binaryExpr(this ж<printer> Ꮡp, ж<ast.BinaryExpr> Ꮡx, 
         // Note: The parser inserts an ast.ParenExpr node; thus this case
         //       can only occur if the AST is created in a different way.
         Ꮡp.print(token.LPAREN);
-        Ꮡp.expr0(new ast_BinaryExprжExpr(Ꮡx), reduceDepth(depth));
+        Ꮡp.expr0(new ast.BinaryExprжExpr(Ꮡx), reduceDepth(depth));
         // parentheses undo one level of depth
         Ꮡp.print(token.RPAREN);
         return;
@@ -898,7 +898,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         if (prec < prec1){
             // parenthesis needed
             Ꮡp.print(token.LPAREN);
-            Ꮡp.expr(new ast_UnaryExprжExpr(x));
+            Ꮡp.expr(new ast.UnaryExprжExpr(x));
             Ꮡp.print(token.RPAREN);
         } else {
             // no parenthesis needed
@@ -1209,13 +1209,13 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
     else if (exprᴛ1 == "0o"u8) {
         return Ꮡlit;
     }
-    if (exprᴛ1 == "0B"u8) {
+    else if (exprᴛ1 == "0B"u8) {
         x = "0b" + x[2..];
     }
     else if (exprᴛ1 == "0b"u8) {
         return Ꮡlit;
     }
-    { /* default: */
+    else { /* default: */
         do {
             {
                 nint i = strings.LastIndexByte(x, (rune)'E'); if (i >= 0) {
@@ -1478,7 +1478,7 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
     }
     case ж<ast.LabeledStmt> s: {
         Ꮡp.print(unindent);
-        Ꮡp.expr(new ast_IdentжExpr((~s).Label));
+        Ꮡp.expr(new ast.IdentжExpr((~s).Label));
         p.setPos((~s).Colon);
         Ꮡp.print(token.COLON, // nothing to do
  // a "correcting" unindent immediately following a line break
@@ -1535,12 +1535,12 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
     }
     case ж<ast.GoStmt> s: {
         Ꮡp.print(token.GO, blank);
-        Ꮡp.expr(new ast_CallExprжExpr((~s).Call));
+        Ꮡp.expr(new ast.CallExprжExpr((~s).Call));
         break;
     }
     case ж<ast.DeferStmt> s: {
         Ꮡp.print(token.DEFER, blank);
-        Ꮡp.expr(new ast_CallExprжExpr((~s).Call));
+        Ꮡp.expr(new ast.CallExprжExpr((~s).Call));
         break;
     }
     case ж<ast.ReturnStmt> s: {
@@ -1568,7 +1568,7 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
         Ꮡp.print((~s).Tok);
         if ((~s).Label != nil) {
             Ꮡp.print(blank);
-            Ꮡp.expr(new ast_IdentжExpr((~s).Label));
+            Ꮡp.expr(new ast.IdentжExpr((~s).Label));
         }
         break;
     }
@@ -1839,10 +1839,10 @@ internal static void spec(this ж<printer> Ꮡp, ast.Spec spec, nint n, bool doI
     case ж<ast.ImportSpec> s: {
         Ꮡp.setComment((~s).Doc);
         if ((~s).Name != nil) {
-            Ꮡp.expr(new ast_IdentжExpr((~s).Name));
+            Ꮡp.expr(new ast.IdentжExpr((~s).Name));
             Ꮡp.print(blank);
         }
-        Ꮡp.expr(new ast_BasicLitжExpr(sanitizeImportPath((~s).Path)));
+        Ꮡp.expr(new ast.BasicLitжExpr(sanitizeImportPath((~s).Path)));
         Ꮡp.setComment((~s).Comment);
         p.setPos((~s).EndPos);
         break;
@@ -1867,7 +1867,7 @@ internal static void spec(this ж<printer> Ꮡp, ast.Spec spec, nint n, bool doI
     }
     case ж<ast.TypeSpec> s: {
         Ꮡp.setComment((~s).Doc);
-        Ꮡp.expr(new ast_IdentжExpr((~s).Name));
+        Ꮡp.expr(new ast.IdentжExpr((~s).Name));
         if ((~s).TypeParams != nil) {
             Ꮡp.parameters((~s).TypeParams, typeTParam);
         }
@@ -2111,7 +2111,7 @@ internal static void funcDecl(this ж<printer> Ꮡp, ж<ast.FuncDecl> Ꮡd) {
         // method: print receiver
         Ꮡp.print(blank);
     }
-    Ꮡp.expr(new ast_IdentжExpr(d.Name));
+    Ꮡp.expr(new ast.IdentжExpr(d.Name));
     Ꮡp.signature(d.Type);
     Ꮡp.funcBody(p.distanceFrom(d.Pos(), startCol), vtab, d.Body);
 }
@@ -2194,7 +2194,7 @@ internal static void @file(this ж<printer> Ꮡp, ж<ast.File> Ꮡsrc) {
     Ꮡp.setComment(src.Doc);
     p.setPos(src.Pos());
     Ꮡp.print(token.PACKAGE, blank);
-    Ꮡp.expr(new ast_IdentжExpr(src.Name));
+    Ꮡp.expr(new ast.IdentжExpr(src.Name));
     Ꮡp.declList(src.Decls);
     Ꮡp.print(newline);
 }

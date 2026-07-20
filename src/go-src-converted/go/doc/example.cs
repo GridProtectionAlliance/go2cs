@@ -189,12 +189,12 @@ internal static ж<ast.File> playExample(ж<ast.File> Ꮡfile, ж<ast.FuncDecl> 
         switch (decl.type()) {
         case ж<ast.FuncDecl> d: {
             if ((~d).Recv == nil){
-                topDecls[(~(~d).Name).Obj] = new ast_FuncDeclжDecl(d);
+                topDecls[(~(~d).Name).Obj] = new ast.FuncDeclжDecl(d);
             } else {
                 if (len((~(~d).Recv).List) == 1) {
                     var t = (~(~d).Recv).List[0].Value.Type;
                     var (tname, _) = baseTypeName(t);
-                    typMethods[tname] = append(typMethods[tname], (ast.Decl)(new ast_FuncDeclжDecl(d)));
+                    typMethods[tname] = append(typMethods[tname], (ast.Decl)(new ast.FuncDeclжDecl(d)));
                 }
             }
             break;
@@ -203,12 +203,12 @@ internal static ж<ast.File> playExample(ж<ast.File> Ꮡfile, ж<ast.FuncDecl> 
             foreach (var (_, spec) in (~d).Specs) {
                 switch (spec.type()) {
                 case ж<ast.TypeSpec> s: {
-                    topDecls[(~(~s).Name).Obj] = new ast_GenDeclжDecl(d);
+                    topDecls[(~(~s).Name).Obj] = new ast.GenDeclжDecl(d);
                     break;
                 }
                 case ж<ast.ValueSpec> s: {
                     foreach (var (_, name) in (~s).Names) {
-                        topDecls[(~name).Obj] = new ast_GenDeclжDecl(d);
+                        topDecls[(~name).Obj] = new ast.GenDeclжDecl(d);
                     }
                     break;
                 }}
@@ -257,7 +257,7 @@ internal static ж<ast.File> playExample(ж<ast.File> Ꮡfile, ж<ast.FuncDecl> 
             n = s.Value.Name.Value.Name;
             var exprᴛ1 = n;
             if (exprᴛ1 == "_"u8) {
-                blankImports = append(blankImports, (ast.Spec)(new ast_ImportSpecжSpec(s)));
+                blankImports = append(blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
             }
             else if (exprᴛ1 == "."u8) {
@@ -274,7 +274,7 @@ internal static ж<ast.File> playExample(ж<ast.File> Ꮡfile, ж<ast.FuncDecl> 
             pathΔ1 = (~s).Path.Value;
             spec.Path = ᏑpathΔ1;
             spec.Path.Value.ValuePos = groupStart(Ꮡspec);
-            namedImports = append(namedImports, (ast.Spec)(new ast_ImportSpecжSpec(Ꮡspec)));
+            namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
             delete(unresolved, n);
         }
     }
@@ -333,9 +333,9 @@ internal static ж<ast.File> playExample(ж<ast.File> Ꮡfile, ж<ast.FuncDecl> 
         Body: body
     ));
     var decls = new slice<ast.Decl>(0, 2 + len(depDecls));
-    decls = append(decls, (ast.Decl)(new ast_GenDeclжDecl(importDecl)));
+    decls = append(decls, (ast.Decl)(new ast.GenDeclжDecl(importDecl)));
     decls = append(decls, depDecls.ꓸꓸꓸ);
-    decls = append(decls, (ast.Decl)(new ast_FuncDeclжDecl(funcDecl)));
+    decls = append(decls, (ast.Decl)(new ast.FuncDeclжDecl(funcDecl)));
     slices.SortFunc(decls, (ast.Decl a, ast.Decl b) => cmp.Compare(a.Pos(), b.Pos()));
     slices.SortFunc(comments, (ж<ast.CommentGroup> a, ж<ast.CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
     // Synthesize file.
@@ -463,7 +463,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     foreach (var (_, d) in depDecls) {
         switch (d.type()) {
         case ж<ast.FuncDecl> dΔ1: {
-            ds = append(ds, (ast.Decl)(new ast_FuncDeclжDecl(dΔ1)));
+            ds = append(ds, (ast.Decl)(new ast.FuncDeclжDecl(dΔ1)));
             break;
         }
         case ж<ast.GenDecl> dΔ1: {
@@ -475,13 +475,13 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                 switch (s.type()) {
                 case ж<ast.TypeSpec> sΔ1: {
                     if (usedObjs[(~(~sΔ1).Name).Obj]) {
-                        specs = append(specs, (ast.Spec)(new ast_TypeSpecжSpec(sΔ1)));
+                        specs = append(specs, (ast.Spec)(new ast.TypeSpecжSpec(sΔ1)));
                     }
                     break;
                 }
                 case ж<ast.ValueSpec> sΔ1: {
                     if (!containsIota) {
-                        containsIota = hasIota(new ast_ValueSpecжSpec(sΔ1));
+                        containsIota = hasIota(new ast.ValueSpecжSpec(sΔ1));
                     }
                     if (len((~sΔ1).Names) > 1 && len((~sΔ1).Values) == 1) {
                         // A ValueSpec may have multiple names (e.g. "var a, b int").
@@ -489,7 +489,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                         // Exception: the multiple names have a single initializer (which
                         // would be a function call with multiple return values). In that
                         // case, keep everything.
-                        specs = append(specs, (ast.Spec)(new ast_ValueSpecжSpec(sΔ1)));
+                        specs = append(specs, (ast.Spec)(new ast.ValueSpecжSpec(sΔ1)));
                         continue;
                     }
                     ref var ns = ref heap<ast.ValueSpec>(out var Ꮡns);
@@ -505,7 +505,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                         }
                     }
                     if (len(ns.Names) > 0) {
-                        specs = append(specs, (ast.Spec)(new ast_ValueSpecжSpec(Ꮡns)));
+                        specs = append(specs, (ast.Spec)(new ast.ValueSpecжSpec(Ꮡns)));
                     }
                     break;
                 }}
@@ -513,7 +513,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
             if (len(specs) > 0) {
                 // Constant with iota? Keep it all.
                 if ((~dΔ1).Tok == token.CONST && containsIota){
-                    ds = append(ds, (ast.Decl)(new ast_GenDeclжDecl(dΔ1)));
+                    ds = append(ds, (ast.Decl)(new ast.GenDeclжDecl(dΔ1)));
                 } else {
                     // Synthesize a GenDecl with just the Specs we need.
                     ref var nd = ref heap<ast.GenDecl>(out var Ꮡnd);
@@ -524,7 +524,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                         // Remove grouping parens if there is only one spec.
                         nd.Lparen = 0;
                     }
-                    ds = append(ds, (ast.Decl)(new ast_GenDeclжDecl(Ꮡnd)));
+                    ds = append(ds, (ast.Decl)(new ast.GenDeclжDecl(Ꮡnd)));
                 }
             }
             break;
@@ -606,7 +606,7 @@ internal static ж<ast.File> playExampleFile(ж<ast.File> Ꮡfile) {
                 newF = fΔ1.Value;
                 newF.Name = ast.NewIdent("main"u8);
                 (newF.Body, comments) = stripOutputComment((~fΔ1).Body, comments);
-                d = new ast_FuncDeclжDecl(ᏑnewF);
+                d = new ast.FuncDeclжDecl(ᏑnewF);
             }
         }
         decls = append(decls, d);
@@ -711,9 +711,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
         }
     }
     // Group each example with the associated func, type, or method.
-    foreach (var (_, vᴛ1) in examples) {
-        var ex = vᴛ1;
-
+    foreach (var (_, ex) in examples) {
         // Consider all possible split points for the suffix
         // by starting at the end of string (no suffix case),
         // then trying all positions that contain a '_' character.

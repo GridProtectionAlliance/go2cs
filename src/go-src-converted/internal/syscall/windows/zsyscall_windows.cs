@@ -106,8 +106,7 @@ internal static (uint32 ret, error err) adjustTokenPrivileges(syscall.Token toke
 public static error /*err*/ DuplicateTokenEx(syscall.Token hExistingToken, uint32 dwDesiredAccess, ж<syscall.SecurityAttributes> ᏑlpTokenAttributes, uint32 impersonationLevel, TokenType tokenType, ж<syscall.Token> ᏑphNewToken) {
     error err = default!;
 
-    ref var phNewToken = ref ᏑphNewToken.Value;
-    var (r1, _, e1) = syscall.Syscall6(procDuplicateTokenEx.Addr(), 6, (uintptr)hExistingToken, (uintptr)dwDesiredAccess, (uintptr)new @unsafe.Pointer(ᏑlpTokenAttributes), (uintptr)impersonationLevel, (uintptr)(uint32)tokenType, (uintptr)@unsafe.Pointer.FromRef(ref phNewToken));
+    var (r1, _, e1) = syscall.Syscall6(procDuplicateTokenEx.Addr(), 6, (uintptr)hExistingToken, (uintptr)dwDesiredAccess, (uintptr)new @unsafe.Pointer(ᏑlpTokenAttributes), (uintptr)impersonationLevel, (uintptr)(uint32)tokenType, (uintptr)new @unsafe.Pointer(ᏑphNewToken));
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -161,12 +160,11 @@ public static (syscallꓸHandle handle, error err) OpenService(syscallꓸHandle 
 public static error /*err*/ OpenThreadToken(syscallꓸHandle h, uint32 access, bool openasself, ж<syscall.Token> Ꮡtoken) {
     error err = default!;
 
-    ref var token = ref Ꮡtoken.Value;
     uint32 _p0 = default!;
     if (openasself) {
         _p0 = 1;
     }
-    var (r1, _, e1) = syscall.Syscall6(procOpenThreadToken.Addr(), 4, (uintptr)h, (uintptr)access, (uintptr)_p0, (uintptr)@unsafe.Pointer.FromRef(ref token), 0, 0);
+    var (r1, _, e1) = syscall.Syscall6(procOpenThreadToken.Addr(), 4, (uintptr)h, (uintptr)access, (uintptr)_p0, (uintptr)new @unsafe.Pointer(Ꮡtoken), 0, 0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }
@@ -398,8 +396,7 @@ public static (int32 nwrite, error err) MultiByteToWideChar(uint32 codePage, uin
 public static uintptr /*ret*/ RtlLookupFunctionEntry(uintptr pc, ж<uintptr> ᏑbaseAddress, ж<byte> Ꮡtable) {
     uintptr ret = default!;
 
-    ref var baseAddress = ref ᏑbaseAddress.Value;
-    var (r0, _, _) = syscall.Syscall(procRtlLookupFunctionEntry.Addr(), 3, (uintptr)pc, (uintptr)@unsafe.Pointer.FromRef(ref baseAddress), (uintptr)new @unsafe.Pointer(Ꮡtable));
+    var (r0, _, _) = syscall.Syscall(procRtlLookupFunctionEntry.Addr(), 3, (uintptr)pc, (uintptr)new @unsafe.Pointer(ᏑbaseAddress), (uintptr)new @unsafe.Pointer(Ꮡtable));
     ret = (uintptr)r0;
     return ret;
 }
@@ -407,9 +404,7 @@ public static uintptr /*ret*/ RtlLookupFunctionEntry(uintptr pc, ж<uintptr> Ꮡ
 public static uintptr /*ret*/ RtlVirtualUnwind(uint32 handlerType, uintptr baseAddress, uintptr pc, uintptr entry, uintptr ctxt, ж<uintptr> Ꮡdata, ж<uintptr> Ꮡframe, ж<byte> Ꮡctxptrs) {
     uintptr ret = default!;
 
-    ref var data = ref Ꮡdata.Value;
-    ref var frame = ref Ꮡframe.Value;
-    var (r0, _, _) = syscall.Syscall9(procRtlVirtualUnwind.Addr(), 8, (uintptr)handlerType, (uintptr)baseAddress, (uintptr)pc, (uintptr)entry, (uintptr)ctxt, (uintptr)@unsafe.Pointer.FromRef(ref data), (uintptr)@unsafe.Pointer.FromRef(ref frame), (uintptr)new @unsafe.Pointer(Ꮡctxptrs), 0);
+    var (r0, _, _) = syscall.Syscall9(procRtlVirtualUnwind.Addr(), 8, (uintptr)handlerType, (uintptr)baseAddress, (uintptr)pc, (uintptr)entry, (uintptr)ctxt, (uintptr)new @unsafe.Pointer(Ꮡdata), (uintptr)new @unsafe.Pointer(Ꮡframe), (uintptr)new @unsafe.Pointer(Ꮡctxptrs), 0);
     ret = (uintptr)r0;
     return ret;
 }
@@ -467,8 +462,7 @@ public static error /*neterr*/ NetShareDel(ж<uint16> ᏑserverName, ж<uint16> 
 public static error /*neterr*/ NetUserGetLocalGroups(ж<uint16> ᏑserverName, ж<uint16> ᏑuserName, uint32 level, uint32 flags, ж<ж<byte>> Ꮡbuf, uint32 prefMaxLen, ж<uint32> ᏑentriesRead, ж<uint32> ᏑtotalEntries) {
     error neterr = default!;
 
-    ref var buf = ref Ꮡbuf.Value;
-    var (r0, _, _) = syscall.Syscall9(procNetUserGetLocalGroups.Addr(), 8, (uintptr)new @unsafe.Pointer(ᏑserverName), (uintptr)new @unsafe.Pointer(ᏑuserName), (uintptr)level, (uintptr)flags, (uintptr)@unsafe.Pointer.FromRef(ref buf), (uintptr)prefMaxLen, (uintptr)new @unsafe.Pointer(ᏑentriesRead), (uintptr)new @unsafe.Pointer(ᏑtotalEntries), 0);
+    var (r0, _, _) = syscall.Syscall9(procNetUserGetLocalGroups.Addr(), 8, (uintptr)new @unsafe.Pointer(ᏑserverName), (uintptr)new @unsafe.Pointer(ᏑuserName), (uintptr)level, (uintptr)flags, (uintptr)new @unsafe.Pointer(Ꮡbuf), (uintptr)prefMaxLen, (uintptr)new @unsafe.Pointer(ᏑentriesRead), (uintptr)new @unsafe.Pointer(ᏑtotalEntries), 0);
     if (r0 != 0) {
         neterr = ((syscall.Errno)r0);
     }
@@ -493,12 +487,11 @@ public static error /*err*/ GetProcessMemoryInfo(syscallꓸHandle handle, ж<PRO
 public static error /*err*/ CreateEnvironmentBlock(ж<ж<uint16>> Ꮡblock, syscall.Token token, bool inheritExisting) {
     error err = default!;
 
-    ref var block = ref Ꮡblock.Value;
     uint32 _p0 = default!;
     if (inheritExisting) {
         _p0 = 1;
     }
-    var (r1, _, e1) = syscall.Syscall(procCreateEnvironmentBlock.Addr(), 3, (uintptr)@unsafe.Pointer.FromRef(ref block), (uintptr)token, (uintptr)_p0);
+    var (r1, _, e1) = syscall.Syscall(procCreateEnvironmentBlock.Addr(), 3, (uintptr)new @unsafe.Pointer(Ꮡblock), (uintptr)token, (uintptr)_p0);
     if (r1 == 0) {
         err = errnoErr(e1);
     }

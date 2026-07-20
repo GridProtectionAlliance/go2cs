@@ -87,9 +87,7 @@ internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, boo
 
 internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, bool> f) {
     nint w = 0;
-    foreach (var (_, vᴛ1) in a) {
-        var td = vᴛ1;
-
+    foreach (var (_, td) in a) {
         nint n = 0;
         // number of matches
         if (matchDecl((~td).Decl, f)){

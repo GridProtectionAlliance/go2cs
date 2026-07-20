@@ -221,7 +221,7 @@ internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
     else if (exprᴛ1 == reflect.Invalid) {
         return (0, fmt.Errorf("cannot index slice/array with nil"u8));
     }
-    { /* default: */
+    else { /* default: */
         return (0, fmt.Errorf("cannot index slice/array with type %s"u8, index.Type()));
     }
 
@@ -318,7 +318,7 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
     }
 
     // set default values for cases item[:], item[i:].
-    var idx = new nint[]{0, item.Len()}.array();
+    var idx = new nint[]{0, item.Len()}.array(3);
     foreach (var (i, index) in indexes) {
         var (x, err) = indexArg(index, cap);
         if (err != default!) {

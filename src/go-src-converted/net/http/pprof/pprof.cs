@@ -328,7 +328,7 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
     }
     var ts = p1.Value.TimeNanos;
     var dur = (~p1).TimeNanos - (~p0).TimeNanos;
-    p0.Scale(-1);
+    p0.Scale(-1D);
     (p1, err) = profile.Merge(new ж<profile.Profile>[]{p0, p1}.slice());
     if (err != default!) {
         serveError(w, http.StatusInternalServerError, "failed to compute delta"u8);

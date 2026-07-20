@@ -148,7 +148,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     //
     // We must use a lookup on identity rather than a simple map[*Named]bool as
     // instantiated types may be identical but not equal.
-    instanceLookup seen = default!;
+    instanceLookup seen = new();
     // search current depth
     while (len(current) > 0) {
         slice<embeddedType> next = default!;                          // embedded types found at current depth
@@ -378,14 +378,14 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
     ж<Func> method = default!;
     bool wrongType = default!;
 
-    ref var check = ref Ꮡcheck.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var cause = ref Ꮡcause.DerefOrNil();
     var methods = under(T)._<ж<Interface>>().typeSet().Value.methods;
     // T must be an interface
     if (len(methods) == 0) {
         return (default!, false);
     }
-    const nint ok = /* iota */ 0;
+    const nint ok = iota;
     const nint notFound = 1;
     const nint wrongName = 2;
     const nint unexported = 3;

@@ -121,7 +121,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         codes[i].value = pairs[i].value;
         // We need to 'increment' the code, which means treating |code|
         // like a |length| bit number.
-        code += ((uint32)1 << (int)((32 - length)));
+        code += ((uint32)1).Lsh((uint64)((32 - length)));
     }
     // Now we can sort by the code so that the left half of each branch are
     // grouped together, recursively.
@@ -152,7 +152,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     error err = default!;
 
     ref var t = ref Ꮡt.Value;
-    var test = ((uint32)1 << (int)((31 - level)));
+    var test = ((uint32)1).Lsh((uint64)((31 - level)));
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
     foreach (var (i, code) in codes) {

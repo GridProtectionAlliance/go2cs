@@ -356,7 +356,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
                 return ("", 0, 0, new DecodeError("line", r.buf.off, b1.err.Error()));
             }
         }
-        if (exprᴛ1 == formStrpSup) {
+        else if (exprᴛ1 == formStrpSup) {
             if (dwarf64){
                 // Supplemental sections not yet supported.
                 r.buf.uint64();
@@ -600,7 +600,7 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
             return true;
         }
     }
-    if (exprᴛ1 == lnsCopy) {
+    else if (exprᴛ1 == lnsCopy) {
         goto emit;
     }
     else if (exprᴛ1 == lnsAdvancePC) {

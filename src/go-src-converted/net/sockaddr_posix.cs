@@ -43,7 +43,7 @@ partial class net_package {
         }
 
     }
-    if (exprᴛ1 == syscall.AF_UNIX) {
+    else if (exprᴛ1 == syscall.AF_UNIX) {
         var exprᴛ3 = fd.sotype;
         if (exprᴛ3 == syscall.SOCK_STREAM) {
             return sockaddrToUnix;

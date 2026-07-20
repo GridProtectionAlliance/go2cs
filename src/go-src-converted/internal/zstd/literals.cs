@@ -185,13 +185,13 @@ internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr,
     }
     var huffTable = r.huffmanTable;
     var huffBits = (uint32)r.huffmanTableBits;
-    var huffMask = (((uint32)1 << (int)(huffBits))) - 1;
+    var huffMask = (((uint32)1).Lsh((uint64)(huffBits))) - 1;
     for (nint i = 0; i < regeneratedSize; i++) {
         if (!rbr.fetch((uint8)huffBits)) {
             return (default!, rbr.makeError("literals Huffman stream out of bits"u8));
         }
         uint16 t = default!;
-        var idx = (uint32)(((rbr.bits >> (int)((rbr.cnt - huffBits)))) & huffMask);
+        var idx = (uint32)((rbr.bits.Rsh((uint64)((rbr.cnt - huffBits)))) & huffMask);
         t = huffTable[(nint)(idx)];
         outbuf = append(outbuf, (byte)((t >> (int)(8))));
         rbr.cnt -= (uint32)((uint16)(t & 0xff));
@@ -268,7 +268,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
     outbuf = append(outbuf, new slice<byte>(regeneratedSize).ꓸꓸꓸ);
     var huffTable = r.huffmanTable;
     var huffBits = (uint32)r.huffmanTableBits;
-    var huffMask = (((uint32)1 << (int)(huffBits))) - 1;
+    var huffMask = (((uint32)1).Lsh((uint64)(huffBits))) - 1;
     for (nint i = 0; i < regeneratedStreamSize; i++) {
         var use4 = i < regeneratedStreamSize4;
         var huffTableʗ1 = huffTable;
@@ -276,7 +276,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
             if (!rbr.fetch((uint8)huffBits)) {
                 return (0, rbr.makeError("literals Huffman stream out of bits"u8));
             }
-            var idx = (uint32)((((~rbr).bits >> (int)(((~rbr).cnt - huffBits)))) & huffMask);
+            var idx = (uint32)(((~rbr).bits.Rsh((uint64)(((~rbr).cnt - huffBits)))) & huffMask);
             return (huffTableʗ1[(nint)(idx)], default!);
         };
         var (t1, errΔ1) = fetchHuff(Ꮡrbr1);

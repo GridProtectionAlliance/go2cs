@@ -711,7 +711,7 @@ internal static bool illegalClientHelloChange(ж<clientHelloMsg> Ꮡch, ж<clien
         return c.sendAlert(alertInternalError);
     }
     var signed = signedMessage(sigHash, serverSignatureContext, hs.transcript);
-    var signOpts = ((crypto.SignerOpts)new crypto_HashᴠSignerOpts(sigHash));
+    var signOpts = ((crypto.SignerOpts)sigHash);
     if (sigType == signatureRSAPSS) {
         signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
     }

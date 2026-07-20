@@ -356,7 +356,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     if (imp.Name != nil){
         obj = info.Defs[imp.Name];
     } else {
-        obj = info.Implicits[new ast_ImportSpecжNode(Ꮡimp)];
+        obj = info.Implicits[new ast.ImportSpecжNode(Ꮡimp)];
     }
     var (pkgname, _) = obj._<ж<PkgName>>(ᐧ);
     return pkgname;

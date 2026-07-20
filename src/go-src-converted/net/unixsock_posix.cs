@@ -39,9 +39,9 @@ internal static (ж<netFD>, error) unixSocket(context.Context ctx, @string net, 
             return (default!, errMissingAddress);
         }
     }
-    if (exprᴛ2 == "listen"u8) {
+    else if (exprᴛ2 == "listen"u8) {
     }
-    { /* default: */
+    else { /* default: */
         return (default!, errors.New("unknown mode: "u8 + mode));
     }
 
@@ -101,7 +101,7 @@ internal static @string sotypeToNet(nint sotype) {
 }
 
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.DerefOrNil();
 
     if (Ꮡa == nil) {
         return (default!, default!);

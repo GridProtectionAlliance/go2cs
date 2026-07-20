@@ -57,7 +57,7 @@ public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> 
             fn: code,
             stack: abid.stackPtrs,
             argLen: abid.stackCallArgsSize,
-            regPtrs: abid.inRegPtrs
+            regPtrs: abid.inRegPtrs.Clone()
         ),
         ftyp: ftyp,
         fn: fn
@@ -107,7 +107,7 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
             fn: code,
             stack: abid.stackPtrs,
             argLen: abid.stackCallArgsSize,
-            regPtrs: abid.inRegPtrs
+            regPtrs: abid.inRegPtrs.Clone()
         ),
         method: ((nint)(uintptr)v.flag >> (int)(flagMethodShift)),
         rcvr: rcvr

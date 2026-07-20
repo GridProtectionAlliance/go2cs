@@ -649,7 +649,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (rune)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
-    runtime.MemProfileRecord total = default!;
+    runtime.MemProfileRecord total = new();
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
         total.AllocBytes += r.Value.AllocBytes;

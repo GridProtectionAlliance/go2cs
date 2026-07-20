@@ -42,7 +42,7 @@ public static readonly Mode SkipFuncCheck = 2;       // do not check that functi
 
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
 public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt == nil) {
         return default!;
@@ -219,7 +219,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 
 // recover is the handler that turns panics into returns from the top level of Parse.
 internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) => func((defer, recover) => {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
     ref var errp = ref Ꮡerrp.Value;
 
     var e = recover();

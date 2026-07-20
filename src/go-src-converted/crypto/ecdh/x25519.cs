@@ -65,7 +65,7 @@ internal static ж<ΔPublicKey> privateKeyToPublicKey(this ж<x25519Curve> Ꮡc,
         curve: key.curve,
         publicKey: new slice<byte>(x25519PublicKeySize)
     ));
-    var x25519Basepoint = new byte[]{9}.array();
+    var x25519Basepoint = new byte[]{9}.array(32);
     x25519ScalarMult((~k).publicKey, key.privateKey, x25519Basepoint[..]);
     return k;
 }
@@ -111,7 +111,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
     Ꮡz3.One();
     nint swap = 0;
     for (nint pos = 254; pos >= 0; pos--) {
-        var b = (byte)((e[pos / 8] >> (int)((nuint)((nint)(pos & 7)))));
+        var b = (byte)(e[pos / 8].Rsh((nuint)((nint)(pos & 7))));
         b &= (byte)(1);
         swap ^= (nint)((nint)b);
         x2.Swap(Ꮡx3, swap);

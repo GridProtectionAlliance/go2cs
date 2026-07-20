@@ -236,7 +236,7 @@ public static bool Supports(this Goarm64Features g, @string s) {
     } else 
     if (g_major == (rune)'9'){
         // v9.0 diverged from v8.5. This means we should compare with g_minor increased by five.
-        return minor <= g_minor + 5;
+        return minor <= (byte)(g_minor + 5);
     } else {
         return false;
     }

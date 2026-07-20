@@ -136,7 +136,7 @@ internal static array<nint> unzig = new nint[]{
     internal uint16 eobRun; // End-of-Band run, specified in section G.1.2.2.
     internal array<component> comp = new(maxComponents);
     internal array<slice<block>> progCoeffs = new(maxComponents); // Saved state between progressive-mode scans.
-    internal array<array<huffman>> huff = new(maxTc + 1);
+    internal array<array<huffman>> huff = new(maxTc + 1, () => new(4, () => new()));
     internal array<block> quant = new(maxTq + 1); // Quantization tables, in zig-zag order.
     internal array<byte> tmp = new(2 * blockSize);
 }
@@ -647,7 +647,7 @@ break_loop:;
                 return (default!, err);
             }
         }
-        if (exprᴛ1 == dhtMarker) {
+        else if (exprᴛ1 == dhtMarker) {
             if (configOnly){
                 err = d.ignore(n);
             } else {
@@ -821,14 +821,14 @@ break_loop:;
 
 // Decode reads a JPEG image from r and returns it as an [image.Image].
 public static (image.Image, error) Decode(io.Reader r) {
-    decoder d = default!;
+    decoder d = new();
     return d.decode(r, false);
 }
 
 // DecodeConfig returns the color model and dimensions of a JPEG image without
 // decoding the entire image.
 public static (image.Config, error) DecodeConfig(io.Reader r) {
-    decoder d = default!;
+    decoder d = new();
     {
         var (_, err) = d.decode(r, true); if (err != default!) {
             return (new image.Config(nil), err);

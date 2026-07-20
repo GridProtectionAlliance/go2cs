@@ -144,7 +144,7 @@ public static bool Stop(this ж<Timer> Ꮡt) {
 // in Go 1.27 or later.
 public static ж<Timer> NewTimer(Duration d) {
     var c = new channel<Time>(1);
-    var t = ((ж<Timer>)newTimer(when(d), 0, sendTime, c, (uintptr)syncTimer(c)));
+    var t = newTimer(when(d), 0, sendTime, c, (uintptr)syncTimer(c));
     t.Value.C = c;
     return t;
 }
@@ -188,7 +188,7 @@ internal static void sendTime(any c, uintptr seq, int64 delta) {
     // the channel. Subtract delta to go back to the old time that we
     // used to send.
     switch (ᐧ) {
-    case ᐧ: {
+    case ᐧ when c._<channel<Time>>().ᐸꟷ(Now().Add(((Duration)(-delta))), ꟷ): {
         break;
     }
     default: {
@@ -215,7 +215,7 @@ public static /*<-*/channel<Time> After(Duration d) {
 // be used to cancel the call using its Stop method.
 // The returned Timer's C field is not used and will be nil.
 public static ж<Timer> AfterFunc(Duration d, Action f) {
-    return ((ж<Timer>)newTimer(when(d), 0, goFunc, f, nil));
+    return newTimer(when(d), 0, goFunc, f, nil);
 }
 
 internal static void goFunc(any arg, uintptr seq, int64 delta) {

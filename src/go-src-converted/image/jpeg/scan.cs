@@ -231,13 +231,13 @@ partial class jpeg_package {
                     }
                     // Load the previous partially decoded coefficients, if applicable.
                     if (d.progressive){
-                        b = d.progCoeffs[compIndex][by * mxx * hi + bx];
+                        b = d.progCoeffs[compIndex][by * mxx * hi + bx].Clone();
                     } else {
                         b = new block(new int32[64].array());
                     }
                     if (ah != 0){
                         {
-                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable][scan[i].ta]), zigStart, zigEnd, (int32)(1 << (int)(al))); if (err != default!) {
+                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable][scan[i].ta]), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != default!) {
                                 return err;
                             }
                         }
@@ -258,7 +258,7 @@ partial class jpeg_package {
                                 return err;
                             }
                             dc[compIndex] += dcDelta;
-                            b[0] = (dc[compIndex] << (int)(al));
+                            b[0] = dc[compIndex].Lsh((uint64)(al));
                         }
                         if (zig <= zigEnd && d.eobRun > 0){
                             d.eobRun--;
@@ -281,10 +281,10 @@ partial class jpeg_package {
                                     if (errΔ1 != default!) {
                                         return errΔ1;
                                     }
-                                    b[unzig[zig]] = (ac << (int)(al));
+                                    b[unzig[zig]] = ac.Lsh((uint64)(al));
                                 } else {
                                     if (val0 != 0x0f) {
-                                        d.eobRun = (uint16)((uint16)(1 << (int)(val0)));
+                                        d.eobRun = (uint16)(((uint16)1).Lsh((uint64)(val0)));
                                         if (val0 != 0) {
                                             var (bits, errΔ2) = d.decodeBits((int32)val0);
                                             if (errΔ2 != default!) {
@@ -302,7 +302,7 @@ partial class jpeg_package {
                     }
                     if (d.progressive) {
                         // Save the coefficients.
-                        d.progCoeffs[compIndex][by * mxx * hi + bx] = b;
+                        d.progCoeffs[compIndex][by * mxx * hi + bx] = b.Clone();
                         // At this point, we could call reconstructBlock to dequantize and perform the
                         // inverse DCT, to save early stages of a progressive image to the *image.YCbCr
                         // buffers (the whole point of progressive encoding), but in Go, the jpeg.Decode
@@ -345,7 +345,7 @@ partial class jpeg_package {
                 // Reset the Huffman decoder.
                 d.bits = new bits(nil);
                 // Reset the DC components, as per section F.2.1.3.1.
-                dc = new int32[]{}.array();
+                dc = new int32[]{}.array(4);
                 // Reset the progressive decoder state, as per section G.1.2.2.
                 d.eobRun = 0;
             }
@@ -390,7 +390,7 @@ loop:
             switch (val1) {
             case 0: {
                 if (val0 != 0x0f) {
-                    d.eobRun = (uint16)((uint16)(1 << (int)(val0)));
+                    d.eobRun = (uint16)(((uint16)1).Lsh((uint64)(val0)));
                     if (val0 != 0) {
                         var (bits, errΔ3) = d.decodeBits((int32)val0);
                         if (errΔ3 != default!) {

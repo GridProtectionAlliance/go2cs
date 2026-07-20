@@ -140,7 +140,7 @@ dead: true);
             }
             if (exprᴛ1 == _Gcopystack) { matchᴛ1 = true;
             }
-            if (exprᴛ1 == _Gpreempted) { matchᴛ1 = true;
+            else if (exprᴛ1 == _Gpreempted) { matchᴛ1 = true;
                 do {
                     if (!casGFromPreempted(Ꮡgp, // The stack is being copied. We need to wait
  // until this is done.
@@ -185,7 +185,7 @@ dead: true);
 g: Ꮡgp, stopped: stopped);
                 } while (false);
             }
-            if (exprᴛ1 == _Grunning) {
+            else if (exprᴛ1 == _Grunning) {
                 do {
                     if (gp.preemptStop && gp.preempt && gp.stackguard0 == stackPreempt && asyncM == gp.m && asyncM.of(m.ᏑpreemptGen).Load() == asyncGen) {
                         // Optimization: if there is already a pending preemption request

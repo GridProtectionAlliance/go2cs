@@ -105,7 +105,7 @@ internal static error kill(this ж<Process> Ꮡp) {
 }
 
 public static @string String(this ж<ProcessState> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
+    ref var p = ref Ꮡp.DerefOrNil();
 
     if (Ꮡp == nil) {
         return "<nil>"u8;
@@ -150,7 +150,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
 // ExitCode returns the exit code of the exited process, or -1
 // if the process hasn't exited or was terminated by a signal.
 public static nint ExitCode(this ж<ProcessState> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
+    ref var p = ref Ꮡp.DerefOrNil();
 
     // return -1 if the process hasn't started.
     if (Ꮡp == nil) {

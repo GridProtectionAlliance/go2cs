@@ -25,7 +25,7 @@ internal static ref sync.Once once => ref Ꮡonce.Value;
 internal static ж<sync.RWMutex> ᏑsystemRootsMu = new(default(sync.RWMutex));
 internal static ref sync.RWMutex systemRootsMu => ref ᏑsystemRootsMu.Value;
 
-internal static ж<CertPool> systemRoots;
+public static ж<CertPool> systemRoots;
 
 internal static error systemRootsErr;
 

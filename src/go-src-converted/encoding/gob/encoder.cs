@@ -188,7 +188,7 @@ internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<
         else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func) {
             return sent;
         }
-        { /* default: */
+        else { /* default: */
             return sent;
         }
     }
