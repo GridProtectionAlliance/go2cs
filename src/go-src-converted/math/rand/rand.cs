@@ -156,7 +156,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
         // n is power of two, can mask
         return (int32)(r.Int31() & (n - 1));
     }
-    var max = (int32)((2147483648L) - 1 - (((uint32)1 << (int)(31))) % (uint32)n);
+    var max = (int32)((uint32)((2147483648L) - 1) - (((uint32)1 << (int)(31))) % (uint32)n);
     var v = r.Int31();
     while (v > max) {
         v = r.Int31();
@@ -194,7 +194,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
     if (n <= 0) {
         throw panic("invalid argument to Intn");
     }
-    if (n <= 2147483648L - 1) {
+    if (n <= (nint)(2147483648L - 1)) {
         return (nint)r.Int31n((int32)n);
     }
     return (nint)r.Int63n((int64)n);

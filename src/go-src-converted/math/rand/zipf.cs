@@ -58,7 +58,7 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
 // Uint64 returns a value drawn from the [Zipf] distribution described
 // by the [Zipf] object.
 public static uint64 Uint64(this ж<Zipf> Ꮡz) {
-    ref var z = ref Ꮡz.Value;
+    ref var z = ref Ꮡz.DerefOrNil();
 
     if (Ꮡz == nil) {
         throw panic("rand: nil Zipf");
