@@ -49,24 +49,27 @@ func caseBodyHasSwitchBreak(body []ast.Stmt) bool {
 // forgoes the trailing return (leaving the rarer CS0161), NEVER a false "terminal" that would make the
 // trailing return reachable and silently return the zero value. `fallthrough` is NOT terminating here
 // (tracked separately as a case that continues into the next clause); a lone `break`/`continue` is not.
-func isTerminatingStmt(stmt ast.Stmt) bool {
+func isTerminatingStmt(stmt ast.Stmt, info *types.Info) bool {
 	switch s := stmt.(type) {
 	case *ast.ReturnStmt:
 		return true
 	case *ast.BranchStmt:
 		return s.Tok == token.GOTO
 	case *ast.LabeledStmt:
-		return isTerminatingStmt(s.Stmt)
+		return isTerminatingStmt(s.Stmt, info)
 	case *ast.BlockStmt:
-		return isTerminatingStmtList(s.List)
+		return isTerminatingStmtList(s.List, info)
 	case *ast.IfStmt:
 		// Terminating only with an `else` where BOTH branches terminate.
-		return s.Else != nil && isTerminatingStmt(s.Body) && isTerminatingStmt(s.Else)
+		return s.Else != nil && isTerminatingStmt(s.Body, info) && isTerminatingStmt(s.Else, info)
 	case *ast.ExprStmt:
-		// A call to the built-in `panic` is terminating.
+		// A call to the built-in `panic` is terminating. A declaration SHADOWING `panic` makes the
+		// call an ordinary one that returns normally (see identIsUniverseBuiltin), so it is not.
 		if call, ok := s.X.(*ast.CallExpr); ok {
 			if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "panic" {
-				return true
+				if _, isBuiltin := info.ObjectOf(ident).(*types.Builtin); isBuiltin {
+					return true
+				}
 			}
 		}
 	}
@@ -76,13 +79,13 @@ func isTerminatingStmt(stmt ast.Stmt) bool {
 
 // isTerminatingStmtList reports whether a statement list terminates — its final non-empty statement is a
 // terminating statement (Go spec: an empty trailing statement does not affect termination).
-func isTerminatingStmtList(list []ast.Stmt) bool {
+func isTerminatingStmtList(list []ast.Stmt, info *types.Info) bool {
 	for i := len(list) - 1; i >= 0; i-- {
 		if _, empty := list[i].(*ast.EmptyStmt); empty {
 			continue
 		}
 
-		return isTerminatingStmt(list[i])
+		return isTerminatingStmt(list[i], info)
 	}
 
 	return false
@@ -650,7 +653,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// added (see guardedTerminalDefault). Using the shallow "last emitted line was a return" flag
 			// here is WRONG: it false-positives on `if { return }` and lets a reachable `return default!;`
 			// silently return the zero value.
-			if switchBreakWrap || !(isTerminatingStmtList(caseClause.Body) || caseHasFallthroughStmt[i]) {
+			if switchBreakWrap || !(isTerminatingStmtList(caseClause.Body, v.info) || caseHasFallthroughStmt[i]) {
 				allCasesTerminal = false
 			}
 

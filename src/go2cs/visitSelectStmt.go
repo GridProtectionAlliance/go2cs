@@ -316,7 +316,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		allClausesTerminal := true
 
 		for _, comClause := range comClauses {
-			if caseBodyHasSwitchBreak(comClause.Body) || !isTerminatingStmtList(comClause.Body) {
+			if caseBodyHasSwitchBreak(comClause.Body) || !isTerminatingStmtList(comClause.Body, v.info) {
 				allClausesTerminal = false
 				break
 			}

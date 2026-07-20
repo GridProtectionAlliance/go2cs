@@ -138,7 +138,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName, info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -175,7 +175,7 @@ var captureModeCandidates []*captureCandidate
 // direct-ж receiver, whose deref alias is emitted INSIDE the wrapper (fmt ss.Token's
 // `defer func(){ recover() }()` + `s.buf`, CS1628 ×3). Defer/recover inside a nested function
 // literal belongs to that literal (mirrors funcBodyDeferRecover) and does not wrap this body.
-func bodyWrappedInDeferContext(body *ast.BlockStmt, recvName string) bool {
+func bodyWrappedInDeferContext(body *ast.BlockStmt, recvName string, info *types.Info) bool {
 	hasDeferRecover := false
 
 	ast.Inspect(body, func(node ast.Node) bool {
@@ -186,9 +186,13 @@ func bodyWrappedInDeferContext(body *ast.BlockStmt, recvName string) bool {
 			hasDeferRecover = true
 			return false
 		case *ast.CallExpr:
+			// Only the universe `recover` wraps the body; a declaration shadowing that name is
+			// an ordinary call (see identIsUniverseBuiltin).
 			if ident, ok := n.Fun.(*ast.Ident); ok && ident.Name == "recover" {
-				hasDeferRecover = true
-				return false
+				if _, isBuiltin := info.ObjectOf(ident).(*types.Builtin); isBuiltin {
+					hasDeferRecover = true
+					return false
+				}
 			}
 		}
 
