@@ -31,14 +31,24 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withArrayValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+				// An ELIDED array literal is still `[N]T` long, so its projection carries the
+				// declared length whenever the literal writes fewer elements — the same zero-fill
+				// rule the typed path applies below (see the padding comment there). A KEYED
+				// elided literal always needs it: SparseArray's own extent is `max index + 1`.
+				elidedArrayLen := ""
+
+				if int64(len(compositeLit.Elts)) < u.Len() {
+					elidedArrayLen = strconv.FormatInt(u.Len(), 10)
+				}
+
 				// A KEYED elided ARRAY literal — the inner `{joiningL: stateBefore, …}` of a
 				// `[][numJoinTypes]joinState{stateStart: {…}}` (x/net/idna joinStates, CS1003 ×62).
 				// Same SparseArray treatment as the slice case; `.array()` materializes the dense
 				// fixed-length backing, matching the typed array sparse path.
 				if compositeLitIsKeyed(compositeLit.Elts) {
-					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)))
+					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)), strconv.FormatInt(u.Len(), 10))
 				}
-				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withArrayValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))))
+				return fmt.Sprintf("new %s[]{%s}.array(%s)", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withArrayValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))), elidedArrayLen)
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
 				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
@@ -660,6 +670,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			// EMPTY-interface element type (a sparse `[N]any{i: "v"}` value boxes through @string).
 			callContext.keyValueCompositeType = exprType
 			maxKeyValue := 0
+			// Whether every key folded to a literal index. This is TRACKED SEPARATELY from
+			// maxKeyValue because 0 is a legal index, not a "no constant keys" sentinel: a
+			// literal whose only key IS 0 (`[8]byte{0: 1}`) read as "unresolved" and fell to
+			// the SparseArray projection, whose Count is `max index + 1` (1) rather than the
+			// array's DECLARED length (8) - the same dropped-length defect as the positional
+			// form below, reached by a different route.
+			constKeys := true
 
 			for _, elt := range compositeLit.Elts {
 				if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
@@ -680,13 +697,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 							}
 						} else {
 							maxKeyValue = 0
+							constKeys = false
 							break
 						}
+					} else {
+						// A key that is not a BasicLit at all (a const IDENT or const
+						// expression - Go requires array/slice literal keys to be constant,
+						// but not to be literals). Its index is unknown to this scan, so the
+						// SparseArray projection stands; a fixed-length array still needs its
+						// declared length, which the padding below supplies.
+						constKeys = false
+						break
 					}
 				}
 			}
 
-			if maxKeyValue > 0 {
+			if constKeys {
 				arrayTypeContext.compositeInitializer = false
 
 				if definedLen > 0 {
@@ -700,6 +726,20 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				arrayTypeContext.indexedInitializer = true
 			}
 		}
+	}
+
+	// A FIXED-SIZE array composite literal is `[N]T` long no matter how many elements it writes:
+	// Go zero-fills the rest (`[8]byte{}` is EIGHT zero bytes; `[8]byte{1, 2}` is 1, 2 and six
+	// zeros). The `.array()` projection builds its backing from the C# element array, which holds
+	// ONLY the written elements, so a short literal produced a SHORT array — `[8]byte{}` became
+	// length 0 and the first index panicked ("index out of range [7] with length 0"; math/rand/v2
+	// chacha8's Seed). Pass the DECLARED length so the backing is sized and zero-filled. Only a
+	// SHORT literal needs it: a full one — and every `[...]T{…}` ellipsis literal, whose length IS
+	// its element count — already yields the right length and keeps the plain projection, so the
+	// goldens for those are unchanged. A SLICE literal is genuinely as long as its elements
+	// (`[]byte{}` IS empty), and its `.slice()` suffix never matches here.
+	if definedLen > 0 && compositeSuffix == ".array()" && len(compositeLit.Elts) < definedLen {
+		compositeSuffix = fmt.Sprintf(".array(%d)", definedLen)
 	}
 
 	var newSpace string
@@ -761,7 +801,10 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// and an empty non-nil backing for a slice wrapper.
 		if len(compositeLit.Elts) == 0 {
 			if definedLen > 0 {
-				return fmt.Sprintf("new %s(new %s[%d]%s)", typeRender, csElementType, definedLen, compositeSuffix)
+				// `new T[N]` is ALREADY the zero-filled declared length, so this form keeps the
+				// plain projection rather than the padding suffix computed above — the length
+				// would merely be restated (`new byte[6].array(6)`).
+				return fmt.Sprintf("new %s(new %s[%d].array())", typeRender, csElementType, definedLen)
 			}
 
 			return fmt.Sprintf("new %s(new %s[]{}%s)", typeRender, csElementType, compositeSuffix)

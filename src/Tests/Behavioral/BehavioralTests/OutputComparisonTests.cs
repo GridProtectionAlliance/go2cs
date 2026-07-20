@@ -79,6 +79,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
+    public void CheckArrayLiteralDeclaredLength() => CheckTarget("ArrayLiteralDeclaredLength");
+
+    [TestMethod]
     public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
 
     [TestMethod]
@@ -125,6 +128,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckByteTableStringConst() => CheckTarget("ByteTableStringConst");
+
+    [TestMethod]
+    public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
     public void CheckCaptureModeFuncLitParam() => CheckTarget("CaptureModeFuncLitParam");

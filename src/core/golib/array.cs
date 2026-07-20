@@ -478,6 +478,36 @@ public static class ArrayExtensions
         return new array<T>(array);
     }
 
+    // array initializer from a C# array that is SHORT of the Go array's declared length - the
+    // `[8]byte{1, 2}` composite-literal form, where Go zero-fills the omitted elements. Emitted
+    // by the converter only when the literal supplies fewer elements than the declared length,
+    // so a full literal keeps the plain `.array()` projection.
+    //
+    // The padded copy is built HERE rather than in an `array<T>(T[], int)` constructor on purpose:
+    // such a constructor is ambiguous with the `array(slice<T>, nint)` slice-to-array CONVERSION
+    // ctor for a call like `new array<byte>(s, 4)` (CS0121 - `slice<T>` is the exact match on the
+    // source but `int` is the exact match on the length, so neither overload is better;
+    // NamedPointerReinterpret's `sliceToArray` hit exactly this). Keeping the padding out of the
+    // constructor set leaves array<T>'s ctor overloads untouched.
+    public static array<T> array<T>(this T[] array, int length)
+    {
+        T[] padded = new T[length];
+
+        // An over-long source cannot arise from a valid Go literal (the compiler rejects an index
+        // past the declared length), so it is truncated rather than checked.
+        array.AsSpan(0, Math.Min(array.Length, length)).CopyTo(padded);
+
+        return new array<T>(padded);
+    }
+
+    // Same padding for the SparseArray projection of an INDEX-KEYED literal whose highest key
+    // falls short of the declared length (`[8]byte{i: 1}` with a non-literal constant index):
+    // SparseArray's own Count is `max index + 1`, which is the literal's extent, not the array's.
+    public static array<T> array<T>(this IEnumerable<T> source, int length)
+    {
+        return source.ToArray().array(length);
+    }
+
     // array initializer from Span
     public static array<T> array<T>(this Span<T> source)
     {

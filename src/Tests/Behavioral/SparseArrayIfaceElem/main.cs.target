@@ -28,11 +28,11 @@ internal static readonly UntypedInt kLast = 4;
 
 internal static shape lookup(nint i) {
     return new golib.SparseArray<shape>{[kCircle] = new circle(nil), [kSquare] = new square(nil)
-    }.array()[i];
+    }.array(4)[i];
 }
 
 internal static array<shape> registry = new golib.SparseArray<shape>{[kCircle] = new circle(nil), [kSquare] = new square(nil)
-}.array();
+}.array(4);
 
 [GoType("num:nuint")] partial struct hashKind;
 
@@ -40,7 +40,7 @@ internal static readonly hashKind hCircle = 5;
 internal static readonly hashKind hSquare = 6;
 
 internal static array<shape> byKind = new golib.SparseArray<shape>{[(int)((nuint)hCircle)] = new circle(nil), [(int)((nuint)hSquare)] = new square(nil)
-}.array();
+}.array(7);
 
 internal static void Main() {
     fmt.Println(lookup(kCircle).name());

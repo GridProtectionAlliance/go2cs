@@ -81,6 +81,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
 
     [TestMethod]
+    public void CheckArrayLiteralDeclaredLength() => CheckTarget("ArrayLiteralDeclaredLength");
+
+    [TestMethod]
     public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
 
     [TestMethod]
@@ -127,6 +130,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckByteTableStringConst() => CheckTarget("ByteTableStringConst");
+
+    [TestMethod]
+    public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
     public void CheckCaptureModeFuncLitParam() => CheckTarget("CaptureModeFuncLitParam");
