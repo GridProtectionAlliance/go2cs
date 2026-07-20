@@ -191,9 +191,10 @@ func (c *StdLibConverter) scanStdLib() error {
 
 	// First, get the list of standard library packages
 	loadConfig := &packages.Config{
-		Mode: packages.NeedName | packages.NeedImports | packages.NeedDeps | packages.NeedFiles,
-		Dir:  srcPath,
-		Env:  append(os.Environ(), "GO111MODULE=off"), // Disable module mode
+		Mode:       packages.NeedName | packages.NeedImports | packages.NeedDeps | packages.NeedFiles,
+		Dir:        srcPath,
+		BuildFlags: c.options.loaderBuildFlags(),
+		Env:        append(os.Environ(), "GO111MODULE=off"), // Disable module mode
 	}
 
 	// Set the target platform in the environment if specified
@@ -256,9 +257,10 @@ func (c *StdLibConverter) buildDependencyGraph() error {
 
 		// Load the package with dependencies
 		loadConfig := &packages.Config{
-			Mode: packages.NeedImports,
-			Dir:  pkg.Dir,
-			Env:  append(os.Environ(), "GO111MODULE=off"), // Disable module mode
+			Mode:       packages.NeedImports,
+			Dir:        pkg.Dir,
+			BuildFlags: c.options.loaderBuildFlags(),
+			Env:        append(os.Environ(), "GO111MODULE=off"), // Disable module mode
 		}
 
 		// Set the target platform in the environment if specified

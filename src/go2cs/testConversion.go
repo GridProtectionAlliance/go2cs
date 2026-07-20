@@ -151,9 +151,10 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	cfg := &packages.Config{
-		Mode:  packages.LoadAllSyntax,
-		Dir:   inputPath,
-		Tests: true,
+		Mode:       packages.LoadAllSyntax,
+		Dir:        inputPath,
+		Tests:      true,
+		BuildFlags: options.loaderBuildFlags(),
 		Env: append(os.Environ(),
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),

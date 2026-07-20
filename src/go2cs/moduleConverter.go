@@ -118,8 +118,9 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 // out later).
 func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Package, error) {
 	cfg := &packages.Config{
-		Mode: packages.LoadAllSyntax | packages.NeedModule,
-		Dir:  moduleDir,
+		Mode:       packages.LoadAllSyntax | packages.NeedModule,
+		Dir:        moduleDir,
+		BuildFlags: m.options.loaderBuildFlags(),
 	}
 
 	targetParts := strings.Split(m.options.targetPlatform, "/")

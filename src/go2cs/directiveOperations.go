@@ -402,7 +402,7 @@ func isKnownGOOS(s string) bool   { return knownGOOS[s] }
 func isKnownGOARCH(s string) bool { return knownGOARCH[s] }
 
 // Modified CheckBuildConstraints that handles both directives and filename constraints
-func CheckBuildConstraints(filename string, targetPlatform string) (bool, error) {
+func CheckBuildConstraints(filename string, targetPlatform string, buildTags []string) (bool, error) {
 	// Parse the source code to extract directives
 	directives, err := ParseDirectives(filename)
 
@@ -412,6 +412,17 @@ func CheckBuildConstraints(filename string, targetPlatform string) (bool, error)
 
 	// Create a new build constraint evaluator
 	evaluator := NewBuildConstraintEvaluator([]string{targetPlatform})
+
+	// A -tags tag must be honored HERE too, not just by the go/packages loader. The loader selects
+	// files with the tag applied — `-tags purego` picks crypto/sha256's sha256block_generic.go, which
+	// has a real body, over the bodyless sha256block_decl.go — but every file it selected is then
+	// re-checked against this evaluator, where an unknown identifier evaluates to false. Without the
+	// tag seeded, `//go:build (!amd64 && ...) || purego` fails here and the file the tag just selected
+	// is RE-EXCLUDED, leaving the package with no implementation at all rather than the portable one.
+	// Same class of bug as the dotted goexperiment tags handled in evaluateExpr.
+	for _, tag := range buildTags {
+		evaluator.SetTag(tag, true)
+	}
 
 	// First, check if the filename itself indicates build constraints
 	if !isFileNameCompatible(filename, evaluator) {
