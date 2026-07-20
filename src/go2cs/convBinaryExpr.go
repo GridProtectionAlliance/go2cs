@@ -479,10 +479,17 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 		// OPERATOR subtree whose value exceeds int64 entirely (`1 << 63` nested inside
 		// `(1 << 63) - 1` — go/types lands the uint64 conversion on the outermost node, so the
 		// inner shift stays untyped, no width cast reaches it, and C# computes it in int32:
-		// math/rand Int63n, CS0220). Fold exactly those trees, and only under a plain uint64
-		// (a native-width uintptr/nuint target would need a further cast the fold cannot
-		// safely synthesize — that pre-existing caveat keeps its visible error).
-		if v.getCSTypeName(basic) != "uint64" || !v.constExprHasBeyondInt64UntypedOperatorSubexpr(expr) {
+		// math/rand Int63n, CS0220). Fold exactly those trees, under uint64 or a native-width
+		// target (uint/uintptr → nuint).
+		// `uintptr` is a golib STRUCT distinct from `nuint` (golib/uintptr.cs), so Go uintptr and
+		// Go uint render under different names for the same native width; both are in scope.
+		csType := v.getCSTypeName(basic)
+
+		if csType != "uint64" && csType != "nuint" && csType != "uintptr" {
+			return ""
+		}
+
+		if !v.constExprHasBeyondInt64UntypedOperatorSubexpr(expr) {
 			return ""
 		}
 
@@ -492,7 +499,25 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 			return ""
 		}
 
-		return strconv.FormatUint(u, 10) + "UL"
+		lit := strconv.FormatUint(u, 10) + "UL"
+
+		// `nuint` has NO implicit conversion from `ulong`, so a native-width target carries the
+		// narrowing cast in the fold itself — the same rule (and the same parenthesized
+		// `(nuint)(…)` form wholeExprIsCastOfType recognizes, so enclosing paths do not re-wrap)
+		// as the `types.Int`/`(nint)(…)` arm below. This also covers a NAMED type over uintptr
+		// with no further synthesis: `nuint` converts implicitly to its [GoType] wrapper, so
+		// math/big's `nat{…, 1 + 1<<(_W-1), _M ^ (1 << (_W - 1))}` — where the untyped `1 << 63`
+		// subtree exceeds int64 and C# would otherwise compute the element in int32 (CS0029 +
+		// CS0019, int_test.go's TestQuoStepD6) — lands as a `Word` element of the exact value.
+		// The cast is spelled `nuint` for BOTH native-width targets: it is the primitive C# native
+		// unsigned type, and it converts implicitly to golib's `uintptr` struct and to a [GoType]
+		// wrapper over uintptr alike, so one spelling covers uint, uintptr and named types over
+		// either without the fold having to name the target.
+		if csType != "uint64" {
+			return "(nuint)(" + lit + ")"
+		}
+
+		return lit
 	}
 
 	i, exact := constant.Int64Val(val)

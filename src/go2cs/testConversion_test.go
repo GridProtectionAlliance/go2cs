@@ -1126,3 +1126,69 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 		t.Fatalf("a QUALIFIED production reference must not trigger the rename (Sel exclusion):\n%s", qualifiedCs)
 	}
 }
+
+// Receiver/first-parameter guard: a `_test.go` FREE FUNCTION whose emitted C# signature matches a
+// production METHOD's — because the method's receiver becomes the extension method's leading `this`
+// parameter — must Δ-rename the TEST-side declarator. Go keeps method names and package-scope
+// function names in separate namespaces, so math/big's `func (z nat) norm() nat` (nat.go) and
+// `func norm(x nat) nat` (int_test.go) coexist legally, but both emit as `norm(nat)` and `this` does
+// not participate in C# signature identity (CS0111 `big_package` already defines `norm`).
+// Discrimination: a same-named free function whose parameters do NOT line up with the receiver
+// (different type, or an extra parameter) emits distinctly and must keep its plain name.
+func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod": "module example/limbs\n\ngo 1.23\n",
+		"value.go": "package limbs\n\ntype nat []uint\n\n" +
+			"func (z nat) norm() nat { return z }\n\n" +
+			"func (z nat) trim() nat { return z }\n\n" +
+			"func (z nat) keep() nat { return z }\n",
+		"value_test.go": "package limbs\n\n" +
+			// Collides: receiver nat + no params vs one nat param.
+			"func norm(x nat) nat { return x.norm() }\n\n" +
+			// Does NOT collide: the free function takes an extra parameter.
+			"func trim(x nat, n int) nat { return x.trim() }\n\n" +
+			// Does NOT collide: the free function's first parameter is a different type.
+			"func keep(n int) nat { return nil }\n\n" +
+			"func probe(x nat) nat { return norm(trim(keep(0), 1)) }\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	internal, _ := loadBothTestVariantsForDir(t, dir)
+	if internal == nil {
+		t.Fatal("internal test variant was not loaded")
+	}
+
+	outputPath := t.TempDir()
+	testMethodRenames = make(map[types.Object]bool)
+	t.Cleanup(func() { testMethodRenames = nil })
+
+	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
+	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", options); err != nil {
+		t.Fatal(err)
+	}
+
+	valueCs := readConvertedTestFile(t, outputPath, "value_test.cs")
+
+	if !strings.Contains(valueCs, ShadowVarMarker+"norm(") {
+		t.Fatalf("the colliding test-side FREE FUNCTION declarator must be Δ-renamed:\n%s", valueCs)
+	}
+	if !strings.Contains(valueCs, ShadowVarMarker+"norm(trim(") {
+		t.Fatalf("the test function's call sites must follow the Δ-rename:\n%s", valueCs)
+	}
+
+	// The production method keeps its bare name — it is pinned, and only the free function moved.
+	if !strings.Contains(valueCs, ".norm()") {
+		t.Fatalf("the production METHOD must keep its bare name at the call site:\n%s", valueCs)
+	}
+
+	if strings.Contains(valueCs, ShadowVarMarker+"trim") {
+		t.Fatalf("an extra-parameter free function does not collide and must keep its plain name:\n%s", valueCs)
+	}
+	if strings.Contains(valueCs, ShadowVarMarker+"keep") {
+		t.Fatalf("a different-first-parameter free function does not collide and must keep its plain name:\n%s", valueCs)
+	}
+}

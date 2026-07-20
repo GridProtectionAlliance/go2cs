@@ -218,5 +218,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		}
 	}
 
+	// A `-tests` variant Δ-renamed this test-file declarator to keep production symbol names
+	// immutable (see performNameCollisionAnalysis). A METHOD name reaches the isMethod arm above,
+	// but a package-level FREE FUNCTION referenced as a call target or a function value falls
+	// through to here — and its reference must follow the rename or it binds to nothing (CS0103).
+	// Object identity, so a same-named production symbol keeps its plain emission.
+	if testMethodRenames[v.info.ObjectOf(ident)] {
+		return ShadowVarMarker + getSanitizedIdentifier(v.getIdentName(ident))
+	}
+
 	return getSanitizedIdentifier(v.getIdentName(ident))
 }

@@ -64,7 +64,47 @@ func main() {
 	fmt.Println(n32, c32, nptr)
 	showInt32(1<<31 - 2)
 	showUint32(1<<32 - 1)
+
+	// A subexpression past INT64 ENTIRELY under a NATIVE-WIDTH target. `1 << 63` is
+	// 9223372036854775808, so no signed `long` fold can carry it, and `nuint` has no implicit
+	// conversion from `ulong` -- the emission must widen past int64 AND narrow to the target in
+	// one step. Without it C# computes the element in int32 (CS0029 `int` -> the target, and
+	// CS0019 when a named-const operand has already forced the other side wide). math/big's
+	// `nat{..., 1 + 1<<(_W-1), _M ^ (1 << (_W - 1))}` (int_test.go TestQuoStepD6) is exactly this
+	// shape, where Word is a NAMED type over uintptr -- covered here alongside the plain targets.
+	words := []Word{1 + 1<<(_W-1), _M ^ (1 << (_W - 1))}
+	wide := []uintptr{1 + 1<<63, _M ^ (1 << (_W - 1))}
+	uns := []uint{1 + 1<<63}
+
+	// uint64 already folded this shape (bare `UL`, no cast); pinned so that emission stays put.
+	u64wide := []uint64{1 + 1<<63}
+
+	for _, v := range words {
+		fmt.Println(v)
+	}
+
+	for _, v := range wide {
+		fmt.Println(v)
+	}
+
+	for _, v := range uns {
+		fmt.Println(v)
+	}
+
+	for _, v := range u64wide {
+		fmt.Println(v)
+	}
 }
+
+// Word mirrors math/big's Word -- a NAMED type whose underlying type is uintptr, so its elements
+// take the native-width fold through a [GoType] wrapper rather than a primitive target.
+type Word uintptr
+
+const (
+	_W = 64
+	_B = 1 << _W
+	_M = _B - 1
+)
 
 func showInt32(v int32) {
 	fmt.Println(v)

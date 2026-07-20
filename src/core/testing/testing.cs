@@ -79,6 +79,21 @@ public static partial class testing_package
     {
     }
 
+    /// <summary>
+    /// Fuzz-target receiver surface — COMPILE-ONLY, for the same reason as B above. Fuzz
+    /// declarations are disclosed-unsupported in the manifest (execution is deferred to Phase 4D)
+    /// and never registered with the host, but their converted BODIES still compile into the test
+    /// assembly, so the members they reference must exist. There is no fuzzing engine, so Fuzz
+    /// never invokes the target and Add never records a seed: with no run to perform there is
+    /// nothing to time, seed or fail, and every member is a safe non-throwing no-op. The member
+    /// set is Go 1.23's full public surface for *testing.F — the TB members it inherits from the
+    /// embedded common, plus its own Add and Fuzz — so the compiled shape never drifts as more
+    /// fuzz targets convert (the same rule TB above is declared under).
+    /// </summary>
+    public struct F
+    {
+    }
+
     public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
@@ -218,6 +233,72 @@ public static partial class testing_package
     public static void Fatalf(this ж<B> b, @string format, params ꓸꓸꓸany args) => Fatalf(ref b.Value, format, args);
 
     public static void Skip(this ж<B> b, params ꓸꓸꓸany args) => Skip(ref b.Value, args);
+
+    // Compile-only F surface (see struct F above) — never executed, never throwing. Fuzz takes a
+    // System.Delegate because a Go fuzz target's signature is arbitrary (*testing.T followed by
+    // the fuzzed argument types, e.g. func(*testing.T, uint, uint, …)); the converted body is an
+    // explicitly-typed lambda, so C# infers its natural Action<…> and converts it to Delegate.
+    // The target is never invoked and the seed corpus Add collects is discarded — there is no
+    // fuzzing engine to consume either.
+    [GoRecv] public static void Fuzz(this ref F f, Delegate target) { }
+
+    [GoRecv] public static void Fail(this ref F f) { }
+
+    [GoRecv] public static void FailNow(this ref F f) { }
+
+    [GoRecv] public static bool Failed(this ref F f) => false;
+
+    [GoRecv] public static void Helper(this ref F f) { }
+
+    [GoRecv] public static @string Name(this ref F f) => ""u8;
+
+    [GoRecv] public static void SkipNow(this ref F f) { }
+
+    [GoRecv] public static bool Skipped(this ref F f) => false;
+
+    [GoRecv] public static void Cleanup(this ref F f, Action cleanup) { }
+
+    [GoRecv] public static void Setenv(this ref F f, @string key, @string value) { }
+
+    [GoRecv] public static @string TempDir(this ref F f) => ""u8;
+
+    // Params-taking F members need the same explicit ж<F> overloads as T's and B's above (params
+    // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
+    public static void Add(this ref F f, params ꓸꓸꓸany args) { }
+
+    public static void Error(this ref F f, params ꓸꓸꓸany args) { }
+
+    public static void Errorf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Fatal(this ref F f, params ꓸꓸꓸany args) { }
+
+    public static void Fatalf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Log(this ref F f, params ꓸꓸꓸany args) { }
+
+    public static void Logf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Skip(this ref F f, params ꓸꓸꓸany args) { }
+
+    public static void Skipf(this ref F f, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Add(this ж<F> f, params ꓸꓸꓸany args) => Add(ref f.Value, args);
+
+    public static void Error(this ж<F> f, params ꓸꓸꓸany args) => Error(ref f.Value, args);
+
+    public static void Errorf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Errorf(ref f.Value, format, args);
+
+    public static void Fatal(this ж<F> f, params ꓸꓸꓸany args) => Fatal(ref f.Value, args);
+
+    public static void Fatalf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Fatalf(ref f.Value, format, args);
+
+    public static void Log(this ж<F> f, params ꓸꓸꓸany args) => Log(ref f.Value, args);
+
+    public static void Logf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Logf(ref f.Value, format, args);
+
+    public static void Skip(this ж<F> f, params ꓸꓸꓸany args) => Skip(ref f.Value, args);
+
+    public static void Skipf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Skipf(ref f.Value, format, args);
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, with
