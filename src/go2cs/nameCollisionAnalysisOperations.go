@@ -48,6 +48,11 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	methodInProductionFile := make(map[string]bool)
 	testMethodObjects := make(map[string][]types.Object)
 
+	// Every package-level FuncDecl (method AND free function), keyed by name — the input to the
+	// receiver-vs-first-parameter collision scan below, which needs the full signature, not just
+	// the name sets above.
+	funcDeclsByName := make(map[string][]packageFuncDecl)
+
 	// Collect all named element names and method names (top-level declarations only)
 	for _, file := range pkg.Syntax {
 		isTestFile := strings.HasSuffix(strings.ToLower(filepath.Base(pkg.Fset.Position(file.Pos()).Filename)), "_test.go")
@@ -96,6 +101,15 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 
 			case *ast.FuncDecl:
 				methodNames[node.Name.Name] = true
+
+				if pkg.TypesInfo != nil {
+					if obj := pkg.TypesInfo.Defs[node.Name]; obj != nil {
+						if signature, ok := obj.Type().(*types.Signature); ok {
+							funcDeclsByName[node.Name.Name] = append(funcDeclsByName[node.Name.Name],
+								packageFuncDecl{Object: obj, Signature: signature, InTestFile: isTestFile})
+						}
+					}
+				}
 
 				if isTestFile {
 					if pkg.TypesInfo != nil {
@@ -240,6 +254,112 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 			}
 		}
 	}
+
+	resolveReceiverParameterCollisions(funcDeclsByName)
+}
+
+// packageFuncDecl is one package-level FuncDecl — method or free function — with the signature
+// and test/production origin the receiver-vs-first-parameter collision scan needs.
+type packageFuncDecl struct {
+	Object     types.Object
+	Signature  *types.Signature
+	InTestFile bool
+}
+
+// resolveReceiverParameterCollisions Δ-renames a `-tests` test-file declarator whose EMITTED C#
+// signature is identical to a same-named sibling's because a METHOD's receiver becomes the
+// extension method's leading `this` parameter. Go keeps method names and package-scope function
+// names in separate namespaces, so `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat`
+// (int_test.go) coexist legally; both emit into the package class as `norm(nat)` — `this` does not
+// participate in C# signature identity — so the test variant fails to compile (math/big, CS0111).
+//
+// Production names are pinned exactly as in B2/B9 above: the production .cs on disk recompile into
+// the test assembly unchanged, so only the TEST-side declarator may move. When BOTH sides are
+// test-declared the free function is the one renamed, so the choice is deterministic and two
+// colliding declarators never both become Δ-prefixed. A collision between two PRODUCTION
+// declarators is deliberately left alone: it would equally break the production-only conversion,
+// making it a different (and currently hypothetical — the 302-package corpus compiles clean) fix
+// than test-variant coherence.
+func resolveReceiverParameterCollisions(funcDeclsByName map[string][]packageFuncDecl) {
+	for _, decls := range funcDeclsByName {
+		if len(decls) < 2 {
+			continue
+		}
+
+		for i, left := range decls {
+			for _, right := range decls[i+1:] {
+				if !emittedSignaturesCollide(left.Signature, right.Signature) {
+					continue
+				}
+
+				// Rename the test-side declarator; with both test-declared, the free function
+				// (the one WITHOUT a receiver) is renamed so the outcome does not depend on
+				// declaration order.
+				switch {
+				case left.InTestFile && right.InTestFile:
+					if left.Signature.Recv() == nil {
+						registerTestMethodRenames([]types.Object{left.Object})
+					} else {
+						registerTestMethodRenames([]types.Object{right.Object})
+					}
+				case left.InTestFile:
+					registerTestMethodRenames([]types.Object{left.Object})
+				case right.InTestFile:
+					registerTestMethodRenames([]types.Object{right.Object})
+				}
+			}
+		}
+	}
+}
+
+// emittedSignaturesCollide reports whether two same-named package-level signatures land on the
+// same C# member signature once emitted. Only a method/free-function pair can: a method emits its
+// receiver as the leading `this` parameter, so `func (r R) f(a A)` and `func f(r R, a A)` both
+// become `f(R, A)`. Two methods differ by receiver type (Go forbids redeclaring one method on one
+// type) and two free functions cannot share a package scope at all.
+func emittedSignaturesCollide(left, right *types.Signature) bool {
+	method, function := left, right
+
+	if method.Recv() == nil {
+		method, function = right, left
+	}
+
+	// Not a method/free-function pair — either two methods or two free functions.
+	if method.Recv() == nil || function.Recv() != nil {
+		return false
+	}
+
+	// Generic declarations are emitted with their type parameters, which keeps the C# signatures
+	// distinct; comparing instantiated parameter types here would be meaningless anyway.
+	if method.TypeParams().Len() != 0 || function.TypeParams().Len() != 0 ||
+		method.RecvTypeParams().Len() != 0 || function.RecvTypeParams().Len() != 0 {
+		return false
+	}
+
+	// A variadic tail emits as `params`, which C# still counts as one parameter of the same type,
+	// so the arities must agree in the same way — but a variadic/non-variadic mismatch is a
+	// genuine difference in the emitted member and must not be treated as a collision.
+	if method.Variadic() != function.Variadic() {
+		return false
+	}
+
+	methodParams, functionParams := method.Params(), function.Params()
+
+	if methodParams.Len()+1 != functionParams.Len() {
+		return false
+	}
+
+	if !types.Identical(method.Recv().Type(), functionParams.At(0).Type()) {
+		return false
+	}
+
+	for i := 0; i < methodParams.Len(); i++ {
+		if !types.Identical(methodParams.At(i).Type(), functionParams.At(i+1).Type()) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // registerTestMethodRenames records `-tests` test-file method declarators that must emit (and be
