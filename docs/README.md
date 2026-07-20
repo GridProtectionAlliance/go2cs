@@ -332,20 +332,12 @@ The converter builds idiomatic C# for the full range of Go language features, va
 behavioral test suite (390+ Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
 (302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is the milestone, not yet full
 runtime parity: **converting and running the standard library's own tests is the ongoing Phase 4 work** —
-see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). Six standard-library packages'
-own test suites now pass in C#: [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)
-(14/14) and [`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort)
-(63/63); as of **2026-07-18** [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes)
-(81) and [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
-(68) — exercising a new **disclosed-divergence** mechanism for the handful of exact allocation-count
-asserts the managed runtime provably cannot satisfy;
-[`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
-(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool;
-[`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path)
-(9/9, no disclosure); and [`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring)
-(8/8), the first container/pointer-graph package. Each validates against `go test` through the
-converted-test pipeline, and you can
-[reproduce them yourself](#try-it-yourself--validate-a-converted-test-suite) from a clone.
+see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). **Fifteen standard-library packages'
+own Go test suites now pass in C#** — more than 450 of Go's own tests, spanning `unicode/utf8` and `sort`
+through the `hash/*`, `container/*` and `math/*` families. Each is converted to C#, built against the
+converted standard library, run under a Go-semantics test host, and compared verdict-for-verdict against a
+clean `go test -json` baseline. The full validated set — with per-package counts and a one-command
+reproduction from a clone — is under [Try it yourself](#try-it-yourself--validate-a-converted-test-suite).
 
 ### Try it yourself — validate a converted test suite
 
@@ -379,68 +371,38 @@ sides and every unsupported declaration (benchmarks, examples) is accounted for.
 converted `.cs` in place (`git status` stays clean when your toolchain matches the pinned versions); the Go
 source copies and run manifests it stages are git-ignored.
 
-The same command validates every other banked package — as of **2026-07-18**,
-[`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort) is the
-second: substitute `"C:\Program Files\Go\src\sort"` and `src/go-src-converted/sort` above, and expect
-`Validated 63 tests against go test (1 skipped identically on both sides, 46 disclosed-unsupported
-declarations excluded).` — 63/63 agreement including interface-driven sorting, `sort.Slice` reflection
-swaps, NaN-aware float ordering, and stability tests. (The `sort` run also prints a
-`WARNING: Failed to evaluate build constraints for file "...\sort\sort_impl_go121.go"` line before the
-result — a harmless converter notice about one filename the constraint parser doesn't recognize, not a
-failure; the final `Validated` line is what matters.)
+The same command validates every other banked package — substitute the package's GOROOT source path and its
+`src/go-src-converted/<pkg>` path in the two arguments above. The full set that currently validates against
+`go test -json`:
 
-[`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes) and
-[`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
-are the third and fourth — substitute their GOROOT and converted paths as above. They introduce a new
-kind of honest disclosure: a handful of their tests assert an **exact allocation count** (Go's
-`testing.AllocsPerRun`), and the managed CLR provably allocates where Go's compiler stack-allocates —
-a divergence no shim can satisfy without faking the measurement. Rather than skip those tests, each
+| Package | Tests | What it exercises |
+|:--|:--:|:--|
+| [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8) | 14 | UTF-8 encode/decode — the first suite to pass. |
+| [`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort) | 63 | Interface-driven sort, `sort.Slice` reflection swaps, NaN-aware ordering, stability. |
+| [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes) | 81 | Byte-slice algorithms; 7 disclosed (alloc-profile). |
+| [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings) | 68 | String algorithms; 4 disclosed (alloc-count / alloc-profile). |
+| [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16) | 8 | Encode/decode round-trips via `reflect.DeepEqual`; 1 disclosed. |
+| [`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path) | 9 | Pure path manipulation (`Clean`/`Split`/`Join`/`Match`…). |
+| [`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring) | 8 | Circular linked list — a pointer graph. |
+| [`container/heap`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/heap) | 7 | Heap interface over a slice. |
+| [`hash/adler32`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/adler32) | 2 | Adler-32 checksum. |
+| [`hash/crc64`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/crc64) | 5 | CRC-64 checksum tables. |
+| [`hash/fnv`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/fnv) | 19 | FNV-1/FNV-1a across widths. |
+| [`math/cmplx`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/cmplx) | 24 | `complex128` transcendental math. |
+| [`math`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math) | 76 | The core numeric package — IEEE edge cases, rounding, `Inf`/`NaN`. |
+| [`math/bits`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/bits) | 26 | Bit-manipulation intrinsics. |
+| [`math/rand`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/rand) | 43 | PRNG streams, including a child-process race test. |
+
+A few packages carry a **disclosed divergence**: a handful of Go tests assert an *exact allocation count*
+(Go's `testing.AllocsPerRun`), and the managed CLR provably allocates where Go's compiler stack-allocates —
+a difference no shim can satisfy without faking the measurement. Rather than skip those tests, each affected
 package pins the divergence in a hand-owned, committed
 [`go2cs_test_disclosures.json`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/bytes/go2cs_test_disclosures.json)
-that the oracle matches by exact failure signature (a different failure is still a hard mismatch), and
-reports it as **disclosed-divergent** in the summary. Expect, for `bytes`:
-
-```text
-Validated 81 tests against go test (0 skipped identically on both sides, 7 disclosed-divergent (alloc-profile), 123 disclosed-unsupported declarations excluded).
-```
-
-and for `strings`:
-
-```text
-Validated 68 tests against go test (0 skipped identically on both sides, 4 disclosed-divergent (alloc-count-semantics, alloc-profile), 118 disclosed-unsupported declarations excluded).
-```
-
-[`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
-is the fifth — the structural twin of `unicode/utf8`, and the first package to reuse the disclosed-divergence
-mechanism as a general tool rather than a bytes/strings special case. Its eight correctness tests agree
-outright (encode/decode round-trips checked with `reflect.DeepEqual`, driven through the reflection bridge),
-and its one `testing.AllocsPerRun` test (`TestAllocationsDecode`, which asserts `Decode` returns its `[]rune`
-with **zero** heap allocations — an outcome Go reaches only via escape analysis, guarded by
-`testenv.SkipIfOptimizationOff`) is disclosed as `alloc-profile`: the managed runtime always heap-allocates
-the returned slice, so the assert can never agree, while `TestDecode` independently proves the decoded output
-is correct. Expect:
-
-```text
-Validated 8 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (alloc-profile), 8 disclosed-unsupported declarations excluded).
-```
-
-[`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path) is the
-sixth — a pure path-manipulation package (`Clean`/`Split`/`Join`/`Match`/`Base`/`Dir`/`Ext`/`IsAbs`) whose
-nine tests agree outright with **no disclosure at all**. Its one `testing.AllocsPerRun` test,
-`TestCleanMallocs`, is written to run its allocation check only under `GOMAXPROCS == 1`; on a normal
-multi-core `go test` run it takes the early-return path on *both* sides, so the differential matches exactly
-as Go's own CI sees it. Substitute `"C:\Program Files\Go\src\path"` and `src/go-src-converted/path`, and
-expect:
-
-```text
-Validated 9 tests against go test (0 skipped identically on both sides, 8 disclosed-unsupported declarations excluded).
-```
-
-[`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring)
-is the seventh and the first container — a circular linked list whose eight tests exercise the ring's
-pointer graph (`Link`/`Unlink`/`Move`/`Do`) and agree outright. Substitute its paths above and expect
-`Validated 8 tests against go test (0 skipped identically on both sides, 7 disclosed-unsupported
-declarations excluded).`
+that the differential oracle matches by *exact failure signature* — any other failure is still a hard
+mismatch — and reports as **disclosed-divergent** in the summary. Packages without a manifest compare
+strictly. (The `sort` run also prints a one-line
+`WARNING: Failed to evaluate build constraints for file "...\sort\sort_impl_go121.go"` before its result —
+a harmless converter notice, not a failure; the final `Validated` line is what matters.)
 
 ### Performance
 
@@ -465,8 +427,7 @@ High level timeline of the project's major turning points.
 | 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/stdlib-green-2026-07-10) | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see [About Standard Library Compile Milestone](#about-standard-library-compile-milestone)). |
 | 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/nuget-stdlib-2026-07-14) | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
 | 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17) | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
-| 2026-07-18 | [**`bytes` and `strings` test suites passing in C#** — with disclosed-divergence](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · `sort` at `f999c8f78` / [`sort-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/sort-tests-green-2026-07-18) | Phase-4 packages #3 and #4: `bytes` validates **81 tests** and `strings` **68** against `go test -json`. Both exercise a new **test-level disclosed-divergence manifest** — a hand-owned, committed `go2cs_test_disclosures.json` the differential oracle consumes to reclassify the handful of exact-allocation-count asserts (Go's `testing.AllocsPerRun`) the managed CLR provably cannot satisfy, matched by exact failure signature so any *other* failure is still a hard mismatch. `bytes` discloses 7 (alloc-profile), `strings` 4 (alloc-count-semantics + alloc-profile); no other package has a manifest, so `sort` (63/63) and `utf8` (14/14) still compare strictly and stay byte-identical. |
-| 2026-07-18 | [**`unicode/utf16` test suite passing in C#** — disclosed-divergence generalizes](NEWS.md#july-18-2026--unicodeutf16-validates-disclosed-divergence-generalizes) | [`utf16-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf16-tests-green-2026-07-18) | Phase-4 package #5: [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16) validates **8 tests** against `go test -json` (encode/decode round-trips checked with `reflect.DeepEqual` through the reflection bridge), plus one disclosed. It is the first package to reuse the disclosed-divergence manifest as a **general tool** rather than a bytes/strings special case: its lone `TestAllocationsDecode` asserts `Decode` returns its non-escaping `[]rune` with **zero** allocations — reachable in Go only via escape analysis (`testenv.SkipIfOptimizationOff`-guarded), unsatisfiable in a managed runtime where a returned slice is always a heap allocation — pinned as one `alloc-profile` row while `TestDecode` independently proves the output correct. A mechanism that generalizes to the next package cleanly is one that was designed right. |
+| 2026-07-18 | [**Phase-4 test suites expand — disclosed-divergence mechanism**](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · [`sort`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/sort-tests-green-2026-07-18) · [`utf16`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf16-tests-green-2026-07-18) | `bytes` (81), `strings` (68), `sort` (63) and `unicode/utf16` (8) validate against `go test -json`, introducing a hand-owned, committed `go2cs_test_disclosures.json` the differential oracle uses to reclassify the exact-allocation-count asserts (Go's `testing.AllocsPerRun`) the managed CLR provably cannot satisfy — matched by exact failure signature, so any *other* failure is still a hard mismatch. Packages without a manifest compare strictly. The validated set has since grown to **fifteen** standard-library packages (see [Status](#status) and [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)). |
 
 ### _About Standard Library Compile Milestone_
 
