@@ -1479,8 +1479,26 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// If processing a single file, instead of all package files, merge interface implementations
 		if mergeExisting {
 			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
+				line := strings.TrimSpace(packageInfoLines[i])
+
+				// Normalize a merged-in GoImplement record's type references through the SAME
+				// canonicalization the fresh render below applies (qualifyLocalTypeRef), so a record
+				// persisted by an EARLIER converter run under a now-stale spelling collapses with the
+				// fresh record in this HashSet instead of emitting a SECOND [GoImplement] for the same
+				// (impl, interface) pair. A NESTED package-under-test's own interface was once emitted
+				// FULLY QUALIFIED (`go.container.heap_package.Interface`) but is now canonicalized to the
+				// bare local `Interface` by stripLocalTypeQualifier (the math/rand/v2 collapse fix); the
+				// -tests external-variant merge read the committed qualified line verbatim, so the two
+				// spellings landed as two records → go2cs-gen composed the adapter TWICE
+				// (GetUniqueHintName uniquified the second FILE name, so the duplicate TYPE reached the
+				// compiler: CS0102 + CS0111 + CS8646 on IntHeapжInterface, container/heap tests). Scoped
+				// to GoImplement lines: a GoImplicitConv attribute carries a `ValueType =` keyword that
+				// the System-colliding rooter inside qualifyLocalTypeRef would rewrite.
+				if strings.HasPrefix(line, "[assembly: GoImplement<") {
+					line = qualifyLocalTypeRef(line)
+				}
+
+				lines.Add(line)
 			}
 		}
 

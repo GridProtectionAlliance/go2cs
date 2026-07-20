@@ -778,6 +778,82 @@ func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
 	}
 }
 
+// Stale-spelling merge guard (container/heap): a GoImplement record persisted by an EARLIER
+// converter run under a now-stale spelling must NOT survive a re-merge as a SECOND record for the
+// same (impl, interface) pair. A NESTED package-under-test's own interface was once emitted fully
+// qualified (`go.container.heap_package.Interface`); stripLocalTypeQualifier (the math/rand/v2
+// collapse fix) now canonicalizes it to the bare local `Interface`. The -tests external-variant
+// write MERGES the committed package_info_test.cs, so the stale qualified line and the freshly
+// rendered bare line both reached the emitting HashSet and go2cs-gen composed the adapter twice —
+// CS0102 + CS0111 + CS8646 on IntHeapжInterface. writePackageInfoFile now normalizes each merged-in
+// GoImplement line through the same qualifyLocalTypeRef canonicalization the fresh render applies,
+// so the two collapse to ONE. Guards the container/heap -tests re-validation from a fresh converter.
+func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
+	dir := t.TempDir()
+	fileName := filepath.Join(dir, externalTestPackageInfoFileName)
+
+	// The committed (stale) external-test metadata: the interface is spelled fully qualified, as an
+	// older converter emitted it before stripLocalTypeQualifier reduced it to the bare local form.
+	seed := strings.Join([]string{
+		"// <ImportedTypeAliases>",
+		"// </ImportedTypeAliases>",
+		"",
+		"using go;",
+		"using static go.container.heap_package;",
+		"using static go.container.heap_test_package;",
+		"",
+		"// <ExportedTypeAliases>",
+		"// </ExportedTypeAliases>",
+		"",
+		"// <InterfaceImplementations>",
+		"[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]",
+		"// </InterfaceImplementations>",
+		"",
+		"// <ImplicitConversions>",
+		"// </ImplicitConversions>",
+		"",
+		"namespace go.container;",
+		"",
+		"public static partial class heap_test_package",
+		"{",
+		"}",
+	}, "\r\n")
+
+	if err := os.WriteFile(fileName, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageName = "heap_test"
+	packageNamespace = "go.container"
+
+	// What convertTestVariant installs for a -tests run of a NESTED package under test, and the
+	// interface record the external variant's `heap.Init(&h)` cast rediscovers by import path.
+	previous := testLocalTypePrefixes
+	t.Cleanup(func() { testLocalTypePrefixes = previous })
+	testLocalTypePrefixes = []string{"go.container.heap_package"}
+	interfaceImplementations["container.heap_package.Interface"] = NewHashSet([]string{PointerPrefix + "<IntHeap>"})
+
+	writePackageInfoFile(fileName, true)
+
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents := string(data)
+
+	if got := strings.Count(contents, "GoImplement<IntHeap,"); got != 1 {
+		t.Fatalf("IntHeap must map to the interface through exactly ONE GoImplement record (a duplicate composes a duplicate adapter, CS0102/CS0111); got %d:\n%s", got, contents)
+	}
+	if strings.Contains(contents, "go.container.heap_package.Interface") {
+		t.Fatalf("the merged record must canonicalize to the bare generator-resolvable spelling, not the stale qualified one:\n%s", contents)
+	}
+	if !strings.Contains(contents, "[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]") {
+		t.Fatalf("the surviving record must be the bare-spelling pointer form:\n%s", contents)
+	}
+}
+
 // B4/B5 guard (partition predicate): an EXTERNAL variant GoImplement record anchors to the test
 // package unit when its generated code must live in the test package class — bare (test-local)
 // impls, every non-production ж pointer adapter, and adapter-class-marked (interface-sourced /

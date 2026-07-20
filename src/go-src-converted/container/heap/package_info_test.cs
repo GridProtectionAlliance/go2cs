@@ -16,8 +16,8 @@ using static go.container.heap_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]
-[assembly: GoImplement<PriorityQueue, go.container.heap_package.Interface>(Pointer = true)]
+[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]
+[assembly: GoImplement<PriorityQueue, Interface>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

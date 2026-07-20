@@ -3926,6 +3926,29 @@ package's fully-qualified class back to the bare local form the attribute file's
 `HashSet`. Guarded by `TestCanonicalRecordIfaceNameCollapsesToPackageClass` and
 `TestStripLocalTypeQualifier`.
 
+⚠ **The collapse only reaches records the CURRENT run rendered — a stale spelling already on disk
+slips past it, because `package_info_test.cs` / `package_test_info.cs` are MERGE-PRESERVING** (see
+the anchor-routing note above). The merge reads each existing attribute line VERBATIM into the
+emitting `HashSet`, so a record persisted by an OLDER converter — before `stripLocalTypeQualifier`
+reduced it — arrives under the pre-collapse spelling and never meets the fresh, already-collapsed
+one. `container/heap` (banked at package #8, before the collapse landed) committed
+`[assembly: GoImplement<IntHeap, go.container.heap_package.Interface>(Pointer = true)]`; a fresh
+`-tests` run of a NESTED package-under-test now renders that same pair as the bare
+`[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]` (the qualified `go.container.heap_package.`
+prefix gets `rootQualifySubNamespaceTypeRefs`-rooted then stripped, whereas a TOP-LEVEL package's
+`sort_package.Interface` is never rooted so it is never stripped and stays byte-stable). The two
+spellings both survived the merge → `GetUniqueHintName` uniquified the second `.g.cs` → a duplicate
+`IntHeapжInterface` reached the compiler (CS0102 + CS0111 + CS8646). `writePackageInfoFile` now runs
+every merged-in `[assembly: GoImplement<…>]` line through the SAME `qualifyLocalTypeRef` pipeline the
+fresh render applies, so a stale record collapses into the canonical one instead of duplicating it —
+the whole-line pass is safe because the pipeline only rewrites package-qualified name tokens (bare
+flag keywords `Pointer`/`Promoted` and the `assembly`/`GoImplement` scaffolding are untouched), and it
+is scoped to `GoImplement` lines specifically so it cannot rewrite a `GoImplicitConv` attribute's
+`ValueType = "…"` keyword (`ValueType` is a System-colliding name the rooter would otherwise qualify).
+Because whole-package conversions (`-stdlib`, every behavioral test) write with `mergeExisting=false`
+they never take this path, so the corpus and behavioral goldens are byte-identical. Guarded by
+`TestMergedStaleGoImplementSpellingCollapses`.
+
 ### A test project's references cover UNROOTED single-segment alias targets
 A `-tests` project sets `DisableTransitiveProjectReferences`, so its references are the
 direct-import closure plus whatever `aliasReferenceImports` recovers by scanning the emitted `using`
