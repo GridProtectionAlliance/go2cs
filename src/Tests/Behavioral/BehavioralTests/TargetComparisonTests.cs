@@ -1014,6 +1014,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]
+    public void CheckRangeIntIndexAppend() => CheckTarget("RangeIntIndexAppend");
+
+    [TestMethod]
     public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
 
     [TestMethod]

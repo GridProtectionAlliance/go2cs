@@ -946,6 +946,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]
+    public void CheckRangeIntIndexAppend() => CheckTarget("RangeIntIndexAppend");
+
+    [TestMethod]
     public void CheckRangeShadowSelectorMethod() => CheckTarget("RangeShadowSelectorMethod");
 
     [TestMethod]
