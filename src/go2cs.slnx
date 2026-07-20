@@ -62,6 +62,7 @@
     <Project Path="Tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="Tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
     <Project Path="Tests/Behavioral/AnonInterfaceCrossFile/AnonInterfaceCrossFile.csproj" />
+    <Project Path="Tests/Behavioral/AnonInterfaceSignatureAssert/AnonInterfaceSignatureAssert.csproj" />
     <Project Path="Tests/Behavioral/AnonStructArrayElement/AnonStructArrayElement.csproj" />
     <Project Path="Tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
     <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
