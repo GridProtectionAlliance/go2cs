@@ -53,6 +53,7 @@ using static go.main_package;
 [assembly: GoImplement<cert, Labeled>]
 [assembly: GoImplement<cert, certificate>]
 [assembly: GoImplement<counter, ΔMeter>]
+[assembly: GoImplement<dial, CrossPkgLib_package.Labeled>(Pointer = true)]
 [assembly: GoImplement<emblem, Labeled>]
 [assembly: GoImplement<emblem, namedLabel>]
 [assembly: GoImplement<probe, Labeled>]

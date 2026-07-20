@@ -266,6 +266,12 @@ type Visitor struct {
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
 	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
 	pendingTypeAccess string
+	// recordingStructuralImplementers is set while recordLocalConcreteImplementers (the
+	// DECLARATION-SITE structural recorder) is probing a pair. Every other producer records a pair
+	// some emitted site DEMANDS — a cast or an assertion — whereas this one is speculative by
+	// construction, so convertToInterfaceType tags what it records as structural-only for
+	// writePackageInfoFile's adapter-class-name collision prune.
+	recordingStructuralImplementers bool
 	// namedReturnDeferMode is set when the current function has named return values AND uses
 	// defer/recover. Such a function is emitted as a block body that declares the named returns
 	// *outside* the `func((defer, recover) => …)` wrapper (so deferred code, including recover,
@@ -482,6 +488,16 @@ var interfaceInheritances map[string]HashSet[string]
 // GoImplement<net.Conn, io.ReadWriteCloser> leaves every `new net_ConnᴠWriter(…)` use site
 // referencing a class the generator never emits (net/http, CS0246 ×17). Guarded by packageLock.
 var adapterClassImplementations HashSet[string]
+
+// structuralOnlyImplementations tracks, per recorded "iface|impl" GoImplement pair, whether EVERY
+// producer that recorded it was the DECLARATION-SITE structural recorder (recordLocalConcreteImplementers)
+// — true — or whether some emitted cast/assertion site DEMANDED it — false, which wins permanently.
+// A structural-only pair is speculative: it exists so a run-time `x.(Iface)` can resolve, and no
+// emitted C# names its adapter. That makes it the safe loser when two pairs for one concrete would
+// compose the SAME generated adapter class name (see the collision prune in writePackageInfoFile).
+// Guarded by packageLock.
+var structuralOnlyImplementations map[string]bool
+
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
 var indirectImplicitConversions map[string]HashSet[string]
@@ -1191,6 +1207,28 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	}
 }
 
+// aliasCoveredImplementationKeys returns the "canonicalIface|impl" keys of every GoImplement pair
+// that is ALREADY carried by a record under a package type ALIAS of the same interface (os converts
+// dirEntry to fs.DirEntry through its own `type DirEntry = fs.DirEntry` AND through the io/fs name).
+// The aliased record wins and the qualified duplicate is skipped — this set drives that skip in
+// writePackageInfoFile's emission loop, and its adapter-name collision prune consults the same set
+// so a duplicate that will be skipped never owns an adapter name. Callers hold packageLock.
+func aliasCoveredImplementationKeys() HashSet[string] {
+	covered := HashSet[string]{}
+
+	for alias, typeName := range exportedTypeAliases {
+		if implementations, ok := interfaceImplementations[alias]; ok {
+			canonIface := strings.TrimPrefix(typeName, RootNamespace+".")
+
+			for implementation := range implementations {
+				covered.Add(canonIface + "|" + implementation)
+			}
+		}
+	}
+
+	return covered
+}
+
 // writePackageInfoFile creates or updates a package information file (package_info.cs, or the
 // test conversion's package_test_info.cs) by inserting the CURRENT package-scoped metadata
 // globals (imported/exported type aliases, interface implementations, implicit conversions)
@@ -1414,6 +1452,73 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 		}
 
+		// Drop a SPECULATIVE pair whose generated adapter class name COLLIDES with a demanded pair's.
+		// go2cs-gen composes the adapter class name from the LAST DOT SEGMENT of each side — the same
+		// naming adapterTypeRef/valueAdapterTypeRef emit at cast sites — so two records for ONE
+		// concrete against two DIFFERENT interfaces that share a SIMPLE name compose ONE class name:
+		// compress/zlib's own `Resetter` and the `compress/flate` `Resetter` its `*reader` also
+		// implements both yield `readerжResetter` in zlib_package, and the two .g.cs files collide
+		// (CS0102 + CS0111 ×5). The FORM is part of the name (`ж` pointer prefix vs `ᴠ` value infix),
+		// so only same-form pairs collide. The declaration-site structural pair is the safe loser: no
+		// emitted C# names its adapter (it exists only so a run-time assertion can resolve), whereas
+		// dropping a DEMANDED pair strands a real cast site on a class the generator never emits
+		// (CS0246). Two colliding structural pairs are broken by keeping the lexicographically first,
+		// so the result is deterministic regardless of map iteration order. Shrink-only by
+		// construction — a pair is only ever removed, and only when its name is already taken.
+		// A pair the ALIAS dedup below will skip (the QUALIFIED duplicate of a record already carried
+		// under a package type ALIAS) never reaches the file, so it must not OWN an adapter name here
+		// — CrossPkgUser's `type Tagged = CrossPkgLib.Labeled` records badge under BOTH names, and the
+		// qualified one would otherwise claim `badgeᴠLabeled` and evict the local `Labeled` pair the
+		// alias record never actually emits (it emits `badgeᴠTagged`).
+		aliasCoveredImplementations := aliasCoveredImplementationKeys()
+
+		adapterNameOwners := map[string]string{}
+		collidingStructuralPairs := map[string][]string{}
+
+		for interfaceName, implementations := range interfaceImplementations {
+			for _, implementation := range implementations.Keys() {
+				if aliasCoveredImplementations.Contains(strings.TrimPrefix(interfaceName, RootNamespace+".") + "|" + implementation) {
+					continue
+				}
+
+				var adapterName string
+
+				if strings.HasPrefix(implementation, PointerPrefix+"<") {
+					adapterName = adapterTypeRef(implementation[3:len(implementation)-1], interfaceName)
+				} else {
+					adapterName = valueAdapterTypeRef(implementation, interfaceName)
+				}
+
+				pairKey := interfaceName + "|" + implementation
+
+				if !structuralOnlyImplementations[pairKey] {
+					adapterNameOwners[adapterName] = pairKey
+					continue
+				}
+
+				collidingStructuralPairs[adapterName] = append(collidingStructuralPairs[adapterName], pairKey)
+			}
+		}
+
+		for adapterName, structuralPairs := range collidingStructuralPairs {
+			sort.Strings(structuralPairs)
+
+			// With no demanded owner the FIRST structural pair keeps the name; every later one, and
+			// every structural pair whose name a demanded pair already owns, is dropped.
+			if _, demanded := adapterNameOwners[adapterName]; !demanded {
+				structuralPairs = structuralPairs[1:]
+			}
+
+			for _, pairKey := range structuralPairs {
+				separator := strings.LastIndex(pairKey, "|")
+				interfaceName, implementation := pairKey[:separator], pairKey[separator+1:]
+
+				if implementations, ok := interfaceImplementations[interfaceName]; ok {
+					implementations.Remove(implementation)
+				}
+			}
+		}
+
 		// Add new interface implementations to package info file (hashset ensures uniqueness).
 		// A ж<T>-wrapped implementation records a POINTER-sourced cast (`var s Iface = &t`) —
 		// unwrap it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter
@@ -1428,17 +1533,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// last-dot-segment naming; the QUALIFIED duplicate is skipped. (Normalizing the
 		// RECORDS to the qualified form instead regressed os 8→77: the qualified interface
 		// name broke generator resolution and flipped the alias-locality gate.)
-		aliasCoveredImplementations := HashSet[string]{}
-
-		for alias, typeName := range exportedTypeAliases {
-			if implementations, ok := interfaceImplementations[alias]; ok {
-				canonIface := strings.TrimPrefix(typeName, RootNamespace+".")
-
-				for implementation := range implementations {
-					aliasCoveredImplementations.Add(canonIface + "|" + implementation)
-				}
-			}
-		}
+		// Recomputed AFTER the collision prune — that prune can drop an alias record's implementation,
+		// which would leave the qualified duplicate wrongly skipped against a stale covered set.
+		aliasCoveredImplementations = aliasCoveredImplementationKeys()
 
 		for interfaceName, implementations := range interfaceImplementations {
 			// A marker-form key (an anonymous-interface record made from a file visited
@@ -2923,6 +3020,26 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 
 	recordableValueForeign := recordableBase && !pointerTarget && targetIsForeignNamed && !v.isLocalImplType(targetType) && v.isLocalImplType(interfaceType)
 
+	// A LOCAL NAMED FUNC type's VALUE record also generates a per-interface adapter CLASS — a C#
+	// delegate cannot be a partial struct, so the generator takes the `<src>ᴠ<iface>` route (see the
+	// emission arm below, and flag's generated funcValue-...-Value-val.g.cs). It therefore needs the
+	// SAME exemption from the interface-inheritance prune as the ж<T> and foreign-value forms: the
+	// cast site references the adapter for the EXACT interface it targets. flag's boolFuncValue is
+	// recorded against BOTH boolFlag and Value (boolFlag EMBEDS Value), so the prune dropped the
+	// subsumed Value pair as "covered by inheritance" — true for a partial struct that folds the base
+	// into one interface list, FALSE for a per-interface adapter class — and flag.cs's
+	// `new boolFuncValueᴠValue(…)` lost its type (CS0246). Computed independently of exprResult: the
+	// record-only probe paths record the same pair, and the exemption must hold wherever it lands.
+	recordableValueLocalFunc := false
+
+	if recordable && !pointerTarget {
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if _, isSig := named.Underlying().(*types.Signature); isSig {
+				recordableValueLocalFunc = true
+			}
+		}
+	}
+
 	// A VALUE conversion where BOTH sides are FOREIGN (encoding/binary's `BigEndian` passed as
 	// binary.ByteOrder from debug/plan9obj): when the defining assembly already implements the
 	// pair (its package_info carries the value-form GoImplement record), the bare value converts
@@ -3030,8 +3147,18 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		// the cast site references — exempt it from the interface-inheritance prune (a local
 		// impl folds into the type's own partial-struct base list and still prunes; the
 		// pointer-form record is already exempt there by its ж< prefix).
-		if recordableValueForeign {
+		if recordableValueForeign || recordableValueLocalFunc {
 			adapterClassImplementations.Add(interfaceTypeName + "|" + recordName)
+		}
+
+		// Tag the pair's ORIGIN for the adapter-class-name collision prune. A DEMANDED record (any
+		// emitted cast/assertion site) wins permanently over the speculative declaration-site one.
+		if originKey := interfaceTypeName + "|" + recordName; v.recordingStructuralImplementers {
+			if _, seen := structuralOnlyImplementations[originKey]; !seen {
+				structuralOnlyImplementations[originKey] = true
+			}
+		} else {
+			structuralOnlyImplementations[originKey] = false
 		}
 
 		packageLock.Unlock()

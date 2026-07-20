@@ -47,6 +47,7 @@ func resetPackageState(pkg *packages.Package) {
 	constraintProxies = make(map[string][2]string)
 	interfaceInheritances = make(map[string]HashSet[string])
 	adapterClassImplementations = HashSet[string]{}
+	structuralOnlyImplementations = make(map[string]bool)
 	implicitConversions = make(map[string]HashSet[string])
 	invertedImplicitConversions = make(map[string]HashSet[string])
 	indirectImplicitConversions = make(map[string]HashSet[string])

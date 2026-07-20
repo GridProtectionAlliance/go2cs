@@ -593,7 +593,12 @@ func (v *Visitor) recordLocalConcreteImplementers(identType types.Type) {
 			continue
 		}
 
+		// This recorder is the ONLY producer of SPECULATIVE pairs — no site demands them — so mark
+		// what it records: writePackageInfoFile's adapter-class-name collision prune drops a
+		// speculative pair that would compose the same generated class name as a DEMANDED one.
+		v.recordingStructuralImplementers = true
 		v.recordIfImplements(named, iface, identType)
+		v.recordingStructuralImplementers = false
 	}
 }
 

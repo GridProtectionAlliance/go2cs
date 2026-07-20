@@ -94,6 +94,14 @@ internal static @string Stamp(this seal s) {
     return "ok:"u8 + s.name;
 }
 
+[GoType] partial struct dial {
+    internal @string n;
+}
+
+[GoRecv] internal static @string Label(this ref dial d) {
+    return "dial:"u8 + d.n;
+}
+
 [GoType] partial interface certificate :
     CrossPkgLib.Rated,
     CrossPkgLib.Sealed
@@ -259,6 +267,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(((CrossPkgLib.Labeled)new CrossPkgLib.SensorжLabeled(sp2)).Label(), CrossPkgLib.LabeledOf(sp2).Label());
     Labeled localLb = new CrossPkgLib_SensorжLabeled(sp2);
     fmt.Println(localLb.Label());
+    CrossPkgLib.Labeled fgl = new dialжLabeled(Ꮡ(new dial(n: "psi"u8)));
+    fmt.Println(fgl.Label(), CrossPkgLib.Describe(fgl));
     var (rp, rerr) = getReporter();
     fmt.Println(rp.Report(), rerr == default!);
     certificate ct = new cert(id: 42);

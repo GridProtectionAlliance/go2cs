@@ -123,6 +123,17 @@ type seal struct{ name string }
 func (s seal) Label() string { return s.name }
 func (s seal) Stamp() string { return "ok:" + s.name }
 
+// dial's POINTER method set satisfies the LOCAL Labeled and the FOREIGN CrossPkgLib.Labeled
+// alike, and main casts it to the FOREIGN one. Both pairs would compose ONE adapter class name
+// -- the generator names an adapter from the SIMPLE name of each side (dialжLabeled), so the
+// two would collide in main_package (compress/zlib's own Resetter vs the compress/flate Resetter
+// its *reader also implements: CS0102 + CS0111 x5). Only the FOREIGN pair is DEMANDED by an
+// emitted cast; the LOCAL one is recorded speculatively by the declaration-site structural
+// recorder, so it is the one the collision prune drops.
+type dial struct{ n string }
+
+func (d *dial) Label() string { return "dial:" + d.n }
+
 // certificate satisfies BOTH CrossPkgLib.Sealed and CrossPkgLib.Rated — which share Label
 // without subsuming each other — plus CrossPkgLib.Labeled (subsumed by either): the two
 // non-subsumed bases are inherited and the shared Label is RE-DECLARED to hide the two
@@ -364,6 +375,12 @@ func main() {
 	fmt.Println(CrossPkgLib.Labeled(sp2).Label(), CrossPkgLib.LabeledOf(sp2).Label()) // porch porch
 	var localLb Labeled = sp2
 	fmt.Println(localLb.Label()) // porch
+
+	// Adapter-class-name collision: *dial satisfies BOTH the local Labeled and the foreign
+	// CrossPkgLib.Labeled, so the demanded FOREIGN pair and the speculative LOCAL one compose
+	// the same dialжLabeled. The demanded pair keeps the name and drives this cast.
+	var fgl CrossPkgLib.Labeled = &dial{n: "psi"}
+	fmt.Println(fgl.Label(), CrossPkgLib.Describe(fgl)) // dial:psi dial:psi
 
 	rp, rerr := getReporter()
 	fmt.Println(rp.Report(), rerr == nil) // relay:live true
