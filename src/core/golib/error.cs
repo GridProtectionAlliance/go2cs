@@ -195,6 +195,17 @@ public static class errorExtensions
 
     public static T _<T>(this error target)
     {
+        // An assertion to another INTERFACE (`err.(interface{ … })`, e.g. a dyn anonymous interface) is a
+        // standard interface-to-interface assertion, not an unwrap of the error<T> concrete carrier. A
+        // pointer-sourced error is an IжAdapter standing in for the *T it wraps, so unwrap it to that
+        // receiver box (Go's interface holds the *T) and route it through the general duck-typed
+        // type-assertion machinery, which resolves the box's method set structurally.
+        if (typeof(T).IsInterface)
+        {
+            object dynamicValue = target is IжAdapter pointerAdapter && pointerAdapter.Box is not null ? pointerAdapter.Box : target;
+            return dynamicValue._<T>();
+        }
+
         try
         {
             return ((error<T>)target).Target;

@@ -2442,21 +2442,13 @@ public static class builtin
         // Run-time structural check (Go duck-typing). Encountered for dynamically defined interface types
         // or when a function checks a private library interface internally. Results are cached, but there
         // is an initial cost for lookup creation.
+        // Matches each interface method by NAME *and* SIGNATURE (parameter + return types), scoped to the
+        // value's actual Go method set — so `interface{ Unwrap() error }` and `interface{ Unwrap() []error }`
+        // stay distinct, and a pointer value ж<X> is not matched against the pointer methods of other types.
         // FUTURE: Consider if there's a way to do this at transpile time for increased performance
         public static bool Implements(Type valueType)
         {
-            return s_results.GetOrAdd(valueType, static vt =>
-            {
-                ImmutableHashSet<string> interfaceMethodNames = typeof(TInterface).GetInterfaceMethodNames();
-
-                // All types implement an empty interface
-                if (interfaceMethodNames.Count == 0)
-                    return true;
-
-                ImmutableHashSet<string> typeExtensionMethodNames = vt.GetExtensionMethodNames();
-
-                return interfaceMethodNames.Except(typeExtensionMethodNames).Count == 0;
-            });
+            return s_results.GetOrAdd(valueType, static vt => vt.StructurallyImplements(typeof(TInterface)));
         }
     }
 

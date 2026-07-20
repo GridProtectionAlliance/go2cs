@@ -352,6 +352,168 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Determines, by Go DUCK-TYPING (structural) rules, whether the method set of
+    /// <paramref name="valueType"/> satisfies every method of <paramref name="interfaceType"/> —
+    /// matching each interface method by NAME <em>and</em> full SIGNATURE (parameter and return types).
+    /// </summary>
+    /// <param name="valueType">
+    /// Concrete runtime type of the value being asserted. A pointer value is the box <c>ж&lt;X&gt;</c>.
+    /// </param>
+    /// <param name="interfaceType">Anonymous or named interface the value is asserted against.</param>
+    /// <returns>
+    /// <c>true</c> if <paramref name="valueType"/> structurally implements <paramref name="interfaceType"/>;
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This is the runtime gate for duck-typed type assertions (<c>x.(interface{ … })</c>). It replaces a
+    /// prior NAME-ONLY test that had two defects:
+    /// <list type="number">
+    /// <item>It conflated same-named methods whose signatures differ — <c>Unwrap() error</c> versus
+    /// <c>Unwrap() []error</c> — so a value implementing one matched the interface for the other and the
+    /// generated duck-typed adapter then failed to bind a delegate (a <see cref="NotImplementedException"/>).</item>
+    /// <item>For a pointer value <c>ж&lt;X&gt;</c> it admitted the pointer-receiver methods of <em>every</em>
+    /// type, because <see cref="GetExtensionMethodNames"/> collapses a closed <c>ж&lt;X&gt;</c> to the open
+    /// <c>ж&lt;&gt;</c> generic definition (correct for MinBy-precedence single dispatch, wrong for a
+    /// name-set membership test).</item>
+    /// </list>
+    /// Both are corrected here: candidates are restricted to the extension methods whose receiver actually
+    /// belongs to <paramref name="valueType"/>'s Go method set (a pointer box <c>ж&lt;X&gt;</c> exposes the
+    /// value- and pointer-receiver methods of <c>X</c>; a plain value <c>X</c> exposes only its
+    /// value-receiver methods), and each candidate is compared by full signature. Open-generic receiver
+    /// methods keep the prior name-only match, since their signatures carry type parameters that cannot be
+    /// compared structurally against the interface's concrete signature (the defects being fixed are all on
+    /// closed types).
+    /// </remarks>
+    public static bool StructurallyImplements(this Type valueType, Type interfaceType)
+    {
+        MethodInfo[] interfaceMethods = [.. interfaceType.GetInterfaceMethods()];
+
+        // All types implement an empty interface.
+        if (interfaceMethods.Length == 0)
+            return true;
+
+        // Resolve the value's Go method-set receiver element: a pointer box ж<X> exposes BOTH the value-
+        // and pointer-receiver methods of X; a plain value X exposes only its value-receiver methods.
+        ResolveReceiverElement(valueType, out Type valueElement, out bool valueIsPointer);
+
+        // Collect the extension methods whose receiver belongs to this value's method set.
+        (MethodInfo method, Type receiver)[] allExtensionMethods = GetExtensionMethods();
+        List<MethodInfo> candidates = [];
+
+        foreach ((MethodInfo method, Type receiver) in allExtensionMethods)
+        {
+            Type receiverType = receiver.IsByRef ? receiver.GetElementType()! : receiver;
+            ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
+
+            // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
+            if (!valueIsPointer && receiverIsPointer)
+                continue;
+
+            if (ReceiverElementMatches(receiverElement, valueElement))
+                candidates.Add(method);
+        }
+
+        // Every interface method must be satisfied by a candidate with the same name AND signature.
+        foreach (MethodInfo interfaceMethod in interfaceMethods)
+        {
+            bool satisfied = false;
+
+            foreach (MethodInfo candidate in candidates)
+            {
+                if (candidate.Name != interfaceMethod.Name)
+                    continue;
+
+                // An open-generic receiver method (a method generic over its receiver's type parameter)
+                // carries type parameters in its signature that cannot be compared structurally against the
+                // interface's concrete signature — keep the prior name-only match for those.
+                if (candidate.IsGenericMethodDefinition || candidate.GetParameters()[0].ParameterType.ContainsGenericParameters)
+                {
+                    satisfied = true;
+                    break;
+                }
+
+                if (SignaturesMatch(interfaceMethod, candidate))
+                {
+                    satisfied = true;
+                    break;
+                }
+            }
+
+            if (!satisfied)
+                return false;
+        }
+
+        return true;
+    }
+
+    // Splits a receiver type into its concrete element type and whether it is a pointer box ж<X>.
+    private static void ResolveReceiverElement(Type type, out Type element, out bool isPointer)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ж<>))
+        {
+            element = type.GetGenericArguments()[0];
+            isPointer = true;
+        }
+        else
+        {
+            element = type;
+            isPointer = false;
+        }
+    }
+
+    // Determines whether an extension method's receiver element belongs to the asserted value's method set.
+    private static bool ReceiverElementMatches(Type receiverElement, Type valueElement)
+    {
+        if (receiverElement == valueElement)
+            return true;
+
+        // An open-generic receiver (a method on a Go generic type, receiver e.g. List<T>) matches a
+        // constructed value of the same generic definition (List<int>).
+        if (receiverElement.ContainsGenericParameters && receiverElement.IsGenericType &&
+            valueElement.IsGenericType &&
+            receiverElement.GetGenericTypeDefinition() == valueElement.GetGenericTypeDefinition())
+            return true;
+
+        // Safety net for promotion/embedding and base relationships — mirrors the assignability rule the
+        // legacy value-type extension lookup used.
+        return receiverElement.IsAssignableFrom(valueElement);
+    }
+
+    // Compares a duck-typed interface method against a candidate extension method by full signature.
+    // The candidate's first parameter is the extension receiver; the interface method has none.
+    private static bool SignaturesMatch(MethodInfo interfaceMethod, MethodInfo candidate)
+    {
+        if (!TypesEquivalent(interfaceMethod.ReturnType, candidate.ReturnType))
+            return false;
+
+        ParameterInfo[] interfaceParameters = interfaceMethod.GetParameters();
+        ParameterInfo[] candidateParameters = candidate.GetParameters();
+
+        if (interfaceParameters.Length != candidateParameters.Length - 1)
+            return false;
+
+        for (int i = 0; i < interfaceParameters.Length; i++)
+        {
+            if (!TypesEquivalent(interfaceParameters[i].ParameterType, candidateParameters[i + 1].ParameterType))
+                return false;
+        }
+
+        return true;
+    }
+
+    // Type identity for signature comparison, disregarding by-ref decoration (ref/in/out parameters).
+    private static bool TypesEquivalent(Type left, Type right)
+    {
+        if (left.IsByRef)
+            left = left.GetElementType()!;
+
+        if (right.IsByRef)
+            right = right.GetElementType()!;
+
+        return left == right;
+    }
+
+    /// <summary>
     /// Determines if an extension method with the specified <paramref name="methodName"/> exists for the <paramref name="targetType"/>.
     /// </summary>
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>

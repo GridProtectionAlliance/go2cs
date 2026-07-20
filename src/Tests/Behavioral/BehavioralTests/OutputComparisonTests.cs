@@ -49,6 +49,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
 
     [TestMethod]
+    public void CheckAnonInterfaceSignatureAssert() => CheckTarget("AnonInterfaceSignatureAssert");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
