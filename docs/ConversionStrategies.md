@@ -449,6 +449,20 @@ var nums = new nint[]{10, 20, 30}.slice();
 var buf = new slice<byte>(4);
 ```
 
+A `[N]T` literal that writes fewer than `N` elements passes the declared length to the projection, because
+Go zero-fills the remainder — `[8]byte{}` is eight zero bytes, not an empty array. A full literal keeps the
+plain `.array()`, and a slice literal never pads:
+
+```go
+seed := [8]byte{1, 2}   // 1, 2, then six zeros
+```
+```csharp
+var seed = new byte[]{1, 2}.array(8);
+```
+
+See [the reference](ConversionStrategies-Reference.md#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)
+for the keyed/`SparseArray` form and the nested-array gap.
+
 `append`, `len`, `make`, and sub-slicing map to golib builtins/methods, and a variadic `...T` parameter
 arrives as `params ꓸꓸꓸT` rebound to a slice at the top of the body. From the real stdlib:
 

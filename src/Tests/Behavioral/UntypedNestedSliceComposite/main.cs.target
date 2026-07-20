@@ -43,8 +43,8 @@ internal static readonly js j3 = 3;
 internal static readonly js numJS = 4;
 
 internal static slice<array<js>> jsTable = new golib.SparseArray<array<js>>{
-    [(int)j0] = new golib.SparseArray<js>{[(int)j1] = j2, [(int)j3] = j1}.array(),
-    [(int)j2] = new golib.SparseArray<js>{[(int)j0] = j3, [(int)j3] = j2}.array()
+    [(int)j0] = new golib.SparseArray<js>{[(int)j1] = j2, [(int)j3] = j1}.array(4),
+    [(int)j2] = new golib.SparseArray<js>{[(int)j0] = j3, [(int)j3] = j2}.array(4)
 }.slice();
 
 internal static slice<slice<@string>> sparseRows = new slice<@string>[]{

@@ -1690,6 +1690,51 @@ at length 0, not N (a known converter gap, chipped separately). (Guarded by the
 `ZeroValueArrayField` behavioral test — the literal-omission shape ranged/indexed/printed vs Go,
 plus an explicit-argument control.)
 
+### A fixed-array composite literal carries its DECLARED length (`.array(N)`)
+
+A `[N]T{…}` literal is **N** long however many elements it writes — Go zero-fills the rest, so
+`[8]byte{}` is eight zero bytes and `[8]byte{1, 2}` is `1, 2` followed by six zeros. The literal
+renders as a C# element array projected through golib's `.array()` extension, and that element
+array holds only the elements actually written, so the projection produced an array as long as the
+LITERAL rather than as long as the TYPE. `[8]byte{}` became length **0**: it compiled cleanly and
+then panicked on first use (`index out of range [7] with length 0` — math/rand/v2 `chacha8`'s
+`Seed`, whose `[8]byte{}` never held a byte). The projection now takes the declared length:
+
+```go
+a := [8]byte{}          // eight zero bytes
+b := [8]byte{1, 2}      // 1, 2, then six zeros
+c := [3]byte{1, 2, 3}   // already full
+```
+
+```csharp
+var a = new byte[]{}.array(8);
+var b = new byte[]{1, 2}.array(8);
+var c = new byte[]{1, 2, 3}.array();      // full literal keeps the plain projection
+```
+
+Only a **short** literal takes the length argument. A full literal — and every `[...]T{…}`
+ellipsis literal, whose length *is* its element count — already yields the right length and keeps
+the plain `.array()` form, so existing goldens for those are unchanged. A **slice** literal is
+genuinely as long as its elements (`[]byte{}` IS empty) and never pads; its `.slice()` projection
+is untouched. golib's `array<T>(T[] source, int length)` constructor does the zero-filled copy,
+which is deliberately distinct from the `array(slice<T>, nint)` slice-to-array *conversion* ctor
+(there a short source is a Go panic; here it is the normal case).
+
+The same dropped length reached the **indexed/keyed** form by a second route. A keyed literal
+whose indices all fold to constants renders as `new array<T>(N){[i] = v}`, which was already
+correct — but the scan used `0` as its "no constant keys" sentinel, so a literal whose only key
+*is* 0 (`[8]byte{0: 9}`) read as unresolved and fell to the `SparseArray` projection, whose extent
+is `max index + 1`, not `N`. Constant-key detection is now tracked separately from the maximum
+index, and the `SparseArray` projection — still used for a key that is constant but not a literal
+(a `const` identifier), which `SparseArrayIfaceElem`'s `[kLast]shape` registry exercises — also
+carries the declared length. (Guarded by the `ArrayLiteralDeclaredLength` behavioral test: empty,
+partial, full, ellipsis, keyed, zero-keyed, named, aliased, package-level, non-byte element types,
+a tail write proving the backing is really N long, and a `[]byte{}` slice control, output-compared
+vs `go run`; the pre-fix converter exits with the index-out-of-range panic. Note a NESTED fixed
+array's inner elements are still default-constructed — `[2][4]byte{}` gets the right outer length
+but inner length 0 — a separate pre-existing gap shared with the `var` declaration path, chipped
+separately.)
+
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.
 

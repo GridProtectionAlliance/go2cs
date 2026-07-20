@@ -78,6 +78,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
 
     [TestMethod]
+    public void CheckArrayLiteralDeclaredLength() => CheckTarget("ArrayLiteralDeclaredLength");
+
+    [TestMethod]
     public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
 
     [TestMethod]
