@@ -5810,6 +5810,41 @@ foreach (var (_, rᴛ1) in s) {
 ```
 A range variable that is only *read* keeps binding directly to the `foreach` tuple (no temp, no churn). This reuses the same temp-var/`innerPrefix` machinery as the `for k, v = range` (re-assign-into-existing-vars) form. (Guarded by the `RangeVarReassign` behavioral test; runtime hits this in `os_windows`'s UTF-16 surrogate-pair encoder.)
 
+**Addressability flows from the path ROOT, not the immediate operand.** Each trigger above is
+matched against the identifier at the root of a field/element access path (`rangeVarRootIdent`),
+because Go's addressability propagates through every value hop: `test.x.String()` with a
+pointer-receiver `String` is legal in Go (it auto-takes `&test.x`), and C# names the same rule in
+its diagnostics — CS1654/CS1655 speak of *"fields of"* the iteration variable. Matching only the
+immediate operand missed the whole class, which matters far beyond one construct because this is
+the **table-driven test** idiom that dominates the standard library's own test suites:
+
+```go
+for _, test := range tests {
+    fmt.Println(test.x.String())   // pointer receiver on a FIELD of the range var — CS1655
+}
+```
+```csharp
+foreach (var (_, vᴛ1) in tests) {
+    var test = vᴛ1;                // mutable, addressable per-iteration copy
+    fmt.Println(test.x.String());
+}
+```
+
+The same root walk covers a write through a nested path (`test.x.n = 99`, CS1654) and an address
+taken of one (`&test.x`). The walk **stops at the first pointer hop**: past a pointer the access
+goes through the heap box (`ж<T>.Value`), an independent mutable lvalue the iteration variable's
+read-only-ness never reaches — so `test.ptr.Bump()` keeps the direct `foreach` binding with no copy,
+and (matching Go) its write *is* observed by the source. Indexing likewise only continues through an
+**array**, whose storage is in-place; a slice or map index reaches a separate backing store and is
+its own addressability root. The copy is per-iteration, matching Go 1.22+ loop-variable semantics
+(see the for-clause section below).
+
+Scoping the trigger to the root this way *removes* work as well as adding it: the previous
+field-write arm never checked whether the base was a POINTER, so a write like `s.Name = x` through a
+pointer-typed range variable emitted a needless per-iteration copy. Across the 302-package
+`go-src-converted` corpus the net effect is **54 spurious copies eliminated and none added** — the
+addressability additions show up in *test* code (the table-driven idiom), not in production sources.
+
 ### For-clause variables are per-iteration (Go 1.22 loop-variable semantics)
 
 Go 1.22 gives each iteration of a `for i := …; cond; post` loop its **own copy** of the clause-declared variables, initialized from the previous iteration's final value. A C# for-clause variable is ONE variable shared by every iteration, so a closure captured in the body would observe the shared post-mutated final value (`3 3 3` instead of Go's `0 1 2`), and a stored `&i` would alias one shared box — compiling code that is silently wrong. When a clause-declared variable is **captured by a func literal in the body** or is **heap-boxed**, the converter rewrites the clause to drive a renamed *carrier* (`iᴛ1`) and re-declares the real variable fresh from the carrier at the top of the body; when the body can write the variable, its value is copied back to the carrier at every transfer to the post clause — the end of the body, before an unlabeled `continue` (a C# `continue` skips the end of the body), and after the `continue_<label>:` target (which the copy-backs deliberately follow, so a `goto continue_<label>` flows through them):

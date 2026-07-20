@@ -8,14 +8,75 @@ import (
 	"strings"
 )
 
+// rangeVarRootIdent returns the identifier at the ROOT of a field/element access path
+// (`test.x.n` → `test`), or nil when the path is not rooted in a plain identifier.
+//
+// Addressability in Go flows from the root variable through every VALUE hop, so a write to — or an
+// address taken of — any part of that path needs the root itself to be addressable. C# models the
+// same rule (CS1654/CS1655 name "fields of" the iteration variable), which is why the range-var
+// triggers below must test the path ROOT rather than the immediate operand.
+//
+// The walk STOPS at the first hop through a POINTER: past a pointer the emitted access goes through
+// the heap box (`ж<T>.Value`), which is an independent mutable lvalue, so the iteration variable's
+// read-only-ness no longer reaches it and no copy is warranted. Indexing likewise only continues
+// through an ARRAY (whose storage is in-place inside the struct); a slice or map index reaches a
+// separate backing store and is therefore its own addressability root.
+func (v *Visitor) rangeVarRootIdent(expr ast.Expr) *ast.Ident {
+	for {
+		switch e := expr.(type) {
+		case *ast.Ident:
+			return e
+		case *ast.ParenExpr:
+			expr = e.X
+		case *ast.SelectorExpr:
+			if v.exprHopIsPointer(e.X) {
+				return nil
+			}
+
+			expr = e.X
+		case *ast.IndexExpr:
+			operandType := types.Unalias(v.info.TypeOf(e.X))
+
+			if operandType == nil {
+				return nil
+			}
+
+			if _, isArray := operandType.Underlying().(*types.Array); !isArray {
+				return nil
+			}
+
+			expr = e.X
+		default:
+			return nil
+		}
+	}
+}
+
+// exprHopIsPointer reports whether an access path hop is through a pointer — see rangeVarRootIdent.
+func (v *Visitor) exprHopIsPointer(expr ast.Expr) bool {
+	exprType := types.Unalias(v.info.TypeOf(expr))
+
+	if exprType == nil {
+		return false
+	}
+
+	_, isPtr := exprType.Underlying().(*types.Pointer)
+
+	return isPtr
+}
+
 // rangeVarNeedsMutableCopy reports whether the range key/value identifier must be copied into a
-// mutable local in the loop body. Two triggers: (1) the var is reassigned (via `=`, `+=`, `-=`,
-// `++`, …) — Go lets a range variable be reassigned (it is a per-iteration copy), but a C#
-// `foreach` iteration variable is read-only (CS1656); (2) the var is the receiver of a
-// POINTER-RECEIVER method — the emitted `[GoRecv]` form takes `this ref T`, and a foreach
-// iteration variable cannot bind ref (CS1657 — dnsmessage's GoString). Such a var must be
-// iterated through a temp and copied into a mutable local. A `:=` redeclaration shadows into a
-// new object, so it is not counted (the object identity check excludes it).
+// mutable local in the loop body. Three triggers, each rooted at the range var via
+// rangeVarRootIdent: (1) the var — or a field/element PATH rooted at it — is written (via `=`,
+// `+=`, `-=`, `++`, …); Go lets a range variable and its members be written (it is a per-iteration
+// copy), but a C# `foreach` iteration variable is read-only and so are its fields (CS1656/CS1654);
+// (2) a POINTER-RECEIVER method is called on the var or on a value path rooted at it — the emitted
+// `[GoRecv]` form takes `this ref T`, and neither a foreach iteration variable nor its fields can
+// bind ref (CS1657/CS1655 — dnsmessage's GoString, and the table-driven `test.x.String()` idiom
+// that dominates the standard library's own tests); (3) the address of the var or of such a path is
+// taken (`&test.x`), which likewise requires an addressable root. Such a var must be iterated
+// through a temp and copied into a mutable local. A `:=` redeclaration shadows into a new object,
+// so it is not counted (the object identity check excludes it).
 func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) bool {
 	ident, ok := expr.(*ast.Ident)
 
@@ -42,35 +103,40 @@ func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) b
 				return true
 			}
 
+			// A write to the range var itself, or through a field/element PATH rooted at it
+			// (`dt.dll, _ = getString(…)`, debug/pe's importedSymbols; `test.x.n = 99`),
+			// modifies the iteration variable or its members (CS1656/CS1654) — the
+			// mutable-copy escape applies to both.
 			for _, lhs := range s.Lhs {
-				if id, ok := lhs.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+				if root := v.rangeVarRootIdent(lhs); root != nil && v.info.ObjectOf(root) == obj {
 					found = true
 					return false
 				}
-
-				// A FIELD write through the range var (`dt.dll, _ = getString(…)`,
-				// debug/pe's importedSymbols) modifies members of the iteration
-				// variable (CS1654) — the same mutable-copy escape applies.
-				if sel, ok := lhs.(*ast.SelectorExpr); ok {
-					if id, ok := sel.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
-						found = true
-						return false
-					}
-				}
 			}
 		case *ast.IncDecStmt:
-			if id, ok := s.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+			if root := v.rangeVarRootIdent(s.X); root != nil && v.info.ObjectOf(root) == obj {
 				found = true
 				return false
 			}
+		case *ast.UnaryExpr:
+			// Taking the address of the range var or of a value path rooted at it (`&test.x`)
+			// requires an addressable root (CS1655 on a foreach var's fields).
+			if s.Op == token.AND {
+				if root := v.rangeVarRootIdent(s.X); root != nil && v.info.ObjectOf(root) == obj {
+					found = true
+					return false
+				}
+			}
 		case *ast.SelectorExpr:
-			// A pointer-receiver method selected directly on the (value-typed) range var:
-			// `q.GoString()` binds the `[GoRecv]` `this ref` extension, which needs a mutable
-			// lvalue (CS1657 on a foreach var). A pointer-typed range var dereferences instead
-			// and stays read-only, so it is excluded.
-			id, ok := s.X.(*ast.Ident)
+			// A pointer-receiver method selected on the (value-typed) range var — directly
+			// (`q.GoString()`) or on a value path rooted at it (`test.x.String()`, the
+			// table-driven test idiom) — binds the `[GoRecv]` `this ref` extension, which needs
+			// a mutable lvalue (CS1657/CS1655 on a foreach var and its fields). A receiver that
+			// is itself a POINTER dereferences through its box instead and stays legal, so it
+			// is excluded.
+			root := v.rangeVarRootIdent(s.X)
 
-			if !ok || v.info.ObjectOf(id) != obj {
+			if root == nil || v.info.ObjectOf(root) != obj {
 				return true
 			}
 
@@ -82,7 +148,7 @@ func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) b
 
 			if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
 				if _, recvIsPtr := sig.Recv().Type().(*types.Pointer); recvIsPtr {
-					if _, varIsPtr := v.info.TypeOf(id).(*types.Pointer); !varIsPtr {
+					if _, recvExprIsPtr := v.info.TypeOf(s.X).(*types.Pointer); !recvExprIsPtr {
 						found = true
 						return false
 					}
