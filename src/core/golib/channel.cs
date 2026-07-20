@@ -279,6 +279,22 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     /// <summary>
+    /// Attempts to send a value to the channel without blocking.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
+    /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// Defines a Go style channel non-blocking <see cref="Sent"/> operation — the guard emitted for
+    /// a <c>select</c> send case that has a <c>default:</c> clause. Mirrors the receive side's
+    /// <see cref="ꟷᐳ(out T)"/>.
+    /// </remarks>
+    public bool ᐸꟷ(in T value, bool _)
+    {
+        return Sent(value);
+    }
+
+    /// <summary>
     /// Sends an item to channel. 
     /// </summary>
     /// <param name="value">Value to send.</param>
@@ -318,18 +334,29 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     /// <summary>
-    /// Attempts to send a value to the channel.
+    /// Attempts to send a value to the channel without blocking.
     /// </summary>
     /// <param name="value">Value to send.</param>
     /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// <para>
+    /// The send-side mirror of <see cref="Received(out T)"/>: this both PROBES readiness and, when
+    /// ready, performs the send. A <c>select</c> send case that has a <c>default:</c> clause lowers
+    /// to a guarded <c>case ᐧ when ch.Sent(value):</c> label, and the guard is the only place the
+    /// operation can happen — a guard that merely asked whether the channel was ready would take
+    /// the case and never deliver the value.
+    /// </para>
+    /// <para>
+    /// Deferring to <see cref="TrySend(in T)"/> keeps ONE non-blocking send implementation, so Go's
+    /// rules fall out by construction: a CLOSED channel panics (the assert runs before the
+    /// readiness test — a closed FULL channel is not send-ready, yet Go still panics rather than
+    /// taking the <c>default:</c>), and a NIL channel is never ready (<see cref="SendIsReady"/>
+    /// null-checks the absent queue), so its case is never chosen.
+    /// </para>
+    /// </remarks>
     public bool Sent(in T value)
     {
-        if (!SendIsReady)
-            return false;
-
-        m_queue.Enqueue(value);
-        m_canTakeEvent.Set();
-        return true;
+        return TrySend(value);
     }
 
     /// <summary>

@@ -970,6 +970,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectSendDefault() => CheckTarget("SelectSendDefault");
+
+    [TestMethod]
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
 
     [TestMethod]

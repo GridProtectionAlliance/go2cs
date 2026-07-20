@@ -68,7 +68,20 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 		contexts = append(contexts, basicLitContext)
 	}
 
-	if elemIsNonEmptyIface {
+	// A POINTER element type (`chan *Call` is `channel<ж<Call>>`) takes the box, exactly as the
+	// interface case does — the send parameter is `in ж<Call>`. Without the pointer context a
+	// DEREF-ALIASED pointer (a pointer PARAMETER, or the method's own receiver — both emitted as
+	// the pointed-to value with the box held separately) renders as that value and cannot bind the
+	// box parameter: net/rpc's `func (call *Call) done()` sending `call.Done <- call` was CS1503.
+	// A pointer LOCAL already holds its box and convIdent's pointer arm leaves it as-is, so this
+	// widens the emission only where the value had no other way to name its pointer.
+	elemIsPointer := false
+
+	if elemType != nil {
+		_, elemIsPointer = elemType.Underlying().(*types.Pointer)
+	}
+
+	if elemIsNonEmptyIface || elemIsPointer {
 		if _, isPtr := v.getType(sendStmt.Value, false).(*types.Pointer); isPtr {
 			identContext := DefaultIdentContext()
 			identContext.isPointer = true

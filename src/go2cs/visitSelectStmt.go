@@ -223,6 +223,42 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 							}
 						}
 					}
+				} else if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok && hasDefault {
+					// A send case in a select that HAS a `default:` must be chosen only if the
+					// channel can accept the value right now — otherwise Go takes the default. The
+					// switch expression in this mode is the constant `ᐧ` (no `select(…)` call is
+					// emitted), so nothing has probed the channel and nothing has performed the
+					// send: an unguarded `case ᐧ:` took the case unconditionally AND silently
+					// dropped the value. Guard it with the non-blocking send, exactly as a receive
+					// case is guarded by the non-blocking `Received`/`ꟷᐳ` — golib's `Sent` both
+					// probes and, when ready, delivers, so the guard IS the communication. Go's
+					// remaining rules come from golib: a nil channel is never ready (its case is
+					// never chosen), and a send on a CLOSED channel panics rather than falling to
+					// the default.
+					//
+					// The blocking form (no `default:`) is deliberately excluded: there the
+					// `select(…)` call already performed the send through `Sending`, so a guard
+					// here would either send the value a second time or fail and silently skip the
+					// chosen clause body.
+					v.targetFile.WriteString(" when ")
+					v.targetFile.WriteString(v.convExpr(sendStmt.Chan, nil))
+					v.targetFile.WriteRune('.')
+
+					if v.options.useChannelOperators {
+						v.targetFile.WriteString(ChannelLeftOp)
+					} else {
+						v.targetFile.WriteString("Sent")
+					}
+
+					v.targetFile.WriteRune('(')
+					v.targetFile.WriteString(v.convSendValueExpr(sendStmt))
+
+					if v.options.useChannelOperators {
+						v.targetFile.WriteString(", ")
+						v.targetFile.WriteString(OverloadDiscriminator)
+					}
+
+					v.targetFile.WriteRune(')')
 				} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
 					if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {

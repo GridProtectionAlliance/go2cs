@@ -1044,6 +1044,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectSendDefault() => CheckTarget("SelectSendDefault");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
