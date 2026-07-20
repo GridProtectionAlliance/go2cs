@@ -1732,8 +1732,10 @@ partial, full, ellipsis, keyed, zero-keyed, named, aliased, package-level, non-b
 a tail write proving the backing is really N long, and a `[]byte{}` slice control, output-compared
 vs `go run`; the pre-fix converter exits with the index-out-of-range panic. Note a NESTED fixed
 array's inner elements are still default-constructed — `[2][4]byte{}` gets the right outer length
-but inner length 0 — a separate pre-existing gap shared with the `var` declaration path, chipped
-separately.)
+but inner length 0, and so does every element the padding itself creates, so
+`[2][4]byte{{1, 2, 3, 4}}` reads inner `4` then `0`. The `var` DECLARATION path is fixed by the
+element factory described in the next section, but `convCompositeLit` does not yet use it, so the
+LITERAL path stays open — chipped separately.)
 
 ### A fixed-size array constructs its ELEMENTS when `default(T)` is not usable storage
 
