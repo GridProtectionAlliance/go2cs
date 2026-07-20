@@ -2079,6 +2079,40 @@ new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capture
 ```
 The record flows through the existing pointer-target arm of `convertToInterfaceType` (the `ж<T>`-wrapped name unwraps to `GoImplement<T, Iface>(Pointer = true)`, and the render wraps the box in the generated `TжIface` adapter), so a same-package local (`streamWriter`→`io.Closer` in net/http/fcgi) and a foreign pointee (`*ast.SelectorExpr`→`ast.Expr`, `*Basic`→`Type`, `*Func`→`Object` in go/types) route through their local or foreign adapters uniformly. Positional and keyed literals both resolve their field (a keyed element renders `d: new SettingжDescriber(Ꮡs)`); an already-interface element and a value element are unchanged. (Guarded by the `PointerInterfaceStructField` behavioral test — a pointer-receiver-only implementer placed in an interface-typed struct field, positional via an addressed global and keyed via an addressed local, output-compared vs Go.)
 
+### The struct-field interface routing also fires on an ELIDED element composite
+The routing above lived only on the TYPED composite path (`checkStructFields`, reached from
+`convCompositeLit`'s `*types.Named`/`*types.Struct` arms). An **elided** element composite — the inner
+`{v0, v1, …}` of a `[]struct{…}{…}` / `map[K]struct{…}{…}` / `[N]struct{…}{…}`, which drops the repeated
+struct type and resolves it by inference (`compositeLit.Type == nil`) — took the separate target-typed
+`new(…)` constructor branch, which emitted its element values through `convExprList` with **no** interface
+recording or routing at all. So a struct field of interface type in such a literal was passed bare: a
+POINTER form lost its `new TжIface(…)` adapter wrap, and a VALUE form whose concrete was used *only* in the
+elided literal (never converted to the interface anywhere else) was never `GoImplement`-recorded, so no
+`partial struct T : Iface` was generated for it. Both compile to **CS1503**. This is exactly errors'
+`wrap_test`, whose `[]struct{ err error; … }{ {&poser{…}, …}, {errorUncomparable{}, …} }` produced 17
+`cannot convert from 'ж<poser>' / 'errorUncomparable' to 'error'` at the `new(…)` sites while the sibling
+`multiErr{poser}` slice-element cast (a *different* path) wrapped its `poser` correctly.
+
+The interface-field record+route loop was extracted from `checkStructFields` into a shared
+`recordStructFieldInterfaceCasts(compositeLit, structType, callContext)` and is now called from **both** the
+typed path and the elided path (against the inferred `*types.Struct`), so an elided struct composite routes
+its interface fields identically:
+```csharp
+new(new poserжerror(poser), err1, true)                      // *poser  → error  (Pointer = true)
+new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), …)  // *errorUncomparable → error
+new(new errorUncomparable(nil), …)                            // value form: partial struct : error boxes
+// [assembly: GoImplement<poser, error>(Pointer = true)] + <errorUncomparable, error>[(Pointer = true)]
+```
+The extracted logic is byte-for-byte the proven typed-path logic (same keyed-vs-positional field resolution,
+same value/pointer method-set satisfaction test), so it inherits every guard the typed path already carried
+(the gif keyed-field bogus-record avoidance, the `types.Implements` pointee test). An isolated A/B
+full-reconvert of a production cross-section (fmt, errors, net/http, encoding/json, flag, go/types, os, time,
+text/template — 172 `.cs`) shows **zero** production emission change: the pattern is overwhelmingly a
+test-code shape, so the fix is inert for ordinary packages and only realizes the previously-uncompilable test
+literals. (Guarded by the `ElidedStructInterfaceField` behavioral test — a pointer-receiver `*pointerErr`
+and a value-receiver `valueErr`, each used *only* in an elided `[]struct{ err error; … }{…}`, output-compared
+vs Go; the pre-fix converter emits the bare box / bare value and fails CS1503 on both.)
+
 ### Named-string wrapper surface (indexing, sub-slicing, span bridge)
 A named type over `string` is indexed and sub-sliced in Go (`tag[i]`, `tag[i:j]` -- reflect `StructTag.Get`), but C# indexing never applies user-defined conversions. The `InheritedType` template therefore forwards the `@string` surface on every named-string wrapper: `byte this[int]` / `byte this[nint]` indexers, a `Range` indexer returning the WRAPPER (a Go sub-slice of a named string keeps the named type), `nint Length` for `len()`, and an implicit `ReadOnlySpan<byte>` operator so `u8`-literal comparisons and assignments bind. Guarded by `NamedStringConversion`.
 

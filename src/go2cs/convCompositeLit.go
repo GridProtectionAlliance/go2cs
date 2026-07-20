@@ -8,6 +8,108 @@ import (
 	"strings"
 )
 
+// recordStructFieldInterfaceCasts records the GoImplement pair and routes the RENDER for every
+// composite element whose target STRUCT FIELD is a (non-empty) interface: a value- or
+// pointer-receiver concrete assigned to an interface field must be boxed via its partial struct
+// or wrapped in its generated adapter (`new <T>ж<Iface>(…)`), never passed bare (CS1503). It is
+// shared by the TYPED composite path (checkStructFields) and the ELIDED element-composite path
+// (`{v0, v1, …}` inside a `[]struct{…}{…}` / `map[K]struct{…}{…}`), whose struct type is resolved
+// by inference — that path previously emitted its interface fields unconverted, so a pointer form
+// lost its adapter wrap and a value form used only in an elided literal was never recorded at all
+// (errors' `wrap_test` `[]struct{err error; …}{{&poser{…}, …}, {errorUncomparable{}, …}}`).
+func (v *Visitor) recordStructFieldInterfaceCasts(compositeLit *ast.CompositeLit, structType *types.Struct, callContext *CallExprContext) {
+	for i := range structType.NumFields() {
+		field := structType.Field(i)
+
+		if i < len(compositeLit.Elts) {
+			// Check if field is an embedded interface
+			if fieldType := field.Type(); fieldType != nil {
+				if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
+					// Record implementation. A KEYED composite resolves the element by FIELD
+					// NAME — blindly pairing Elts[0]'s value with EVERY interface field
+					// recorded a BOGUS GoImplement (gif's `encoder{g: *g}`: field 0 is
+					// `w writer`, the first value is a GIF → GoImplement<GIF, writer>,
+					// CS1929 ×3 in the generated impl for methods GIF never had).
+					var eltType types.Type
+					eltIndex := i
+
+					if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
+						eltIndex = -1
+
+						for ei, elt := range compositeLit.Elts {
+							if kv, ok := elt.(*ast.KeyValueExpr); ok {
+								if keyIdent, ok := kv.Key.(*ast.Ident); ok && keyIdent.Name == field.Name() {
+									eltType = v.info.TypeOf(kv.Value)
+									eltIndex = ei
+									break
+								}
+							}
+						}
+					} else {
+						eltType = v.info.TypeOf(compositeLit.Elts[i])
+					}
+
+					if eltType != nil {
+						_, eltIsStruct := eltType.Underlying().(*types.Struct)
+
+						// A named NON-struct element that implements the interface field —
+						// hpack's `DecodingError{InvalidIndexError(idx)}`, where
+						// `type InvalidIndexError int` has an Error() method satisfying the
+						// `error` field — must ALSO be recorded + routed, or it is passed bare
+						// to the interface-typed constructor parameter (surfaces as NilType,
+						// CS1503). The struct/embedded triggers are unchanged; this adds
+						// method-set satisfaction for a named, non-struct, non-interface value
+						// (the call-argument path already routes any arg into an interface param
+						// without a struct-only restriction). An interface-typed element is
+						// excluded — it is already the interface, so it needs no adapter.
+						eltImplementsIface := false
+
+						if !eltIsStruct && !field.Embedded() {
+							// The concrete type carrying the satisfying method set: the element
+							// itself, OR the pointee of a POINTER element whose pointer-receiver
+							// methods satisfy the field — `&logLoggerLevel` (`*LevelVar`) feeding a
+							// `Leveler` field in log/slog's `&handlerWriter{…, &logLoggerLevel, …}`,
+							// where `*LevelVar` implements Leveler via a pointer-receiver `Level()`
+							// (CS1503; no `GoImplement<LevelVar, Leveler>(Pointer = true)` was
+							// recorded because this arm previously matched only a NAMED value, not a
+							// pointer). types.Implements is tested on the ELEMENT type (the pointer
+							// method set), while the non-interface guard tests the pointee.
+							implSource := eltType
+
+							if ptr, ok := eltType.(*types.Pointer); ok {
+								implSource = ptr.Elem()
+							}
+
+							if named, ok := implSource.(*types.Named); ok {
+								if _, eltIsIface := named.Underlying().(*types.Interface); !eltIsIface {
+									if iface, ok := fieldType.Underlying().(*types.Interface); ok && types.Implements(eltType, iface) {
+										eltImplementsIface = true
+									}
+								}
+							}
+						}
+
+						if eltIsStruct || field.Embedded() || eltImplementsIface {
+							v.convertToInterfaceType(fieldType, eltType, "")
+
+							// Route the element through the interface conversion at RENDER
+							// too — the record-only call above can miss paths that bypass
+							// it, and the ctor's interface param cannot take the bare
+							// struct without its partial (archive/tar's lifted
+							// `struct{ io.Reader }{fr}`, CS1503 ×3).
+							if eltIndex >= 0 {
+								callContext.interfaceTypes[eltIndex] = fieldType
+							}
+						}
+					}
+				} else if ok := isPointer(fieldType); ok {
+					callContext.argTypeIsPtr[i] = true
+				}
+			}
+		}
+	}
+}
+
 func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyValueContext) string {
 	result := &strings.Builder{}
 
@@ -124,6 +226,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		if inferred := elidedContext.keyValueCompositeType; inferred != nil {
 			if st, ok := inferred.Underlying().(*types.Struct); ok {
 				v.markAnyFieldLits(st, compositeLit.Elts, elidedContext)
+
+				// Record + route an interface STRUCT FIELD exactly as the typed path does — an
+				// ELIDED element composite (`{&poser{…}, err1, true}` inside a `[]struct{err
+				// error; …}{…}`) resolves its struct type by inference, so without this its
+				// pointer fields lost the `new <T>ж<Iface>(…)` adapter wrap and a value form
+				// used only here was never recorded at all (errors' wrap_test, CS1503 ×17).
+				v.recordStructFieldInterfaceCasts(compositeLit, st, elidedContext)
 			}
 		}
 
@@ -212,96 +321,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// (keyed elements take convKeyValueExpr's `any`-field arm instead).
 		v.markAnyFieldLits(structType, compositeLit.Elts, callContext)
 
-		for i := range structType.NumFields() {
-			field := structType.Field(i)
-
-			if i < len(compositeLit.Elts) {
-				// Check if field is an embedded interface
-				if fieldType := field.Type(); fieldType != nil {
-					if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
-						// Record implementation. A KEYED composite resolves the element by FIELD
-						// NAME — blindly pairing Elts[0]'s value with EVERY interface field
-						// recorded a BOGUS GoImplement (gif's `encoder{g: *g}`: field 0 is
-						// `w writer`, the first value is a GIF → GoImplement<GIF, writer>,
-						// CS1929 ×3 in the generated impl for methods GIF never had).
-						var eltType types.Type
-						eltIndex := i
-
-						if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
-							eltIndex = -1
-
-							for ei, elt := range compositeLit.Elts {
-								if kv, ok := elt.(*ast.KeyValueExpr); ok {
-									if keyIdent, ok := kv.Key.(*ast.Ident); ok && keyIdent.Name == field.Name() {
-										eltType = v.info.TypeOf(kv.Value)
-										eltIndex = ei
-										break
-									}
-								}
-							}
-						} else {
-							eltType = v.info.TypeOf(compositeLit.Elts[i])
-						}
-
-						if eltType != nil {
-							_, eltIsStruct := eltType.Underlying().(*types.Struct)
-
-							// A named NON-struct element that implements the interface field —
-							// hpack's `DecodingError{InvalidIndexError(idx)}`, where
-							// `type InvalidIndexError int` has an Error() method satisfying the
-							// `error` field — must ALSO be recorded + routed, or it is passed bare
-							// to the interface-typed constructor parameter (surfaces as NilType,
-							// CS1503). The struct/embedded triggers are unchanged; this adds
-							// method-set satisfaction for a named, non-struct, non-interface value
-							// (the call-argument path already routes any arg into an interface param
-							// without a struct-only restriction). An interface-typed element is
-							// excluded — it is already the interface, so it needs no adapter.
-							eltImplementsIface := false
-
-							if !eltIsStruct && !field.Embedded() {
-								// The concrete type carrying the satisfying method set: the element
-								// itself, OR the pointee of a POINTER element whose pointer-receiver
-								// methods satisfy the field — `&logLoggerLevel` (`*LevelVar`) feeding a
-								// `Leveler` field in log/slog's `&handlerWriter{…, &logLoggerLevel, …}`,
-								// where `*LevelVar` implements Leveler via a pointer-receiver `Level()`
-								// (CS1503; no `GoImplement<LevelVar, Leveler>(Pointer = true)` was
-								// recorded because this arm previously matched only a NAMED value, not a
-								// pointer). types.Implements is tested on the ELEMENT type (the pointer
-								// method set), while the non-interface guard tests the pointee.
-								implSource := eltType
-
-								if ptr, ok := eltType.(*types.Pointer); ok {
-									implSource = ptr.Elem()
-								}
-
-								if named, ok := implSource.(*types.Named); ok {
-									if _, eltIsIface := named.Underlying().(*types.Interface); !eltIsIface {
-										if iface, ok := fieldType.Underlying().(*types.Interface); ok && types.Implements(eltType, iface) {
-											eltImplementsIface = true
-										}
-									}
-								}
-							}
-
-							if eltIsStruct || field.Embedded() || eltImplementsIface {
-								v.convertToInterfaceType(fieldType, eltType, "")
-
-								// Route the element through the interface conversion at RENDER
-								// too — the record-only call above can miss paths that bypass
-								// it, and the ctor's interface param cannot take the bare
-								// struct without its partial (archive/tar's lifted
-								// `struct{ io.Reader }{fr}`, CS1503 ×3).
-								if eltIndex >= 0 {
-									callContext.interfaceTypes[eltIndex] = fieldType
-								}
-							}
-						}
-					} else if ok := isPointer(fieldType); ok {
-						callContext.argTypeIsPtr[i] = true
-					}
-				}
-			}
-		}
+		v.recordStructFieldInterfaceCasts(compositeLit, structType, callContext)
 
 		// A NAMED FUNC-type field initialized with a value of a DIFFERENT delegate type must
 		// wrap in the target delegate's constructor — C# has no implicit conversion between

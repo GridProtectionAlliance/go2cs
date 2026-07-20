@@ -286,6 +286,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckElidedNestedPtrComposite() => CheckTarget("ElidedNestedPtrComposite");
 
     [TestMethod]
+    public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
+
+    [TestMethod]
     public void CheckEmbeddedPointerNilAssign() => CheckTarget("EmbeddedPointerNilAssign");
 
     [TestMethod]
