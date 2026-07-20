@@ -9,7 +9,16 @@ partial class main_package {
     internal nint x;
 }
 
+internal static ж<T> Ꮡglobal = new(new T(x: 42));
+internal static ref T global => ref Ꮡglobal.Value;
+
+internal static uintptr gPtr = (uintptr)new @unsafe.Pointer(Ꮡglobal);
+
+internal static uintptr gNil = (uintptr)(@unsafe.Pointer)default!;
+
 internal static void Main() {
+    fmt.Println(gPtr != 0);
+    fmt.Println(gNil == 0);
     ж<T> p = default!;
     fmt.Println((uintptr)new @unsafe.Pointer(p) == 0);
     var q = Ꮡ(new T(x: 5));

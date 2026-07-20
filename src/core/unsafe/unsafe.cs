@@ -258,7 +258,10 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator uintptr(Pointer value) {
-        return value.Value;
+        // A nil unsafe.Pointer can be modeled as a C# null reference (the ==/!= operators above
+        // already treat null as nil); its uintptr value is 0. Honor that same null-tolerance here
+        // so `uintptr(unsafe.Pointer(nil))` yields 0 instead of dereferencing a null Pointer.
+        return value is null ? (uintptr)0 : value.Value;
     }
 
     public static implicit operator Pointer(void* value) {
@@ -266,7 +269,7 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator void*(Pointer value) {
-        return (void*)value.Value;
+        return value is null ? null : (void*)value.Value;
     }
 
     public static Pointer FromRef<T>(ref T type)
