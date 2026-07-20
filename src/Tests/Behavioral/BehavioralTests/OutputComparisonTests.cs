@@ -277,6 +277,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
+
+    [TestMethod]
     public void CheckDynamicInterfaceKeywordMethod() => CheckTarget("DynamicInterfaceKeywordMethod");
 
     [TestMethod]
