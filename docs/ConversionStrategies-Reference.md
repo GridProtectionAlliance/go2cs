@@ -1232,6 +1232,41 @@ A non-shadowed parameter maps to its own raw name (no churn). (Guarded by the `P
 
 A shadow-renamed **pointer** parameter completes the same rule on two more paths. A `*T` parameter is deref-aliased as `ref var <value> = ref Ꮡ<raw>.Value`, so its box companion `Ꮡ<raw>` always keeps the **raw** Go name even when the value alias is shadow-renamed — `func decrypt(rand io.Reader, …)` where `rand` shadows the `math/rand`-style alias becomes `ref var randΔ1 = ref Ꮡrand.Value`. **(A)** An address-of or by-pointer pass of that parameter must therefore use the raw box name `Ꮡrand`, not `Ꮡ`+value-alias `ᏑrandΔ1` (which is not in scope, CS0103) — `boxBaseName` returns the raw name for a pointer *parameter* specifically (unlike an escaping shadow-renamed *local*, whose box *is* the shadow form `ᏑiΔ1`). **(B)** When a function has **both** a pointer parameter and a shadow-renamed value parameter, its signature is rebuilt through a separate `updatedSignature` path (not the `generateParametersSignature` path fixed above), which had kept emitting the value param's raw name — so `EncryptOAEP(hash.Hash hash, …)` diverged from its `hashΔ1` uses again. That path now resolves value-param names through `v.varNames` too, matching the primary fix. Together these cleared 50 errors (crypto/rsa 23 + testing/quick 27). (Guarded by the `PackageShadowPointerParam` behavioral test.)
 
+### A declaration shadowing a BUILT-IN makes the call an ordinary call
+Go permits shadowing a universe built-in at any scope, after which a call through that name is an
+ordinary call to the declaration, **not** the built-in — math/big's own tests declare
+`make := func(z *Int) *Int { … }` as a function-local and then call `make(test.z)`. The converter's
+built-in handling is keyed on the identifier's **name**, so such a call was emitted with built-in
+semantics. Every built-in arm is now gated on the identifier actually resolving to the universe
+built-in (`identIsUniverseBuiltin` — go/types records a genuine built-in as a `*types.Builtin`
+object; anything else is a shadowing declaration), and a shadowed call falls through to the ordinary
+call path:
+
+```go
+make := func(n int) int { return n * 2 }
+fmt.Println(make(21))
+```
+```csharp
+var make = (nint n) => n * 2;
+fmt.Println(make(21));            // was: fmt.Println(new nint()) — the argument dropped entirely
+```
+
+Seven built-ins had a name-keyed emission arm and so were affected: `make` (→ `new nint()`), `new`
+(→ `@new<nint>()` — both drop the argument, CS1503/CS1929), `panic` (→ the *statement* `throw
+panic(x)` in expression position, CS8115), `print`/`println` (a spurious variadic `interface{}`
+cast), and `len`/`cap` **when the argument is a pointer-to-named-array** (a spurious `.Value` deref
+from the auto-deref arm). `close`, `min`/`max` and `recover` already carried the `*types.Builtin`
+check; `append`'s arm self-bails on a non-slice argument; the remaining built-ins (`copy`, `delete`,
+`clear`, `complex`, `real`, `imag`) have no dedicated arm and already fell through. Two *analysis*
+paths shared the hole and were closed the same way: `isTerminatingStmt` treated a shadowed
+`panic(…)` as terminating (mis-deciding a switch case's `break`), and the capture-mode scan treated
+a shadowed `recover(…)` as forcing the defer/recover execution-context lambda.
+
+Note this is the **opposite** direction from `packageBuiltinShadows` (see *Type-vs-Method Name
+Collisions*): there the call genuinely *is* the built-in and a same-named package method shadows the
+C# `using static go.builtin`, so the call is emitted **qualified** as `builtin.<name>(…)`. Here the
+call is not a built-in at all. (Guarded by the `BuiltinShadowLocal` behavioral test.)
+
 ## Multi-Result Values and Comma-Ok Forms
 Many Go functions return either a single value or a "value, ok"/"value, error" tuple, where only the declared return arity selects the behavior. You cannot differentiate C# overloads by return type alone, so the runtime types expose a second overload distinguished by an extra discard argument. For map access, the "comma-ok" read routes through a two-value indexer using the discard sentinel `ꟷ`:
 
@@ -5949,6 +5984,41 @@ foreach (var (_, rᴛ1) in s) {
 }
 ```
 A range variable that is only *read* keeps binding directly to the `foreach` tuple (no temp, no churn). This reuses the same temp-var/`innerPrefix` machinery as the `for k, v = range` (re-assign-into-existing-vars) form. (Guarded by the `RangeVarReassign` behavioral test; runtime hits this in `os_windows`'s UTF-16 surrogate-pair encoder.)
+
+**Addressability flows from the path ROOT, not the immediate operand.** Each trigger above is
+matched against the identifier at the root of a field/element access path (`rangeVarRootIdent`),
+because Go's addressability propagates through every value hop: `test.x.String()` with a
+pointer-receiver `String` is legal in Go (it auto-takes `&test.x`), and C# names the same rule in
+its diagnostics — CS1654/CS1655 speak of *"fields of"* the iteration variable. Matching only the
+immediate operand missed the whole class, which matters far beyond one construct because this is
+the **table-driven test** idiom that dominates the standard library's own test suites:
+
+```go
+for _, test := range tests {
+    fmt.Println(test.x.String())   // pointer receiver on a FIELD of the range var — CS1655
+}
+```
+```csharp
+foreach (var (_, vᴛ1) in tests) {
+    var test = vᴛ1;                // mutable, addressable per-iteration copy
+    fmt.Println(test.x.String());
+}
+```
+
+The same root walk covers a write through a nested path (`test.x.n = 99`, CS1654) and an address
+taken of one (`&test.x`). The walk **stops at the first pointer hop**: past a pointer the access
+goes through the heap box (`ж<T>.Value`), an independent mutable lvalue the iteration variable's
+read-only-ness never reaches — so `test.ptr.Bump()` keeps the direct `foreach` binding with no copy,
+and (matching Go) its write *is* observed by the source. Indexing likewise only continues through an
+**array**, whose storage is in-place; a slice or map index reaches a separate backing store and is
+its own addressability root. The copy is per-iteration, matching Go 1.22+ loop-variable semantics
+(see the for-clause section below).
+
+Scoping the trigger to the root this way *removes* work as well as adding it: the previous
+field-write arm never checked whether the base was a POINTER, so a write like `s.Name = x` through a
+pointer-typed range variable emitted a needless per-iteration copy. Across the 302-package
+`go-src-converted` corpus the net effect is **54 spurious copies eliminated and none added** — the
+addressability additions show up in *test* code (the table-driven idiom), not in production sources.
 
 ### For-clause variables are per-iteration (Go 1.22 loop-variable semantics)
 

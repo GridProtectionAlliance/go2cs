@@ -51,10 +51,46 @@ func describeSignal(sig int) string {
 	return "none"
 }
 
+type arr [3]int
+
+// The built-ins still mean the built-ins in a scope that does NOT shadow them.
+func unshadowed() (int, int) {
+	s := make([]int, 2, 5)
+	return len(s), cap(s)
+}
+
+// shadowedCalls declares locals that shadow built-ins and then CALLS them through those
+// names — the math/big test shape `make := func(z *Int) *Int { … }; make(test.z)`. Go
+// resolves each call to the local, not the built-in. The converter's built-in arms are keyed
+// on the identifier's NAME, so before they were gated on the name actually resolving to the
+// universe built-in these emitted built-in semantics instead: `make(21)` became `new nint()`
+// and `new(7)` became `@new<nint>()` (both dropping the argument, CS1503/CS1929), `panic(5)`
+// became the STATEMENT `throw panic(5)` inside an expression, `print`/`println` picked up a
+// spurious variadic cast, and `len`/`cap` on a pointer-to-named-array gained a `.Value` deref.
+func shadowedCalls() {
+	a := arr{1, 2, 3}
+
+	make := func(n int) int { return n * 2 }
+	new := func(n int) int { return n * 3 }
+	panic := func(n int) int { return n * 4 }
+	print := func(n int) int { return n * 5 }
+	println := func(n int) int { return n * 6 }
+	len := func(p *arr) int { return p[0] + 100 }
+	cap := func(p *arr) int { return p[1] + 200 }
+
+	fmt.Println("shadowed", make(21), new(7), panic(5))
+	fmt.Println("shadowed", print(4), println(3), len(&a), cap(&a))
+}
+
 func main() {
 	fmt.Println(sumWithLenLocal([]int{10, 20, 30})) // 60 + 3 = 63
 	fmt.Println(sumWithLenLocal(nil))               // 0
 	fmt.Println(capPlusOne(make([]int, 2, 5)))      // 5 + 1 = 6
 	fmt.Println(describeSignal(9))                  // [SIGKILL]
 	fmt.Println(describeSignal(1))                  // [SIG?]
+
+	shadowedCalls()
+
+	l, c := unshadowed()
+	fmt.Println("builtin", l, c) // builtin 2 5
 }

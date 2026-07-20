@@ -36,12 +36,36 @@ internal static @string describeSignal(nint sig) {
     return "none"u8;
 }
 
+[GoType("[3]nint")] partial struct arr;
+
+internal static (nint, nint) unshadowed() {
+    var s = new slice<nint>(2, 5);
+    return (len(s), cap(s));
+}
+
+internal static void shadowedCalls() {
+    ref var a = ref heap<arr>(out var Ꮡa);
+    a = new arr(new nint[]{1, 2, 3}.array());
+    var make = (nint n) => n * 2;
+    var @new = (nint n) => n * 3;
+    var panic = (nint n) => n * 4;
+    var print = (nint n) => n * 5;
+    var println = (nint n) => n * 6;
+    var len = (ж<arr> p) => p.Value[0] + 100;
+    var cap = (ж<arr> p) => p.Value[1] + 200;
+    fmt.Println("shadowed", make(21), @new(7), panic(5));
+    fmt.Println("shadowed", print(4), println(3), len(Ꮡa), cap(Ꮡa));
+}
+
 internal static void Main() {
     fmt.Println(sumWithLenLocal(new nint[]{10, 20, 30}.slice()));
     fmt.Println(sumWithLenLocal(default!));
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));
     fmt.Println(describeSignal(9));
     fmt.Println(describeSignal(1));
+    shadowedCalls();
+    var (l, c) = unshadowed();
+    fmt.Println("builtin", l, c);
 }
 
 } // end main_package

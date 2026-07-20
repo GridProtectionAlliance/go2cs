@@ -45,6 +45,33 @@ func isNarrowIntegerKind(kind types.BasicKind) bool {
 	return false
 }
 
+// identIsUniverseBuiltin reports whether an identifier in call position resolves to a Go universe
+// built-in rather than to a same-named declaration that SHADOWS it. Go permits shadowing a built-in
+// at ANY scope — `make := func(z *Int) *Int {…}` as a function-local in math/big's own tests, a
+// parameter named `len`, a package-level `var new …` — after which `make(x)` is an ordinary call to
+// that declaration, NOT the built-in. The converter's built-in arms are keyed on the identifier's
+// NAME, so without this check a shadowed call is emitted with built-in semantics (`make(test.z)` →
+// `new nint()`, CS1503/CS1929). go/types has already resolved the name for us: a genuine built-in
+// is the universe *types.Builtin object, anything else is a shadowing declaration and must fall
+// through to the ordinary call path.
+//
+// This is the opposite direction from packageBuiltinShadows, which handles a package method whose
+// name collides with a built-in the call still MEANS (there the call is a real built-in and gets
+// QUALIFIED as `builtin.<name>`); here the call is not a built-in at all.
+func (v *Visitor) identIsUniverseBuiltin(ident *ast.Ident) bool {
+	_, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin)
+
+	return isBuiltin
+}
+
+// callFunIsUniverseBuiltin reports whether a call's callee is an unshadowed universe built-in —
+// identIsUniverseBuiltin for a call whose callee has not already been narrowed to an identifier.
+func (v *Visitor) callFunIsUniverseBuiltin(callExpr *ast.CallExpr) bool {
+	ident, ok := callExpr.Fun.(*ast.Ident)
+
+	return ok && v.identIsUniverseBuiltin(ident)
+}
+
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
 	// Immediately-invoked, no-argument function literal (IIFE): `func(){ … }()`. A bare C#
 	// lambda cannot be invoked directly (CS0149), and the literal may use defer/recover that
@@ -944,7 +971,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// Handle builtin functions that take `...Type` parameters, treat as `interface{}`
 			var ok bool
 
-			if funcName == "print" || funcName == "println" {
+			if (funcName == "print" || funcName == "println") && v.callFunIsUniverseBuiltin(callExpr) {
 				paramType = types.NewInterfaceType(nil, nil)
 			} else if paramType, ok = getParameterType(funcSignature, i); !ok {
 				continue
@@ -1280,7 +1307,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	callExprContext.replacementArgs = replacementArgs
 
-	if ident, ok := callExpr.Fun.(*ast.Ident); ok {
+	// Every arm below is keyed on a built-in's NAME; a shadowing declaration of that name makes the
+	// call an ordinary one, so the whole group is gated on the identifier actually resolving to the
+	// universe built-in (see identIsUniverseBuiltin).
+	if ident, ok := callExpr.Fun.(*ast.Ident); ok && v.identIsUniverseBuiltin(ident) {
 		// Go auto-derefs `len(p)`/`cap(p)` for a pointer-to-array; a ж<named-array-wrapper>
 		// argument has no golib len/cap overload (the wrapper itself implements IArray, its box
 		// does not — CS1503, runtime proc.go's `len(mp.cgoCallers)` where cgoCallers is

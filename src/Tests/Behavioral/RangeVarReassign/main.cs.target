@@ -42,10 +42,40 @@ internal static void Main() {
         sum += t.x + t.y;
     }
     fmt.Println("fieldwrite", sum, tags[0].x, tags[1].y);
+    var rows = new row[]{new(new point(1, 2), Ꮡ(new point(10, 0))), new(new point(3, 4), Ꮡ(new point(20, 0)))}.slice();
+    foreach (var (_, vᴛ3) in rows) {
+        var r = vᴛ3;
+
+        fmt.Println("field method", r.v.bump());
+    }
+    fmt.Println("field method orig", rows[0].v.x, rows[1].v.x);
+    foreach (var (_, vᴛ4) in rows) {
+        var r = vᴛ4;
+
+        r.v.x = 99;
+    }
+    fmt.Println("nested write orig", rows[0].v.x, rows[1].v.x);
+    foreach (var (_, vᴛ5) in rows) {
+        ref var r = ref heap(new row(), out var Ꮡr);
+        r = vᴛ5;
+
+        var p = Ꮡr.of(row.Ꮡv);
+        p.Value.x += 5;
+        fmt.Println("addr", (~p).x);
+    }
+    foreach (var (_, r) in rows) {
+        r.ptr.bump();
+    }
+    fmt.Println("through pointer", (~rows[0].ptr).x, (~rows[1].ptr).x);
 }
 
 [GoType] partial struct point {
     internal nint x, y;
+}
+
+[GoType] partial struct row {
+    internal point v;
+    internal ж<point> ptr;
 }
 
 [GoRecv] internal static nint bump(this ref point p) {
