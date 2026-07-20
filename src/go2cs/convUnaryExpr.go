@@ -43,7 +43,18 @@ func (v *Visitor) convArrayIndex(index ast.Expr) string {
 // unchanged (no golden churn, Go-like un-namespaced form preserved). A `Ꮡ`-prefixed receiver (`Ꮡx`)
 // can never equal a bare type name, so those never qualify; an already-qualified cross-package type
 // (contains '.') is returned unchanged.
-func boxAccessorType(typeName, receiver string) string {
+//
+// The receiver is only ONE of the ways the bare name can be captured. C# scopes a local to its whole
+// enclosing block, so ANY variable named like the type — however unrelated to this accessor — owns
+// the simple name at this point. poly1305's purego `mac` is the general case: `type mac struct{
+// macGeneric }`, and `func (h *MAC) Sum(b []byte)` declares `var mac [TagSize]byte`, so the
+// promoted-embed hop for `h.mac.Sum(&mac)` spells `Ꮡ(h.mac).of(mac.ᏑmacGeneric)` where `mac` binds to
+// the `array<byte>` local (CS1061 ×2 — it errors in `Sum`/`Verify`, which declare that local, and not
+// in `Write`, which does not). Go guarantees such a reference is unambiguous — inside the shadowed
+// scope the type is not reachable by that name at all, so every bare occurrence the EMITTER produces
+// is meant as the type — which makes package-qualifying it always value-correct. funcScopeVarNames
+// carries the current function's declared variable names (see performVariableAnalysis).
+func (v *Visitor) boxAccessorType(typeName, receiver string) string {
 	// An already-qualified cross-package type (contains '.') is left alone.
 	if strings.Contains(typeName, ".") {
 		return typeName
@@ -82,10 +93,13 @@ func boxAccessorType(typeName, receiver string) string {
 	//     local `w` is visible and has no identical-simple-name fallback, so a bare `w.Ꮡpark`
 	//     binds the uncapturable ref-local (CS8175/CS1061). The trailing `.` anchors the name
 	//     boundary (`Ꮡmatch.Value` does not qualify type `m`).
+	//   - A variable of that name is declared ANYWHERE in the enclosing function (the general form of
+	//     the receiver cases above — the shadowing local need not participate in this accessor at all).
 	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
 		strings.HasPrefix(receiver, typeName+CapturedVarMarker) ||
 		receiver == AddressPrefix+typeName ||
-		strings.HasPrefix(receiver, AddressPrefix+typeName+".") {
+		strings.HasPrefix(receiver, AddressPrefix+typeName+".") ||
+		v.funcScopeVarNames.Contains(typeName) {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
 
@@ -211,7 +225,7 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 		}
 
 		boxName := v.boxBaseName(baseIdent)
-		fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
+		fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
 		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
 	}
@@ -279,7 +293,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					}
 
 					if _, ok := recvType.(*types.Named); ok {
-						fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(convertToCSTypeName(v.getTypeName(recvType, false)), ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+						fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(convertToCSTypeName(v.getTypeName(recvType, false)), ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 						// Direct-ж: the receiver box is the parameter `Ꮡx` (see
 						// packageDirectBoxReceiverMethods), so field-ref through it directly. No
@@ -349,7 +363,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 
 						typeName := convertToCSTypeName(v.getTypeName(ptrType.Elem(), false))
-						fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, structExpr), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+						fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, structExpr), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 						return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
 					}
 				}
@@ -379,7 +393,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// another file of the package (e.g. `&cpu.X86.HasADX`).
 					structExpr := v.convExpr(selectorExpr.X, nil)
 					typeName := v.dynamicStructTypeName(selectorExpr.X)
-					fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+					fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 					// When the base is itself a VALUE field reached through a pointer field —
 					// `&gp.m.mLockProfile.waitTime`, base `gp.m.mLockProfile` a value field of the

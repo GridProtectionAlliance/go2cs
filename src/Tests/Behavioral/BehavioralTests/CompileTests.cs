@@ -621,6 +621,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLinknameVarPullLib() => CheckTarget("LinknameVarPullLib");
 
     [TestMethod]
+    public void CheckLocalShadowsEmbedHopType() => CheckTarget("LocalShadowsEmbedHopType");
+
+    [TestMethod]
     public void CheckLocalStructFieldAddr() => CheckTarget("LocalStructFieldAddr");
 
     [TestMethod]

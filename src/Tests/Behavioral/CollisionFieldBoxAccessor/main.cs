@@ -59,7 +59,7 @@ internal static nint boxRefCapturedValueNamedAfterType() {
     w = new w(park: 100, other: 9);
     nint got = 0;
     run(() => {
-        var p = Ꮡw.of(w.Ꮡpark);
+        var p = Ꮡw.of(main_package.w.Ꮡpark);
         p.Value = p.Value + 5;
         got = p.Value;
     });

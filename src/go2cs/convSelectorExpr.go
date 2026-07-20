@@ -1295,7 +1295,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 							for k := 1; k < len(hopFields); k++ {
 								ownerTypeName := convertToCSTypeName(v.getTypeName(hopFields[k-1].Type(), false))
-								fieldAddr = fmt.Sprintf("%s.of(%s.%s%s)", fieldAddr, boxAccessorType(ownerTypeName, ""),
+								fieldAddr = fmt.Sprintf("%s.of(%s.%s%s)", fieldAddr, v.boxAccessorType(ownerTypeName, ""),
 									AddressPrefix, v.structFieldBoxName(&ast.Ident{Name: hopFields[k].Name()}, selectorExpr.X))
 							}
 

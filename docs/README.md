@@ -330,7 +330,11 @@ Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
 
 The converter builds idiomatic C# for the full range of Go language features, validated by an extensive
 behavioral test suite (390+ Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
-(302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is the milestone, not yet full
+(302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. The converted standard library reproduces
+**Go built with `-tags purego`** — a managed runtime cannot execute Go's hand-written `.s` assembly, so the
+portable pure-Go variants of the asm-backed crypto/hash functions are the faithful target (`-stdlib` applies
+the tag by default; see [Conversion Strategies → the standard library reproduces Go `-tags purego`](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
+Compiling is the milestone, not yet full
 runtime parity: **converting and running the standard library's own tests is the ongoing Phase 4 work** —
 see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). **Fifteen standard-library packages'
 own Go test suites now pass in C#** — more than 450 of Go's own tests, spanning `unicode/utf8` and `sort`
