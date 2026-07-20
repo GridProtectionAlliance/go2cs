@@ -565,6 +565,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLinknameVarPull() => CheckTarget("LinknameVarPull");
 
     [TestMethod]
+    public void CheckLocalShadowsEmbedHopType() => CheckTarget("LocalShadowsEmbedHopType");
+
+    [TestMethod]
     public void CheckLocalStructFieldAddr() => CheckTarget("LocalStructFieldAddr");
 
     [TestMethod]

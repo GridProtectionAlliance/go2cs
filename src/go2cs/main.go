@@ -39,6 +39,7 @@ type Options struct {
 	nugetRefs           bool   // -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local $(go2csPath) project references
 	targetPlatform      string
 	buildTags           []string // -tags: build tags applied to package loading AND constraint evaluation
+	tagsExplicit        bool     // whether -tags was passed on the command line (vs. the -stdlib purego default)
 	indentSpaces        int
 	preferVarDecl       bool
 	useChannelOperators bool
@@ -327,6 +328,12 @@ type Visitor struct {
 	// float-literal suffix and the postfix `.i()` complex64/complex128 overload choice.
 	untypedConstContexts map[ast.Expr]types.Type
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
+	// funcScopeVarNames holds the Go name of every variable declared ANYWHERE in the current
+	// function — receiver, parameters, results and locals at every nesting depth, including inside
+	// func literals. A bare type name spelled by the EMITTER (the `Type.Ꮡfield` box accessor) binds
+	// to such a variable rather than to the type wherever one exists, so boxAccessorType qualifies
+	// against this set. Repopulated per function by performVariableAnalysis.
+	funcScopeVarNames HashSet[string]
 	scopeStack             []map[string]*types.Var // Stack of local variable scopes
 	lambdaCapture          *LambdaCapture          // Lambda capture tracking
 }
@@ -692,14 +699,14 @@ func main() {
 	goRootCmd := commandLine.String("goroot", goRoot, "Path to Go root directory")
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
-	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
+	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags purego by default; pass an explicit -tags to override)")
 	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
 	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare)")
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
-	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones")
+	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib, purego is applied by default and any explicit -tags value replaces it)")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
@@ -731,6 +738,23 @@ func main() {
 		inputFilePath = strings.TrimSpace(positionals[0])
 	}
 
+	// A bare `-stdlib` conversion (the whole-library corpus) applies `-tags purego` by default; the
+	// converted standard library is defined to reproduce Go built with that tag (see
+	// defaultStdLibBuildTags). Detect whether the caller passed `-tags` at all: if they did — even
+	// `-tags=` to clear it — that is a deliberate override and we honor it verbatim. Only `-stdlib`
+	// gets the default; `-recurse`/single-file conversions stay tag-neutral (their build tags govern).
+	tagsExplicit := false
+	commandLine.Visit(func(f *flag.Flag) {
+		if f.Name == "tags" {
+			tagsExplicit = true
+		}
+	})
+
+	buildTags := parseBuildTags(*buildTagsCmd)
+	if convertStdLib && !tagsExplicit {
+		buildTags = defaultStdLibBuildTags
+	}
+
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
@@ -752,11 +776,12 @@ Examples:
   go2cs package_dir
   go2cs -tests package_dir                  # Convert production sources and package tests
   go2cs -tests -test-action all package_dir # Convert, build, run, and compare with go test
-  go2cs -stdlib                           # Convert the entire Go standard library
+  go2cs -stdlib                           # Convert the entire Go standard library (applies -tags purego by default)
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
   go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
-  go2cs -stdlib -comments -tags purego    # Select the portable Go crypto implementations over the assembly ones
+  go2cs -stdlib -comments -tags purego    # Explicit form of the default: the portable Go crypto over the assembly ones
+  go2cs -stdlib -tags=                    # Opt OUT of the purego default (reproduce the asm-backed default build)
  `)
 		os.Exit(1)
 	}
@@ -772,7 +797,8 @@ Examples:
 		recurse:             recurseVal.enabled,
 		nugetRefs:           recurseVal.nuget,
 		targetPlatform:      *targetPlatformCmd,
-		buildTags:           parseBuildTags(*buildTagsCmd),
+		buildTags:           buildTags,
+		tagsExplicit:        tagsExplicit,
 		indentSpaces:        *indentSpacesCmd,
 		preferVarDecl:       *preferVarDeclCmd,
 		useChannelOperators: *useChannelOperatorsCmd,
@@ -927,6 +953,17 @@ Examples:
 		}
 	}
 }
+
+// defaultStdLibBuildTags are the build tags a bare `-stdlib` conversion applies when the caller did
+// not pass an explicit `-tags`. The converted standard library is defined to reproduce Go built with
+// `-tags purego`: a managed C# runtime can never execute the hand-written `.s` assembly that the
+// default (amd64/arm64/…) build binds hot crypto/hash functions to, so those declarations would
+// convert to throwing stubs that COMPILE but cannot RUN. `purego` selects the portable pure-Go
+// variants (real bodies the transpiler can convert), making "the corpus reproduces Go -tags purego"
+// a claim go2cs can actually honor. This default applies ONLY to `-stdlib` (the whole-library
+// corpus); `-recurse` end-user conversions and single-file/dir conversions stay tag-neutral so the
+// user's own build tags govern, and an explicit `-tags` on `-stdlib` overrides this default verbatim.
+var defaultStdLibBuildTags = []string{"purego"}
 
 // parseBuildTags splits a -tags value into individual build tags. Commas and whitespace are both
 // accepted as separators (the go command has used each form over time), and empty fields are dropped

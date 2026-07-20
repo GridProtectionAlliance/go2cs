@@ -301,6 +301,16 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// package var keeps the simple name.
 	usedPackageVarNames := HashSet[string]{}
 
+	// Every variable DECLARED anywhere in this function — receiver, parameters, results and locals
+	// at every nesting depth (func literals included). The emitter spells bare package-level TYPE
+	// names on its own (the `Type.Ꮡfield` box accessor); C# binds such a bare name to a same-named
+	// variable in scope, so boxAccessorType consults this set to decide when the type name must be
+	// package-qualified. Collected here rather than from the scope stack because the shadowing
+	// variable need not be anywhere near the reference — poly1305's `func (h *MAC) Sum(b []byte)`
+	// declares `var mac [TagSize]byte` and the promoted-embed hop for `h.mac.Sum(&mac)` spells
+	// `mac.ᏑmacGeneric`, which binds to that `array<byte>` local (CS1061).
+	v.funcScopeVarNames = HashSet[string]{}
+
 	ast.Inspect(funcDecl, func(n ast.Node) bool {
 		if ident, ok := n.(*ast.Ident); ok {
 			if _, isPkg := v.info.Uses[ident].(*types.PkgName); isPkg {
@@ -311,6 +321,12 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				if globalObj, isGlobal := v.globalScope[ident.Name]; isGlobal && globalObj == varObj {
 					usedPackageVarNames.Add(ident.Name)
 				}
+			}
+
+			// A struct type declared INSIDE the function contributes field objects here; a field is
+			// struct-scoped and never binds a bare name, so only true variables are recorded.
+			if varObj, isVar := v.info.Defs[ident].(*types.Var); isVar && !varObj.IsField() {
+				v.funcScopeVarNames.Add(ident.Name)
 			}
 		}
 

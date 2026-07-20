@@ -1120,6 +1120,28 @@ model, `sync/atomic.Value`, the reflection bridge (`abi.TypeOf`/`reflect` value+
 
 ---
 
+## The standard library reproduces Go `-tags purego`
+
+The converted standard library corpus reproduces **Go built with `-tags purego`**, not the default
+`amd64`/`arm64` build. Go implements hot crypto/hash functions in `.s` assembly the transpiler cannot
+convert (the Go file has only a bodyless declaration gated `… && !purego`), so a default build turns
+them into throwing stubs that *compile* but can't *run*; `purego` selects the portable pure-Go
+variants with real bodies. `-stdlib` applies `-tags purego` **by default** (an explicit `-tags`
+overrides it, `-tags=` clears it) and prints the effective tags at the start of each run; the default
+is scoped to `-stdlib` only, so `-recurse` end-user conversions and single-file conversions stay
+tag-neutral. Asm-backed declarations split three ways: **purego-gated** (the tag gives a real body —
+the common case, `crypto/sha256` et al.), **GOARCH-gated with no purego escape** (hand-owned
+`*_impl.cs`, e.g. `internal/chacha8rand`), and **genuinely raw-metal** (`[module: GoManualConversion]`
+compiling stub). One accepted behavioral divergence from the default build: under purego,
+`crypto/elliptic` P256 `Inverse` panics — **exactly as real Go does under `-tags purego`** (an upstream
+gating inconsistency), so matching it is fidelity.
+
+**Full detail:** [Reference → The standard-library conversion applies `-tags purego`](ConversionStrategies-Reference.md#the-standard-library-conversion-applies--tags-purego) —
+the exposure decision and rejected alternatives, the three-bucket taxonomy, and the verified
+`crypto/elliptic` divergence.
+
+---
+
 ## Deterministic Output
 
 Converter output is **byte-reproducible**: the same Go source with the same converter build produces
