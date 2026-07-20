@@ -300,14 +300,24 @@ namespace PerformanceRunner
             Console.WriteLine(failed == 0 ? "ok" : $"{failed} failed");
         }
 
-        // A project is up to date when every .cs is newer than its matching .go source.
+        // A project is up to date when every .cs is newer than BOTH its matching .go source and the
+        // converter binary that produced it. Omitting the converter would leave every benchmark "up to
+        // date" after a converter-only change (the .go files don't move), so Verify/Measure would run
+        // the PREVIOUS converter's C# -- a false green.
         private static bool UpToDate(string projPath)
         {
+            DateTime exe = File.GetLastWriteTimeUtc(s_go2csExe);
+
             foreach (string go in Directory.GetFiles(projPath, "*.go"))
             {
                 string cs = Path.ChangeExtension(go, ".cs");
 
-                if (!File.Exists(cs) || File.GetLastWriteTimeUtc(cs) <= File.GetLastWriteTimeUtc(go))
+                if (!File.Exists(cs))
+                    return false;
+
+                DateTime csTime = File.GetLastWriteTimeUtc(cs);
+
+                if (csTime <= File.GetLastWriteTimeUtc(go) || csTime <= exe)
                     return false;
             }
 
