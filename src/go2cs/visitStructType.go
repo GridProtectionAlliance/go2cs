@@ -277,7 +277,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		if arrayType, ok := field.Type.(*ast.ArrayType); ok {
 			if arrayType.Len != nil {
-				arrayInitializer = fmt.Sprintf(" = new(%s)", v.convExpr(arrayType.Len, nil))
+				arrayInitializer = fmt.Sprintf(" = new(%s)", v.arrayZeroValueArgs(v.convExpr(arrayType.Len, nil), fieldType))
 			}
 		}
 

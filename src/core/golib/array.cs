@@ -82,6 +82,31 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = new T[length];
     }
 
+    // Fixed-size array whose ELEMENT zero value must itself be constructed, because default(T)
+    // is not usable storage: a nested fixed array (`[2][4]byte` -> array<array<byte>>, whose
+    // inner length exists only in the Go type, never in array<T>) or a struct whose own zero
+    // value needs construction. The converter supplies the factory since only it knows the
+    // element's shape; every other element type keeps the plain length ctors' fill of default(T).
+    //
+    // Mirrors the int/nint/ulong length overloads above: a Go array length can be a NAMED integer
+    // constant (`quant [nQuantIndex][blockSize]byte` - image/jpeg), which reaches this ctor as its
+    // wrapper's underlying nint rather than an int (CS1503 against an int-only overload).
+    public array(nint length, Func<T> elementFactory)
+    {
+        m_array = new T[length];
+
+        for (nint i = 0; i < length; i++)
+            m_array[i] = elementFactory();
+    }
+
+    public array(int length, Func<T> elementFactory) : this((nint)length, elementFactory)
+    {
+    }
+
+    public array(ulong length, Func<T> elementFactory) : this((nint)length, elementFactory)
+    {
+    }
+
     public array(T[]? array)
     {
         m_array = array ?? [];

@@ -1735,6 +1735,49 @@ array's inner elements are still default-constructed — `[2][4]byte{}` gets the
 but inner length 0 — a separate pre-existing gap shared with the `var` declaration path, chipped
 separately.)
 
+### A fixed-size array constructs its ELEMENTS when `default(T)` is not usable storage
+
+`new array<T>(N)` fills its backing with `default(T)`, which is the correct Go zero value only when
+`default(T)` is itself well formed. For a NESTED fixed array it is not: `[2][4]byte` emits
+`array<array<byte>>`, and the inner length `4` lives only in the Go type — `array<T>` has nowhere to
+carry it, so golib cannot recover it from `T`. Every element kept a null backing, so `len(x[1])`
+reported 0 where Go says 4, and the first indexed write panicked (`index out of range [2] with
+length 0`) — a silent-correctness defect that compiled clean. The same held for an element whose own
+zero value needs construction: `default(T)` skips the generated constructor that runs a struct's
+fixed-array field initializers and allocates its embed boxes.
+
+Only the converter knows the element's shape, so it supplies an element factory to a golib
+`array(int length, Func<T> elementFactory)` constructor:
+
+```go
+var x [2][4]byte           // len(x), len(x[1]) => 2 4
+var deep [2][3][4]byte
+var se [2]inner            // type inner struct { b [3]byte }
+```
+```csharp
+array<array<byte>> x = new(2, () => new(4));
+array<array<array<byte>>> deep = new(2, () => new(3, () => new(4)));
+array<inner> se = new(2, () => new());
+```
+
+The factory nests to any depth, and each element gets its OWN storage rather than one shared inner
+array. It is emitted from every fixed-array zero-value site — local `var`, package-level `var`
+(including the addressed-global `ж<>` box form), the type-ALIAS-to-array spelling, and a struct's
+field initializer (`internal array<array<nint>> entries = new(2, () => new(3));`).
+
+A NAMED array element needs no factory and is deliberately left alone: `type row [4]byte` generates
+a wrapper that allocates its backing lazily from its own known size (go2cs-gen's
+`m_value ??= new row(4)`), so `array<row> nr = new(2);` is already correct. Elements whose
+`default(T)` is a valid zero value (scalars, pointers, slices, maps) likewise keep the bare
+`new(N)`, which keeps the A/B footprint to genuinely nested shapes.
+
+This mirrors go2cs-gen's `AppendZeroValueInitializers`/`NeedsConstruction`, which does the same for
+struct FIELDS, and narrows the zero-value gap disclosed above — a `default!` zero-var local and a
+`make([]S, n)` element still read an array field at length 0. (Guarded by the `NestedFixedArrays`
+behavioral test: inner `len`, writes read back through inner arrays, per-element storage
+independence, three-level nesting, struct/named-array elements, and the global paths, all compared
+against `go run`.)
+
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.
 

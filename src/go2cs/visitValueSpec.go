@@ -260,9 +260,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								}
 
 								if len(arrayLenValue) > 0 && arrayLenValue != arrayLenExpr {
-									v.writeOutput("%s %s = new(%s); /* %s */", csTypeName, csIDName, arrayLenValue, arrayLenExpr)
+									v.writeOutput("%s %s = new(%s); /* %s */", csTypeName, csIDName, v.arrayZeroValueArgs(arrayLenValue, def.Type()), arrayLenExpr)
 								} else {
-									v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, arrayLenExpr)
+									v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, v.arrayZeroValueArgs(arrayLenExpr, def.Type()))
 								}
 							} else if arrayType, ok := types.Unalias(def.Type()).(*types.Array); ok {
 								// A type ALIAS to a fixed-size array (`type words = [4]uint64`,
@@ -270,7 +270,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								// the ast.ArrayType check above misses — resolve the length through
 								// types.Unalias or the local gets `default!` with a null backing
 								// array (NRE on first element write).
-								v.writeOutput("%s %s = new(%d);", csTypeName, csIDName, arrayType.Len())
+								v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, v.arrayZeroValueArgs(strconv.FormatInt(arrayType.Len(), 10), arrayType))
 							} else if v.structHasPromotedEmbeds(def.Type()) {
 								// A struct with a promoted embed stores it in a readonly `ж<T>`
 								// box only the constructors initialize — `default!` leaves the
@@ -309,6 +309,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							// Alias-typed global (`var gw words` where `type words = [4]uint64`):
 							// same types.Unalias resolution as the local path above.
 							arrayLenValue = strconv.FormatInt(arrayType.Len(), 10)
+						}
+
+						// A nested/needy element type must be constructed per element — the bare
+						// length would leave every element `default(T)` (see arrayZeroValueArgs).
+						if len(arrayLenValue) > 0 {
+							arrayLenValue = v.arrayZeroValueArgs(arrayLenValue, def.Type())
 						}
 
 						// A promoted-embed struct global has the same null-box hazard as the

@@ -19,7 +19,7 @@ partial class main_package {
     internal nint item;
     internal array<byte> pad = new(4);
 }
-internal static array<poolᴛ1> pool = new(2);
+internal static array<poolᴛ1> pool = new(2, () => new());
 
 internal static array<nint> nums = new(3);
 
