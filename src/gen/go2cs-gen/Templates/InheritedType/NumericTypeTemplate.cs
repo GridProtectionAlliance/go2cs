@@ -71,10 +71,22 @@ internal static class NumericTypeTemplate
                 public static {targetTypeName} operator ^({targetTypeName} left, {targetTypeName} right) => ({targetTypeName})(left.m_value ^ right.m_value);
         """;
 
-    private static string GetUnaryNegationOperator(string typeName, string targetTypeName) => IsUnsignedType(typeName) ? "" : 
+    // Go defines `-x` on EVERY numeric type, unsigned included, as the wrap-around `0 - x`. C# has
+    // no unary minus for ulong (and widens uint/byte/ushort to a signed type), so the unsigned form
+    // is written as that subtraction under `unchecked`, which is exactly Go's semantics. Emitting it
+    // for unsigned too is what lets a generated named type satisfy the IUnaryNegationOperators
+    // constraint the converter lifts for the Arithmetic operator set (constraintOperations.go
+    // getLiftedConstraints) — without it, a generic over `~uint64` instantiated with a named
+    // unsigned type is CS0315 (internal/trace's `dataTable[EI ~uint64, E]` over `type stringID uint64`).
+    private static string GetUnaryNegationOperator(string typeName, string targetTypeName) => IsUnsignedType(typeName) ?
        $"""
-        
-        
+
+
+                public static {targetTypeName} operator -({targetTypeName} value) => ({targetTypeName})unchecked(({typeName})(({typeName})0 - value.m_value));
+        """ :
+       $"""
+
+
                 public static {targetTypeName} operator -({targetTypeName} value) => ({targetTypeName})(-value.m_value);
         """;
 }

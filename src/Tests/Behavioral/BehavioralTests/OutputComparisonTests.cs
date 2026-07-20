@@ -403,6 +403,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
 
     [TestMethod]
+    public void CheckGenericNegation() => CheckTarget("GenericNegation");
+
+    [TestMethod]
     public void CheckGenericPointerInterfaceImpl() => CheckTarget("GenericPointerInterfaceImpl");
 
     [TestMethod]

@@ -10,24 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
-using static go.math.rand_package;
-using static go.math.rand_test_package;
+using static go.main_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,28 +38,15 @@ using static go.math.rand_test_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Rand, Source64>(Pointer = true)]
-[assembly: GoImplement<Rand, Source>(Pointer = true)]
-[assembly: GoImplement<Rand, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<lockedSource, Source64>(Pointer = true)]
-[assembly: GoImplement<lockedSource, Source>(Pointer = true)]
-[assembly: GoImplement<rngSource, Source64>(Pointer = true)]
-[assembly: GoImplement<rngSource, Source>(Pointer = true)]
-[assembly: GoImplement<runtimeSource, Source64>(Pointer = true)]
-[assembly: GoImplement<runtimeSource, Source>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-namespace go.math;
+namespace go;
 
-[GoPackage("rand")]
-public static partial class rand_package
-{
-}
-
-[GoPackage("rand_test")]
-public static partial class rand_test_package
+[GoPackage("main")]
+[GoTestMatchingConsoleOutput]
+public static partial class main_package
 {
 }

@@ -65,6 +65,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageChildNamespaces = make(map[string]bool)
 	packageQualifiedNamespaces = make(map[string]bool)
 	packageImportLeadingSegments = make(map[string]bool)
+	testLocalTypePrefixes = nil
 	packagePublicizedTypes = make(map[types.Object]bool)
 	packagePublicizedLiftedTypes = make(map[types.Type]bool)
 	packageCaptureModeMethods = make(map[*types.Func]bool)

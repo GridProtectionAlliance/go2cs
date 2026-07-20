@@ -83,6 +83,66 @@ func rootQualifySubNamespaceTypeRefs(name string) string {
 	})
 }
 
+// stripLocalTypeQualifier rewrites a type reference that names a type compiled into THIS assembly
+// through a fully-qualified package class (`go.math.rand.rand_package.PCG`) to the bare local form
+// (`PCG`) the owning package's own emission always uses — the assembly-attribute file carries
+// `using static <ns>.<pkg>_package;`, so both spellings resolve to the SAME type and the bare one
+// is canonical.
+//
+// The GoImplement/GoImplicitConv record sets are keyed by RENDERED name, so two spellings of one
+// resolved pair are two records: under -tests the package-under-test's records arrive BOTH short
+// (seeded verbatim from the production package_info.cs by the test-metadata anchor) and fully
+// qualified (re-discovered while converting the _test.go variants, where the production package is
+// reached through its import path). go2cs-gen then generated the adapter TWICE — GetUniqueHintName
+// silently uniquified the second FILE name, so the duplicate TYPE reached the compiler
+// (math/rand/v2: CS0102 + CS0111 x5 + CS8646 on rand_package.PCGжSource). Normalizing here makes
+// the two records textually identical, so the emitting HashSet collapses them to one. math/rand
+// escaped only by luck — its one self-qualified record targets a different interface than any
+// short record.
+//
+// The prefixes considered are the CURRENT package's own class plus testLocalTypePrefixes (the
+// package under test, populated only by a -tests conversion). A genuinely FOREIGN reference is
+// never stripped: matching a foreign package's record would suppress the LOCAL record its consumer
+// needs, which is the mistake documented on canonicalRecordIfaceName.
+func stripLocalTypeQualifier(name string, localTypePrefix string) string {
+	prefixes := make([]string, 0, 1+len(testLocalTypePrefixes))
+
+	if localTypePrefix != "" {
+		prefixes = append(prefixes, localTypePrefix)
+	}
+
+	// Under -tests the package under test compiles into this same assembly, so its class prefix is
+	// local too even though the external variant reached it through an import path.
+	prefixes = append(prefixes, testLocalTypePrefixes...)
+
+	matched := false
+
+	for _, prefix := range prefixes {
+		if strings.Contains(name, prefix+".") {
+			matched = true
+			break
+		}
+	}
+
+	if !matched {
+		return name
+	}
+
+	return packageQualifiedNameRegex.ReplaceAllStringFunc(name, func(match string) string {
+		for _, prefix := range prefixes {
+			trimmed, ok := strings.CutPrefix(match, prefix+".")
+
+			// Only a DIRECT member of the local package class is the bare local type; a longer
+			// dotted tail is a nested reference this normalization has no business rewriting.
+			if ok && !strings.Contains(trimmed, ".") {
+				return trimmed
+			}
+		}
+
+		return match
+	})
+}
+
 // qualifySystemCollidingLocalTypeRefs roots any BARE (single-segment) type reference whose name is a
 // System type (systemCollidingTypeNames) at packagePrefix (e.g. `go.@internal.profile_package`), so it
 // resolves to the LOCAL package type rather than being ambiguous with the `using System;`-imported type
@@ -138,7 +198,9 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(v.currentImportPath, PackageSuffix))
 
 	if isPackageUnderTest {
-		importPath = fmt.Sprintf("%s.%s", packageNamespace, getSanitizedImport(v.options.testPackageName+PackageSuffix))
+		// Composed from packageNamespace directly rather than routed through
+		// rootQualifyIfAmbiguous, so force the root shadow qualifier explicitly.
+		importPath = globalQualifyRooted(fmt.Sprintf("%s.%s", packageNamespace, getSanitizedImport(v.options.testPackageName+PackageSuffix)))
 	}
 
 	// The canonical C# alias for this package — what an unaliased import emits and what getTypeName's
@@ -211,19 +273,41 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 // `global::` forces resolution from the global namespace. A package with no `go/*` anywhere in
 // its closure keeps the bare `go.` prefix — `global::` there would be needless golden churn.
 func rootQualified(ns string) string {
-	segs := strings.Split(packageNamespace, ".")
-
-	if len(segs) >= 2 && segs[0] == RootNamespace && segs[1] == RootNamespace {
-		return "global::" + RootNamespace + "." + ns
-	}
-
-	// packageChildNamespaces mirrors the transitive import closure's namespace chains (populated
-	// by computeImportAliasRenames' pre-pass); a go/* import path contributes the `go.go` key.
-	if packageChildNamespaces[RootNamespace+"."+RootNamespace] {
+	if rootNamespaceShadowed() {
 		return "global::" + RootNamespace + "." + ns
 	}
 
 	return RootNamespace + "." + ns
+}
+
+// rootNamespaceShadowed reports whether a `go.go` namespace shadows the root in the compilation
+// the current file is emitted into — see rootQualified for the two ways that happens.
+func rootNamespaceShadowed() bool {
+	segs := strings.Split(packageNamespace, ".")
+
+	if len(segs) >= 2 && segs[0] == RootNamespace && segs[1] == RootNamespace {
+		return true
+	}
+
+	// packageChildNamespaces mirrors the transitive import closure's namespace chains (populated
+	// by computeImportAliasRenames' pre-pass); a go/* import path contributes the `go.go` key.
+	return packageChildNamespaces[RootNamespace+"."+RootNamespace]
+}
+
+// globalQualifyRooted forces `global::` onto an ALREADY-root-qualified namespace path (`go.…`)
+// when a `go.go` namespace shadows the root. rootQualified serves the callers that BUILD a rooted
+// path from a bare one; the using-directive targets composed directly from packageNamespace — the
+// test project's `using static <ns>.<class>;` anchors and the test host's `using go.testing_runtime;`
+// — are already rooted and so bypassed the gate entirely, re-binding their leading `go` to `go.go`
+// (math/rand/v2 whose regress_test.go imports go/format: CS0234 on the production class anchor and
+// on the host's runtime import). Idempotent, and a no-op with no shadow, so unshadowed packages
+// (every behavioral-test case) emit byte-identically.
+func globalQualifyRooted(rooted string) string {
+	if strings.HasPrefix(rooted, "global::") || !rootNamespaceShadowed() {
+		return rooted
+	}
+
+	return "global::" + rooted
 }
 
 // rootQualifyIfAmbiguous prefixes an imported namespace with the root namespace ("go.") when its

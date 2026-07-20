@@ -69,7 +69,7 @@ internal class InterfaceTypeTemplate : TemplateBase
             // Increment/decrement live in the numeric-only Arithmetic set (never the
             // string-including Sum set) — mirrors the converter's lifted constraint list in
             // constraintOperations.go getLiftedConstraints; keep the two in sync.
-            "Arithmetic" => [$"{Indent}ISubtractionOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IMultiplyOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IDivisionOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IIncrementOperators<{TypeT}>", $"{Indent}IDecrementOperators<{TypeT}>"],
+            "Arithmetic" => [$"{Indent}ISubtractionOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IMultiplyOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IDivisionOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IIncrementOperators<{TypeT}>", $"{Indent}IDecrementOperators<{TypeT}>", $"{Indent}IUnaryNegationOperators<{TypeT}, {TypeT}>"],
             // Shift-count parameter is int, matching the BCL IShiftOperators<TSelf, int, TSelf>
             // shape (see the converter's lifted Integer constraint set in constraintOperations.go).
             "Integer" => [$"{Indent}IModulusOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IBitwiseOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IShiftOperators<{TypeT}, int, {TypeT}>"],
