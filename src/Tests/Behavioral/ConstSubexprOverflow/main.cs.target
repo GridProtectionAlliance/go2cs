@@ -39,7 +39,30 @@ internal static void Main() {
     fmt.Println(n32, c32, nptr);
     showInt32((int32)(2147483648L - 2));
     showUint32((uint32)(4294967296L - 1));
+    var words = new Word[]{(nuint)(9223372036854775809UL), (nuint)(9223372036854775807UL)}.slice();
+    var wide = new uintptr[]{(nuint)(9223372036854775809UL), (nuint)(9223372036854775807UL)}.slice();
+    var uns = new nuint[]{(nuint)(9223372036854775809UL)}.slice();
+    var u64wide = new uint64[]{9223372036854775809UL}.slice();
+    foreach (var (_, v) in words) {
+        fmt.Println(v);
+    }
+    foreach (var (_, v) in wide) {
+        fmt.Println(v);
+    }
+    foreach (var (_, v) in uns) {
+        fmt.Println(v);
+    }
+    foreach (var (_, v) in u64wide) {
+        fmt.Println(v);
+    }
 }
+
+[GoType("num:uintptr")] partial struct Word;
+
+internal static readonly UntypedInt _W = 64;
+internal static readonly GoUntyped _B = /* 1 << _W */
+    GoUntyped.Parse("18446744073709551616");
+internal static readonly UntypedInt _M = /* _B - 1 */ 18446744073709551615;
 
 internal static void showInt32(int32 v) {
     fmt.Println(v);

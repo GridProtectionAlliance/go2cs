@@ -374,6 +374,19 @@ The narrowing applies to every integer target EXCEPT `int64`, whose C# `long` al
 
 Corpus effect: this repaired latent `ulong`-versus-`long` mismatches across crypto/aes, crypto/cipher, database/sql/driver, math/big, net/http, runtime, strconv, sync, and vendored chacha20poly1305, and made math/rand's `Int31n` compute in `uint32` exactly as Go does (it previously computed the same value in `long`). The `1<<31 - 1` / `1<<63 - 1` idiom is pervasive in Go's own `_test.go` files, where the shape is a hard compile blocker. (Guarded by the `ConstSubexprOverflow` behavioral test — int32/int16/uint32/uint64/uintptr/int elements, the int64 no-cast case, in-range controls, and assignment/explicit-conversion/argument positions, values verified vs Go.)
 
+**A subexpression past INT64 under a NATIVE-WIDTH unsigned target folds with its own `(nuint)` cast (2026-07-20).** The narrowing above needs the whole value to be int64-exact, and the *fold* that produces its widened operand originally ran only under a plain `uint64` target — a native-width target (`uint`/`uintptr`, and any named type over them) was left with its visible error, since `nuint` has no implicit conversion from `ulong` and the fold could not name the target. Go's arbitrary-precision rule makes this shape ordinary in numeric code: math/big's `nat{0, 0, 1 + 1<<(_W-1), _M ^ (1 << (_W - 1))}` (`int_test.go`'s `TestQuoStepD6`, where `Word` is a named type over `uintptr` and `_W` is 64) has an inner `1 << 63` of 9223372036854775808 — past int64 entirely, so no signed `long` fold can carry it — while each element's own value is representable in `Word`. Left alone, C# computed the element in int32: `1 + (1 << (int)(63))` against a `Word` element (CS0029), and `(nuint)_M ^ (1 << (int)(63))` mixing `nuint` with `int` (CS0019).
+
+The fold now covers `uint64` **and** both native-width spellings — Go `uint` renders as `nuint`, Go `uintptr` as golib's distinct `uintptr` struct — and carries the narrowing itself for the native-width pair, in the same parenthesized form `wholeExprIsCastOfType` recognizes as the `(nint)(…)` arm on the signed side:
+
+| Go | Was emitted | Now |
+|---|---|---|
+| `[]Word{1 + 1<<63}` (`Word uintptr`) | `1 + (1 << (int)(63))` — CS0029 | `(nuint)(9223372036854775809UL)` |
+| `[]uintptr{_M ^ (1 << 63)}` | `(uintptr)_M ^ ((1 << (int)(63)))` — CS0019 | `(nuint)(9223372036854775807UL)` |
+| `[]uint{1 + 1<<63}` | `1 + (1 << (int)(63))` — CS0029 | `(nuint)(9223372036854775809UL)` |
+| `[]uint64{1 + 1<<63}` | `9223372036854775809UL` | *unchanged* |
+
+The cast is spelled `nuint` for both native-width targets rather than naming the target: it is the primitive C# native unsigned type, and it converts implicitly to golib's `uintptr` struct and to a `[GoType]` wrapper over `uintptr` alike — so one spelling covers `uint`, `uintptr`, and named types over either, with no target-name synthesis. The `uint64` emission is untouched (it already had an implicit conversion from `ulong`), so this is zero-churn on the existing corpus — CNR is byte-identical across all 434 behavioral projects. (Guarded by the same `ConstSubexprOverflow` behavioral test, extended with a named-`uintptr` `Word` type plus plain `uintptr`/`uint`/`uint64` elements of the beyond-int64 shape, values verified vs Go.)
+
 See [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
 ## Native and Narrow Integer Types
