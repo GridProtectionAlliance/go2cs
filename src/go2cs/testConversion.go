@@ -1114,6 +1114,14 @@ func supportedTestCapabilities() []string {
 		"T.Fatal", "T.Fatalf", "T.Helper", "T.Log", "T.Logf", "T.Name", "T.Parallel",
 		"T.Run", "T.Setenv", "T.Skip", "T.SkipNow", "T.Skipf", "T.Skipped", "T.TempDir", "M.Run",
 		"testing.AllocsPerRun", "testing.CoverMode", "testing.Short", "testing.Verbose",
+		// In-process benchmarking driven from a Test function: testing.Benchmark runs a
+		// func(*B) closure and returns a BenchmarkResult, setting B.N and exposing NsPerOp
+		// (unicode's TestCalibrate uses this to pick a linear-vs-binary search cutoff). The
+		// host implements these (core/testing/testing.cs: Benchmark, B.N, BenchmarkResult).
+		// Top-level BenchmarkXxx DECLARATIONS remain unsupported by their kind (they are never
+		// registered — see the "benchmark" case in discoverTestDeclarations), so supporting
+		// these members only unblocks Test functions that call testing.Benchmark themselves.
+		"testing.Benchmark", "B.N", "BenchmarkResult.NsPerOp",
 	}
 	sort.Strings(capabilities)
 	return capabilities

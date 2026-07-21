@@ -640,6 +640,54 @@ func TestCoverModeCapabilityIsSupported(t *testing.T) {
 	}
 }
 
+// A Test function may drive an in-process benchmark itself: testing.Benchmark runs a func(*B)
+// closure (reading b.N) and returns a BenchmarkResult whose NsPerOp() the test inspects —
+// unicode's TestCalibrate is the stdlib case. The host implements Benchmark/B.N/BenchmarkResult
+// (core/testing/testing.cs), so such a test must census as included rather than being
+// disclosed-unsupported. (Top-level BenchmarkXxx DECLARATIONS remain unsupported by their kind;
+// see TestManifestEligibility — this only covers Test functions that CALL testing.Benchmark.)
+func TestBenchmarkCapabilityIsSupported(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/benchcap\n\ngo 1.23\n",
+		"value.go": "package benchcap\n",
+		"value_test.go": "package benchcap\n" +
+			"import \"testing\"\n" +
+			"func TestCalibrateLike(t *testing.T) {\n" +
+			"\tr := testing.Benchmark(func(b *testing.B) {\n" +
+			"\t\tfor i := 0; i < b.N; i++ {\n" +
+			"\t\t}\n" +
+			"\t})\n" +
+			"\tif r.NsPerOp() < 0 {\n" +
+			"\t\tt.Fatalf(\"ns/op = %d\", r.NsPerOp())\n" +
+			"\t}\n" +
+			"}\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, internal := loadTestVariantForDir(t, dir)
+
+	analysis := analyzeTestingCapabilities(internal)
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+
+	if len(declarations) != 1 || declarations[0].Name != "TestCalibrateLike" {
+		t.Fatalf("declarations = %#v, want just TestCalibrateLike", declarations)
+	}
+	declaration := declarations[0]
+	if declaration.Status != "included" {
+		t.Fatalf("TestCalibrateLike should be included (testing.Benchmark/B.N/BenchmarkResult.NsPerOp are supported), got status %q reason %q", declaration.Status, declaration.Reason)
+	}
+	required := NewHashSet(declaration.RequiredCapabilities)
+	for _, capability := range []string{"testing.Benchmark", "B.N", "BenchmarkResult.NsPerOp"} {
+		if !required.Contains(capability) {
+			t.Fatalf("required capabilities %v do not contain %q", declaration.RequiredCapabilities, capability)
+		}
+	}
+}
+
 // F4 guard: capability attribution is per test THROUGH its helper closure — one blocked test
 // (via a helper it calls) blocks itself; its supported sibling stays included.
 func TestPerTestCapabilityAttributionBlocksOnlyOffendingTest(t *testing.T) {

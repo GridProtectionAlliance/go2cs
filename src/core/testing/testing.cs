@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Diagnostics;
 using go.testing_runtime;
 using any = System.Object;
 using ꓸꓸꓸany = System.Span<System.Object>;
@@ -61,17 +62,101 @@ public static partial class testing_package
     }
 
     /// <summary>
-    /// Benchmark receiver surface — COMPILE-ONLY in the bootstrap shim. Benchmark declarations
-    /// are disclosed-unsupported in the manifest (execution is deferred to Phase 4D) and never
-    /// registered with the host, but their converted BODIES still compile into the test assembly,
-    /// so the members they reference must exist. All members are safe non-throwing no-ops
-    /// (req §6.2): N defaults to 0 so a b.N loop iterates zero times, Run reports success
-    /// without executing, and the timer/allocation/failure reporters have empty bodies —
-    /// there is no run to time or fail.
+    /// Benchmark receiver surface. Top-level BenchmarkXxx DECLARATIONS remain disclosed-unsupported
+    /// in the manifest (execution is deferred to Phase 4D) and are never registered with the host,
+    /// but their converted BODIES still compile into the test assembly, so the members they
+    /// reference must exist. Those receiver members (Run and the timer/allocation/failure reporters)
+    /// stay safe non-throwing no-ops — a disclosed declaration is never invoked, so there is no run
+    /// to time or fail. N is the exception: it is set by <see cref="Benchmark"/>, which DOES drive a
+    /// closure in-process (a converted Test can legitimately call testing.Benchmark itself —
+    /// unicode's TestCalibrate does), so a b.N loop inside such a closure iterates the measured
+    /// count rather than zero times.
     /// </summary>
     public struct B
     {
         public nint N;
+    }
+
+    /// <summary>
+    /// The result of one <see cref="Benchmark"/> run — the subset of Go's testing.BenchmarkResult a
+    /// converted Test function needs when it drives an in-process benchmark (unicode's TestCalibrate
+    /// reads NsPerOp()). N is the final iteration count Benchmark settled on. Go's companion field is
+    /// T time.Duration; the shim stays time-package-free (see the file's Sprint remark on why no
+    /// second stdlib tree is dragged in), so the elapsed wall-clock time is held here as Nanoseconds,
+    /// the int64 nanosecond form of that Duration.
+    /// </summary>
+    public struct BenchmarkResult
+    {
+        public nint N;
+        public long Nanoseconds;
+
+        /// <summary>
+        /// Average nanoseconds per iteration — like Go's BenchmarkResult.NsPerOp(). Zero iterations
+        /// yields 0 (Go returns 0 rather than dividing when N is non-positive).
+        /// </summary>
+        public readonly long NsPerOp()
+        {
+            if (N <= 0)
+                return 0L;
+            return Nanoseconds / (long)N;
+        }
+    }
+
+    /// <summary>
+    /// Runs benchmark closure <paramref name="f"/> in-process and reports the measurement — a
+    /// minimal stand-in for Go's testing.Benchmark. Like Go, it grows N geometrically (starting at
+    /// 1) until the run spends a target time budget or hits an iteration ceiling, times the final
+    /// run, and returns a <see cref="BenchmarkResult"/>. This is the ONLY path that executes a
+    /// benchmark body: it exists for converted Test functions that call testing.Benchmark directly
+    /// (unicode's TestCalibrate). Top-level BenchmarkXxx declarations are still never registered or
+    /// run (they are disclosed in the manifest), so adding this changes no existing test's behavior.
+    /// </summary>
+    /// <remarks>
+    /// Go's default benchmark time is 1s; the shim uses a smaller budget so an in-process benchmark
+    /// completes quickly. The N-growth mirrors Go's predictNextN shape (scale by target/observed,
+    /// grow by at most 100x and at least +20%, clamp to the ceiling). Only N and the run's wall time
+    /// are measured — the B timer/allocation reporters are the no-op receiver members above, exactly
+    /// as for a disclosed benchmark, so a closure that calls them still behaves consistently.
+    /// </remarks>
+    public static BenchmarkResult Benchmark(Action<ж<B>> f)
+    {
+        ArgumentNullException.ThrowIfNull(f);
+
+        const long targetNanoseconds = 100L * 1000L * 1000L;   // 100ms budget per benchmark
+        const nint maxIterations = 1_000_000_000;              // Go's benchmark N ceiling (1e9)
+
+        nint n = 1;
+        long elapsedNanoseconds = 0L;
+
+        while (true)
+        {
+            ref B b = ref builtin.heap<B>(out ж<B> box);
+            b.N = n;
+
+            Stopwatch timer = Stopwatch.StartNew();
+            f(box);
+            timer.Stop();
+            elapsedNanoseconds = (long)timer.Elapsed.TotalNanoseconds;
+
+            if (elapsedNanoseconds >= targetNanoseconds || n >= maxIterations)
+                break;
+
+            // Predict the next N: scale by how far under budget the last run was, bounded to a
+            // 100x jump above and a +20% floor below, and never past the ceiling (Go's predictNextN).
+            nint next;
+            if (elapsedNanoseconds <= 0L)
+                next = n * 100;
+            else
+            {
+                next = (nint)((double)n * targetNanoseconds / elapsedNanoseconds);
+                next = Math.Min(next, n * 100);
+                next = Math.Max(next, n + n / 5);
+            }
+
+            n = Math.Min(Math.Max(next, n + 1), maxIterations);
+        }
+
+        return new BenchmarkResult { N = n, Nanoseconds = elapsedNanoseconds };
     }
 
     /// <summary>
