@@ -15,7 +15,7 @@ internal static float64 f64(float64 x) {
 internal static void Main() {
     fmt.Println(/* 100000 * myPi */ 314159.26535897935D);
     fmt.Println(/* float32(100000 * myPi) */ 314159.25D);
-    fmt.Println(f64(2) * /* (1 / myLn10) */ 0.4342944819032518D);
+    fmt.Println(f64(2D) * /* (1 / myLn10) */ 0.4342944819032518D);
 }
 
 } // end main_package

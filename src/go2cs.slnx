@@ -248,6 +248,7 @@
     <Project Path="Tests/Behavioral/InterfaceMapKeyPointer/InterfaceMapKeyPointer.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAssertion/InterfaceToInterfaceAssertion.csproj" />
+    <Project Path="Tests/Behavioral/IntFormFloatConst/IntFormFloatConst.csproj" />
     <Project Path="Tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
     <Project Path="Tests/Behavioral/InvalidRuneString/InvalidRuneString.csproj" />
     <Project Path="Tests/Behavioral/IoLike/IoLike.csproj" />
