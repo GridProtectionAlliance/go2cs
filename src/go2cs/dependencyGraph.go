@@ -1,3 +1,9 @@
+// dependencyGraph.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
 // This file holds the shared package dependency graph + topological sort used to order
 // conversion "least dependencies first." It is the common core of the two conversion
 // drivers: StdLibConverter (convert-set = the Go standard library) and, from P2 on,

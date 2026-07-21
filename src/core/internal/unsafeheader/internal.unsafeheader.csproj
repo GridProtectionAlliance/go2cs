@@ -9,9 +9,9 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026 The go2cs Authors</Copyright>
     <Authors>$(Product) Authors</Authors>
-    <Company>J. Ritchie Carroll</Company>
+    <Company>The go2cs Authors</Company>
     <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>

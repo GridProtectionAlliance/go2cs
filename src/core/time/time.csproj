@@ -6,13 +6,13 @@
     <AssemblyName>time_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
     <PackageId>go.time</PackageId>
-    <Authors>J. Ritchie Carroll</Authors>
-    <Company>J. Ritchie Carroll</Company>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The go2cs Authors</Company>
     <Product>go2cs</Product>
     <Title>go2cs time package</Title>
     <PackageDescription>Go time package in .NET for use with go2cs</PackageDescription>
     <Description>Go time package in .NET for use with go2cs</Description>
-    <Copyright>Copyright © 2020</Copyright>
+    <Copyright>Copyright © 2026 The go2cs Authors</Copyright>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

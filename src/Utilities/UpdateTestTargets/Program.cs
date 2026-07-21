@@ -1,4 +1,10 @@
-﻿// Move up from here: "go2cs\src\Utilities\UpdateTestTargets\bin\Debug\net9.0"
+﻿// Program.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
+// Move up from here: "go2cs\src\Utilities\UpdateTestTargets\bin\Debug\net9.0"
 const string RootPath = @"..\..\..\..\..\";
 
 // Scan all behavioral test folders

@@ -6,13 +6,13 @@
     <AssemblyName>rand_package</AssemblyName>
     <ApplicationIcon>..\..\go2cs.ico</ApplicationIcon>
     <PackageId>go.math.rand</PackageId>
-    <Authors>J. Ritchie Carroll</Authors>
-    <Company>J. Ritchie Carroll</Company>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The go2cs Authors</Company>
     <Product>go2cs</Product>
     <Title>go2cs math.rand package</Title>
     <PackageDescription>Go math.rand package in .NET for use with go2cs</PackageDescription>
     <Description>Go math package in .NET for use with go2cs</Description>
-    <Copyright>Copyright © 2024</Copyright>
+    <Copyright>Copyright © 2026 The go2cs Authors</Copyright>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

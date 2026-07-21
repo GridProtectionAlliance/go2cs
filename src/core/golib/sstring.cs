@@ -1,26 +1,9 @@
-//******************************************************************************************************
-//  sstring.cs - Gbtc
+// sstring.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-//  Copyright © 2026, J. Ritchie Carroll.  All Rights Reserved.
-//
-//  Licensed under the MIT License (MIT), the "License"; you may not use this file except in compliance
-//  with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  06/28/2018 - J. Ritchie Carroll
-//       Generated original version of source code.
-//  07/12/2026 - J. Ritchie Carroll
-//       Promoted from experimental to a first-class stack string; rewritten for correctness and to
-//       shed ref-struct-incompatible surface.
-//
-//******************************************************************************************************
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
 // ReSharper disable CheckNamespace
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle

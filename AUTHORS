@@ -1,0 +1,13 @@
+# This is the official list of go2cs authors for copyright purposes.
+# It is referenced by the copyright notice in the LICENSE and NOTICE files
+# and by the per-file headers, which read "The go2cs Authors" rather than
+# naming an individual so that attribution scales as contributors arrive.
+#
+# This file lists copyright holders. Names are added on first substantive
+# contribution; entries are one per line, in the form:
+#
+#     Name <email address>
+#
+# Please keep the list sorted by first appearance.
+
+J. Ritchie Carroll <ritchiecarroll@gmail.com>

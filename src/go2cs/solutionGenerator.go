@@ -1,3 +1,9 @@
+// solutionGenerator.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
 // This file emits a Visual Studio .slnx solution for a whole-standard-library (-stdlib)
 // conversion, so the freshly converted stdlib is openable / buildable as a single unit
 // right after a run instead of relying on a hand-maintained solution that drifts.

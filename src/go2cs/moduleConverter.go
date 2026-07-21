@@ -1,3 +1,9 @@
+// moduleConverter.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
 // This file drives -recurse: recursive end-user module conversion. ModuleConverter converts a
 // downloaded Go application PLUS every third-party dependency package in its transitive closure,
 // in dependency order (least dependencies first), while REFERENCING (not converting) the

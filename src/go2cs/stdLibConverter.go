@@ -1,3 +1,9 @@
+// stdLibConverter.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
 // This file contains extensions to the go2cs project for handling standard library conversion
 package main
 
