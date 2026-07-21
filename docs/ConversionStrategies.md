@@ -1110,8 +1110,9 @@ bridge**: `reflect`/`internal/reflectlite` read an interface's `{type,data}` wor
 `unsafe.Pointer`, so the bridged entry points instead carry the boxed managed value and a synthetic
 descriptor stamped with the real `System.Type` (`ValueOf`, the value readers, canonical `Type`
 interning, `Swapper`, and `DeepEqual`'s recursion keyed on managed reference identity). A small
-whitelist of `//go:linkname` pulls (currently the Windows DLL-loading helpers) emits forwarders to
-real hand-written targets; non-whitelisted linkname pulls remain throwing stubs.
+whitelist of `//go:linkname` pulls emits forwarders to real implementations — the Windows DLL-loading
+helpers (hand-written `syscall` P/Invokes) and golib builtins such as `maps.Clone`'s `runtime.mapclone`
+(→ `builtin.mapclone`, a shallow independent map clone); non-whitelisted linkname pulls remain throwing stubs.
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations) —
 the guintptr family surface, the `unsafe.Pointer`→manual-type ctor cooperation, the runtime lock/note

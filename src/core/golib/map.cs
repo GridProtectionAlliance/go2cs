@@ -39,11 +39,31 @@ public interface IMap
     /// allocated map is NOT nil (Go's only legal map comparison is against nil).
     /// </summary>
     bool IsNil { get; }
+
+    /// <summary>
+    /// Returns a shallow clone of this map with an INDEPENDENT backing store — the runtime
+    /// intrinsic behind <c>maps.Clone</c> (Go's <c>runtime.mapclone</c>). Keys and values are
+    /// copied by ordinary assignment; mutating the clone does not affect the original. A nil
+    /// map clones to a nil map.
+    /// </summary>
+    IMap CloneMap();
 }
 
 public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
 {
     (TValue, bool) this[TKey key, bool _] { get; }
+
+    /// <summary>
+    /// Default <see cref="IMap.CloneMap"/> for any <see cref="IMap{TKey, TValue}"/> — covers both
+    /// the concrete <see cref="map{TKey, TValue}"/> and the generated named-map wrappers (which
+    /// wrap a shared <see cref="map{TKey, TValue}"/>). Builds a fresh <see cref="map{TKey, TValue}"/>
+    /// populated from this map's entries, so the clone's backing store is independent of the
+    /// original (Go's shallow clone: keys/values set by ordinary assignment). A nil map clones to nil.
+    /// </summary>
+    IMap IMap.CloneMap()
+    {
+        return IsNil ? default(map<TKey, TValue>) : new map<TKey, TValue>(this);
+    }
 }
 
 public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>> where TKey : notnull

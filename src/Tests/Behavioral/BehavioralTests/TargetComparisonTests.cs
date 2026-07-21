@@ -663,6 +663,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]
+    public void CheckMapCloneLinkname() => CheckTarget("MapCloneLinkname");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]

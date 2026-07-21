@@ -926,6 +926,22 @@ public static class builtin
     }
 
     /// <summary>
+    /// Returns a shallow clone of a map held as a boxed <c>any</c> — the runtime intrinsic Go
+    /// implements as <c>runtime.mapclone</c> and links into <c>maps.clone</c> (the un-generic
+    /// worker behind <c>maps.Clone</c>). The argument arrives boxed (an <c>any</c> wrapping a
+    /// <see cref="map{TKey, TValue}"/> or a named-map wrapper); the returned <c>any</c> wraps a
+    /// fresh map with the same key/value pairs and an INDEPENDENT backing store, so mutating the
+    /// clone does not affect the original. A nil map clones to a nil map. Dispatch flows through
+    /// <see cref="IMap.CloneMap"/> so the concrete key/value types are recovered without reflection.
+    /// </summary>
+    /// <param name="m">Boxed map value to clone.</param>
+    /// <returns>A boxed independent clone of <paramref name="m"/>.</returns>
+    public static any mapclone(any m)
+    {
+        return m is IMap source ? source.CloneMap() : m;
+    }
+
+    /// <summary>
     /// Returns the smallest value among its ordered arguments (the Go 1.21 <c>min</c> built-in).
     /// </summary>
     /// <param name="x">First value (Go requires at least one argument).</param>

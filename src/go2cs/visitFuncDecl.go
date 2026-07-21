@@ -1557,6 +1557,19 @@ var linknameForwardTargets = map[string]bool{
 	"syscall.getprocaddress":    true,
 }
 
+// linknameForwardBuiltins is the whitelist of cross-package //go:linkname PULL targets whose
+// implementation is a golib BUILTIN — a compiler intrinsic Go defines in the runtime and links
+// into another package by symbol, for which golib carries the real C# implementation. The map
+// value is the golib builtin's C# name; it is in scope UNQUALIFIED via `using static go.builtin`,
+// so the forwarder emits a bare `<builtin>(args)` call (an empty package alias signals this). The
+// canonical case is maps.clone — Go implements it as runtime.mapclone (`//go:linkname mapclone
+// maps.clone`) and the maps package pulls it as a bodyless `func clone(m any) any`; golib's
+// builtin.mapclone returns a shallow, independent clone of the boxed map. Extend this set when a
+// new linkname intrinsic gains a golib builtin implementation.
+var linknameForwardBuiltins = map[string]string{
+	"maps.clone": "mapclone",
+}
+
 // funcLinknameForward recognizes a bodyless function carrying a `//go:linkname <thisFunc>
 // <pkgpath>.<targetFunc>` directive whose target is a hand-implemented native function
 // (linknameForwardTargets). It returns the C# alias for the target package (the last path segment,
@@ -1576,6 +1589,14 @@ func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, tar
 		}
 
 		target := fields[2]
+
+		// A linkname target implemented as a golib BUILTIN — in scope unqualified via
+		// `using static go.builtin`, so the forwarder emits a bare `<builtin>(args)` call. The
+		// empty alias is the sentinel writeLinknameForwarder reads to omit the package qualifier
+		// (maps.clone → mapclone, Go's runtime.mapclone shallow-clone intrinsic).
+		if builtin, isBuiltin := linknameForwardBuiltins[target]; isBuiltin {
+			return "", builtin, true
+		}
 
 		if !linknameForwardTargets[target] {
 			return "", "", false
@@ -1649,7 +1670,13 @@ func (v *Visitor) writeLinknameForwarder(signature *types.Signature, alias strin
 		args[i] = name
 	}
 
-	call := fmt.Sprintf("%s.%s(%s)", alias, targetFunc, strings.Join(args, ", "))
+	// An empty alias signals a golib-builtin target (in scope unqualified via `using static
+	// go.builtin`); any other alias is the target package's using-alias (`syscall.loadlibrary`).
+	call := fmt.Sprintf("%s(%s)", targetFunc, strings.Join(args, ", "))
+
+	if alias != "" {
+		call = fmt.Sprintf("%s.%s(%s)", alias, targetFunc, strings.Join(args, ", "))
+	}
 
 	results := signature.Results()
 

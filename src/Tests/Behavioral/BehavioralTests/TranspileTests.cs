@@ -660,6 +660,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]
+    public void CheckMapCloneLinkname() => CheckTarget("MapCloneLinkname");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
