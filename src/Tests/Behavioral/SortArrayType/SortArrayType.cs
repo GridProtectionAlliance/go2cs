@@ -162,22 +162,22 @@ internal static void Main() {
         new(
             Name: "Person1"u8,
             Age: 26,
-            ShoeSize: 8
+            ShoeSize: 8F
         ),
         new(
             Name: "Person2"u8,
             Age: 21,
-            ShoeSize: 4
+            ShoeSize: 4F
         ),
         new(
             Name: "Person3"u8,
             Age: 15,
-            ShoeSize: 9
+            ShoeSize: 9F
         ),
         new(
             Name: "Person4"u8,
             Age: 45,
-            ShoeSize: 15
+            ShoeSize: 15F
         ),
         new(
             Name: "Person5"u8,

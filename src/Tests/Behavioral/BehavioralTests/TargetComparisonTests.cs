@@ -597,6 +597,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAssertion() => CheckTarget("InterfaceToInterfaceAssertion");
 
     [TestMethod]
+    public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
+
+    [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]

@@ -16,12 +16,12 @@ internal static void Main() {
     fmt.Println(ninf < -1e308D);
     fmt.Println(Δmath.Float64bits(pinf));
     fmt.Println(Δmath.Float64bits(ninf));
-    fmt.Println(Δmath.Float64bits(1 / ninf));
+    fmt.Println(Δmath.Float64bits(1D / ninf));
     var nan = Δmath.Float64frombits(0x7FF8000000000001UL);
     fmt.Println(nan != nan);
     fmt.Println(Δmath.Float64bits(nan));
     var sub = Δmath.Float64frombits(1);
-    fmt.Println(sub > 0);
+    fmt.Println(sub > 0D);
     fmt.Println(Δmath.Float64bits(sub));
     fmt.Println(Δmath.Float64bits(5e-324D));
     fmt.Println(Δmath.Float64bits(1.0D));
@@ -41,7 +41,7 @@ internal static void Main() {
     fmt.Println(Δmath.Float32bits(qnan));
     fmt.Println(Δmath.Float32bits(snan));
     var fsub = Δmath.Float32frombits(1);
-    fmt.Println(fsub > 0);
+    fmt.Println(fsub > 0F);
     fmt.Println(Δmath.Float32bits(fsub));
     fmt.Println(Δmath.Float32bits(Δmath.Float32frombits(0x3F9D70A4)) == 0x3F9D70A4);
     fmt.Println(Δmath.Float32bits((float32)1.0F));

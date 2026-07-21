@@ -30,7 +30,7 @@ internal static void Main() {
     fmt.Println(3.14D, 2.5D, 0.1D, 100.0D, -7.5D);
     float32 f32 = 0.1F;
     fmt.Println(f32, (float64)f32);
-    fmt.Println((float32)1e10F, (float32)16777216, (float32)1e-7F);
+    fmt.Println((float32)1e10F, (float32)16777216F, (float32)1e-7F);
     fmt.Println((float32)3.4028235e+38F, (float32)3.14F);
     var v = 1234.5678D;
     fmt.Printf("[%e] [%E] [%f] [%F] [%g] [%G]\n"u8, v, v, v, v, v, v);

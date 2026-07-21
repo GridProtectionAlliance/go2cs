@@ -12,11 +12,11 @@ public static readonly UntypedInt Sep = /* ':' */ 58;
 [GoType("num:float64")] partial struct Celsius;
 
 public static Celsius Boiling() {
-    return 100;
+    return 100D;
 }
 
 public static Temperature Freezing() {
-    return 0;
+    return 0D;
 }
 
 public static Celsius Add(this Celsius c, Celsius d) {
@@ -29,7 +29,7 @@ public static Celsius Add(this Celsius c, Celsius d) {
 }
 
 public static bool Hot(this Sensor s) {
-    return s.Temp > 50;
+    return s.Temp > 50D;
 }
 
 public static @string Label(this Sensor s) {

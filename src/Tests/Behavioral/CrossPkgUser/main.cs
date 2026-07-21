@@ -174,11 +174,11 @@ internal static (slice<byte>, error) readWith(@string @base, @string @file) {
 internal static void Main() => func((defer, recover) => {
     deferǃ(note, (nint)(CrossPkgLib.Precision), defer);
     var b = CrossPkgLib.Boiling();
-    var r = b.Add(10);
+    var r = b.Add(10D);
     fmt.Println((float64)b);
     fmt.Println((float64)r);
     CrossPkgLibꓸTemperature t = CrossPkgLib.Freezing();
-    t = t.Add(32);
+    t = t.Add(32D);
     fmt.Println((float64)t);
     var s = new CrossPkgLib.Sensor(Name: "kitchen"u8, Temp: CrossPkgLib.Boiling());
     fmt.Println(s.Name, (float64)s.Temp, s.Hot());
@@ -186,16 +186,16 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(l.Label());
     fmt.Println(CrossPkgLib.Describe(s));
     ref var s2 = ref heap<CrossPkgLib.Sensor>(out var Ꮡs2);
-    s2 = new CrossPkgLib.Sensor(Name: "attic"u8, Temp: 20);
+    s2 = new CrossPkgLib.Sensor(Name: "attic"u8, Temp: 20D);
     var p = new probe(Sensor: Ꮡs2, id: 7);
     fmt.Println(p.Name, (float64)p.Temp, p.id);
-    p.Temp = 75;
+    p.Temp = 75D;
     fmt.Println((float64)s2.Temp, s2.Hot());
-    p.Sensor.Value.Calibrate(5);
+    p.Sensor.Value.Calibrate(5D);
     fmt.Println((float64)s2.Temp);
-    var g = new tagged(Sensor: new CrossPkgLib.Sensor(Name: "cellar"u8, Temp: 5), n: 3);
+    var g = new tagged(Sensor: new CrossPkgLib.Sensor(Name: "cellar"u8, Temp: 5D), n: 3);
     fmt.Println(g.Name, (float64)g.Temp, g.n);
-    g.Temp = 60;
+    g.Temp = 60D;
     fmt.Println((float64)g.Temp, g.Sensor.Hot());
     Labeled lb2 = g;
     fmt.Println("promoted label:", lb2.Label());
@@ -211,12 +211,12 @@ internal static void Main() => func((defer, recover) => {
     var (st1, err1) = stampOrErr(false);
     var (st2, err2) = stampOrErr(true);
     fmt.Println(st1 == st2, err1 != default!, st2 == bigStamp, err2 == default!);
-    var rg = new rig(Device: new CrossPkgLib.Device(Sensor: new CrossPkgLib.Sensor(Name: "deep"u8, Temp: 55), Serial: 9), id: 1);
+    var rg = new rig(Device: new CrossPkgLib.Device(Sensor: new CrossPkgLib.Sensor(Name: "deep"u8, Temp: 55D), Serial: 9), id: 1);
     fmt.Println((float64)rg.Temp, rg.Serial, rg.id);
-    rg.Temp = 66;
+    rg.Temp = 66D;
     fmt.Println((float64)rg.Device.Sensor.Temp);
     fmt.Println(rg.Device.Sensor.Hot());
-    Ꮡ(rg).of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(3);
+    Ꮡ(rg).of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(3D);
     fmt.Println((float64)rg.Device.Sensor.Temp);
     var exprᴛ1 = CrossPkgLib.Precision;
     if (exprᴛ1 == 1) {
@@ -230,7 +230,7 @@ internal static void Main() => func((defer, recover) => {
     }
 
     fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
-    fmt.Println(CheckFunc(new CrossPkgLibꓸStatus(Code: 21)), new CrossPkgLib.Sensor(Temp: 9).Status());
+    fmt.Println(CheckFunc(new CrossPkgLibꓸStatus(Code: 21)), new CrossPkgLib.Sensor(Temp: 9D).Status());
     var (g1, c1) = gauge(new CrossPkgLibꓸStatus(Code: 5));
     fmt.Println(g1.Code, c1);
     var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
@@ -263,7 +263,7 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(st.Label(), st.Stamp(), CrossPkgLib.Describe(st), lb.Label());
     Labeled wide = new seal(name: "w"u8);
     fmt.Println(AreEqual(((CrossPkgLib.Labeled)wide), lb));
-    var sp2 = Ꮡ(new CrossPkgLib.Sensor(Name: "porch"u8, Temp: 40));
+    var sp2 = Ꮡ(new CrossPkgLib.Sensor(Name: "porch"u8, Temp: 40D));
     fmt.Println(((CrossPkgLib.Labeled)new CrossPkgLib.SensorжLabeled(sp2)).Label(), CrossPkgLib.LabeledOf(sp2).Label());
     Labeled localLb = new CrossPkgLib_SensorжLabeled(sp2);
     fmt.Println(localLb.Label());
@@ -292,10 +292,10 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(isHot(60), isHot(40));
     var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde"u8);
     fmt.Println((~nd).ID, nerr == default!);
-    sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage"u8, Temp: 30));
+    sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage"u8, Temp: 30D));
     fmt.Println((~(~sensorHolder).item).Name);
     var sbx = new sensorBox(tag: "b"u8);
-    sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed"u8, Temp: 40));
+    sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed"u8, Temp: 40D));
     fmt.Println((~sbx.Holder.item).Name, sbx.tag);
     fmt.Println("leaf:", leafEmitter.Emit());
     fmt.Println("branch:", branchEmitter.Emit());
@@ -312,13 +312,13 @@ internal static void Main() => func((defer, recover) => {
     sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
     fmt.Println("tallies score:", sc.Score());
     var cal = (Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(CrossPkgLib.Calibrate);
-    var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx"u8, Temp: 10));
-    cal(mx, 4);
+    var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx"u8, Temp: 10D));
+    cal(mx, 4D);
     fmt.Println((float64)(~mx).Temp);
     var hot = (Func<CrossPkgLib.Sensor, bool>)(CrossPkgLib.Hot);
-    fmt.Println(hot(mx.Value), hot(new CrossPkgLib.Sensor(Temp: 60)));
+    fmt.Println(hot(mx.Value), hot(new CrossPkgLib.Sensor(Temp: 60D)));
     var madd = (Func<CrossPkgLib.Celsius, CrossPkgLib.Celsius, CrossPkgLib.Celsius>)(CrossPkgLib.Add);
-    fmt.Println((float64)madd(2, 3));
+    fmt.Println((float64)madd(2D, 3D));
 });
 
 [GoType("num:float64")] partial struct localCelsius;

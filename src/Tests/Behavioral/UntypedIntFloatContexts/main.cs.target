@@ -15,10 +15,10 @@ internal static void Main() {
     float32 f32 = m;
     fmt.Println(i, fl, f32);
     float64 half = m;
-    fmt.Println(half / 2);
+    fmt.Println(half / 2D);
     float64 pf = pkgConst;
     nint pi = pkgConst;
-    fmt.Println(pf / 8, pi);
+    fmt.Println(pf / 8D, pi);
     float64 hf = hugeConst;
     uint64 hu = hugeConst;
     fmt.Println(hf / (1152921504606846976D), hu);
@@ -28,7 +28,7 @@ internal static void Main() {
     UntypedInt neg = -7;
     float64 nf = neg;
     nint ni = neg;
-    fmt.Println(nf / 2, ni);
+    fmt.Println(nf / 2D, ni);
 }
 
 } // end main_package

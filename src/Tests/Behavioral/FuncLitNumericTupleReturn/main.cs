@@ -55,7 +55,7 @@ internal static @string negatedArm(bool ok) {
 internal static @string floatShape(bool ok) {
     var ratio = (float64, error) () => {
         if (!ok) {
-            return (0, errSeek);
+            return (0D, errSeek);
         }
         return (2.5D, default!);
     };

@@ -19,7 +19,7 @@ internal static void Main() {
     @string s = ((@string)codepoint);
     fmt.Println(len(s), codepoint);
     float64 factor = scale;
-    fmt.Println(factor * 2);
+    fmt.Println(factor * 2D);
     fmt.Println(cbrtC);
     fmt.Println(cbrtD);
     fmt.Println(folded);

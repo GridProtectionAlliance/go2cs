@@ -326,29 +326,79 @@ func preserveGoIntLiteral(source string, decimal string) string {
 	return source
 }
 
+// intLiteralFloatKind reports the floating (or complex) basic Kind an integer literal has been
+// resolved to, and whether it was — so convBasicLit can render it as a C# floating literal (F/D
+// suffix) rather than a bare integer that would either overflow a C# integral type (a value beyond
+// int64/uint64) or bind an int-typed overload. A literal reaches a float type two ways, checked in
+// order:
+//
+//	(1) go/types typed it DIRECTLY — a float-typed composite-literal element, typed const, argument,
+//	    return, or assignment — recorded in info.Types as a NON-untyped float/complex (a NAMED type
+//	    over float64 resolves through Underlying to its float64 Kind, matching the FLOAT case).
+//	(2) an enclosing constant expression PROPAGATED a float context into it (untypedConstContexts —
+//	    complex()/min/max/arithmetic operands, see markUntypedConstContexts); the literal itself
+//	    stays untyped, so route (1) skips it and the recorded context supplies the Kind.
+//
+// Returns (0, false) for an ordinary integer-typed or integer-context literal (the common path).
+func (v *Visitor) intLiteralFloatKind(basicLit *ast.BasicLit) (types.BasicKind, bool) {
+	if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
+		if basic, ok := tv.Type.Underlying().(*types.Basic); ok &&
+			basic.Info()&types.IsUntyped == 0 && basic.Info()&(types.IsFloat|types.IsComplex) != 0 {
+			return basic.Kind(), true
+		}
+	}
+
+	if cc := v.untypedConstContext(basicLit); cc != nil && cc.Info()&(types.IsFloat|types.IsComplex) != 0 {
+		return cc.Kind(), true
+	}
+
+	return 0, false
+}
+
 func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) string {
 	result := &strings.Builder{}
 	value := basicLit.Value
 
 	switch basicLit.Kind {
 	case token.INT:
-		// An untyped int literal RESOLVED to a floating type by its context (a complex() element,
-		// a min/max arg, or a float-constant arithmetic operand — see markUntypedConstContexts) is a
-		// floating value in Go; render it at that type so it binds float-typed overloads like a float
-		// literal does. `complex(0, math.Pi/2)` in a complex128 context must pick golib's
-		// complex(float64, float64), not complex(float32, float32): C# rates int->float a better
-		// argument conversion than int->double, so a bare `0` drags the call onto the float32
+		// An int literal RESOLVED to a floating (or complex) type must render as a C# FLOATING
+		// literal, not a bare integer. Two routes reach a float type:
+		//   (1) go/types typed it DIRECTLY — a float-typed composite-literal element, typed const,
+		//       function argument, return, or assignment (`{float64: 123456789123456789123456789}`);
+		//       the literal is recorded as a non-untyped float/complex in info.Types.
+		//   (2) an enclosing constant expression PROPAGATED a float context into it — a complex()
+		//       element, a min/max arg, or a float-constant arithmetic operand (see
+		//       markUntypedConstContexts); the literal stays untyped and the context is recorded in
+		//       untypedConstContexts.
+		// A bare integer literal is wrong on both routes. A LARGE value overflows every C# integral
+		// type (strconv ftoa_test's `123456789123456789123456789` against a `float float64` field →
+		// CS1021 "Integral constant is too large"), and even a small value binds int-typed overloads
+		// rather than the float ones: `complex(0, math.Pi/2)` in a complex128 context must pick
+		// golib's complex(float64, float64), not complex(float32, float32) — C# rates int->float a
+		// better argument conversion than int->double, so a bare `0` drags the call onto the float32
 		// overload and recomputes math.Pi/2 at float32, silently losing precision. The FLOAT/IMAG
 		// cases below make the analogous F/D choice; an int literal has no fractional part, so its
-		// exact digits plus the suffix suffice.
-		if cc := v.untypedConstContext(basicLit); cc != nil && cc.Info()&(types.IsFloat|types.IsComplex) != 0 {
+		// digits plus the suffix suffice. The Go SOURCE digits are preserved verbatim when they also
+		// form a valid C# real literal (the visually-similar goal: `123456789123456789123456789D` is
+		// a valid C# double literal that rounds to the SAME float64 the bare form overflowed on — so
+		// the emitted digits still read like the Go source). A hex/octal/binary/legacy-leading-zero
+		// form cannot survive a suffix (`0x10D` is the C# HEX integer 269), so those re-render as the
+		// exact DECIMAL digits of the folded constant (constant.ToInt.ExactString) — mirroring
+		// isValidCSharpRealLiteral's rejection of radix prefixes for the FLOAT case.
+		if floatKind, ok := v.intLiteralFloatKind(basicLit); ok {
 			if tv, ok := v.info.Types[basicLit]; ok && tv.Value != nil {
 				if ival := constant.ToInt(tv.Value); ival.Kind() == constant.Int {
-					switch cc.Kind() {
+					digits := ival.ExactString()
+
+					if isValidCSharpRealLiteral(value) {
+						digits = value
+					}
+
+					switch floatKind {
 					case types.Float32, types.Complex64:
-						return ival.ExactString() + "F"
+						return digits + "F"
 					case types.Float64, types.Complex128:
-						return ival.ExactString() + "D"
+						return digits + "D"
 					}
 				}
 			}
