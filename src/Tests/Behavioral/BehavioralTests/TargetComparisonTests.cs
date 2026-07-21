@@ -483,6 +483,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
 
     [TestMethod]
+    public void CheckGenericUntypedIntArg() => CheckTarget("GenericUntypedIntArg");
+
+    [TestMethod]
     public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
