@@ -1,6 +1,6 @@
 # go.html.template
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package template (html/template) implements data-driven templates for generating HTML output safe against code injection. It provides the same interface as [text/template](/text/template) and should be used instead of [text/template](/text/template) whenever the output is HTML.
@@ -192,6 +192,6 @@ Least Surprise Property: "A developer (or code reviewer) familiar with HTML, CSS
 Previously, ECMAScript 6 template literal were disabled by default, and could be enabled with the GODEBUG=jstmpllitinterp=1 environment variable. Template literals are now supported by default, and setting jstmpllitinterp has no effect.
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

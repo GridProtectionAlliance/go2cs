@@ -13,8 +13,8 @@
     <PackageDescription>Go io package in .NET for use with go2cs</PackageDescription>
     <Description>Go io package in .NET for use with go2cs</Description>
     <Copyright>Copyright © 2020</Copyright>
-    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

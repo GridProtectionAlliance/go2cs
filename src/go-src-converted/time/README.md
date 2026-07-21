@@ -1,6 +1,6 @@
 # go.time
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package time provides functionality for measuring and displaying time.
@@ -41,6 +41,6 @@ For debugging, the result of t.String does include the monotonic clock reading i
 \[Timer] resolution varies depending on the Go runtime, the operating system and the underlying hardware. On Unix, the resolution is ~1ms. On Windows version 1803 and newer, the resolution is ~0.5ms. On older Windows versions, the default resolution is ~16ms, but a higher resolution may be requested using [golang.org/x/sys/windows.TimeBeginPeriod](/golang.org/x/sys/windows#TimeBeginPeriod).
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

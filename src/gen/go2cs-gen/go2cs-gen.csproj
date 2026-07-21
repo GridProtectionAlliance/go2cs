@@ -13,14 +13,14 @@
     <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
-    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Title>go2cs source generator</Title>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>go.gen</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageDescription>$(Description)</PackageDescription>
-    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
     <PackageTags>go2cs;Golang;go;roslyn;analyzer;source-generator</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -1,6 +1,6 @@
 # go.internal.chacha8rand
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package chacha8rand implements a pseudorandom generator based on ChaCha8. It is used by both runtime and math/rand/v2 and must have minimal dependencies.
@@ -27,6 +27,6 @@ See [https://c2sp.org/chacha8rand](https://c2sp.org/chacha8rand) for additional 
 Normal ChaCha20 implementations for encryption use this same parallelism but then have to deinterlace the results so that it appears the blocks were generated separately. For the purposes of generating random numbers, the interlacing is fine. We are simply locked in to preserving the 4-way interlacing in any future optimizations.
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

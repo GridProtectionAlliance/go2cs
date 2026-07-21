@@ -12,7 +12,7 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 ## 📰 NEWS — July 17, 2026: Go's own tests now pass in C#
 
 **A standard-library package's own Go test suite — converted to C# — now runs and agrees with `go test`,
-verdict for verdict.** [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
+verdict for verdict.** [`unicode/utf8`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
 real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline — transpiled to
 C#, built against the converted standard library, run under a Go-semantics test host, and differentially
 compared against a clean `go test -json` baseline. The answer to *"but does it **run**?"* has its first [machine-checked proof](#try-it-yourself--validate-a-converted-test-suite).
@@ -26,11 +26,11 @@ Convert source code written in the [Go programming language](https://golang.org/
 and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
 easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
-* Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
+* Browse transpiled code: [Converted Go Standard Library](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted)
 * Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
-* Compile in Visual Studio: [Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
+* Compile in Visual Studio: [Go Standard Library Solution](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted.slnx)
 * Reproduce test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
-* View example converted test: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
+* View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
 * Project activity: [Status](#status) — [Milestones](#milestones)
 
 ## Transpiler Goals
@@ -82,14 +82,14 @@ richer:
 
 | Package | Go 1.23.1 source | Converted C# | What it shows |
 |:--|:--|:--|:--|
-| `errors` | [errors.go](https://github.com/golang/go/blob/go1.23.1/src/errors/errors.go) | [errors.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
-| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.23.1/src/cmp/cmp.go) | [cmp.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/cmp/cmp.cs) | Generics with an ordered-type constraint. |
-| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.23.1/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
-| `sort` | [search.go](https://github.com/golang/go/blob/go1.23.1/src/sort/search.go) | [search.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
-| `strings` | [reader.go](https://github.com/golang/go/blob/go1.23.1/src/strings/reader.go) | [reader.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
-| `container/list` | [list.go](https://github.com/golang/go/blob/go1.23.1/src/container/list/list.go) | [list.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
+| `errors` | [errors.go](https://github.com/golang/go/blob/go1.23.1/src/errors/errors.go) | [errors.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
+| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.23.1/src/cmp/cmp.go) | [cmp.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/cmp/cmp.cs) | Generics with an ordered-type constraint. |
+| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.23.1/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
+| `sort` | [search.go](https://github.com/golang/go/blob/go1.23.1/src/sort/search.go) | [search.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
+| `strings` | [reader.go](https://github.com/golang/go/blob/go1.23.1/src/strings/reader.go) | [reader.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
+| `container/list` | [list.go](https://github.com/golang/go/blob/go1.23.1/src/container/list/list.go) | [list.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
 
-Browse the whole set under [`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted).
+Browse the whole set under [`src/go-src-converted`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted).
 
 ## Features
 
@@ -346,8 +346,8 @@ reproduction from a clone — is under [Try it yourself](#try-it-yourself--valid
 ### Try it yourself — validate a converted test suite
 
 Every package whose own Go test suite has been validated ships its **converted C# test sources** next to the
-production code under [`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
-(for example, [`unicode/utf8/utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)) —
+production code under [`src/go-src-converted`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted)
+(for example, [`unicode/utf8/utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)) —
 so you can read the exact C# that runs. You can also re-run the validation yourself. You need
 **[Go 1.23.1](https://go.dev/dl/)** (for the reference `go test` run) and the **[.NET 9 SDK](https://dotnet.microsoft.com/download)**
 (to build and run the converted test host). This example assumes `go2cs` is installed, see step 2 from [converting a real-world module](#converting-a-real-world-module):
@@ -381,27 +381,27 @@ The same command validates every other banked package — substitute the package
 
 | Package | Tests | What it exercises |
 |:--|:--:|:--|
-| [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8) | 14 | UTF-8 encode/decode — the first suite to pass. |
-| [`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort) | 63 | Interface-driven sort, `sort.Slice` reflection swaps, NaN-aware ordering, stability. |
-| [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes) | 81 | Byte-slice algorithms; 7 disclosed (alloc-profile). |
-| [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings) | 68 | String algorithms; 4 disclosed (alloc-count / alloc-profile). |
-| [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16) | 8 | Encode/decode round-trips via `reflect.DeepEqual`; 1 disclosed. |
-| [`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path) | 9 | Pure path manipulation (`Clean`/`Split`/`Join`/`Match`…). |
-| [`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring) | 8 | Circular linked list — a pointer graph. |
-| [`container/heap`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/heap) | 7 | Heap interface over a slice. |
-| [`hash/adler32`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/adler32) | 2 | Adler-32 checksum. |
-| [`hash/crc64`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/crc64) | 5 | CRC-64 checksum tables. |
-| [`hash/fnv`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/hash/fnv) | 19 | FNV-1/FNV-1a across widths. |
-| [`math/cmplx`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/cmplx) | 24 | `complex128` transcendental math. |
-| [`math`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math) | 76 | The core numeric package — IEEE edge cases, rounding, `Inf`/`NaN`. |
-| [`math/bits`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/bits) | 26 | Bit-manipulation intrinsics. |
-| [`math/rand`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/math/rand) | 43 | PRNG streams, including a child-process race test. |
+| [`unicode/utf8`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/unicode/utf8) | 14 | UTF-8 encode/decode — the first suite to pass. |
+| [`sort`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/sort) | 63 | Interface-driven sort, `sort.Slice` reflection swaps, NaN-aware ordering, stability. |
+| [`bytes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/bytes) | 81 | Byte-slice algorithms; 7 disclosed (alloc-profile). |
+| [`strings`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/strings) | 68 | String algorithms; 4 disclosed (alloc-count / alloc-profile). |
+| [`unicode/utf16`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/unicode/utf16) | 8 | Encode/decode round-trips via `reflect.DeepEqual`; 1 disclosed. |
+| [`path`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/path) | 9 | Pure path manipulation (`Clean`/`Split`/`Join`/`Match`…). |
+| [`container/ring`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/container/ring) | 8 | Circular linked list — a pointer graph. |
+| [`container/heap`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/container/heap) | 7 | Heap interface over a slice. |
+| [`hash/adler32`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/hash/adler32) | 2 | Adler-32 checksum. |
+| [`hash/crc64`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/hash/crc64) | 5 | CRC-64 checksum tables. |
+| [`hash/fnv`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/hash/fnv) | 19 | FNV-1/FNV-1a across widths. |
+| [`math/cmplx`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/math/cmplx) | 24 | `complex128` transcendental math. |
+| [`math`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/math) | 76 | The core numeric package — IEEE edge cases, rounding, `Inf`/`NaN`. |
+| [`math/bits`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/math/bits) | 26 | Bit-manipulation intrinsics. |
+| [`math/rand`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/math/rand) | 43 | PRNG streams, including a child-process race test. |
 
 A few packages carry a **disclosed divergence**: a handful of Go tests assert an *exact allocation count*
 (Go's `testing.AllocsPerRun`), and the managed CLR provably allocates where Go's compiler stack-allocates —
 a difference no shim can satisfy without faking the measurement. Rather than skip those tests, each affected
 package pins the divergence in a hand-owned, committed
-[`go2cs_test_disclosures.json`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/bytes/go2cs_test_disclosures.json)
+[`go2cs_test_disclosures.json`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/bytes/go2cs_test_disclosures.json)
 that the differential oracle matches by *exact failure signature* — any other failure is still a hard
 mismatch — and reports as **disclosed-divergent** in the summary. Packages without a manifest compare
 strictly. (The `sort` run also prints a one-line
@@ -422,16 +422,16 @@ High level timeline of the project's major turning points.
 |:--|:--|:--|:--|
 | 2018-05-21 | Project inception | `929d1457f` | Original go2cs: a C#/.NET converter built on an ANTLR4 Go grammar with T4 templates. |
 | 2020-07-09 | Runtime library + hand-converted stub | `9792eeea2` | `golib` Go-semantics runtime (slices, maps, channels, built-ins) and a curated hand-finished stdlib stub. |
-| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/v0.1.2) | Tagged release of the mature ANTLR4-era converter. |
+| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) | Tagged release of the mature ANTLR4-era converter. |
 | 2025-01-12 | [Rewrite as "go2cs2" — Go-based converter](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs2) | `87465f5f5` | Converter re-implemented in Go on `go/ast` + `go/types`; T4 templates replaced by raw string literals; Roslyn source generators supply ancillary Go semantics; the ANTLR4/C# converter is retired. |
-| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`, 05-11) | Whole Go stdlib converted (~301 projects). "Converts" here means the transpiler did not crash with all Go code files getting a corresponding C# code file — not that all the emitted correctly C# compiles. |
+| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`, 05-11) | Whole Go stdlib converted (~301 projects). "Converts" here means the transpiler did not crash with all Go code files getting a corresponding C# code file — not that all the emitted correctly C# compiles. |
 | 2026-06-25 | Baseline ↔ full-conversion separation | `3c8b3a848` | Compiling curated baseline restored to `src/core`; the WIP full conversion isolated in `src/go-src-converted`. Green build and the converter-improvement loop restored. |
 | 2026-06-26 | First full-conversion package promoted | `05a53e8c0` | `sync/atomic` migrated into the baseline (`atomic.Pointer[T]` backed by a managed slot). |
-| 2026-06-27 | [`math` package compiles clean](NEWS.md#june-27-2026--the-math-package-compiles-clean) | [`math-green-2026-06-27`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/math-green-2026-06-27) (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
-| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/stdlib-green-2026-07-10) | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see [About Standard Library Compile Milestone](#about-standard-library-compile-milestone)). |
-| 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/nuget-stdlib-2026-07-14) | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
-| 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17) | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
-| 2026-07-18 | [**Phase-4 test suites expand — disclosed-divergence mechanism**](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · [`sort`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/sort-tests-green-2026-07-18) · [`utf16`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf16-tests-green-2026-07-18) | `bytes` (81), `strings` (68), `sort` (63) and `unicode/utf16` (8) validate against `go test -json`, introducing a hand-owned, committed `go2cs_test_disclosures.json` the differential oracle uses to reclassify the exact-allocation-count asserts (Go's `testing.AllocsPerRun`) the managed CLR provably cannot satisfy — matched by exact failure signature, so any *other* failure is still a hard mismatch. Packages without a manifest compare strictly. The validated set has since grown to **fifteen** standard-library packages (see [Status](#status) and [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)). |
+| 2026-06-27 | [`math` package compiles clean](NEWS.md#june-27-2026--the-math-package-compiles-clean) | [`math-green-2026-06-27`](https://github.com/ritchiecarroll/go2cs/releases/tag/math-green-2026-06-27) (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
+| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see [About Standard Library Compile Milestone](#about-standard-library-compile-milestone)). |
+| 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14) | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
+| 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17) | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
+| 2026-07-18 | [**Phase-4 test suites expand — disclosed-divergence mechanism**](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/ritchiecarroll/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · [`sort`](https://github.com/ritchiecarroll/go2cs/releases/tag/sort-tests-green-2026-07-18) · [`utf16`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf16-tests-green-2026-07-18) | `bytes` (81), `strings` (68), `sort` (63) and `unicode/utf16` (8) validate against `go test -json`, introducing a hand-owned, committed `go2cs_test_disclosures.json` the differential oracle uses to reclassify the exact-allocation-count asserts (Go's `testing.AllocsPerRun`) the managed CLR provably cannot satisfy — matched by exact failure signature, so any *other* failure is still a hard mismatch. Packages without a manifest compare strictly. The validated set has since grown to **fifteen** standard-library packages (see [Status](#status) and [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)). |
 
 ### _About Standard Library Compile Milestone_
 

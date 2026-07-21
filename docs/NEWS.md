@@ -9,7 +9,7 @@ summarized at the top of the [README](README.md), full text kept here.
 
 ## July 18, 2026 — `unicode/utf16` validates; disclosed-divergence generalizes
 
-**Phase-4 package #5.** [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
+**Phase-4 package #5.** [`unicode/utf16`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/unicode/utf16)
 validates its own Go test suite in C# — **8 tests agreeing outright** against `go test -json`, plus one
 honestly disclosed. The structural twin of the very first validated package (`unicode/utf8`), it round-trips
 UTF-16 encode/decode with results checked by `reflect.DeepEqual` — exercised here through the converted
@@ -35,8 +35,8 @@ designed right.
 ## July 18, 2026 — `bytes` and `strings` tests pass, with disclosed-divergence
 
 **Two more standard-library packages validate their own Go test suites in C#** — and they arrive with a
-new piece of Phase-4 machinery. [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes)
-validates **81 tests** and [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
+new piece of Phase-4 machinery. [`bytes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/bytes)
+validates **81 tests** and [`strings`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/strings)
 **68** against `go test -json`, bringing the count of Phase-4-validated packages to four (after
 `unicode/utf8` and `sort`).
 
@@ -65,7 +65,7 @@ compare strictly and are wholly unaffected.
 ## July 17, 2026 — Go's own tests now pass in C#
 
 **A standard-library package's own Go test suite — converted to C# — now runs and agrees with `go test`,
-verdict for verdict.** [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
+verdict for verdict.** [`unicode/utf8`](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
 real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline: the `_test.go`
 files are transpiled to C#, built against the converted standard library, executed under a Go-semantics
 test host, and differentially compared against a clean `go test -json` baseline by full test name — with
@@ -76,7 +76,7 @@ machine-checked proof — and it's one you can
 (tag: `utf8-tests-green-2026-07-17`). This is the Phase 4 operational era: **real Go tests, not
 compilation, are now the currency of correctness** — with `sort`, `strings`, and `bytes` next in line.
 
-*Tag: [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17)
+*Tag: [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17)
 · commit `337a928df`*
 
 ---
@@ -92,7 +92,7 @@ converted end-user app or library restores the whole go2cs stack from NuGet with
 checkout**; the app's own and third-party converted packages stay project references. See
 [Converting a real-world module](README.md#converting-a-real-world-module) for the end-to-end walkthrough.
 
-*Tag: [`nuget-stdlib-2026-07-14`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/nuget-stdlib-2026-07-14)
+*Tag: [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14)
 · commits `2363af0e6`, `2e15eec9d`, `dd821a556`*
 
 ---
@@ -110,7 +110,7 @@ above)! However, simple apps will run, try
 [milestone's details](README.md#about-standard-library-compile-milestone) and
 [current status](README.md#status) in the README.
 
-*Tag: [`stdlib-green-2026-07-10`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/stdlib-green-2026-07-10)
+*Tag: [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10)
 · commit `51ba5d9cf`*
 
 ---
@@ -125,7 +125,7 @@ library. The session that landed it greened nine full-conversion packages (`unic
 fixes. The dominant theme was comprehensive untyped-constant typing, plus shadowing fixes,
 namespace-collision qualification, composite self-qualification, and relational-pattern guards.
 
-*Tag: [`math-green-2026-06-27`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/math-green-2026-06-27)
+*Tag: [`math-green-2026-06-27`](https://github.com/ritchiecarroll/go2cs/releases/tag/math-green-2026-06-27)
 · commit `914d4bd72`*
 
 ---
@@ -138,7 +138,7 @@ did not crash and every Go source file received a corresponding C# file — not 
 compiles. Driving this full conversion to a clean compile became the Phase 3 campaign, finished on
 July 10, 2026 (above).
 
-*Tag: [`full-conversion-2025-05`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/full-conversion-2025-05)
+*Tag: [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05)
 (`cc14584c7`, May 11) · commit `6ca1c45b7`*
 
 ---
@@ -163,7 +163,7 @@ From the ANTLR4-era converter's News:
 * String literals are encoded using UTF-8 (C# `u8` string suffix) which uses the `ReadOnlySpan<byte>`
   ref struct. This should make Go strings faster since strings do not have to be converted to UTF-8
   from UTF-16. Also added an experimental
-  [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs),
+  [`sstring`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/sstring.cs),
   a ref struct implementation of a Go string.
 * Code conversions now better match original Go code styling.
 
@@ -179,7 +179,7 @@ the original Go code's styling, with new command-line options for pre-C#-10-comp
 brace style, options to skip GOOS/GOARCH- and cgo-targeted files, and the ANTLR4 grammar synchronized
 to the official source.
 
-*Tag: [`v0.1.2`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/v0.1.2) (`289b939db`)*
+*Tag: [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) (`289b939db`)*
 
 ---
 

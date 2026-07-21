@@ -12,7 +12,7 @@
     <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
-    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>CS0282;CS0660;CS0661;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
@@ -47,7 +47,7 @@
     <PackageId>go.$(AssemblyName)</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
-    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
     <PackageTags>$(AssemblyName);go2cs;Golang;go</PackageTags>
   </PropertyGroup>

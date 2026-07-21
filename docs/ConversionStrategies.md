@@ -71,24 +71,24 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 |---|---|---|
 | `package foo` · top-level `func Bar()` | `partial class foo_package` · `static` methods (receiver methods → extension methods) | converter |
 | `import "x/y"` | `using y = go.x.y_package;` + a `ProjectReference` | converter |
-| `int` / `uint` / `uintptr` | `nint` / `nuint` / [`uintptr`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/uintptr.cs) (a distinct golib struct) | [BCL](Glossary.md#bcl) / golib |
+| `int` / `uint` / `uintptr` | `nint` / `nuint` / [`uintptr`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/uintptr.cs) (a distinct golib struct) | [BCL](Glossary.md#bcl) / golib |
 | `int32`, `byte`, `rune`, `float64`, … | same-named C# aliases (`global using rune = System.Int32;`) | global usings |
-| untyped constant | [`UntypedInt`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/UntypedInt.cs) / [`UntypedFloat`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/UntypedFloat.cs) / [`UntypedComplex`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/UntypedComplex.cs) wrapper | golib |
-| `type Celsius float64` | [`[GoType("num:float64")]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoTypeAttribute.cs) `partial struct Celsius` | `TypeGenerator` |
-| `nil` | `nil` (golib [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/NilType.cs)) or `default!` in value position | golib |
+| untyped constant | [`UntypedInt`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/UntypedInt.cs) / [`UntypedFloat`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/UntypedFloat.cs) / [`UntypedComplex`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/UntypedComplex.cs) wrapper | golib |
+| `type Celsius float64` | [`[GoType("num:float64")]`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoTypeAttribute.cs) `partial struct Celsius` | `TypeGenerator` |
+| `nil` | `nil` (golib [`NilType`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/NilType.cs)) or `default!` in value position | golib |
 | `interface{}` / `any` | `any` (a global alias for `object`) | BCL |
-| `[]T` slice · `[N]T` array | [`slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/slice.cs) · [`array<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/array.cs) | golib |
-| `map[K]V` · `chan T` | [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) · [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) | golib |
-| `string` | [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs) (heap) · [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs) (non-escaping stack view) | golib |
-| `v, ok := m[k]` (comma-ok) | [`var (v, ok) = m[k, ꟷ];`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) | golib |
+| `[]T` slice · `[N]T` array | [`slice<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/slice.cs) · [`array<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/array.cs) | golib |
+| `map[K]V` · `chan T` | [`map<K,V>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/map.cs) · [`channel<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/channel.cs) | golib |
+| `string` | [`@string`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/string.cs) (heap) · [`sstring`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/sstring.cs) (non-escaping stack view) | golib |
+| `v, ok := m[k]` (comma-ok) | [`var (v, ok) = m[k, ꟷ];`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/map.cs) | golib |
 | `a, b = b, a` | `(a, b) = (b, a);` | C# tuples |
-| `*T` · `&x` | [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) heap box · [`Ꮡx`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) address-of | golib |
-| `type I interface{…}` | [`[GoType]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoTypeAttribute.cs) `partial interface` + [generated implementing glue](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gen/go2cs-gen/ImplementGenerator.cs) | `ImplementGenerator` |
-| struct embedding | [promoted field accessors + method forwarders](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gen/go2cs-gen/TypeGenerator.cs) | `TypeGenerator` |
-| `func (t T) M()` / `func (t *T) M()` | [`[GoRecv]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoRecvAttribute.cs)/`this` extension method + a [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) overload | `RecvGenerator` |
-| `defer f()` · `panic(x)` · `recover()` | body-wrapped [`func((defer, recover) => {…})`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs); `defer(f)`; [`throw panic(x)`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/PanicException.cs) | golib |
-| `go f()` · `select {…}` | [`goǃ(…)`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) · [`switch (select(…))`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) | golib |
-| `x.(T)` · `switch x.(type)` | [`x._<T>()`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) · [`x.type()`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) | golib / converter |
+| `*T` · `&x` | [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) heap box · [`Ꮡx`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) address-of | golib |
+| `type I interface{…}` | [`[GoType]`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoTypeAttribute.cs) `partial interface` + [generated implementing glue](https://github.com/ritchiecarroll/go2cs/blob/master/src/gen/go2cs-gen/ImplementGenerator.cs) | `ImplementGenerator` |
+| struct embedding | [promoted field accessors + method forwarders](https://github.com/ritchiecarroll/go2cs/blob/master/src/gen/go2cs-gen/TypeGenerator.cs) | `TypeGenerator` |
+| `func (t T) M()` / `func (t *T) M()` | [`[GoRecv]`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoRecvAttribute.cs)/`this` extension method + a [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) overload | `RecvGenerator` |
+| `defer f()` · `panic(x)` · `recover()` | body-wrapped [`func((defer, recover) => {…})`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFunc.cs); `defer(f)`; [`throw panic(x)`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/PanicException.cs) | golib |
+| `go f()` · `select {…}` | [`goǃ(…)`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/builtin.cs) · [`switch (select(…))`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/builtin.cs) | golib |
+| `x.(T)` · `switch x.(type)` | [`x._<T>()`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/builtin.cs) · [`x.type()`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/builtin.cs) | golib / converter |
 | generic `[T Constraint]` | `where T : <lifted interface(s)>` | golib / .NET |
 
 ---
@@ -513,7 +513,7 @@ semantics.
 
 ## Strings (`@string` and `sstring`)
 
-Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs):
+Go's `string` is represented by golib [`@string`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/string.cs):
 an immutable byte string whose `len`, indexing, ranging, concatenation, and comparisons are byte-oriented
 like Go's, not UTF-16-oriented like `System.String`. Plain string literals usually render as
 `"..."u8` `ReadOnlySpan<byte>` values, then target-type into `@string` only when a heap string is actually
@@ -553,7 +553,7 @@ Most `string([]byte)` conversions must copy into `@string` — the price of Go's
 Go's own compiler *elides* that copy when the resulting string does not escape and its source is not
 modified while it is alive, letting the string alias the bytes in place. The converter recovers this common
 fast path with a second string type,
-[`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs): a
+[`sstring`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/sstring.cs): a
 stack-only `readonly ref struct` that *views* a `ReadOnlySpan<byte>` with **no allocation**.
 
 A provably-safe `string([]byte)` conversion emits `sstring`; anything that escapes stays `@string` (the implicit

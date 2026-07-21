@@ -1,6 +1,6 @@
 # go.sync.atomic
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package atomic provides low-level atomic memory primitives useful for implementing synchronization algorithms.
@@ -31,6 +31,6 @@ The load and store operations, implemented by the LoadT and StoreT functions, ar
 In the terminology of [the Go memory model](https://go.dev/ref/mem), if the effect of an atomic operation A is observed by atomic operation B, then A “synchronizes before” B. Additionally, all the atomic operations executed in a program behave as though executed in some sequentially consistent order. This definition provides the same semantics as C++'s sequentially consistent atomics and Java's volatile variables.
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

@@ -612,7 +612,7 @@ Only **validated** satisfies the default Phase 5 behavior gate.
 
 The escape-analysis-driven stack-string emission landed as a deliberately conservative **MVP** (2026-07-12,
 branch `golib-string-performance`; see [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)
-and the [Glossary MVP entry](Glossary.md#mvp)). It emits a zero-copy [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs)
+and the [Glossary MVP entry](Glossary.md#mvp)). It emits a zero-copy [`sstring`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/sstring.cs)
 view for a `s := string([]byte)` local only when the local is non-escaping, its source is a plain unnamed
 `[]byte` never written after the conversion, and its every use is a safe read (`len`/`cap`, byte index, or
 comparison against a string literal). That initial predicate fired on **exactly one** Go-1.23 stdlib site.
@@ -691,7 +691,7 @@ increments, roughly by ROI:
    Go's inlined `memcmp`; a decomposition micro-benchmark confirmed the `sstring` `==` operator itself adds
    **zero** over a raw span compare — the whole cost is the per-use view reconstruction).
 
-   **Implementation** ([`sstringHoistOperations.go`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go2cs/sstringHoistOperations.go)):
+   **Implementation** ([`sstringHoistOperations.go`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go2cs/sstringHoistOperations.go)):
    a per-`FuncDecl` pre-pass (`planSStringHoists`) groups eligible `string(x)` conversions **over a bare
    identifier** by that identifier's object and, when the source is a never-written function-local/parameter
    (`objectIsWritten == false`) declared before the injection point with no use inside a nested func literal,

@@ -16,4 +16,4 @@ If you are looking for a more _binary_ integration, you might consider using nat
 
 ~~## ANTLR4 Grammar~~
 
-~~Go code is converted using ANTLR. Several improvements have been made to the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang). Even so, initial attempts to convert all the Go Standard Library code still finds that the grammar needs some more work. If you update the grammar file [in this project](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.~~
+~~Go code is converted using ANTLR. Several improvements have been made to the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang). Even so, initial attempts to convert all the Go Standard Library code still finds that the grammar needs some more work. If you update the grammar file [in this project](https://github.com/ritchiecarroll/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.~~

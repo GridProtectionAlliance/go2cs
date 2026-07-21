@@ -3,8 +3,8 @@ remote_theme: lewismiddleton/cayman-dark
 title: go2cs
 description: Golang to C# Converter
 github:
-  repository_name: GridProtectionAlliance/go2cs
-  owner_url: https://www.gridprotectionalliance.org
-  owner_name: Grid Protection Alliance
+  repository_name: ritchiecarroll/go2cs
+  owner_url: https://github.com/ritchiecarroll
+  owner_name: J. Ritchie Carroll
 plugins:
   - jemoji

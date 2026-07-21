@@ -1,6 +1,6 @@
 # go.os.signal
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package signal implements access to incoming signals.
@@ -88,6 +88,6 @@ Additionally, if Notify is called, and Windows sends CTRL\_CLOSE\_EVENT, CTRL\_L
 On Plan 9, signals have type syscall.Note, which is a string. Calling Notify with a syscall.Note will cause that value to be sent on the channel when that string is posted as a note.
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

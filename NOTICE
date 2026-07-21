@@ -2,7 +2,7 @@
 ==                                NOTICE file for the go2cs distribution                               ==
 =========================================================================================================
 
-go2cs (https://github.com/GridProtectionAlliance/go2cs)
+go2cs (https://github.com/ritchiecarroll/go2cs)
 Copyright © 2018-2026, J. Ritchie Carroll
 
 =========================================================================================================
@@ -24,4 +24,4 @@ may not be limited to, the following:
        see: https://blog.golang.org/gopher
 
 * The go2cs icon was designed by William N. Carroll:
-       see: https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/images/
+       see: https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/

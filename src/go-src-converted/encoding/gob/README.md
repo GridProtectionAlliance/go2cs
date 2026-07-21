@@ -1,6 +1,6 @@
 # go.encoding.gob
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package gob manages streams of gobs - binary values exchanged between an \[Encoder] (transmitter) and a \[Decoder] (receiver). A typical use is transporting arguments and results of remote procedure calls (RPCs) such as those provided by [net/rpc](/net/rpc).
@@ -174,6 +174,6 @@ See "Gobs of data" for a design discussion of the gob wire format: [https://blog
 This package is not designed to be hardened against adversarial inputs, and is outside the scope of [https://go.dev/security/policy](https://go.dev/security/policy). In particular, the \[Decoder] does only basic sanity checking on decoded input sizes, and its limits are not configurable. Care should be taken when decoding gob data from untrusted sources, which may consume significant resources.
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

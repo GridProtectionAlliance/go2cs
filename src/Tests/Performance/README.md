@@ -6,7 +6,7 @@ C# both on the normal JIT runtime and compiled with **Native AOT** (self-contain
 faster startup and lower memory, the closest deployment analog to a Go binary).
 
 This is deliberately *not* an exhaustive benchmark game. Each benchmark is a tiny Go program (same
-shape as the [behavioral tests](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral)) chosen to exercise one Go construct whose C# emulation
+shape as the [behavioral tests](https://github.com/ritchiecarroll/go2cs/tree/master/src/Tests/Behavioral)) chosen to exercise one Go construct whose C# emulation
 has a real cost model — slices, strings, maps, channels, interface dispatch — plus raw compute loops
 where the two runtimes should be close. Results below give the "common expected" range of differences.
 
@@ -120,7 +120,7 @@ What the numbers above actually show, and why:
   concat operand and its buffer is mutated), so they stay `@string` — see StringView for the eligible case.
 - **StringView (JIT ~3.1×, AOT ~1.9×):** the same `[]byte`→`string` cost, but for the subset the converter
   can prove non-escaping and used only in safe reads/comparisons — where it emits a zero-copy stack string
-  (`sstring`) instead of `@string` (see [ConversionStrategies-Reference](https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/ConversionStrategies-Reference.md)).
+  (`sstring`) instead of `@string` (see [ConversionStrategies-Reference](https://github.com/ritchiecarroll/go2cs/blob/master/docs/ConversionStrategies-Reference.md)).
   Both runtimes already stack-allocate `@string`'s byte[] here, so the win is eliminating the per-comparison
   **copy** and the **literal allocation** (`@string == "…"u8` materializes the literal every time; `sstring`
   compares spans in place): in isolation the eligible comparison runs **~12× faster than `@string` on the

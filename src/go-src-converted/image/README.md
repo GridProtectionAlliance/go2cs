@@ -1,6 +1,6 @@
 # go.image
 
-> C# package converted from the Go standard library by [go2cs](https://github.com/GridProtectionAlliance/go2cs).
+> C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 > Go version: 1.23.1
 
 Package image implements a basic 2-D image library.
@@ -20,6 +20,6 @@ See "The Go image package" for more details: [https://golang.org/doc/articles/im
 The image package can be used to parse arbitrarily large images, which can cause resource exhaustion on machines which do not have enough memory to store them. When operating on arbitrary images, \[DecodeConfig] should be called before \[Decode], so that the program can decide whether the image, as defined in the returned header, can be safely decoded with the available resources. A call to \[Decode] which produces an extremely large image, as defined in the header returned by \[DecodeConfig], is not considered a security issue, regardless of whether the image is itself malformed or not. A call to \[DecodeConfig] which returns a header which does not match the image returned by \[Decode] may be considered a security issue, and should be reported per the \[Go Security Policy]([https://go.dev/security/policy](https://go.dev/security/policy)).
 
 ---
-Part of the go2cs converted Go standard library. See the [repository](https://github.com/GridProtectionAlliance/go2cs) for usage and details.
+Part of the go2cs converted Go standard library. See the [repository](https://github.com/ritchiecarroll/go2cs) for usage and details.
 
-Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.
+Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/LICENSE) file. The go2cs conversion itself is distributed under the MIT license.

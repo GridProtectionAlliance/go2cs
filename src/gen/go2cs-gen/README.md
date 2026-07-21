@@ -1,7 +1,7 @@
 # go.gen — go2cs source generator
 
 `go.gen` is the Roslyn source generator / analyzer used by
-[go2cs](https://github.com/GridProtectionAlliance/go2cs) to emit the compile-time C# glue that makes
+[go2cs](https://github.com/ritchiecarroll/go2cs) to emit the compile-time C# glue that makes
 converted Go code behave like Go:
 
 - interface satisfaction (duck-typed `GoImplement` wiring),
@@ -19,4 +19,4 @@ This is a development-time dependency (analyzer); it ships no runtime assembly.
 
 ## License
 
-MIT. See the [go2cs repository](https://github.com/GridProtectionAlliance/go2cs).
+MIT. See the [go2cs repository](https://github.com/ritchiecarroll/go2cs).
