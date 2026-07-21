@@ -81,13 +81,13 @@ public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
 }
 
 public static void PrintValPtr2Ptr(ж<ж<nint>> Ꮡpptr) {
-    ref var pptr = ref Ꮡpptr.Value;
+    ref var pptr = ref Ꮡpptr.ValueSlot;
 
     fmt.Printf("Value available at **pptr = %d\n"u8, pptr.Value);
 }
 
 public static void PrintValPtr2Ptr2Ptr(ж<ж<ж<nint>>> Ꮡppptr) {
-    ref var ppptr = ref Ꮡppptr.Value;
+    ref var ppptr = ref Ꮡppptr.ValueSlot;
 
     fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.ValueSlot.Value);
 }

@@ -987,6 +987,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerSelectorDeref() => CheckTarget("PointerSelectorDeref");
 
     [TestMethod]
+    public void CheckPointerToInterfaceParamDeref() => CheckTarget("PointerToInterfaceParamDeref");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]

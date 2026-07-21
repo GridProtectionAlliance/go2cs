@@ -13,7 +13,7 @@ internal static void push(this ж<profBuf> Ꮡb, nint v) {
 }
 
 internal static void appendInt(ж<slice<nint>> Ꮡs, nint v) {
-    ref var s = ref Ꮡs.Value;
+    ref var s = ref Ꮡs.ValueSlot;
 
     s = append(s, v);
 }

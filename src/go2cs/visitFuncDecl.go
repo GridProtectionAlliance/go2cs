@@ -518,6 +518,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				if v.nilSafePtrParamNames.Contains(param.Name()) {
 					derefAccessor = NilSafeDerefAccessor
+				} else if isInherentlyHeapAllocatedType(pointerType.Elem()) {
+					// The POINTEE is itself a reference type (`*error`, `*[]T`, `*map`, `**T`,
+					// `*func`, `*chan`): the box is a real, structurally non-nil pointer (`Ꮡ<name>`),
+					// but its held value is legitimately null when the pointee is the zero value —
+					// a nil interface/slice/map/etc. Establishing the entry deref ALIAS is a read of
+					// the held value, NOT a dereference of the box (in Go, `*(&err)` of a nil `error`
+					// yields nil, no panic), yet `.Value`'s IsNull check fires on `m_val is null` and
+					// throws a spurious NilPointerDereference at function entry (e.g. tabwriter's
+					// `handlePanic(err *error)`). Use the nil-check-free `.ValueSlot`, mirroring
+					// namedResultBoxAccessor (a named result of the same type already reads this way);
+					// it returns the same real slot as `.Value` in every non-throwing case, so
+					// write-through and non-null reads are byte-behaviorally identical.
+					derefAccessor = "ValueSlot"
 				}
 
 				if v.options.preferVarDecl {

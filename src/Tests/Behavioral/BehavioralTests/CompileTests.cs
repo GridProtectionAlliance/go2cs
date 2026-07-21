@@ -984,6 +984,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerSelectorDeref() => CheckTarget("PointerSelectorDeref");
 
     [TestMethod]
+    public void CheckPointerToInterfaceParamDeref() => CheckTarget("PointerToInterfaceParamDeref");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]

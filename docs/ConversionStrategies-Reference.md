@@ -2053,6 +2053,36 @@ Guarded by `ArrayOfCrossPackageType` (the type assert and a `var` declaration).
 
 A **SAME-PACKAGE instantiated generic** is rendered structurally for the same reason — the name plus each type argument recursively resolved, never from the `go/types` string. A *cross-package* generic already took the structural path (`getTypeName`/`getFullTypeName` both special-case `pkg != v.pkg`), but a generic whose OWN type is local while a type ARGUMENT is cross-package fell through to the `t.String()` form: `curve[*repro/sub.Item]`, whose slash-strip then ate everything before the `/` — **including the `curve[` header** — collapsing the wrapper. crypto/elliptic's `var p224 = &nistCurve[*nistec.P224Point]{…}` and its `p256Curve struct { nistCurve[*nistec.P256Point] }` embed emitted `ж<nistec.P224Point>>` / `ref go.nistec.P256Point> …` (a CS1519/CS1526 cascade, ~137 errors across elliptic/ecdh/mlkem768). Both `getTypeName` (the var-type path) and `getFullTypeName` (the struct-embed field path) now render a same-package generic as `Name[args…]` with each arg via the same function, so the arguments carry their short, slash-free package-qualified names and the header survives → `ж<nistCurve<ж<nistec.P224Point>>>`. Byte-identical across the behavioral corpus; an A/B of crypto/elliptic+ecdh shows only wrapper-restorations at every site (var types, adapter ctors, `GoImplement` attributes, the embed accessor, the unmarshaler array). (Guarded by the `CrossPkgUser` extension — a same-package `Holder[*CrossPkgLib.Sensor]` as a var type AND a struct embed, field read/write vs Go.)
 
+### A reference-type-pointee pointer parameter uses the nil-check-free `.ValueSlot` deref alias
+
+The entry deref-alias for a pointer parameter is `ref var p = ref Ꮡp.Value`. The `.Value` getter
+throws `NilPointerDereference` when the box reports `IsNull` — for a MANAGED box, `m_val is null`.
+That is correct when the pointee is a VALUE type (a null `m_val` means a genuinely nil pointer). But
+when the POINTEE is itself a reference type — `*error`, `*[]T`, `*map[K]V`, `**T`, `*func(…)`,
+`*chan T` — the box holds the reference VALUE directly, and that value is legitimately null when it
+is the zero value (a nil interface/slice/map). The pointer is still a valid, non-nil box (`Ꮡ(err)`),
+so establishing the entry ALIAS is a read of the held value, not a dereference of the box: in Go,
+`*(&err)` of a nil `error` yields nil, no panic. `.Value`'s `IsNull` check misfires on `m_val is
+null` and panics spuriously at function entry — text/scanner's `digits(…, invalid *bool)` and, for a
+reference pointee, text/tabwriter's `handlePanic(err *error)` (deferred from `Write`, whose `err` is
+a nil named-return interface) crashed with a nil-pointer panic before `recover()` even ran. The fix:
+when the pointee `isInherentlyHeapAllocatedType`, emit the nil-check-free `.ValueSlot` accessor
+(`ref var err = ref Ꮡerr.ValueSlot`), mirroring `namedResultBoxAccessor` — a named result of the same
+type already reads this way. `.ValueSlot` returns the same real `m_val` slot as `.Value` in every
+non-throwing case, so write-through and non-null reads are byte-behaviorally identical; only the
+spurious-panic case changes. The nil-safe `DerefOrNil()` (nil-terminator-walked params) still takes
+precedence. Corpus-wide the swap touches 49 stdlib files + 10 behavioral goldens, all value-preserving
+(full behavioral suite Output 0-fail). (Guarded by the `PointerToInterfaceParamDeref` behavioral test
+— a `*error` parameter read through inside a deferred recover/re-panic where the pointee is nil at
+address-of time; before the fix the entry alias NREs, after it prints the re-panic message,
+output-compared vs `go run`.) ⚠ This fixes only the spurious CRASH. A SEPARATE latent defect remains:
+a non-heap-promoted address-taken named return — `Ꮡ(err)` boxes a COPY — so `*err = …` in the
+deferred handler writes the copy while `return err` reads the original; text/tabwriter's tests need
+that heap-promotion of address-taken named returns before they fully validate. The value-type nilable
+case (a genuinely nil `*bool`/`*int` passed by an optional-out-param caller, deref'd only under a
+body guard) is likewise still open — its entry hoist needs the nil-safe accessor selected from
+call-site nil arguments, not only body `== nil` compares.
+
 ### A pointer-element composite literal takes the box for a deref-aliased ident
 
 A bare identifier element of a pointer-element composite literal (`[]*CommentGroup{c}`) renders

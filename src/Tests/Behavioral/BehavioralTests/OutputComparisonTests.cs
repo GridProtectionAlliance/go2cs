@@ -925,6 +925,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerSelectorDeref() => CheckTarget("PointerSelectorDeref");
 
     [TestMethod]
+    public void CheckPointerToInterfaceParamDeref() => CheckTarget("PointerToInterfaceParamDeref");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]

@@ -204,7 +204,7 @@ internal static any describe(bool b) {
 }
 
 internal static void replaceAnimal(ж<Animal> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
+    ref var a = ref Ꮡa.ValueSlot;
 
     a = new CatжAnimal(Ꮡ(new Cat(nil)));
 }
