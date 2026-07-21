@@ -971,6 +971,25 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) ||
 				(lhsIsInterface && concreteOperand(rhsType)) || (rhsIsInterface && concreteOperand(lhsType)) {
+				// The CONCRETE operand of an interface `==`/`!=` compares by BOX: AreEqual reflects on
+				// the boxed values' runtime types (an early `leftType != right.GetType()` bail), so an
+				// untyped `int` constant that convBasicLit rendered as a bare C# `int` literal
+				// (System.Int32) fails against the interface's boxed Go `int` (go2cs `nint`, a
+				// System.IntPtr) — `e.Value != 1` wrongly reports unequal (container/list TestIssue6349).
+				// Cast the constant to `nint` so it boxes as Go's `int` dynamic type, mirroring the
+				// castArgToType["nint"] treatment the interface-argument path already applies at call
+				// sites (see argBoxesAsInt32ButNeedsNint) — the predicate returns false for the
+				// interface operand and for any non-int32-range / non-int-default / non-constant operand,
+				// so a bare int compared against a concrete int (which never routes through AreEqual)
+				// stays untouched.
+				if v.argBoxesAsInt32ButNeedsNint(binaryExpr.X) {
+					leftOperand = fmt.Sprintf("(nint)(%s)", leftOperand)
+				}
+
+				if v.argBoxesAsInt32ButNeedsNint(binaryExpr.Y) {
+					rightOperand = fmt.Sprintf("(nint)(%s)", rightOperand)
+				}
+
 				// Handle interface comparison with special runtime function
 				if binaryOp == "==" {
 					return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)

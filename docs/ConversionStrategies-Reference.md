@@ -919,6 +919,26 @@ the per-argument `castArgToType["nint"]` plumbing; the other positions wrap thro
 (Guarded by the `UntypedIntInterfaceBox` behavioral test — each position read back through an
 `x.(int)` assertion or an `int`/`int32` type switch, output-compared vs Go.)
 
+**The same cast applies to an interface `==`/`!=` comparison against an untyped `int` constant.** Go
+compares an interface against a concrete value by its dynamic type *and* value, which the converter
+lowers to golib's reflective `AreEqual` (`convBinaryExpr`'s interface-comparison branch — the
+`iface == concrete` / `iface == iface` / `iface == ptr` cases). `AreEqual(object, object)` bails early
+on `leftType != right.GetType()`, so a comparison operand's boxed *runtime* type must match, exactly as
+a stored-then-asserted value's does. A bare C# int literal boxes as `System.Int32`, so `e.Value != 1`
+against an `any` field holding a boxed Go `int` (`nint`/`IntPtr`) — container/list's
+`TestIssue6349`, emitted `!AreEqual((~e).Value, 1)` — saw `IntPtr != Int32`, reported the values
+UNEQUAL, and fired the test's error even though the value round-tripped as `1`. The interface-comparison
+branch now casts the concrete constant operand to `nint` (`!AreEqual((~e).Value, (nint)(1))`), reusing
+the same `argBoxesAsInt32ButNeedsNint` predicate the boxing positions above key off — so the literal
+boxes as Go's `int` dynamic type and the runtime-type guard passes. The cast is confined to the
+`AreEqual` lowering (interface-vs-concrete / interface / pointer), so a bare int compared against a
+*concrete* `int` — which lowers to C#'s native `==`, never `AreEqual` — stays bare (no noise). The
+predicate returns false for the interface operand itself and for any non-int32-range / non-`int`-default
+/ non-constant operand, so only the genuine boxed-literal-mismatch site is touched. (Guarded by the
+`InterfaceUntypedIntCompare` behavioral test — an `any`-field-holding boxed int compared `==`/`!=`
+against an int literal, negative-literal and literal-on-the-left forms, output-compared vs Go; the
+pre-fix converter emits the bare literal and mis-reports every comparison unequal.)
+
 ## Multi-Assignment and Evaluation Order
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 

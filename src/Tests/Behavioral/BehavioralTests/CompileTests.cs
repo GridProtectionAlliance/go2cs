@@ -594,6 +594,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAssertion() => CheckTarget("InterfaceToInterfaceAssertion");
 
     [TestMethod]
+    public void CheckInterfaceUntypedIntCompare() => CheckTarget("InterfaceUntypedIntCompare");
+
+    [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
 
     [TestMethod]
