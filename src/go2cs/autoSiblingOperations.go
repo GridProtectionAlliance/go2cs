@@ -57,6 +57,7 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 
 	performEscapeAnalysis(markedFiles, fset, packageTypes, info)
 	collectAddressedGlobals(markedFiles, packageTypes, info)
+	collectNilArgPtrParams(markedFiles, info)
 	computeImportAliasRenames(markedFiles, packageTypes, packageNamespace)
 	preloadImportedTypeAliases(markedFiles, options)
 

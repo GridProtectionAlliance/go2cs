@@ -59,6 +59,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageDynamicTypeNames = make(map[string]string)
 	packageManualTypeNames = make(map[string]bool)
 	packageAddressedGlobals = make(map[types.Object]bool)
+	packageNilArgPtrParams = make(map[*types.Func]HashSet[int])
 	packageMovedInitVars = make(map[types.Object]int)
 	packageMovedInitMethods = make(map[int]string)
 	packageImportAliasRenames = make(map[string]string)

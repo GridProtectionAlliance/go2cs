@@ -2078,10 +2078,27 @@ address-of time; before the fix the entry alias NREs, after it prints the re-pan
 output-compared vs `go run`.) ⚠ This fixes only the spurious CRASH. A SEPARATE latent defect remains:
 a non-heap-promoted address-taken named return — `Ꮡ(err)` boxes a COPY — so `*err = …` in the
 deferred handler writes the copy while `return err` reads the original; text/tabwriter's tests need
-that heap-promotion of address-taken named returns before they fully validate. The value-type nilable
-case (a genuinely nil `*bool`/`*int` passed by an optional-out-param caller, deref'd only under a
-body guard) is likewise still open — its entry hoist needs the nil-safe accessor selected from
-call-site nil arguments, not only body `== nil` compares.
+that heap-promotion of address-taken named returns before they fully validate.
+
+The value-type nilable case — a genuinely nil `*rune`/`*bool`/`*int` optional-out-param, deref'd only
+under a body VALUE guard — is handled by the companion **call-site nil-argument** detection.
+`collectNilSafePtrParams` scanned only the body for `param == nil`/`!= nil`, so text/scanner's
+`digits(ch0 rune, base int, invalid *rune)` — whose sole deref `*invalid == 0` sits behind
+`ch >= max` (never `invalid != nil`) and which is called `digits(ch, 10, nil)` — kept the strict
+`.Value` entry hoist and NRE'd at entry, where Go never dereferences (`ch >= max` is false on the
+nil-call path). A package-wide pre-pass (`collectNilArgPtrParams`, mirroring `collectAddressedGlobals`
+— wired into all three conversion drivers: normal, test, and hand-owned-sibling) records, per
+`*types.Func`, the pointer-parameter positions ever passed the untyped `nil` at a call site;
+`collectNilSafePtrParams` folds those positions into `nilSafePtrParamNames`, so the entry alias takes
+the nil-safe `DerefOrNil()` (real slot when the box is non-nil — writes still persist — a throwaway
+slot when nil, never read because the body guards). Same-package call sites only (the converter
+processes one package at a time); a parameter passed nil solely from another package keeps `.Value`.
+Corpus-surgical: CNR byte-identical across the behavioral suite (no project has the pattern), and of
+the validated stdlib packages NONE are touched — it changes exactly the nilable-out-param sites (9
+non-validated stdlib packages + text/scanner, which it unblocks to 18/18). (Guarded by the
+`GuardedNilPointerParamDeref` behavioral test — a `*int` out-param deref'd under an `i >= base` guard,
+called once with a real pointer and once with nil; NREs at the entry hoist pre-fix, matches `go run`
+post-fix.)
 
 ### A pointer-element composite literal takes the box for a deref-aliased ident
 

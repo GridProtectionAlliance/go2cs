@@ -537,6 +537,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoStmtValueReturn() => CheckTarget("GoStmtValueReturn");
 
     [TestMethod]
+    public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]

@@ -1150,6 +1150,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)
 
+		// Record pointer parameters passed the untyped nil at a call site (cross-file) so their
+		// entry deref alias takes the nil-safe accessor (see packageNilArgPtrParams).
+		collectNilArgPtrParams(files, info)
+
 		// Find package-level var initializers whose Go dependency order cannot be reproduced by
 		// C#'s static-field-initializer order (cross-file / same-file forward reference /
 		// dependency on a relocated var — resolved transitively through package function bodies,

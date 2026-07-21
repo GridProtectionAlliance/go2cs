@@ -216,7 +216,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// re-alias must use the nil-safe accessor so re-aliasing to a nil box yields a ref to default(T)
 	// (never read while p is nil) instead of throwing a nil-pointer dereference (see comment on
 	// nilSafePtrParamNames). Run AFTER paramObjects is populated (identIsParameter relies on it).
-	v.collectNilSafePtrParams(funcDecl.Body)
+	v.collectNilSafePtrParams(funcDecl)
 
 	// Loop through function results to check if any are structs
 	if funcDecl.Type.Results != nil {
@@ -1103,18 +1103,42 @@ func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 // local comparison does not qualify) and gated on the direct-ж form (only it has a receiver box
 // to deref); a receiver that is never compared keeps the plain `.Value` form, so emission is
 // unchanged for every method that does not test its receiver.
-func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
+func (v *Visitor) collectNilSafePtrParams(funcDecl *ast.FuncDecl) {
 	if v.nilSafePtrParamNames == nil {
 		v.nilSafePtrParamNames = HashSet[string]{}
 	} else {
 		v.nilSafePtrParamNames.Clear()
 	}
 
-	if body == nil {
+	if funcDecl == nil {
 		return
 	}
 
-	ast.Inspect(body, func(node ast.Node) bool {
+	// A pointer parameter passed the untyped `nil` at some call site is legally nil at run time even
+	// when this body never nil-COMPARES it — the deref sits behind an ordinary value guard (see
+	// packageNilArgPtrParams / text/scanner's `digits(…, invalid *rune)` called `digits(ch, 10, nil)`).
+	// The nil-arg positions were recorded package-wide in the pre-pass; map them to parameter names so
+	// their entry deref alias takes the nil-safe accessor. Resolved by OBJECT identity via the func's
+	// signature, so a name-only match cannot leak in.
+	if funcObj, ok := v.info.Defs[funcDecl.Name].(*types.Func); ok {
+		if indices := packageNilArgPtrParams[funcObj]; indices != nil {
+			if sig, ok := funcObj.Type().(*types.Signature); ok {
+				for i := 0; i < sig.Params().Len(); i++ {
+					if indices.Contains(i) {
+						if name := sig.Params().At(i).Name(); name != "" && name != "_" {
+							v.nilSafePtrParamNames.Add(name)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if funcDecl.Body == nil {
+		return
+	}
+
+	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
 		if n, ok := node.(*ast.BinaryExpr); ok && (n.Op == token.EQL || n.Op == token.NEQ) {
 			for _, operand := range []ast.Expr{n.X, n.Y} {
 				if ident, ok := operand.(*ast.Ident); ok && (v.isDerefdPointerParamIdent(ident) || v.isComparedDirectBoxReceiverIdent(ident)) {
