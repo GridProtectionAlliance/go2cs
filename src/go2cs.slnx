@@ -279,6 +279,8 @@
     <Project Path="Tests/Behavioral/MethodGroupGenericArg/MethodGroupGenericArg.csproj" />
     <Project Path="Tests/Behavioral/MethodOnBoxedGlobalIndex/MethodOnBoxedGlobalIndex.csproj" />
     <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
+    <Project Path="Tests/Behavioral/MethodExprDotImport/MethodExprDotImport.csproj" />
+    <Project Path="Tests/Behavioral/MethodExprDotImport/mep/MethodExprDotImport.mep.csproj" />
     <Project Path="Tests/Behavioral/MethodExpression/MethodExpression.csproj" />
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="Tests/Behavioral/MethodValueReassignCapture/MethodValueReassignCapture.csproj" />

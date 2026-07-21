@@ -602,6 +602,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			hasReturn := false
 			hasFullyTypedArm := false
 
+			// Per-result-position tracking for the Go-`int` (C# nint) MIXED-arm conflict below: at a
+			// declared-`int` position, an INT LITERAL arm (`0`) is naturally C# `int` while a
+			// non-literal Go-`int` arm (`i + 1`) is C# `nint`. When both occur — and the other tuple
+			// positions are typeless (`default!`) on the non-literal arms — the ONLY arm with a natural
+			// tuple type is a literal one, so C# infers the delegate's first element as `int` and the
+			// `nint` arm then fails to convert to it (CS0029/CS1662; the var's inferred delegate is
+			// also `int`-first, rejected at the invariant use site, CS0407 — bufio ExampleScanner_*'s
+			// `onComma := func(...) (advance int, ...) { …; return 0, data, ErrFinalToken; …; return
+			// i+1, …; }`). The plain `types.Int` exemption below intentionally lets the literal count as
+			// matching (the pervasive all-literal `return 0, err` shape is green and must not churn), so
+			// this narrower conflict is detected separately and forces the explicit return type.
+			posHasIntLiteral := make([]bool, results.Len())
+			posHasNintExpr := make([]bool, results.Len())
+
 			ast.Inspect(funcLit.Body, func(n ast.Node) bool {
 				if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
 					return false // a nested literal's returns belong to it
@@ -645,12 +659,39 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 					if fullyTyped {
 						hasFullyTypedArm = true
 					}
+
+					// Record int-literal vs nint-expression occupancy per declared-`int` position
+					// (independent of the fullyTyped break above, which is why it runs in its own loop).
+					for i, res := range ret.Results {
+						declared, ok := types.Unalias(results.At(i).Type()).(*types.Basic)
+
+						if !ok || declared.Kind() != types.Int {
+							continue
+						}
+
+						if lit, isNumeric := numericBasicLit(res); isNumeric && lit.Kind == token.INT {
+							posHasIntLiteral[i] = true
+						} else if resType := v.getType(res, false); resType != nil {
+							if resBasic, ok := types.Unalias(resType).(*types.Basic); ok && resBasic.Kind() == types.Int {
+								posHasNintExpr[i] = true
+							}
+						}
+					}
 				}
 
 				return true
 			})
 
-			if hasReturn && !hasFullyTypedArm {
+			mixedIntConflict := false
+
+			for i := range posHasIntLiteral {
+				if posHasIntLiteral[i] && posHasNintExpr[i] {
+					mixedIntConflict = true
+					break
+				}
+			}
+
+			if hasReturn && (!hasFullyTypedArm || mixedIntConflict) {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
 		}

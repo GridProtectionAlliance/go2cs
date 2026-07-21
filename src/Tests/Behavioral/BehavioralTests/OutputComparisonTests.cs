@@ -622,6 +622,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]
+    public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
+
+    [TestMethod]
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]

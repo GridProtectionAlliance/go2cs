@@ -678,6 +678,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]
+    public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
+
+    [TestMethod]
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]

@@ -681,6 +681,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]
+    public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
+
+    [TestMethod]
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]

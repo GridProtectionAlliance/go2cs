@@ -81,6 +81,32 @@ internal static @string intControl(bool ok) {
     return fmt.Sprintf("ok:%d"u8, n);
 }
 
+internal static @string takeSplit(Func<slice<byte>, bool, (nint, slice<byte>, error)> f, slice<byte> data, bool atEOF) {
+    var (a, t, err) = f(data, atEOF);
+    if (err != default!) {
+        return fmt.Sprintf("adv:%d tok:[%s] err:%s"u8, a, ((@string)t), err.Error());
+    }
+    return fmt.Sprintf("adv:%d tok:[%s]"u8, a, ((@string)t));
+}
+
+internal static @string mixedIntArms(slice<byte> data, bool atEOF) {
+    var onComma = (nint advance, slice<byte> token, error err) (slice<byte> dataΔ1, bool atEOFΔ1) => {
+        nint advance = default!;
+        slice<byte> token = default!;
+        error err = default!;
+        for (nint i = 0; i < len(dataΔ1); i++) {
+            if (dataΔ1[i] == (rune)',') {
+                return (i + 1, dataΔ1[..(int)(i)], default!);
+            }
+        }
+        if (!atEOFΔ1) {
+            return (0, default!, default!);
+        }
+        return (0, dataΔ1, errSeek);
+    };
+    return takeSplit(onComma, data, atEOF);
+}
+
 internal static void Main() {
     fmt.Println("sizeFuncShape(true):", sizeFuncShape(true));
     fmt.Println("sizeFuncShape(false):", sizeFuncShape(false));
@@ -91,6 +117,9 @@ internal static void Main() {
     fmt.Println("floatControl:", floatControl());
     fmt.Println("intControl(true):", intControl(true));
     fmt.Println("intControl(false):", intControl(false));
+    fmt.Println("mixedIntArms(hi,bye/true):", mixedIntArms(slice<byte>("hi,bye"u8), true));
+    fmt.Println("mixedIntArms(tail/true):", mixedIntArms(slice<byte>("tail"u8), true));
+    fmt.Println("mixedIntArms(tail/false):", mixedIntArms(slice<byte>("tail"u8), false));
 }
 
 } // end main_package
