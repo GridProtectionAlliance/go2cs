@@ -133,6 +133,8 @@ that covers, grouped:
 See [`ConversionStrategies.md`](ConversionStrategies.md) for an example-driven tour of how each construct
 maps to C# (with [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md) for the full detail).
 
+![GopherDotNetBotFrisbee](images/GopherDotNetBotFrisbee.png)
+
 ## Requirements
 
 - **[.NET 9.0 SDK](https://dotnet.microsoft.com/download)** — to build and run the converted C#.
