@@ -990,6 +990,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPromotedEmbedUser() => CheckTarget("PromotedEmbedUser");
 
     [TestMethod]
+    public void CheckPromotedEmbedZeroValueField() => CheckTarget("PromotedEmbedZeroValueField");
+
+    [TestMethod]
     public void CheckPromotedFieldNameIsType() => CheckTarget("PromotedFieldNameIsType");
 
     [TestMethod]
