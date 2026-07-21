@@ -173,10 +173,10 @@ gpg-signed; **never land ungated or unverified work.**
   judgment calls, NOT on routine work. Delegate as parallel as feasible, and choose each sub-agent's
   **`model` + `effort`** (the Workflow/Agent options) to fit the task, using cheaper tiers **liberally**
   wherever the work is efficiently suited to them:
-  - **Cheap / mechanical → a light model at low effort** (e.g. haiku / sonnet, low–medium): the
+  - **Cheap / mechanical → a light model at low effort** (e.g. sonnet / opus, low–medium): the
     isolation-pipeline-sweep scout, banking a validated package's test sources, re-validation runs,
     characterizing a blocker, doc/ledger updates, any well-specified single-file mechanical fix.
-  - **Moderate, well-scoped fixes → a mid model at medium–high effort** (e.g. sonnet, high): a
+  - **Moderate, well-scoped fixes → a mid model at medium–high effort** (e.g. sonnet / opus, high): a
     contained converter/golib fix with a clear root cause and a bounded blast radius.
   - **Hardest / most delicate → the top tier at high–max effort, or the coordinator itself**: the
     Tier-0 capability frogs (channels, reflect, os, math/big), architecture/design decisions,
@@ -184,7 +184,7 @@ gpg-signed; **never land ungated or unverified work.**
     own reasoning for exactly these.
   - When unsure whether a cheaper model suffices, **start cheap** (a scout or an attempt) and escalate
     only on evidence it's under-powered — don't pre-emptively burn the top tier, and don't under-power a
-    genuinely delicate task (a wrong cheap fix that has to be reworked costs more than doing it right).
+    genuinely delicate task (a wrong cheap fix that has to be reworked costs more than doing it right). If it turns out that starting cheap most always requires escalation anyway, adjust strategy as needed: start at a higher tier to begin with on future tasks for better work cadence.
 
 - **Parallelism is now cheap and unconstrained.** Workspaces target the **C:\ NVMe** (fastest drive);
   the earlier H:\ dev-drive disk bottleneck is **gone**. The 32-core machine easily handles **multiple
@@ -300,14 +300,13 @@ Hard-won during this campaign. Read these before touching the relevant area.
 - **Decisions.** On a genuine design decision or trade-off (a new mechanism, a promotion question, a
   semantic divergence — anything shaping shared architecture), do NOT pick a shortcut to keep moving.
   If the durable choice is clear from the project goals, make it and document it. If it is a real
-  judgment call the user should own, **STOP, write up the options + your recommendation, surface it**,
-  and continue with other packages while it's pending. **Design WITH the user on anything long-term.**
+  judgment call that could affect the architecture, the user should own, **STOP, write up the options + your recommendation, surface it**,
+  and continue with other packages while it's pending. **Design WITH the user on anything that would cause a long-term architectural change.** Judgments on internal semantics, you own, just keep code clean and clear, reduce duplication, refactor for clarity and optimize for conversion speed. 
 - **Honesty.** Report real numbers at every checkpoint — what validated, what's blocked and precisely
   why, what decisions were made or pending. State partial results plainly ("N/M agree; remainder is
   <class>, owned/pending"). Compiling ≠ correct; validating-via-hack ≠ validated. Never claim a
   package validates when it does not.
-- **Cadence.** Self-pace; checkpoint after each package (or small batch). Don't spin on a genuinely
+- **Cadence.** Keep a fast pace using parallel options for continuous progress. Don't spin on a genuinely
   blocked package — record the blocker, surface any needed ruling, move to the next viable one. **Push
-  is a deliberate, user-initiated ceremony** — land gpg-signed to local master and let the user
-  initiate `git push`. Pause/end when every viable package validates or when blocked solely on user
-  input.
+  is a deliberate, user-initiated ceremony** — land gpg-signed commits to local master and let the user
+  initiate `git push`. Pause/end only when when a major cross-section of viable packages validate or when blocked solely on user input. At push ceremony, pause with summary of progress.
