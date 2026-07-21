@@ -134,6 +134,51 @@ public static class GoReflect
     }
 
     /// <summary>
+    /// Reports whether values of the Go type that <paramref name="t"/> represents are comparable
+    /// (usable with <c>==</c> / as a map key). Mirrors Go's rule: slices, maps and funcs are not
+    /// comparable, nor is any struct or array that (transitively) contains one; every other kind —
+    /// bool, numbers, string, pointer, channel, interface, unsafe.Pointer — is. The reflection bridge
+    /// uses this to populate <c>abi.Type.Equal</c> on a synthesized descriptor, which both
+    /// <c>reflect.Type.Comparable</c> and <c>internal/reflectlite</c>'s <c>Comparable</c> read as their
+    /// comparability signal (<c>Equal != nil</c>) — and <c>errors.Is</c> gates its equality match on the
+    /// latter, so a wrong answer here makes <c>errors.Is(err, sentinel)</c> silently return false.
+    /// </summary>
+    public static bool IsComparable(Type? t)
+    {
+        if (t is null)
+            return false;
+
+        switch (KindOf(t))
+        {
+            case Slice:
+            case Map:
+            case Func:
+                return false;
+            case Array:
+                return IsComparable(ElementType(t));
+            case Struct:
+                return StructFieldsComparable(t);
+            default:
+                return true;
+        }
+    }
+
+    // A struct is comparable iff every field is (Go). Recurses over the converted [GoType] struct's
+    // instance fields; a field of slice/map/func kind — or a nested struct/array that contains one —
+    // makes the whole struct non-comparable. Pointer/interface/chan fields stay comparable without
+    // recursing into their referents, so this terminates (Go forbids a struct containing itself by value).
+    private static bool StructFieldsComparable(Type t)
+    {
+        foreach (FieldInfo f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            if (!IsComparable(f.FieldType))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// The Go source type string for a managed <see cref="Type"/> — what `reflect.Type.String()` and
     /// `%T` print. Recurses over the golib container types (`[]int`, `map[string]int`, `*main.Point`),
     /// maps the scalar representations to their Go spelling, and package-qualifies a named/struct type

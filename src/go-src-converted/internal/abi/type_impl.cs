@@ -39,6 +39,15 @@ public static ж<Type> synthType(System.Type? st) {
     ref var t = ref heap<Type>(out var Ꮡt);
     t.Kind_ = (ΔKind)((uint8)GoReflect.KindOf(st));
     t.sysType = st;
+    // Carry Go comparability on the descriptor: reflect.Type.Comparable and internal/reflectlite's
+    // Comparable both report `Equal != nil`, and errors.Is gates its equality match on the latter — so a
+    // comparable Go type (e.g. the *errorString behind a sentinel like csv.ErrFieldCount) must have a
+    // non-nil Equal or errors.Is(err, sentinel) silently returns false. A synthetic descriptor carries no
+    // addressable value memory, so this is a comparability signal, not a real bit-compare; the delegate
+    // compares its pointer arguments as a safe, non-throwing fallback should any path invoke it directly.
+    if (GoReflect.IsComparable(st)) {
+        t.Equal = static (p, q) => AreEqual(p, q);
+    }
     return Ꮡt;
 }
 
