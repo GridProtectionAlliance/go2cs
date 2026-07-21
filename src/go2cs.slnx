@@ -381,6 +381,7 @@
     <Project Path="Tests/Behavioral/PrintfWidthFlags/PrintfWidthFlags.csproj" />
     <Project Path="Tests/Behavioral/PromotedEmbedLib/PromotedEmbedLib.csproj" />
     <Project Path="Tests/Behavioral/PromotedEmbedUser/PromotedEmbedUser.csproj" />
+    <Project Path="Tests/Behavioral/PromotedEmbedZeroValueField/PromotedEmbedZeroValueField.csproj" />
     <Project Path="Tests/Behavioral/PromotedFieldNameIsType/PromotedFieldNameIsType.csproj" />
     <Project Path="Tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
     <Project Path="Tests/Behavioral/PromotedValueEmbedExprRecv/PromotedValueEmbedExprRecv.csproj" />

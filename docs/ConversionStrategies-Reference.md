@@ -1470,15 +1470,36 @@ sibling library sub-project, so the reference is genuinely metadata; a same-proj
 syntax and would pass even unfixed. Against the unfixed generator the test panics with
 `index out of range [2] with length 0`.)
 
-A **known remaining gap, not covered by the above:** the *parameterized* constructor
-(`GenerateConstructor`, used by a composite literal such as `&Holder{tag: "lit"}`) assigns
-`this.f = f;` unconditionally for a needy struct member, so an OMITTED argument overwrites the field with
-its broken `default`. A fixed-array member beside it already has the analogous
-`if (f.Source is not null)` guard; the needy-struct member has no equivalent. This path never consults
-`StructTypeNeedsConstruction` at all, so it fails identically for a **same-package** field type — it is an
-independent defect rather than part of the cross-package resolution bug, and closing it would touch every
-parameterized constructor. Only the NilType and parameterless constructors
-are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`. A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
+**The field-wise constructor closes the same gap for a PARTIAL composite literal.** The *parameterized*
+constructor (`GenerateConstructor`, used by a composite literal that sets some fields —
+`&Holder{tag: "lit"}` → `new Holder(tag: "lit")`) took `T f = default!` for every member and assigned
+`this.f = f;` unconditionally, so an OMITTED needy-struct argument arrived as the broken `default(T)` and
+overwrote the field — identical breakage to the NilType path above, and (because it never consulted
+`StructTypeNeedsConstruction`) firing for a **same-package** field type too. The live case is `io.pipe`,
+whose `onceError rerr, werr` value fields each embed `sync.Mutex` via the promotion box: `io.Pipe()`
+builds the pipe with `new pipe(wrCh: …, rdCh: …, done: …)`, omitting `rerr`/`werr`, so both boxes were
+null and the first `Store`/`Load` `Lock()` NREd on the pipe's writer goroutine — crashing every `io.Pipe`
+consumer (`encoding/base32`'s `TestBufferedDecodingPadding`; the goroutine NRE aborted the whole test
+host). A fixed-array member beside it already had the analogous `if (f.Source is not null)` guard (its
+`= new(N)` field initializer supplies the omitted zero); the needy-struct member has no field initializer
+to fall back on, so it must be *constructed*. `GenerateConstructor` now emits the needy value-struct
+member's parameter as **nullable** — `onceError? rerr = default!` — making an omitted argument a genuine
+`null` sentinel that `default(onceError)` (a real struct value with a null box) could never be — and its
+body reconstructs only when omitted: `this.rerr = rerr ?? new onceError(nil);`, exactly mirroring the
+pointer-embed `?? new ж<T>(nil)` handling for a promoted embed. A caller-SUPPLIED value is used as-is (no
+extra allocation, unchanged reference semantics — the struct copy shares the same embed box); an omitted
+one gets `T`'s own NilType ctor, which recursively constructs *its* needy members. The predicate
+`IsNeedyValueStructMember` reuses `StructTypeNeedsConstruction` (member is not a promoted embed, not a
+reference, not a fixed array, and its struct type needs construction), so every *ordinary* member's
+parameter/assignment is byte-identical to before — the change is confined to genuinely-needy value-struct
+fields. All of the NilType, parameterless, and now field-wise constructors are covered, so this reaches
+`new(T)`/`@new<T>()`/`T{}`/`&T{…}` (empty **and** partial composite literals). (Guarded by the
+`PromotedEmbedZeroValueField` output-compared test — a `slotBox{id: 3}` partial literal omitting a
+`holder` value field that embeds a promoted `counter`, whose promoted `inc()` is then called on the
+omitted field; against the unfixed generator it NREs with `Object reference not set to an instance of an
+object`, exactly as `encoding/base32` did.)
+
+A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
 closes the remaining gap on its side: when `T` needs construction it emits `T x = new();` — the generated
 parameterless constructor, which runs the same field initializers + `AppendZeroValueInitializers` — instead
 of the `T x = default!;` that left an array field's backing null (an NRE on the first index/`len`). The

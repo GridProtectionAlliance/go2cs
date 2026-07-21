@@ -1022,7 +1022,13 @@ internal class StructTypeTemplate : TemplateBase
 
         result.AppendLine();
         result.Append($"{TypeElemIndent}{scope} {NonGenericStructName}(");
-        result.Append(string.Join(", ", structMembers.Select(item => $"{item.typeName} {item.memberName} = default!")));
+        // A needy VALUE-struct member takes a NULLABLE parameter (`onceError? rerr = default!`) so an
+        // OMITTED argument is a genuine `null` sentinel the body can distinguish from a passed value —
+        // a non-nullable `onceError` param can only default to the BROKEN `default(onceError)` (null
+        // embed box), which the body could not tell apart from a caller-supplied zero. See the body's
+        // `?? new T(nil)` reconstruction and IsNeedyValueStructMember.
+        result.Append(string.Join(", ", structMembers.Select(item =>
+            $"{(IsNeedyValueStructMember(item.typeName, item.isReferenceType, item.isPromotedStruct) ? $"{item.typeName}?" : item.typeName)} {item.memberName} = default!")));
         result.AppendLine(")");
         result.AppendLine($"{TypeElemIndent}{{");
 
@@ -1044,15 +1050,39 @@ internal class StructTypeTemplate : TemplateBase
             // stringFinder{pattern:…, goodSuffixSkip:…}) left its `[256]int` unusable. Keep the
             // initializer for a zero-value argument (Go's zero `[N]T` IS the zeroed backing the
             // initializer produced); a constructed argument assigns as before.
+            // A needy VALUE-struct member (a plain field whose OWN zero value is broken — its type
+            // carries a promoted-embed box or fixed array at some depth) must be CONSTRUCTED when the
+            // argument is omitted: `default(T)` leaves that box null and the first use NREs (io.pipe's
+            // `onceError rerr/werr`, whose embedded sync.Mutex box is null → Store/Load `Lock()` NRE on
+            // the goroutine, crashing io.Pipe consumers). The parameterless/NilType ctors already build
+            // it via AppendZeroValueInitializers; the field-wise ctor is the last gap. The nullable
+            // param makes an omitted arg a real `null`, so `?? new T(nil)` reconstructs ONLY when
+            // omitted (a caller-supplied value is used as-is — no extra allocation, unchanged reference
+            // semantics), exactly mirroring the POINTER-embed `memberValue` handling above.
             result.AppendLine(isPromotedStruct ?
                 $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>({memberValue});" :
                 IsFixedArrayMember(typeName, isReferenceType) ?
                     $"if ({memberName}.Source is not null) this.{memberName} = {memberName};" :
-                    $"this.{memberName} = {memberName};");
+                    IsNeedyValueStructMember(typeName, isReferenceType, isPromotedStruct) ?
+                        $"this.{memberName} = {memberName} ?? new {typeName}(nil);" :
+                        $"this.{memberName} = {memberName};");
         }
 
         result.Append($"{TypeElemIndent}}}");
     }
+
+    // A plain (non-embed) VALUE-struct member whose own zero value is broken — its type needs
+    // construction (a promoted-embed box or a fixed-array backing at some depth; see
+    // StructTypeNeedsConstruction), so a field-wise-ctor argument left `default` leaves that member
+    // unusable. Detected identically to AppendZeroValueInitializers' predicate: not a promoted embed
+    // (its box is built by the isPromotedStruct branch), not a reference (a nil pointer/interface IS
+    // the correct Go zero), and not a fixed-array member (which self-heals via its own `= new(N)`
+    // field initializer). Cross-package/golib types resolve false (no public NilType ctor to call),
+    // matching StructTypeNeedsConstruction's conservatism, so no unconstructable `new T(nil)` is emitted.
+    private bool IsNeedyValueStructMember(string typeName, bool isReferenceType, bool isPromotedStruct) =>
+        !isPromotedStruct && !isReferenceType &&
+        !IsFixedArrayMember(typeName, isReferenceType) &&
+        StructTypeNeedsConstruction(typeName);
 
     // The member's type IS golib's fixed-array struct (`global::go.array<…>` / `go.array<…>`) — a
     // PREFIX match, not Contains: a reference member like `ж<array<T>>` (pointer-to-array field,

@@ -922,6 +922,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPromotedEmbedUser() => CheckTarget("PromotedEmbedUser");
 
     [TestMethod]
+    public void CheckPromotedEmbedZeroValueField() => CheckTarget("PromotedEmbedZeroValueField");
+
+    [TestMethod]
     public void CheckPromotedFieldNameIsType() => CheckTarget("PromotedFieldNameIsType");
 
     [TestMethod]
