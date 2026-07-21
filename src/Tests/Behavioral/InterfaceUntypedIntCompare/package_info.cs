@@ -45,8 +45,8 @@ using static go.main_package;
 
 namespace go;
 
-[GoTestMatchingConsoleOutput]
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
 }
