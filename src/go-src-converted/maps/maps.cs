@@ -56,7 +56,9 @@ public static bool EqualFunc<M1, M2, K, V1, V2>(M1 m1, M2 m2, Func<V1, V2, bool>
 // clone is implemented in the runtime package.
 //
 //go:linkname clone maps.clone
-internal static partial any clone(any m);
+internal static any clone(any m) {
+    return mapclone(m);
+}
 
 // Clone returns a copy of m.  This is a shallow clone:
 // the new keys and values are set using ordinary assignment.
