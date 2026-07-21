@@ -1094,6 +1094,46 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
+			// An untyped INTEGER constant passed to a GENERIC parameter whose declared type IS the
+			// ELEMENT type parameter of a sibling `~[]E`-constrained type parameter — the
+			// `Index[S ~[]E, E comparable](s S, v E)` / `Insert[S ~[]E, E any](s S, i int, v ...E)`
+			// shape (slices) — drives C# generic inference from the LITERAL's OWN C# type. Go infers
+			// E from S's core type (`[]int` → E = Go `int` → `nint`), but C# has no analogue for
+			// `~[]E` core-type inference: `where S : ISlice<E>` does NOT flow S's concrete element to
+			// E, so C# infers E SOLELY from the value literal. A bare int literal is C# `int`
+			// (System.Int32), so `Index(s, 2)` makes C# infer E=int and `slice<nint>` then fails the
+			// `~[]int` constraint (CS0315/CS0411/CS1503). go/types has already resolved the literal to
+			// E's instantiation (int→nint, byte, int64→long, …); emit it AT that C# type so inference
+			// binds the intended argument. A resolved `int32`/`rune` (already System.Int32) and a
+			// value convBasicLit already casts (`(nint)…L`) are left untouched — no cast, no noise (the
+			// wholeExprIsCastOfType skip in convExprList drops the latter). The sibling-lock gate is
+			// deliberately narrow: a FREELY-inferred type parameter (`First[T any](v ...T)`), one
+			// determined DIRECTLY by another argument (`setThrough[P *T, T any](p P, v T)` — C# infers
+			// T from the pointer), and an EXPLICITLY-instantiated call (`NewOption[nint](42)`) all
+			// infer correctly already, so they keep their bare literal. A variadic slot flags every
+			// trailing element; an existing per-arg cast (append/narrow-int/defer) is not overwritten.
+			if paramHasArg {
+				if pTP, ok := types.Unalias(paramType).(*types.TypeParam); ok && typeParamIsSliceElementOfSibling(funcSignature, pTP) {
+					lastArg := i
+
+					if funcSignature.Variadic() && i == params.Len()-1 {
+						lastArg = len(callExpr.Args) - 1
+					}
+
+					for j := i; j <= lastArg; j++ {
+						if castType := v.untypedIntGenericArgCastType(callExpr.Args[j]); castType != "" {
+							if callExprContext.castArgToType == nil {
+								callExprContext.castArgToType = make(map[int]string)
+							}
+
+							if _, exists := callExprContext.castArgToType[j]; !exists {
+								callExprContext.castArgToType[j] = castType
+							}
+						}
+					}
+				}
+			}
+
 			// A TYPE PARAMETER reads as an interface (its underlying is the constraint), which
 			// routed a pointer-instantiated generic param into the interface arm and away from
 			// the box treatment (`ptr = abi.Escape(ptr)` instantiating T = *T passed the
@@ -2194,6 +2234,75 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 		switch a.Op {
 		case token.SUB, token.ADD, token.XOR:
 			return v.isUntypedNumericConstArg(a.X)
+		}
+	}
+
+	return false
+}
+
+// untypedIntGenericArgCastType returns the C# type an untyped INTEGER constant argument must be
+// cast to when it feeds a bare type-parameter slot of a generic call — or "" when no cast is
+// needed. C# infers the type argument from the literal's OWN type, and a bare int literal is
+// `int` (System.Int32); go/types has already resolved the literal to the type parameter's
+// concrete instantiation, so the cast retypes it to bind the intended argument (`nint` for Go
+// `int`, `byte`, `long` for `int64`, `nuint` for `uint`/`uintptr`, …). Returns "" for a
+// non-constant, a non-integer resolved type, or a resolved `int32`/`rune` kind — a bare int
+// literal already IS System.Int32, so those need no retype (an int literal in an int32 context
+// gains no noise). Reuses isUntypedNumericConstArg's constant test — the same one the append and
+// narrow-int element casts key off — so a tightened local const (already declared at its concrete
+// type) is correctly excluded.
+func (v *Visitor) untypedIntGenericArgCastType(arg ast.Expr) string {
+	if !v.isUntypedNumericConstArg(arg) {
+		return ""
+	}
+
+	tv, ok := v.info.Types[arg]
+
+	if !ok || tv.Value == nil {
+		return ""
+	}
+
+	basic, ok := tv.Type.(*types.Basic)
+
+	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUntyped != 0 {
+		return ""
+	}
+
+	// int32/rune already renders as — and C# infers as — System.Int32 from a bare literal.
+	if basic.Kind() == types.Int32 {
+		return ""
+	}
+
+	return convertToCSTypeName(v.getTypeName(basic, false))
+}
+
+// typeParamIsSliceElementOfSibling reports whether type parameter tp is the ELEMENT type of some
+// OTHER type parameter's `~[]E` slice-core constraint in the same signature — the `S ~[]E, E …`
+// shape (slices.Index/Insert/Replace). Go's core-type inference fixes E from S's concrete element,
+// but C#'s `where S : ISlice<E>` constraint carries no such flow — C# infers E purely from the
+// value argument — so an untyped-int literal in the E slot mis-infers E and violates the S
+// constraint unless it is retyped to E's instantiation (see the call-site cast). When tp is NOT
+// thus locked — E free (`[T any](v ...T)`), or determined directly by another parameter's type
+// (`[P *T, T any](p P, v T)`, where C# infers T from the pointer arg) — C# already infers it
+// correctly, so no retype is wanted. Mirrors typeParamSliceCore's constraint walk.
+func typeParamIsSliceElementOfSibling(sig *types.Signature, tp *types.TypeParam) bool {
+	tparams := sig.TypeParams()
+
+	if tparams == nil {
+		return false
+	}
+
+	for k := range tparams.Len() {
+		sibling := tparams.At(k)
+
+		if sibling == tp {
+			continue
+		}
+
+		if core := typeParamSliceCore(sibling); core != nil {
+			if elem, ok := types.Unalias(core.Elem()).(*types.TypeParam); ok && elem == tp {
+				return true
+			}
 		}
 	}
 
