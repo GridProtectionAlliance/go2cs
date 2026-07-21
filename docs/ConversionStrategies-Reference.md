@@ -1042,6 +1042,41 @@ through the original variable; the churned goldens `PointerToPointer`,
 `UnsafePointerReinterpret`, `DerefPointerToField`, `PointerCastSliceRange`,
 `EscapedLoopVarSiblingIndex` all re-verified against Go.)
 
+### An address-taken NAMED RESULT heap-boxes too
+A named result is declared in the function signature, not by any body statement, so the escape
+analysis' define-walk never reached it — it was analyzed only when it also happened to sit on a
+`:=` LHS somewhere. A named result whose address is taken but which is never `:=`-reassigned
+(text/tabwriter's `func (b *Writer) flush() (err error) { defer b.handlePanic(&err, "Flush"); … }`,
+where the deferred handler writes `*err = nerr.err`) was therefore left unboxed: `&err` fell back to
+the `Ꮡ(err)` **copy** box, so the handler wrote a copy while `return err` read the original —
+silently dropping the error (Go promotes an address-taken named result to the heap). The escape
+analysis now walks every named result and marks it escaping when its address is genuinely taken
+(`&err`, `&err.field`, `&err[i]`), so the existing heap-box machinery boxes it at entry — the box
+`Ꮡerr`, the deferred handler's write through the pointer, and the final `return err` all reference
+one slot:
+```go
+func flush() (err error) { defer handlePanic(&err); … }   // handlePanic: *err = e
+```
+```csharp
+internal static error /*err*/ flush() {
+    heap<error>(out var Ꮡerr);                    // box declared outside the defer wrapper
+    func((defer, recover) => {
+        ref var err = ref Ꮡerr.ValueSlot;         // value alias inside
+        deferǃ(handlePanic, Ꮡerr, defer);         // the BOX is passed, not Ꮡ(copy)
+        …
+    });
+    return Ꮡerr.ValueSlot;                        // reads the SAME slot the handler wrote
+}
+```
+The trigger is address-taken **specifically** — a named result merely referenced or written inside a
+closure is not boxed (a C# closure already captures the outer local by reference), so a common
+`defer func(){ err = wrap(err) }()` result keeps its plain declaration (no churn). The verdict is
+only ever SET true, so a result whose address is never taken is byte-unchanged. Function literals
+take the same treatment. (Guarded by `NamedResultAddressEscape` — an error result written through
+`&err` by a deferred handler and a value `int` result mutated through `&n`, output-compared vs Go;
+`PointerToInterfaceParamDeref` re-baselined to the box form, its output unchanged since its handler
+only *reads* `*err`.)
+
 ### A field-addressed value local heap-boxes — `Ꮡ(x).of(…)` copy-boxes orphan writes
 Escape analysis's address-of walk marked `&x` (direct) and `&x[k]` (element) but had **no
 selector arm**, so a value-struct local whose FIELD address was taken in plain assignment
@@ -2162,6 +2197,15 @@ An already-interface-typed element stays bare. The **empty interface** (`any`) e
 args = append(args.slice(-1, len(args), len(args)), (any)(c.output));
 ```
 Guarded by `InterfaceCasting` (non-empty interface) and `AppendUntypedConst` (the empty-interface `[]byte`-into-`[]any` and scalar-into-`[]any` cases).
+
+### A `nil` element appended to a slice casts to the element type
+A bare `nil` appended as a single element -- `append(b.lines, nil)` on `[][]cell` -- renders `nil` as `default!`, which C# overload resolution binds to `append`'s `params` parameter as the **whole null array** (a non-expanded params call), appending **ZERO** elements rather than one nil element. This silently no-ops the grow: text/tabwriter's `addLine` never extended `b.lines`, so every `terminateCell` indexing `b.lines[len(b.lines)-1]` panicked with index `[-1]`. The interface (`error`) and named-composite branches above already cast a nil element (its untyped-nil type differs from the element type), but an **unnamed** nillable element type -- slice/map/pointer/chan/func -- matched no branch and emitted bare. The converter now casts any untyped-nil element to the slice's element type, forcing single-element binding:
+```csharp
+lines = append(lines, (slice<nint>)(default!));       // []int   element
+maps  = append(maps,  (map<@string, nint>)(default!)); // map     element
+ptrs  = append(ptrs,  (ж<nint>)(nil));                 // pointer element (nil renders in pointer context)
+```
+A nil element is only ever valid when the element type is nillable, so the cast target always exists. Spread appends (`append(dst, src...)`) are excluded (the existing `Ellipsis.IsValid()` guard). Guarded by the `AppendNilSliceElement` behavioral test (slice/map/pointer element types, output-compared vs Go).
 
 ### A struct-literal interface field takes a pointer element's adapter
 A composite struct literal whose field is an INTERFACE type, initialized with a POINTER element whose pointer-receiver method set satisfies that interface, must record and route the same `*T`→interface adapter a call argument does — `&handlerWriter{l.Handler(), &logLoggerLevel, capturePC}` (log/slog SetDefault), where field `level` is `Leveler` and `*LevelVar` implements Leveler via a pointer-receiver `Level()`. The struct-field interface routing (`checkStructFields`) recorded/routed a NAMED VALUE element that satisfies the field (`DecodingError{InvalidIndexError(idx)}`) but matched only a `*types.Named` element, so a POINTER element fell through: no `GoImplement<LevelVar, Leveler>(Pointer = true)` was recorded, and the box `ᏑlogLoggerLevel` was passed bare to the interface-typed constructor parameter (CS1503). The detection now takes the concrete satisfying type from the element OR the pointee of a POINTER element (`types.Implements` tested on the element's own pointer method set, the non-interface guard tested on the pointee), so a pointer element records and routes exactly like the value case:

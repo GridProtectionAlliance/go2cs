@@ -1483,6 +1483,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			if sliceType := v.info.TypeOf(callExpr.Args[0]); sliceType != nil {
 				if sliceUnder, ok := sliceType.Underlying().(*types.Slice); ok {
+					// A bare `nil` element (untyped nil → `default!`) binds to append's `params`
+					// parameter as the WHOLE null array — appending ZERO elements — instead of as a
+					// single nil element: `append(b.lines, nil)` on `[][]cell` never grew the slice
+					// (tabwriter addLine, which left b.lines empty and every terminateCell indexing
+					// `b.lines[len-1]` panicking [-1]). Cast the nil to the element type so it binds as
+					// ONE element. The interface and named-composite branches below already do this for
+					// their element kinds (both differ from the untyped nil); this covers the remaining
+					// nillable element types — unnamed slice/map/pointer/chan/func — for which no other
+					// branch fires. A nil element is only ever valid when the element type is nillable,
+					// so the cast target always exists.
+					for i := 1; i < len(callExpr.Args); i++ {
+						if tv, ok := v.info.Types[callExpr.Args[i]]; ok && tv.IsNil() {
+							if callExprContext.castArgToType == nil {
+								callExprContext.castArgToType = make(map[int]string)
+							}
+
+							callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(sliceUnder.Elem(), false))
+						}
+					}
+
 					// Only numeric element types are affected (the wrong-element-type overload
 					// selection is a numeric-conversion artifact); skip otherwise.
 					if elemBasic, ok := sliceUnder.Elem().Underlying().(*types.Basic); ok && elemBasic.Info()&types.IsNumeric != 0 {

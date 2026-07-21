@@ -148,11 +148,28 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 						return true
 					})
 
+					// A named RESULT whose address is taken (`&err` / passed as `*T` /
+					// `&result.field`) — e.g. tabwriter's `defer b.handlePanic(&err, …)` in
+					// flush/Write — must be heap-boxed at entry, exactly like an escaping
+					// address-taken local, so the box `Ꮡerr`, the deferred handler's write
+					// through the pointer, and the final `return err` all reference the SAME
+					// storage (Go promotes such a result to the heap). A named result is
+					// declared in the signature, not by any body statement, so the define-walk
+					// above never feeds it to the escape analysis — it reached one only when it
+					// also happened to sit on a `:=` LHS. Analyze them explicitly against the
+					// same body here.
+					visitor.analyzeNamedResults(node.Type.Results, node.Body)
+
 				case *ast.FuncLit:
 					// A literal OUTSIDE any function declaration (a package-level var
 					// initializer). Literals inside a FuncDecl were already marked above —
 					// the already-analyzed guard makes this re-visit a no-op for them.
 					visitor.markCaptureModeBoxedParams(node.Type.Params, node.Body)
+
+					// A function literal's named results take the same address-taken escape
+					// treatment as a declaration's (see analyzeNamedResults). Nested literals
+					// hit this case too — the already-analyzed guard makes any overlap a no-op.
+					visitor.analyzeNamedResults(node.Type.Results, node.Body)
 				}
 				return true
 			})
@@ -219,6 +236,90 @@ func (v *Visitor) markCaptureModeBoxedParams(params *ast.FieldList, body *ast.Bl
 			}
 		}
 	}
+}
+
+// analyzeNamedResults heap-marks a function's (or literal's) named result whose address is taken
+// in its body. A named result is declared in the signature, not by any body statement, so the
+// body's define-walk never reaches it unless it also happens to sit on a `:=` LHS; without this an
+// address-taken named result (`&err` passed to a deferred handler — tabwriter's
+// `defer b.handlePanic(&err, …)`) is left unboxed and `Ꮡ(err)` boxes a COPY, silently dropping
+// writes the handler makes through the pointer (Go promotes such a result to the heap).
+//
+// The trigger is ADDRESS-TAKEN specifically — the one condition that hands other code a pointer
+// into the result's own storage, requiring the box `Ꮡerr`, the pointee write, and `return err` to
+// share one slot (mirrors identHasHeapBox's box gate for an inherently-heap ident). A result that
+// is merely referenced or WRITTEN inside a closure does NOT qualify: a C# closure already captures
+// the outer local by reference, so the full escape analysis (which blanket-marks any inherently-
+// heap ident referenced in a closure) would needlessly flip such a result to box-ref emission. The
+// verdict is only ever SET true here — a non-address-taken result stays absent from the map, so
+// emission for every result that does not take its own address is byte-unchanged.
+func (v *Visitor) analyzeNamedResults(results *ast.FieldList, body *ast.BlockStmt) {
+	if results == nil || body == nil {
+		return
+	}
+
+	for _, field := range results.List {
+		for _, name := range field.Names {
+			if isDiscardedVar(name.Name) {
+				continue
+			}
+
+			obj := v.info.ObjectOf(name)
+
+			if obj == nil {
+				continue
+			}
+
+			// Already analyzed (it also sits on a `:=` LHS) — keep the existing verdict.
+			if _, found := v.identEscapesHeap[obj]; found {
+				continue
+			}
+
+			if v.namedResultAddressTaken(obj, body) {
+				v.identEscapesHeap[obj] = true
+			}
+		}
+	}
+}
+
+// namedResultAddressTaken reports whether the storage of the named result obj has its address
+// taken anywhere in body (including nested function literals): `&result`, `&result.field…` (a
+// value-field selector chain rooted at the result), or `&result[i]`. Only such a form hands other
+// code a pointer INTO the result's own storage — the case that needs the result heap-boxed. This
+// is the result-side analogue of performEscapeAnalysis's UnaryExpr address-of arm.
+func (v *Visitor) namedResultAddressTaken(obj types.Object, body *ast.BlockStmt) bool {
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		unary, ok := n.(*ast.UnaryExpr)
+
+		if !ok || unary.Op != token.AND {
+			return true
+		}
+
+		switch x := unary.X.(type) {
+		case *ast.Ident:
+			if v.info.ObjectOf(x) == obj {
+				found = true
+			}
+		case *ast.IndexExpr:
+			if id, ok := x.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+				found = true
+			}
+		case *ast.SelectorExpr:
+			if selectorChainRootsAtIdent(x, obj, v.info) {
+				found = true
+			}
+		}
+
+		return !found
+	})
+
+	return found
 }
 
 // Perform escape analysis on the given identifier within the specified block

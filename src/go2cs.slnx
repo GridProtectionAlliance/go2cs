@@ -72,6 +72,7 @@
     <Project Path="Tests/Behavioral/AnyStringLitChanSend/AnyStringLitChanSend.csproj" />
     <Project Path="Tests/Behavioral/AnyStringLitComposite/AnyStringLitComposite.csproj" />
     <Project Path="Tests/Behavioral/AppendNamedSliceElement/AppendNamedSliceElement.csproj" />
+    <Project Path="Tests/Behavioral/AppendNilSliceElement/AppendNilSliceElement.csproj" />
     <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="Tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
@@ -307,6 +308,7 @@
     <Project Path="Tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
     <Project Path="Tests/Behavioral/NamedMapMakeNonNil/NamedMapMakeNonNil.csproj" />
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
+    <Project Path="Tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="Tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceCaptureMethod/NamedSliceCaptureMethod.csproj" />

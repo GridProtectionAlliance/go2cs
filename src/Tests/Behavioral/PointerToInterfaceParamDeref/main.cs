@@ -16,12 +16,14 @@ internal static void handle(@string label, ж<error> Ꮡerr) => func((defer, rec
 });
 
 internal static error /*err*/ doit() {
-    error err = default!;
+    heap<error>(out var Ꮡerr);
     func((defer, recover) => {
-        deferǃ(handle, (@string)"doit", Ꮡ(err), defer);
+    ref var err = ref Ꮡerr.ValueSlot;
+
+        deferǃ(handle, (@string)"doit", Ꮡerr, defer);
         throw panic("boom");
     });
-    return err;
+    return Ꮡerr.ValueSlot;
 }
 
 internal static void Main() => func((defer, recover) => {

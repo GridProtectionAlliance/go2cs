@@ -75,6 +75,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
 
     [TestMethod]
+    public void CheckAppendNilSliceElement() => CheckTarget("AppendNilSliceElement");
+
+    [TestMethod]
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
@@ -793,6 +796,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
+
+    [TestMethod]
+    public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
 
     [TestMethod]
     public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");
