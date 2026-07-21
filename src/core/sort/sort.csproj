@@ -6,8 +6,8 @@
     <AssemblyName>sort_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
     <PackageId>go.sort</PackageId>
-    <Authors>Grid Protection Alliance</Authors>
-    <Company>Grid Protection Alliance</Company>
+    <Authors>J. Ritchie Carroll</Authors>
+    <Company>J. Ritchie Carroll</Company>
     <Product>go2cs</Product>
     <Title>go2cs sort package</Title>
     <PackageDescription>Go sort package in .NET for use with go2cs</PackageDescription>

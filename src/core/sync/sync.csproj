@@ -6,8 +6,8 @@
     <AssemblyName>sync_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
     <PackageId>go.sync</PackageId>
-    <Authors>Grid Protection Alliance</Authors>
-    <Company>Grid Protection Alliance</Company>
+    <Authors>J. Ritchie Carroll</Authors>
+    <Company>J. Ritchie Carroll</Company>
     <Product>go2cs</Product>
     <Title>go2cs sync package</Title>
     <PackageDescription>Go sync package in .NET for use with go2cs</PackageDescription>

@@ -12,7 +12,7 @@
     <AssemblyTitle>$(Description)</AssemblyTitle>
     <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
-    <Company>Grid Protection Alliance</Company>
+    <Company>J. Ritchie Carroll</Company>
     <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Title>go2cs source generator</Title>
