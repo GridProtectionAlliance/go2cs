@@ -14,9 +14,12 @@
 // A declared element the literal's natural type already matches (int32 for INT, float64 for
 // FLOAT) keeps inferred typing, and Go `int` (C# nint) is deliberately exempt — the
 // `return 0, err` shape against (int, error) results is pervasive and green today — so the
-// intControl arm pins the unchanged inferred emission. Every literal here is invoked and its
-// values printed, comparing behavior vs Go; the sized literals are also PASSED to typed
-// function parameters, the exact use the wrong inferred delegate type rejects.
+// intControl arm pins the unchanged inferred emission. That exemption is NARROWED, not removed:
+// when a declared-int position carries BOTH a bare-`0` (C# int) arm AND a non-literal `i+1`
+// (C# nint) arm, the mix defeats inference (the mixedIntArms bufio-`onComma` shape) and the
+// explicit `(nint, …)` return type is forced. Every literal here is invoked and its values
+// printed, comparing behavior vs Go; the sized literals are also PASSED to typed function
+// parameters, the exact use the wrong inferred delegate type rejects.
 package main
 
 import (
@@ -111,6 +114,38 @@ func intControl(ok bool) string {
 	return fmt.Sprintf("ok:%d", n)
 }
 
+func takeSplit(f func(data []byte, atEOF bool) (advance int, token []byte, err error), data []byte, atEOF bool) string {
+	a, t, err := f(data, atEOF)
+	if err != nil {
+		return fmt.Sprintf("adv:%d tok:[%s] err:%s", a, string(t), err.Error())
+	}
+	return fmt.Sprintf("adv:%d tok:[%s]", a, string(t))
+}
+
+// mixedIntArms is the bufio ExampleScanner_* `onComma` shape and the case where the Go-`int`
+// exemption above (intControl) must NOT fire: a multi-result closure whose declared first result
+// is Go `int` (C# nint) and whose arms MIX a bare `0` (naturally C# `int`) with a non-literal
+// `i + 1` (C# `nint`). One arm is FULLY typed (`return 0, data, errSeek` — no nil element), so it
+// alone drove C# lambda return-type inference to a C# `int` first element, and the `nint` arm
+// then failed (CS0029/CS1662; the assignment-inferred delegate is also rejected at the invariant
+// use site, CS0407). The int-literal + nint-expression MIX at a declared-int position now forces
+// the explicit `(nint, ...)` return type; each arm converts in place. intControl (all-literal, no
+// nint-expression arm) still keeps its inferred emission — the exemption is narrowed, not removed.
+func mixedIntArms(data []byte, atEOF bool) string {
+	onComma := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		for i := 0; i < len(data); i++ {
+			if data[i] == ',' {
+				return i + 1, data[:i], nil
+			}
+		}
+		if !atEOF {
+			return 0, nil, nil
+		}
+		return 0, data, errSeek
+	}
+	return takeSplit(onComma, data, atEOF)
+}
+
 func main() {
 	fmt.Println("sizeFuncShape(true):", sizeFuncShape(true))
 	fmt.Println("sizeFuncShape(false):", sizeFuncShape(false))
@@ -121,4 +156,7 @@ func main() {
 	fmt.Println("floatControl:", floatControl())
 	fmt.Println("intControl(true):", intControl(true))
 	fmt.Println("intControl(false):", intControl(false))
+	fmt.Println("mixedIntArms(hi,bye/true):", mixedIntArms([]byte("hi,bye"), true))
+	fmt.Println("mixedIntArms(tail/true):", mixedIntArms([]byte("tail"), true))
+	fmt.Println("mixedIntArms(tail/false):", mixedIntArms([]byte("tail"), false))
 }

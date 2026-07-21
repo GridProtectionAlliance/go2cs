@@ -652,36 +652,25 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		delegateType := convertToCSTypeName(v.getCSTypeName(v.info.TypeOf(selectorExpr)))
 		methodName := v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))
 
-		// A FOREIGN type's method expression — `(*http.Request).Write` (net/http/httputil
-		// persist.go) — must QUALIFY the method's static form: the [GoRecv]/extension static
-		// (and its RecvGenerator ж-overload) lives in the DEFINING package's class, so the
-		// bare name is CS0103 (or mis-binds a same-named local method group, CS0123). The Go
-		// operand necessarily spells the type through its package qualifier — peel
-		// `(*http.Request)` to the `http` package ident and render it exactly as any
-		// package-qualified reference does (sanitization and collision renames included).
+		// A FOREIGN-package type's method expression — `(*http.Request).Write` (net/http/httputil
+		// persist.go), or `(*Reader).ReadBytes` in an EXTERNAL test (`package bufio_test`) that
+		// dot-imports `bufio` — must QUALIFY the method's static form: the [GoRecv]/extension static
+		// (and its RecvGenerator ж-overload) lives in the DEFINING package's class, so the bare name
+		// is CS0103 (a `using static` exposes an extension method only for `recv.M()` invocation, not
+		// as a bare method group; a same-named local method would instead mis-bind, CS0123). Derive
+		// the qualifier from the method's OWN package via go/types — identical to how getTypeName
+		// qualifies the receiver type inside the delegate (`bufio.Reader`) — rather than peeling the
+		// Go source spelling: a dot-imported type is a BARE ident (`Reader`), not a `pkg.Type`
+		// selector, so the source-peel misses it and drops the qualifier.
 		if obj := sel.Obj(); obj != nil && obj.Pkg() != nil && obj.Pkg() != v.pkg {
-			operand := selectorExpr.X
+			pkg := obj.Pkg()
+			aliasQualifier := importQualifier(pkg.Name())
 
-			for {
-				switch x := operand.(type) {
-				case *ast.ParenExpr:
-					operand = x.X
-					continue
-				case *ast.StarExpr:
-					operand = x.X
-					continue
-				}
-
-				break
+			if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
+				aliasQualifier = fileAlias
 			}
 
-			if typeSel, ok := operand.(*ast.SelectorExpr); ok {
-				if pkgIdent, ok := typeSel.X.(*ast.Ident); ok {
-					if _, isPkg := v.identifierIsPackageName(pkgIdent); isPkg {
-						methodName = v.convExpr(typeSel.X, nil) + "." + methodName
-					}
-				}
-			}
+			methodName = aliasQualifier + "." + methodName
 		}
 
 		return fmt.Sprintf("(%s)(%s)", delegateType, methodName)
