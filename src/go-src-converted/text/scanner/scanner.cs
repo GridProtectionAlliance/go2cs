@@ -405,7 +405,7 @@ internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, n
     rune ch = default!;
     nint digsep = default!;
 
-    ref var invalid = ref Ꮡinvalid.Value;
+    ref var invalid = ref Ꮡinvalid.DerefOrNil();
     ch = ch0;
     if (@base <= 10){
         var max = (rune)((rune)'0' + @base);
