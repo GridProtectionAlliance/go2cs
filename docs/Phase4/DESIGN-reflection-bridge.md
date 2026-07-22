@@ -1,9 +1,33 @@
 # DESIGN — Native reflection bridge (Phase 4 operational)
 
-> **Status: proposal for review (design WITH user, not yet implemented).** Companion to the Phase-4
-> operational campaign in [`../Roadmap.md`](../Roadmap.md). The `reflect` package *compiles*
-> (Phase-3 milestone; see [`Reflect-Census.md`](Reflect-Census.md)) but does not *run* — this is the
+> **Status (2026-07-22): Phases 1 and 2 are SHIPPED. Phase 3 is the open work** — and it is a
+> chip-class arc, per §6.1 of [`Phase4-Autonomous-Loop-Charter.md`](Phase4-Autonomous-Loop-Charter.md).
+> Companion to the Phase-4 operational campaign in [`../Roadmap.md`](../Roadmap.md). The `reflect`
+> package *compiled* at the project's Phase-3 milestone (see
+> [`../Phase3/Reflect-Census.md`](../Phase3/Reflect-Census.md)) but did not *run* — this is the
 > operational bridge that makes it work.
+>
+> ⚠ **"Phase 1/2/3" below are THIS DOCUMENT's scope phases** (§ *Scope*), unrelated to the project's
+> Phase-3 / Phase-4 milestones.
+>
+> **Implemented** — `manualConversionFuncs` in `src/go2cs/manualTypeOperations.go` is the authoritative
+> list; derive it fresh rather than trusting this summary: the Kind classifier + type helpers (golib
+> `GoReflect`: `KindOf`, `GoTypeName`, `ElementType`, `IsComparable`, `TryAdapterWrappedType`),
+> `internal/abi.TypeOf` (`type_impl.cs` synthesizes the descriptor from the managed `System.Type`),
+> `reflect.{ValueOf, unpackEface, valueInterface}`, the ~17 `Value` readers + `MapIter.{Next,Key,Value}`,
+> `rtype.{String, Name, Elem, Field, NumField}`, **canonical interned `Value.Type`/`toType`**
+> (`canonType` — the map-key-ordering fix, § below), `deepValueEqual` (`deepequal_impl.cs`), the
+> `internal/reflectlite` mini-bridge (`ValueOf`/`Len`/`Swapper`), and the `synthType.Equal`
+> comparability signal (encoding/csv, 2026-07-21).
+>
+> **NOT implemented — the chip's scope:** everything in *Phase 3* (`Value.Set*` + addressability/
+> `CanSet`, `Value.Call`/`MakeFunc` dynamic invocation, `MakeSlice`/`MakeMap`/`New`), the
+> `getcallersp` stub (`PartialStubGenerator` `NotImplementedException` in `runtime`; errors TestAs →
+> `reflect.mustBeAssignableSlow`), open question 3 (field-name/tag fidelity) beyond what `rtype.Field`
+> returns today, and the **adapter-type follow-up**: `GoReflect.KindOf`/`ElementType` still report the
+> *adapter class* for `IжAdapter` / ᴠ-adapter types, where `GoTypeName` already unwraps them via
+> `TryAdapterWrappedType` (flagged by R10 in
+> [`StringsBytes-BlockerMap.md`](StringsBytes-BlockerMap.md)).
 
 ## The problem
 
@@ -98,11 +122,24 @@ UnsafePointer, Pointer`), `Type.{Elem, Field(i).Name}`, a `MapIter` (`Next/Key/V
 MapIter + StructField, ~30 methods**, all managed reflection. Makes `%v`/`%+v`/`%#v` of structs,
 slices, maps, and pointers correct.
 
-**Phase 3 — write-back & call (`Value.Set*`, `Value.Call`, `MakeFunc`, addressability) — DEFERRED.**
-Needed by `encoding/json`, `text/template`, `encoding/gob`, etc., not by `fmt`. Larger and best
-designed against a concrete consumer. Out of scope for the color sample.
+**Phase 3 — write-back & call (`Value.Set*`, `Value.Call`, `MakeFunc`, addressability) — OPEN; the
+chip's scope.** Needed by `encoding/binary`, `encoding/gob`·`json`·`xml`, `testing/quick`,
+`text/template`, and (transitively) `math/big`; not by `fmt`. Larger, and **best designed against a
+concrete consumer** — which is exactly why the charter (§6.1) spawns this chip only once a package's
+differential actually lands on this surface, and requires designing WITH the user + adversarial design
+review before implementation. Carry the `getcallersp` stub and the adapter-type `Kind`/`Elem` unwrap
+in the same chip.
 
 ## Open design questions (for review)
+
+> **Resolved by what shipped (2026-07-22):** **Q1** — the native shim was confirmed and built; the
+> descriptor-synthesis alternative was not pursued. **Q2** — both Phase 1 *and* Phase 2 were built.
+> **Q4** — the answer was *both*, deliberately: the entry points and exercised methods are whole-file
+> hand-owned `*_impl.cs`, while the reusable managed logic (Kind classification, Go type naming,
+> element types, comparability, adapter unwrap) lives in golib `GoReflect` so `reflect`,
+> `internal/abi`, `internal/reflectlite`, and golib's own `builtin` formatting all share one
+> implementation. **Q3 is still open** and belongs to the Phase-3 chip. Q1–Q4 are kept below as the
+> record of the decision.
 
 1. **Approach — confirm the native shim.** Replace the 3 constructors + reimplement the exercised
    methods over `System.Type`/`System.Object` (recommended). The alternative — synthesize faithful

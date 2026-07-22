@@ -6,6 +6,14 @@
 > the docs it points to. The running per-package ledger, blockers, and hard-won detail live in the
 > **memory index** (`[[go2cs-phase4-operational]]` and the other `go2cs-*` notes) — consult it every
 > session and keep it current.
+>
+> **Companion records in `docs/Phase4/`:**
+> [`DESIGN-reflection-bridge.md`](DESIGN-reflection-bridge.md) — the reflection bridge's design;
+> Phases 1–2 shipped, Phase 3 is the chip-class arc of §6.1.
+> [`StringsBytes-BlockerMap.md`](StringsBytes-BlockerMap.md) — **CLOSED ledger** for packages #3–4:
+> every row B1–B10 / R1–R14 resolved, both packages validated 2026-07-18. Read it as the worked
+> example of a full package arc (scout → build blockers → runtime blockers → differential →
+> disclosed-divergence ruling → bank); its open spin-offs are carried in §3/§6.1/§9 here, not there.
 
 ---
 
@@ -71,13 +79,22 @@ times in the slog. **Verify branch/blocker state fresh each session** — rememb
    exist on a branch; assess it (git-cherry + content) or redo it right. This is a delicate concurrency
    redesign → **use adversarial review (§7) and design WITH the user (§10).**
 
-2. **Reflection completeness** *(golib `GoReflect` + the hand-owned `internal/abi` bridge + `reflect`
-   internals).* The 2026-07-21 csv fix landed the *comparability* half (`synthType.Equal` signal). Still
-   needed: `reflect.Value.Call` / dynamic invocation (testing/quick), `Value.Set/Field/Index/MakeSlice/
-   MakeMap` round-trips (encoding/binary, encoding/gob), and the `getcallersp` golib stub (errors TestAs
-   → `reflect.mustBeAssignableSlow`). See `docs/Phase4/DESIGN-reflection-bridge.md`. **Blocks:
-   encoding/binary, encoding/gob·json·xml, testing/quick, errors, and any reflect-driven package.**
-   Deep + architectural → design WITH the user; adversarial-review the design before building.
+2. **Reflection completeness — Phase 3 of the bridge** *(golib `GoReflect` + the hand-owned
+   `internal/abi`/`reflect`/`internal/reflectlite` `*_impl.cs` entry points).* **Read
+   `docs/Phase4/DESIGN-reflection-bridge.md` first — Phases 1 and 2 are SHIPPED, not proposals.**
+   Already landed: the Kind classifier, `TypeOf`/`ValueOf`/`unpackEface`, the ~21 `Value` readers +
+   `MapIter`, the `rtype` name/field methods, canonical (interned) `reflect.Type`, `deepValueEqual`,
+   the `reflectlite` mini-bridge (`Len`/`Swapper`), and the `synthType.Equal` comparability signal
+   (csv, 2026-07-21). **Remaining = Phase 3, the write-back & call half:** `Value.Set*` /
+   addressability, `Value.Call` / `MakeFunc` dynamic invocation (testing/quick), `MakeSlice`/`MakeMap`
+   round-trips (encoding/binary, encoding/gob), the `getcallersp` stub (a `PartialStubGenerator`
+   `NotImplementedException` in `runtime`; errors TestAs → `reflect.mustBeAssignableSlow`), and the
+   adapter-type follow-up flagged by R10 — `GoReflect.KindOf`/`ElementType` still report the *adapter
+   class* for `IжAdapter`/ᴠ-adapter types, where `GoTypeName` already unwraps via
+   `TryAdapterWrappedType`. **Blocks: encoding/binary, encoding/gob·json·xml, testing/quick, errors,
+   math/big (#4 below), and any reflect-driven package.** Deep + architectural + multi-session →
+   this one does **not** run as an inline sub-agent: it is a **coordinator-spawned independent chip,
+   per §6.1.**
 
 3. **os / filesystem** *(golib `os` operational).* `os.Open` + file reads (testdata). **Blocks: strconv
    (TestFp reads testdata), errors (synth `*fs.PathError`), and every testdata-reading test.** (os/exec
@@ -197,6 +214,52 @@ gpg-signed; **never land ungated or unverified work.**
 - **The coordinator's job is merging + validation**, not doing every fix — integrate sub-agent
   branches (cherry-pick + re-gate), keep the memory ledger current, and own the landing.
 
+### 6.1 Special operation — CHIP-CLASS arcs (the reflection bridge; math/big)
+
+A few items on this campaign are **not sub-agent work at any model tier**. They are deep,
+architectural, multi-session arcs whose blast radius is *every* converted package, and they need
+design-WITH-the-user (§10) and adversarial design review (§7) before a line is written. These run as
+**independent chips** — a separate, user-owned session spun off from a background-task chip
+(`spawn_task`) — **spawned by the coordinator at the right moment**, not inline, not in a worktree
+sub-agent, and not up front.
+
+**The chip-class list (as of 2026-07-22):**
+
+| Arc | Scope | Spawn trigger |
+|---|---|---|
+| **Reflection bridge — Phase 3** (Tier-0 #2) | `Value.Set*`/addressability, `Value.Call`/`MakeFunc`, `MakeSlice`/`MakeMap`, `getcallersp`, adapter-type `Kind`/`Elem`. Design doc: `docs/Phase4/DESIGN-reflection-bridge.md` (Phases 1–2 shipped; Phase 3 is the whole chip). | When a Tier-1/Tier-2 package's differential **actually lands on the Phase-3 surface** (errors' `getcallersp`, a `Value.Set*`/`Call` NRE, encoding/binary·gob, testing/quick) — i.e. a *demonstrated* consumer, not a predicted one. Design it against that concrete consumer, exactly as the doc's Phase-3 note directs. |
+| **math/big** (Tier-0 #4) | 189 Test funcs; its own campaign. | After the reflection chip lands (math/big depends on it through gob/json/xml + testing/quick). |
+
+**Coordinator protocol for spawning one:**
+
+1. **Don't pre-spawn.** Keep working the packages that don't need it. Spawn on the *first demonstrated
+   consumer*, so the chip is designed against a real failing differential rather than a guess.
+2. **Write a self-contained chip prompt.** The chip is a fresh session with none of this context. It
+   must carry: this charter's path, the design doc's path, the **exact deferred surface** the arc owns,
+   the concrete consumer package + its failing differential, the §5 gate table that applies, and the
+   §10 design-WITH-user requirement. A chip prompt that says "continue the reflection work" is a
+   defect.
+3. **Declare an ownership lock, and honor it.** While a chip is live the coordinator and its
+   sub-agents do **not** edit that arc's files — for the reflection chip: `reflect/*_impl.cs`,
+   `internal/reflectlite/*_impl.cs`, `internal/abi/type_impl.cs`, `golib/GoReflect.cs`, and the
+   `manualConversionFuncs` entries for those packages. Record the lock in the memory ledger when the
+   chip is spawned and clear it when the chip lands. Concurrent edits to a hand-owned bridge file are
+   how a split-brain lands.
+4. **Never block on it.** The coordinator keeps validating packages that don't touch the arc; every
+   package that *does* gets its blocker recorded in the ledger against the chip and is skipped — no
+   spinning, no partial workarounds that the chip will have to unwind (a package "validated" around a
+   missing bridge capability is a §2 failure, not a win).
+5. **The chip owns its own gates and its own landing.** It is a full session under user control: it
+   runs the §5 gate for its change class (golib → full behavioral suite; go2cs-gen → suite + the
+   302-corpus; **plus operational re-validation of every already-validated package**, isolation-
+   reconvert-diff to skip byte-identical ones) and lands gpg-signed per §4.6. If it lands on a branch
+   instead, the coordinator re-runs the all-ships-rise gate before ff-merging — **never ff-merge a
+   chip's branch on the chip's say-so alone.**
+6. **One chip per arc, not per package.** The arc's follow-ups (e.g. the adapter-type `Kind`/`Elem`
+   row) belong to the same chip, not to a new one.
+7. **Update this table** when an arc lands or a new chip-class arc is identified — it is the durable
+   record of what is deliberately *not* being done inline.
+
 ---
 
 ## 7. Adversarial review for delicate / complex work
@@ -264,6 +327,24 @@ Hard-won during this campaign. Read these before touching the relevant area.
   whose `grep -P` dies on the locale, or whose paths fail to resolve, returns an empty result set that
   reads exactly like a clean PASS. Give every corpus scan a **positive control** — a case it MUST find —
   and confirm the control fires before trusting a zero-hit result.
+- **A capability-EXCLUDED test still COMPILES.** Exclusion gates the *run registry*, not emission, so
+  a broken emission inside an `AllocsPerRun`-excluded (or otherwise unsupported) test still fails the
+  whole package build — bytes was blocked for a wave by one such site. Never dismiss a build error
+  because "that test doesn't run anyway"; and conversely, a census that shows N excluded declarations
+  tells you nothing about how much C# had to be emitted correctly.
+- **Slow ≠ hung — a short `-test-timeout` FAKES a failing tail.** When the host is killed mid-run,
+  every test after the cut reports `C#=""` and the differential reads as a mass infrastructure-error
+  wall that looks like a real blocker class. strings' `TestCompareStrings` legitimately runs ~109 s in
+  the C# runtime (the `unsafeString`→`@string` copy cost — a real, still-open performance gap), and the
+  2 m default truncated the whole suite behind it. Hence the `-test-timeout 10m` in §1's command. Before
+  root-causing a `C#=""` cluster, confirm the host ran to completion.
+- **Root-cause LAYERING — one row masks, triggers, or moves another.** Expect the failure you are
+  looking at to be the top of a stack: R8's null array-backing masked R5's DeepEqual (fixing R8 *moved*
+  TestFinderCreation's error site rather than greening it); R9's pointer-print crash was *triggered by*
+  R11's wrong comparison (fixing R11 stopped the trigger while R9 stayed latent); and Roslyn skips
+  method-body binding while declaration errors exist, so a whole wave of CS1503s was invisible until
+  the CS0246s cleared. Re-measure after every fix; never assume the wall you mapped is the wall that
+  remains, and never count a row "fixed" because its symptom moved.
 - **Adding a supported test capability can change BANKED packages.** Widening
   `supportedTestCapabilities` moves previously excluded-unsupported tests into the RUN set, so a
   package validated under the old list can shift. Before landing one, scan every validated package's

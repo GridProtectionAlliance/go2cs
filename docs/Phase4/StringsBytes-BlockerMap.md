@@ -6,6 +6,26 @@
 > end state **strings 57/69 PASS, bytes 74/82 PASS** — so each fix sketch below was demonstrated
 > to clear its blocker. The tree was fully restored afterward.
 
+> **STATUS (2026-07-22): CLOSED.** Every row below is resolved — build blockers B1–B10 (B10a
+> re-bucketed into B9) and runtime blockers R1–R14 — and both packages validated 2026-07-18:
+> **bytes #3 (81 tests, 7 disclosed-divergent)** and **strings #4 (68 tests, 4 disclosed-divergent)**,
+> test sources banked per the validated-package policy. Sections below are in *merge* order, so an
+> earlier section's "still open" note may be superseded by a later one — trust the later section.
+> Kept as the **worked example of a complete package arc**: scout → build blockers → runtime blockers
+> → differential → disclosed-divergence ruling → bank.
+>
+> **Open spin-offs this map produced** (tracked in
+> [`Phase4-Autonomous-Loop-Charter.md`](Phase4-Autonomous-Loop-Charter.md), not here):
+> (1) `reflect.Kind()`/`Elem()` of *adapter* types still report the adapter class — folded into the
+> reflection-bridge chip (charter §3 Tier-0 #2 / §6.1);
+> (2) the **`@string` performance cliff** — strings' `TestCompareStrings` runs ~109 s in the C#
+> runtime on the `unsafeString`→`@string` copy path; never given a row, and the reason §1's pipeline
+> command carries `-test-timeout 10m` (charter §9);
+> (3) golib slice nil-identity adjacent gaps (zero-arg variadic, named-slice wrapper `== nil`,
+> `NilType`'s `ISlice` arm) — recorded in `docs/ConversionStrategies-Reference.md`;
+> (4) cosmetic: the tests-csproj template's `<OutDir>` override defeats its own
+> `BaseOutputPath=bin\tests\` — align when next touching the template.
+
 The Step-3 sweep's census reproduces exactly: strings 64/68 tests included (3 × `AllocsPerRun`,
 1 × `AllocsPerRun`+`CoverMode`), bytes 81/88 (7 × `AllocsPerRun`). The sweep-era "CS0234
 `go.unicode` ×64 vs CS0050 abi" environment-dependence is **gone/superseded** — both symptom sets
@@ -386,7 +406,8 @@ classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
   IndexOutOfRange. Post-R11 the comparison is correctly equal, the Errorf never fires, and the
   non-empty leg's must-NOT-share assert still holds (distinct arrays stay unequal through the
   canonicalization). **R9 stays open as a latent golib defect** (PrintPointer on an empty-backing
-  ж) — the strings suite merely no longer triggers it. Honest remainder: 4 fail = the AllocsPerRun
+  ж) — the strings suite merely no longer triggers it. *(SUPERSEDED — R9 was fixed the same day in
+  the `blissful-poitras` batch, which merged after this one; see § R6–R9 FIXED below.)* Honest remainder: 4 fail = the AllocsPerRun
   divergence classes below (proposal pending); 9 infra = R5 (TestSplit/TestSplitAfter), R6
   (TestRepeatCatchesOverflow), R7 (TestCaseConsistency), R8 (TestFinderCreation/TestFinderNext/
   TestPickAlgorithm/TestReplacer/TestWriteStringError) — all owned rows.
