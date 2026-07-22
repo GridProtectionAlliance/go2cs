@@ -26,6 +26,14 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+
+# VS Code: per-developer state stays local; only genuinely shared, portable
+# project config is tracked (settings.json = the cSpell project dictionary).
+# launch.json in particular is a personal debug scratchpad with machine-specific
+# paths — it does not belong in the repo.
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/extensions.json
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
