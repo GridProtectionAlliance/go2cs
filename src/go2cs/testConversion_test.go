@@ -789,7 +789,7 @@ func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
 // same (impl, interface) pair. A NESTED package-under-test's own interface was once emitted fully
 // qualified (`go.container.heap_package.Interface`); stripLocalTypeQualifier (the math/rand/v2
 // collapse fix) now canonicalizes it to the bare local `Interface`. The -tests external-variant
-// write MERGES the committed package_info_test.cs, so the stale qualified line and the freshly
+// write MERGES the committed package_info_external_test.cs, so the stale qualified line and the freshly
 // rendered bare line both reached the emitting HashSet and go2cs-gen composed the adapter twice —
 // CS0102 + CS0111 + CS8646 on IntHeapжInterface. writePackageInfoFile now normalizes each merged-in
 // GoImplement line through the same qualifyLocalTypeRef canonicalization the fresh render applies,
@@ -899,7 +899,7 @@ func TestExternalVariantRecordPartitionAnchors(t *testing.T) {
 }
 
 // B4/B5 guard (split write): the external variant's test-anchored records land in
-// package_info_test.cs — whose FIRST class is the test package class (the generator's anchor)
+// package_info_external_test.cs — whose FIRST class is the test package class (the generator's anchor)
 // and which carries NO [GoPackage] (the attribute-bearing partial stays in
 // package_test_info.cs, CS0579) — while production-anchored records and the alias globals merge
 // into package_test_info.cs. A variant with NO test-anchored records writes no unit at all

@@ -49,11 +49,18 @@ const (
 
 	// The EXTERNAL test package's metadata anchor (B4/B5) — the compilation unit hosting the
 	// GoImplement/GoImplicitConv attributes whose generated adapters/partials must anchor to
-	// the <name>_test package class. Named per Go's `_test` file convention, which doubles as
-	// the exclusion mechanism: the production csproj's committed `*_test.cs` Compile Remove and
-	// productionCSFiles both skip it WITHOUT a shared-csproj-template edit (which would churn
-	// every behavioral csproj on re-transpile).
-	externalTestPackageInfoFileName = "package_info_test.cs"
+	// the <name>_test package class. "external test package" is Go's own term for `package
+	// <name>_test`, matching the vocabulary used throughout this file.
+	//
+	// ⚠ The `_test.cs` SUFFIX IS LOAD-BEARING — it is the exclusion mechanism: the production
+	// csproj's committed `*_test.cs` Compile Remove and productionCSFiles both skip this file by
+	// that glob alone, WITHOUT a shared-csproj-template edit (which would churn every behavioral
+	// csproj on re-transpile). Any future rename must keep the suffix or pay that churn.
+	//
+	// Renamed from the original `package_info_test.cs` (2026-07-21): a near-anagram of
+	// testPackageInfoFileName above, the two sorted adjacent to `package_info.cs` in every
+	// converted package directory, and nothing in either name said which class it anchors to.
+	externalTestPackageInfoFileName = "package_info_external_test.cs"
 )
 
 // Markers substituted into test-csproj-template.xml by writeTestProject (embedded-resource
@@ -271,7 +278,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		// Merge this variant's collected metadata globals while they are still live (the next
 		// variant's conversion resets them). The EXTERNAL variant's records are split across
 		// TWO anchor files (B4/B5): records whose generated code must live in the test package
-		// class go to package_info_test.cs; production-anchored records stay in
+		// class go to package_info_external_test.cs; production-anchored records stay in
 		// package_test_info.cs.
 		if variant == external {
 			unitName, err := writeExternalVariantMetadata(testInfoPath, outputPath, production.Name)
@@ -888,7 +895,7 @@ func splitExternalVariantRecords(productionClassName string) (testAnchored, prod
 	return testAnchored, productionAnchored
 }
 
-// externalTestPackageInfoSeed composes the initial contents of package_info_test.cs. The
+// externalTestPackageInfoSeed composes the initial contents of package_info_external_test.cs. The
 // structure mirrors package_info-template.txt (the shared writer requires all four marker
 // sections); the FIRST — and only — class declaration is the external test package class, which
 // is what the go2cs-gen generators anchor generated adapters and partials to
@@ -931,7 +938,7 @@ func externalTestPackageInfoSeed(projectNamespace, productionClassName, testClas
 
 // writeExternalVariantMetadata merges the EXTERNAL test variant's live metadata globals into
 // the -tests anchor files (B4/B5). Test-anchored records are written into
-// package_info_test.cs — a separate compilation unit whose first class is the test package
+// package_info_external_test.cs — a separate compilation unit whose first class is the test package
 // class — through the SAME shared writer (with the alias globals stashed: `global using`
 // aliases must live in exactly one file, CS1537, and GoTypeAlias attributes stay with the
 // production-anchored metadata). Production-anchored records and every alias then merge into

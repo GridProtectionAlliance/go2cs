@@ -115,7 +115,8 @@ abi-accessibility errors exist under the current absolute-path pipeline.
 - **B4/B5 + B2c: FIXED** (worktree branch `claude/trusting-engelbart-161588`) — converter-only,
   as ruled. (a) The EXTERNAL variant's GoImplement/GoImplicitConv records now split across TWO
   anchors: test-anchored records (bare test-local impls, every non-production ж pointer adapter,
-  adapter-class-marked ᴠ pairs) land in a NEW compilation unit `package_info_test.cs` whose
+  adapter-class-marked ᴠ pairs) land in a NEW compilation unit `package_info_external_test.cs`
+  (named `package_info_test.cs` when this report was written) whose
   first — and only — class is the test package class (bare partial, no `[GoPackage]` — that
   stays on `package_test_info.cs`'s appended block, CS0579), so the generators host their
   output where test-file cast sites resolve it; production-qualified records keep the

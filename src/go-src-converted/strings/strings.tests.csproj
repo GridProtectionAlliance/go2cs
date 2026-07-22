@@ -74,7 +74,7 @@
     <Compile Include="example_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="package_info_test.cs" />
+    <Compile Include="package_info_external_test.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="reader.cs" />
     <Compile Include="reader_test.cs" />
