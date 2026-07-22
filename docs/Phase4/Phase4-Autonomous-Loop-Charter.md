@@ -257,11 +257,37 @@ Hard-won during this campaign. Read these before touching the relevant area.
   the exe); `check-no-regression.ps1` re-transpiles **unconditionally** = the authoritative instrument.
   (c) `UpdateTestTargets --createTargetFiles` copies current `.cs`→`.cs.target` **without** re-
   transpiling — re-transpile first or it re-baselines stale output.
+- **False-ALARM traps — the mirror of false-green.** (a) An A/B (stash the change, rebuild, compare)
+  proves only that an error is **not attributable to your change**. It does NOT establish the error is a
+  real pre-existing bug — it may be an artifact of an invalid check (see the standalone-`.tests.csproj`
+  trap below). Root-cause it before reporting it as a finding. (b) **Verify your verification**: a scan
+  whose `grep -P` dies on the locale, or whose paths fail to resolve, returns an empty result set that
+  reads exactly like a clean PASS. Give every corpus scan a **positive control** — a case it MUST find —
+  and confirm the control fires before trusting a zero-hit result.
+- **Adding a supported test capability can change BANKED packages.** Widening
+  `supportedTestCapabilities` moves previously excluded-unsupported tests into the RUN set, so a
+  package validated under the old list can shift. Before landing one, scan every validated package's
+  `_test.go` for the newly-supported call (with a positive control, per above) and confirm zero hits —
+  otherwise re-validate the affected packages. (Worked example: `testing.Benchmark` / `B.N` /
+  `BenchmarkResult.NsPerOp`, 2026-07-21 — zero hits across 32 packages / 97 test files, control
+  `unicode/letter_test.go`.)
 
 **Build / git mechanics**
 - **CS2012 during a corpus build = file-LOCKS, not compile errors** — an orphaned/concurrent build
   holds `.dll` locks. `dotnet build-server shutdown`, rebuild the locked packages; never leak a
   `&`-backgrounded build. Grep for `error CS` *excluding* CS2012 to see real errors.
+- **A committed `<pkg>.tests.csproj` does NOT build standalone — that is not a valid check.** Its inputs
+  are pipeline-staged, in two independent ways. (a) The `*.go` differential-baseline copies are
+  git-ignored, so a clean tree has none and the build dies with `MSB3030` copy errors that mean nothing.
+  (b) It compiles against the production `.cs` the `-tests` run **regenerates**, which can legitimately
+  differ from the committed production emission. Worked example: `math/rand/v2`'s committed `pcg.cs`
+  emits bare `using go.math;` — correct, because the production closure contains no `go/*` package —
+  while the `-tests` build regenerates it as `global::go.math`, because `regress_test.go` imports
+  `go/format`, whose `namespace go.go` shadows the root and would otherwise bind `go.math` → `go.go.math`
+  (CS0234). Both emissions are right for their own closure; only the pipeline pairs them correctly
+  (`globalQualifyRooted` / `rootNamespaceShadowed`, guarded by `rootShadowQualification_test.go`).
+  **To check a package, run the pipeline** — `go2cs -tests -test-action all <goroot-pkg> <converted-pkg>`
+  — never a bare `dotnet build <pkg>.tests.csproj`.
 - **autocrlf-only "drift":** a re-validated / agent-banked test source often shows `git status`
   modified but the **content diff is empty** (CRLF↔LF). Confirm with `git diff` before chasing.
 - **`.slnx` edits are byte-exact CRLF:** `sed`/`awk` strip CRLF — use `perl -0777` with explicit
