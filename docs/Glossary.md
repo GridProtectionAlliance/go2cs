@@ -204,6 +204,32 @@ symbol constants; likewise the `{{PackageName}}_package` text inside go2cs-gen e
 (it is the emission shape itself). Audits flag violations. Glyphs inside
 goldens, docs examples, and comments are fine — they *are* the output.
 
+<a id="adapter-names"></a>**Adapter class names (`XжI` / `XᴠI`).**
+A generated interface-implementation adapter composes its name from the concrete type, a **form
+glyph**, and the interface's simple name: `errorStringжerror` reads "`*errorString` as `error`";
+`net_ConnᴠWriter`, "a foreign `net.Conn` value as `io.Writer`". Three shapes exist. A same-package
+**value** implementation needs no adapter at all — the generator adds the interface to the struct's
+own base list (`partial struct T : I`) and the conversion is implicit. A **pointer** implementation
+(`GoImplement<T, I>(Pointer = true)`, i.e. Go's method set puts the method on `*T`) emits a `TжI`
+class wrapping the receiver box `ж<T>`, so the interface value aliases the pointer exactly as Go's
+does — pointer identity, write-through, and type-assert-back all survive — and every conversion site
+must therefore construct it (`new errorStringжerror(Ꮡ(…))`). A **value** implementation whose
+concrete cannot carry a base list — a foreign struct, or a named func type (a C# delegate cannot be
+a partial struct) — emits a `TᴠI` class. Converter (`adapterTypeRef` / `valueAdapterTypeRef` in
+`src/go2cs/main.go`) and generator (`ImplementGenerator`) compose the name independently and must
+stay in sync; a foreign concrete is package-qualified first (`os_FileжReader`).
+
+Three properties of the scheme are load-bearing, and answer the recurring "why not `жT_I`?": the
+separator must be a character **illegal in a Go identifier**, or the name stops decomposing back
+into its parts — `_` is legal in Go names *and* already means package-qualifier here, so a
+hypothetical `жos_File_error` is ambiguous where `os_FileжReader` is not. **Concrete-first** keeps
+each adapter sorted beside its own type in IntelliSense, object browsers, and CS-error output,
+where a leading glyph would instead bucket every adapter in the package together. And the **form is
+part of the name** (`ж` vs `ᴠ`), so only same-form pairs can collide — which the CS0102 prune
+relies on. One naming trap: the constant is `PointerPrefix` because it *prefixes* the type in
+`ж<T>`; in a composed adapter name the same glyph sits **between** the two names.
+See [Interfaces](ConversionStrategies-Reference.md#interfaces).
+
 **OWED.**
 Annotation in memory logs for a known debt: an *OWED merge* (a finished chip branch not yet
 integrated), an *OWED guard* (a fix landed with its regression test deferred — rare and always
