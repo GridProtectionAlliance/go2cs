@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071926">
+  <title>Tour of go2cs</title>
+  <link rel="icon" href="/assets/go2cs.ico">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="/assets/go2cs-small.png" alt="" width="124" height="63">
+      <div>
+        <p class="eyebrow">Learn by translation</p>
+        <h1>Tour of <span>go2cs</span></h1>
+      </div>
+    </div>
+    <div class="header-state" aria-live="polite">
+      <span class="connection-dot" id="connection-dot"></span>
+      <span id="connection-label">Connecting to the Tour…</span>
+      <span class="lesson-pill" id="lesson-label">Waiting for a lesson</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="language-panel go-panel" aria-labelledby="go-heading">
+      <div class="panel-heading">
+        <div>
+          <span class="language-mark go-mark">GO</span>
+          <div>
+            <p class="panel-kicker">Original lesson</p>
+            <h2 id="go-heading">A Tour of Go</h2>
+          </div>
+        </div>
+        <span class="sync-state" id="sync-state">Awaiting editor</span>
+      </div>
+      <iframe
+        id="tour-frame"
+        title="Official Tour of Go"
+        src="/tour/welcome/1"
+        allow="clipboard-write"
+      ></iframe>
+    </section>
+
+    <section class="language-panel cs-panel" aria-labelledby="cs-heading">
+      <div class="panel-heading cs-heading">
+        <div>
+          <span class="language-mark cs-mark">C#</span>
+          <div>
+            <p class="panel-kicker">Live translation</p>
+            <h2 id="cs-heading">Generated .NET</h2>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="quiet-button" id="copy-button" type="button" disabled>Copy C#</button>
+          <button class="run-button" id="run-button" type="button" disabled>
+            <span class="play-icon">▶</span>
+            Convert &amp; run
+          </button>
+        </div>
+      </div>
+
+      <div class="pipeline-strip" id="pipeline-strip" aria-label="Pipeline status">
+        <div class="pipeline-stage" data-stage="go"><i></i><span>Go run</span></div>
+        <b></b>
+        <div class="pipeline-stage" data-stage="transpile"><i></i><span>Transpile</span></div>
+        <b></b>
+        <div class="pipeline-stage" data-stage="build"><i></i><span>Build</span></div>
+        <b></b>
+        <div class="pipeline-stage" data-stage="run"><i></i><span>.NET run</span></div>
+      </div>
+
+      <div class="code-shell">
+        <div class="file-tab">
+          <span class="file-dot"></span>
+          <span id="project-label">main.cs</span>
+          <span class="generated-label">generated</span>
+        </div>
+        <pre id="csharp-code" tabindex="0" aria-label="Generated C# source"><code>// Edit the Go source in the Tour, then choose “Convert &amp; run”.
+// The generated C# will appear here.</code></pre>
+      </div>
+
+      <section class="console-shell" aria-labelledby="console-heading">
+        <div class="console-header">
+          <div>
+            <span class="terminal-icon">&gt;_</span>
+            <h3 id="console-heading">Pipeline output</h3>
+          </div>
+          <span id="elapsed-label">Ready</span>
+        </div>
+        <div class="console-tabs" id="console-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-tab="welcome">Overview</button>
+        </div>
+        <pre class="console-output" id="console-output" tabindex="0">Every run keeps its stages separate, so transpile, compiler, and runtime failures stay easy to find.
+
+Keyboard: Ctrl/⌘ + Shift + Enter</pre>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span>Official Go lessons on the left. Native go2cs + .NET execution on the right.</span>
+    <span>Local execution · 20 second stage limit</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
