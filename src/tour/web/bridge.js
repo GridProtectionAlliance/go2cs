@@ -42,17 +42,21 @@
 
   function attach() {
     const instance = editor();
-    if (!instance) return;
+    if (!instance || instance === currentEditor) return;
 
-    // Keep the Go side visually parallel with the highlighted C# pane.
-    instance.setOption("mode", "text/x-go");
-    instance.setOption("lineNumbers", true);
+    currentEditor = instance;
 
-    if (instance !== currentEditor) {
-      currentEditor = instance;
-      instance.on("change", () => publish("edit"));
-      publish("navigation", true);
+    // Configure each editor once. Reapplying these options mutates CodeMirror's
+    // DOM, which would wake the MutationObserver and create a feedback loop.
+    if (instance.getOption("mode") !== "text/x-go") {
+      instance.setOption("mode", "text/x-go");
     }
+    if (!instance.getOption("lineNumbers")) {
+      instance.setOption("lineNumbers", true);
+    }
+
+    instance.on("change", () => publish("edit"));
+    publish("navigation", true);
   }
 
   function inspectNavigation() {
