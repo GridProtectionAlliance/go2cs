@@ -56,6 +56,37 @@ func totalLens(bss ...[]byte) int {
 	return sum
 }
 
+// A spread variadic aliases the caller's slice backing array. Replacing an element in the callee
+// must therefore be visible through the caller's original slice; the sslice prologue preserves
+// that Go behavior without the old Span<T>.slice() copy.
+func replaceFirst(bs ...*box) {
+	bs[0] = &box{v: 40}
+}
+
+// cap is a safe, non-escaping read and has a direct sslice overload.
+func countCap(bs ...*box) int {
+	return cap(bs)
+}
+
+// The execution wrapper is a hard heap gate: its lambda must capture the variadic slice local,
+// and C# forbids capturing an sslice ref struct.
+func deferredLen(bs ...*box) int {
+	defer func() {}()
+	return len(bs)
+}
+
+// A nested function literal likewise forces the heap slice fallback.
+func capturedLen(bs ...*box) int {
+	count := func() int { return len(bs) }
+	return count()
+}
+
+// append may grow and therefore deliberately keeps the heap slice fallback.
+func appendedLen(bs ...*box) int {
+	bs = append(bs, &box{v: 50})
+	return len(bs)
+}
+
 func main() {
 	a := &box{v: 1}
 	b := &box{v: 2}
@@ -68,10 +99,16 @@ func main() {
 	// call-site spread of a slice into the variadic
 	boxes := []*box{a, b, c, &box{v: 4}}
 	fmt.Println(total(boxes...)) // 10
+	replaceFirst(boxes...)
+	fmt.Println(boxes[0].v) // 40: spread aliases the caller backing array
+	fmt.Println(countCap(a, b, c))
+	fmt.Println(deferredLen(a, b))
+	fmt.Println(capturedLen(a, b, c))
+	fmt.Println(appendedLen(a, b))
 
 	// variadic of a qualified type
 	fmt.Println(countPtrs(unsafe.Pointer(a), unsafe.Pointer(b), unsafe.Pointer(c))) // 3
-	fmt.Println(countPtrs())                                                         // 0
+	fmt.Println(countPtrs())                                                        // 0
 
 	// variadic of a slice type — stays inline, no alias
 	fmt.Println(totalLens([]byte("ab"), []byte("cde"))) // 5

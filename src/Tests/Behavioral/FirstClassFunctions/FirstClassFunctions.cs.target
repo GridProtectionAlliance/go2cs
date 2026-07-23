@@ -73,7 +73,7 @@ internal static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
 }
 
 internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
-    var vals = valsʗp.slice();
+    var vals = valsʗp.sslice();
 
     nint total = 0;
     foreach (var (_, val) in vals) {

@@ -59,7 +59,7 @@ internal static void Main() {
     var (total4, log4) = g(new Tally(total: 3, log: "n"u8));
     fmt.Println("nested:", total4, log4);
     var h = (Tally tʗp, params ꓸꓸꓸnint nsʗp) => {
-        var ns = nsʗp.slice();
+        var ns = nsʗp.sslice();
         ref var t = ref heap(tʗp, out var Ꮡt);
         foreach (var (_, n) in ns) {
             Ꮡt.Add(n);

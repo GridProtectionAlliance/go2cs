@@ -46,6 +46,7 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 				info:             info,
 				identEscapesHeap: fileEntry.identEscapesHeap,
 				sstringEligible:  fileEntry.sstringEligible,
+				ssliceEligible:   fileEntry.ssliceEligible,
 				sstringConvExprs: fileEntry.sstringConvExprs,
 			}
 
@@ -67,6 +68,7 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 					}
 
 					visitor.markCaptureModeBoxedParams(node.Type.Params, node.Body)
+					visitor.markVariadicSSliceEligible(node.Type.Params, node.Body)
 
 					// Mark FUNCTION LITERAL value params BEFORE the define walk below, same as
 					// the declaration's own params above: a mixed `t, y := …` re-use of a literal
@@ -171,6 +173,7 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 					// initializer). Literals inside a FuncDecl were already marked above —
 					// the already-analyzed guard makes this re-visit a no-op for them.
 					visitor.markCaptureModeBoxedParams(node.Type.Params, node.Body)
+					visitor.markVariadicSSliceEligible(node.Type.Params, node.Body)
 
 					// A function literal's named results take the same address-taken escape
 					// treatment as a declaration's (see analyzeNamedResults). Nested literals
@@ -183,6 +186,120 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 	}
 
 	concurrentTasks.Wait()
+}
+
+// markVariadicSSliceEligible records whether the final variadic parameter may bind directly to its
+// incoming params Span<T> through a stack-only sslice<T>. The proof is deliberately narrow: every
+// use must consume only the slice header within this frame (len/cap, direct range, or element access).
+// Anything that could retain, capture, reassign, grow, box, return, or pass the slice falls back to
+// the existing heap slice<T> prologue.
+func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.BlockStmt) {
+	if params == nil || body == nil || len(params.List) == 0 {
+		return
+	}
+
+	field := params.List[len(params.List)-1]
+
+	if _, ok := field.Type.(*ast.Ellipsis); !ok {
+		return
+	}
+
+	for _, ident := range field.Names {
+		if isDiscardedVar(ident.Name) {
+			continue
+		}
+
+		obj := v.info.ObjectOf(ident)
+
+		if obj == nil || v.identEscapesHeap[obj] || !v.ssliceUsesAreSafe(obj, body) {
+			continue
+		}
+
+		v.ssliceEligible[obj] = true
+
+		if os.Getenv("GO2CS_DEBUG_SSLICE") != "" {
+			pos := v.fset.Position(ident.Pos())
+			fmt.Fprintf(os.Stderr, "[sslice] eligible variadic: %s at %s:%d:%d\n", ident.Name, pos.Filename, pos.Line, pos.Column)
+		}
+	}
+}
+
+// ssliceUsesAreSafe reports whether every occurrence of obj is a non-escaping operation supported
+// directly by sslice<T>: len/cap, the base of an element index, or the expression ranged over.
+// A nested function literal always rejects the candidate because it would capture a ref struct.
+// Taking an indexed element's address is also rejected: the converter's element-address helpers are
+// heap-slice based, and the resulting pointer may outlive the stack view.
+func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool {
+	safeIdents := map[*ast.Ident]bool{}
+	var stack []ast.Node
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return true
+		}
+
+		inNestedFunc := stackHasFuncLit(stack)
+
+		switch e := n.(type) {
+		case *ast.CallExpr:
+			if !inNestedFunc {
+				if fn, ok := e.Fun.(*ast.Ident); ok && (fn.Name == "len" || fn.Name == "cap") {
+					if builtin, ok := v.info.ObjectOf(fn).(*types.Builtin); ok &&
+						(builtin.Name() == "len" || builtin.Name() == "cap") {
+						for _, arg := range e.Args {
+							if id, ok := arg.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+								safeIdents[id] = true
+							}
+						}
+					}
+				}
+			}
+
+		case *ast.IndexExpr:
+			if !inNestedFunc {
+				if id, ok := e.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+					addressTaken := false
+
+					if len(stack) > 0 {
+						if unary, ok := stack[len(stack)-1].(*ast.UnaryExpr); ok && unary.Op == token.AND && unary.X == e {
+							addressTaken = true
+						}
+					}
+
+					if !addressTaken {
+						safeIdents[id] = true
+					}
+				}
+			}
+
+		case *ast.RangeStmt:
+			if !inNestedFunc {
+				if id, ok := e.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+					safeIdents[id] = true
+				}
+			}
+		}
+
+		stack = append(stack, n)
+		return true
+	})
+
+	allSafe := true
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if !allSafe {
+			return false
+		}
+
+		if id, ok := n.(*ast.Ident); ok && v.info.ObjectOf(id) == obj && !safeIdents[id] {
+			allSafe = false
+		}
+
+		return true
+	})
+
+	return allSafe
 }
 
 // markCaptureModeBoxedParams marks the function's VALUE parameters on which the body calls a

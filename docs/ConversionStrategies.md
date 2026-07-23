@@ -463,11 +463,13 @@ var seed = new byte[]{1, 2}.array(8);
 See [the reference](ConversionStrategies-Reference.md#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)
 for the keyed/`SparseArray` form and the nested-array gap.
 
-`append`, `len`, `make`, and sub-slicing map to golib builtins/methods, and a variadic `...T` parameter
-arrives as `params ꓸꓸꓸT` rebound to a slice at the top of the body — where `ꓸꓸꓸT` is a using alias for
-`Span<T>` whose identifier mirrors the Go name (`...*RangeTable` → `ꓸꓸꓸжRangeTable`, `...unsafe.Pointer`
-→ `ꓸꓸꓸunsafeꓸPointer`), falling back to an inline `params Span<T>` for an element type that cannot form a
-legal alias identifier (a type parameter, or a constructed type such as `[]byte`). From the real stdlib:
+`append`, `len`, `make`, and sub-slicing map to golib builtins/methods. A variadic `...T` parameter arrives
+as `params ꓸꓸꓸT`, where `ꓸꓸꓸT` is a using alias for `Span<T>` whose identifier mirrors the Go name
+(`...*RangeTable` → `ꓸꓸꓸжRangeTable`, `...unsafe.Pointer` → `ꓸꓸꓸunsafeꓸPointer`), falling back to an inline
+`params Span<T>` for an element type that cannot form a legal alias identifier (a type parameter, or a
+constructed type such as `[]byte`). At the top of the body, a variadic used only through `len`/`cap`,
+indexing, or range binds to the allocation-free stack view `sslice<T>`; a value that may escape, grow,
+or cross a closure/execution-wrapper boundary keeps the heap `slice<T>` fallback. From the real stdlib:
 
 ```go
 func Join(errs ...error) error {          // errors/join.go
@@ -481,7 +483,7 @@ func Join(errs ...error) error {          // errors/join.go
 ```
 ```csharp
 public static error Join(params ꓸꓸꓸerror errsʗp) {     // errors/join.cs
-    var errs = errsʗp.slice();
+    var errs = errsʗp.sslice();
     // ...
     var e = Ꮡ(new joinError(errs: new slice<error>(0, n)));
     foreach (var (_, err) in errs) {

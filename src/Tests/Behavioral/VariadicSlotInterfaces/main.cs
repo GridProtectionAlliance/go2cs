@@ -30,7 +30,7 @@ internal static ж<Rect> newRect(nint w, nint h) {
 }
 
 internal static nint totalArea(nint scale, params ꓸꓸꓸShape shapesʗp) {
-    var shapes = shapesʗp.slice();
+    var shapes = shapesʗp.sslice();
 
     nint sum = 0;
     foreach (var (_, s) in shapes) {

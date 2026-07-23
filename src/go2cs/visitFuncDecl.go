@@ -716,6 +716,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			// Check if parameter is variadic, in this case parameter is a C# params array that needs to be converted to a Go slice<T>
 			if i == parameters.Len()-1 && signature.Variadic() {
 				variadicDecls := resultParameters
+				useSSlice := v.ssliceEligible[param] && !variadicHoistMode
+				sliceMethod := "slice"
+				sliceType := "slice"
+
+				if useSSlice {
+					sliceMethod = "sslice"
+					sliceType = "sslice"
+				}
 
 				if variadicHoistMode {
 					// Hoisted OUTSIDE the execution wrapper (block form) — see variadicHoistMode.
@@ -723,9 +731,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				}
 
 				if v.options.preferVarDecl {
-					v.writeString(variadicDecls, "%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					v.writeString(variadicDecls, "%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				} else {
-					v.writeString(variadicDecls, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					v.writeString(variadicDecls, "%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				}
 
 				if variadicHoistMode {

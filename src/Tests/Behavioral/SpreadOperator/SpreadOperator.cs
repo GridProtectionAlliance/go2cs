@@ -6,7 +6,7 @@ using ꓸꓸꓸnint = Span<nint>;
 partial class main_package {
 
 internal static nint sum(params ꓸꓸꓸnint numsʗp) {
-    var nums = numsʗp.slice();
+    var nums = numsʗp.sslice();
 
     nint total = 0;
     foreach (var (_, n) in nums) {

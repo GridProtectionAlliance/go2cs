@@ -376,11 +376,19 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		if strings.HasPrefix(trimmedBody, "{") {
 			param := litSig.Params().At(litSig.Params().Len() - 1)
 			var prologue string
+			useSSlice := v.ssliceEligible[param] && !litHasDefer && !litHasRecover
+			sliceMethod := "slice"
+			sliceType := "slice"
+
+			if useSSlice {
+				sliceMethod = "sslice"
+				sliceType = "sslice"
+			}
 
 			if v.options.preferVarDecl {
-				prologue = fmt.Sprintf("%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 			} else {
-				prologue = fmt.Sprintf("%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 			}
 
 			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")

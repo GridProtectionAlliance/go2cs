@@ -17,7 +17,7 @@ internal static Action<ж<options>> withLevel(nint n) {
 }
 
 internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
-    var opts = optsʗp.slice();
+    var opts = optsʗp.sslice();
 
     var o = Ꮡ(new options(nil));
     foreach (var (_, opt) in opts) {

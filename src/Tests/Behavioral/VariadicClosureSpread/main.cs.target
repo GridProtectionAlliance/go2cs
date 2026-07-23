@@ -14,7 +14,7 @@ internal static void Main() {
     fmt.Println(format("%s=%d"u8, "x", 1));
     fmt.Println(format("%s=%d"u8, "y", 2));
     var sum = (params ꓸꓸꓸnint numsʗp) => {
-        var nums = numsʗp.slice();
+        var nums = numsʗp.sslice();
         nint total = 0;
         foreach (var (_, n) in nums) {
             total += n;

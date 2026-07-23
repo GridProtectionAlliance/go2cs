@@ -13,7 +13,7 @@ partial class main_package {
 }
 
 internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
-    var elem = elemʗp.slice();
+    var elem = elemʗp.sslice();
 
     @string joined = ""u8;
     foreach (var (i, e) in elem) {
@@ -48,7 +48,7 @@ internal static void Main() {
     var parts = new @string[]{"x", "y"}.slice();
     fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
     ctxt.JoinPath = @string (params ꓸꓸꓸstring elemʗp) => {
-        var elem = elemʗp.slice();
+        var elem = elemʗp.sslice();
         return fmt.Sprint(len(elem));
     };
     fmt.Println(ctxt.JoinPath("p"u8, "q"));

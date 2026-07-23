@@ -31,7 +31,7 @@ internal static void doubleList(ж<node> Ꮡp) {
 }
 
 internal static ж<node> build(params ꓸꓸꓸnint valsʗp) {
-    var vals = valsʗp.slice();
+    var vals = valsʗp.sslice();
 
     ж<node> head = default!;
     for (nint i = len(vals) - 1; i >= 0; i--) {

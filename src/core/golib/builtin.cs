@@ -329,6 +329,16 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets the maximum length the stack-only <paramref name="slice"/> can reach when resliced.
+    /// </summary>
+    /// <param name="slice">Target stack slice.</param>
+    /// <returns>The capacity of the <paramref name="slice"/>.</returns>
+    public static nint cap<T>(in sslice<T> slice)
+    {
+        return slice.Capacity;
+    }
+
+    /// <summary>
     /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>

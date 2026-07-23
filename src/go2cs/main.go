@@ -75,6 +75,12 @@ type FileEntry struct {
 	// types.Object. Computed per file (no cross-file sharing) in performEscapeAnalysis.
 	sstringEligible map[types.Object]bool
 
+	// ssliceEligible flags a variadic parameter whose uses are proven not to let its slice header
+	// escape the function frame. Its params Span<T> prologue may therefore bind through the
+	// stack-only sslice<T> instead of copying into the heap slice<T>. Keyed by the parameter's
+	// types.Object and computed per file in performEscapeAnalysis.
+	ssliceEligible map[types.Object]bool
+
 	// sstringConvExprs flags the specific `string(x)` conversion CallExprs that must emit `(sstring)x`
 	// (the zero-copy view) rather than `(@string)x` (the heap copy): the RHS of an eligible local
 	// (above) and unnamed `string(x)` temporaries consumed within a comparison against a literal
@@ -325,33 +331,34 @@ type Visitor struct {
 	// holds the per-iteration copy-back statements (`iᴛ1 = i;`) an unlabeled `continue` must
 	// emit before transferring to the post clause (nil for range loops and for loops whose
 	// per-iteration variables are never written in the body).
-	loopCopyBackStack      [][]string
-	lastStatementWasReturn bool
-	lastReturnIndentLevel  int
-	identEscapesHeap       map[types.Object]bool
-	tightenedConsts        map[*types.Const]*types.Basic // Function-local untyped consts declared at their single concrete use type (see performUntypedConstAnalysis)
-	sstringEligible        map[types.Object]bool     // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
-	sstringConvExprs       map[*ast.CallExpr]bool     // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
-	emitStringConvAsSString bool                      // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
-	sstringHoistedConvExprs map[*ast.CallExpr]string  // Per-func: eligible `string(x)` uses lifted to a shared sstring temp — each emits the temp NAME (see planSStringHoists)
-	sstringHoistsByStmt    map[ast.Stmt][]sstringHoist // Per-func: hoisted sstring temp decls to inject before a top-level body statement (its anchor)
-	suppressSStringHoist   bool                      // Transient: while rendering a hoisted temp's OWN initializer, ignore sstringHoistedConvExprs so the real `((sstring)x)` view is emitted
-	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
-	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
+	loopCopyBackStack       [][]string
+	lastStatementWasReturn  bool
+	lastReturnIndentLevel   int
+	identEscapesHeap        map[types.Object]bool
+	tightenedConsts         map[*types.Const]*types.Basic // Function-local untyped consts declared at their single concrete use type (see performUntypedConstAnalysis)
+	sstringEligible         map[types.Object]bool         // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
+	ssliceEligible          map[types.Object]bool         // Variadic params emittable as stack-only sslice (see FileEntry.ssliceEligible)
+	sstringConvExprs        map[*ast.CallExpr]bool        // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
+	emitStringConvAsSString bool                          // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
+	sstringHoistedConvExprs map[*ast.CallExpr]string      // Per-func: eligible `string(x)` uses lifted to a shared sstring temp — each emits the temp NAME (see planSStringHoists)
+	sstringHoistsByStmt     map[ast.Stmt][]sstringHoist   // Per-func: hoisted sstring temp decls to inject before a top-level body statement (its anchor)
+	suppressSStringHoist    bool                          // Transient: while rendering a hoisted temp's OWN initializer, ignore sstringHoistedConvExprs so the real `((sstring)x)` view is emitted
+	identNames              map[*ast.Ident]string         // Local identifiers to adjusted names map
+	isReassigned            map[*ast.Ident]bool           // Local identifiers to reassignment status map
 	// untypedConstContexts maps an UNTYPED constant subexpression to the resolved type of its
 	// enclosing typed constant expression — the context go/types drops when it leaves constant
 	// operands untyped (see markUntypedConstContexts). convBasicLit consults it for the F/D
 	// float-literal suffix and the postfix `.i()` complex64/complex128 overload choice.
 	untypedConstContexts map[ast.Expr]types.Type
-	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
+	funcLevelDecls       map[string]*types.Var // Function-level local declarations of the current function (for global-shadow qualification)
 	// funcScopeVarNames holds the Go name of every variable declared ANYWHERE in the current
 	// function — receiver, parameters, results and locals at every nesting depth, including inside
 	// func literals. A bare type name spelled by the EMITTER (the `Type.Ꮡfield` box accessor) binds
 	// to such a variable rather than to the type wherever one exists, so boxAccessorType qualifies
 	// against this set. Repopulated per function by performVariableAnalysis.
 	funcScopeVarNames HashSet[string]
-	scopeStack             []map[string]*types.Var // Stack of local variable scopes
-	lambdaCapture          *LambdaCapture          // Lambda capture tracking
+	scopeStack        []map[string]*types.Var // Stack of local variable scopes
+	lambdaCapture     *LambdaCapture          // Lambda capture tracking
 }
 
 // Converter-internal template sentinels and limits. The cross-language symbol constants

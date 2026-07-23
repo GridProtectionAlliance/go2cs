@@ -7,7 +7,7 @@ using ꓸꓸꓸnint = Span<nint>;
 partial class main_package {
 
 internal static @string gather(@string prefix, params ꓸꓸꓸnint valsʗp) {
-    var vals = valsʗp.slice();
+    var vals = valsʗp.sslice();
 
     nint total = 0;
     foreach (var (_, v) in vals) {
@@ -31,7 +31,7 @@ internal static void report(Actionꓸꓸꓸ<@string, any> emit) {
 internal static void Main() {
     apply(gather);
     apply((@string prefix, params ꓸꓸꓸnint valsʗp) => {
-        var vals = valsʗp.slice();
+        var vals = valsʗp.sslice();
         return fmt.Sprintf("%s|%d"u8, prefix, len(vals));
     });
     Funcꓸꓸꓸ<@string, nint, @string> f = default!;

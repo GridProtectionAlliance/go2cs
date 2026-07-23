@@ -107,6 +107,7 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 				blocks:                    Stack[*strings.Builder]{},
 				identEscapesHeap:          fileEntry.identEscapesHeap,
 				sstringEligible:           fileEntry.sstringEligible,
+				ssliceEligible:            fileEntry.ssliceEligible,
 				sstringConvExprs:          fileEntry.sstringConvExprs,
 			}
 
