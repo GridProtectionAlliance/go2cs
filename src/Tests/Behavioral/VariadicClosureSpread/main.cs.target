@@ -28,6 +28,15 @@ internal static void Main() {
         return sumʗ1(a.ꓸꓸꓸ);
     };
     fmt.Println(forward(10, 20, 30));
+    var values = new nint[]{1, 2, 3}.slice();
+    var mutate = (params ꓸꓸꓸnint numsʗp) => func(ref numsʗp, (ref ꓸꓸꓸnint numsʗp, Defer defer, Recover recover) => {
+        var nums = numsʗp.sslice();
+        defer(() => {
+        });
+        nums[0] = 40;
+    });
+    mutate(values.ꓸꓸꓸ);
+    fmt.Println(values[0]);
 }
 
 } // end main_package

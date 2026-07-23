@@ -68,10 +68,24 @@ func countCap(bs ...*box) int {
 	return cap(bs)
 }
 
-// The execution wrapper is a hard heap gate: its lambda must capture the variadic slice local,
-// and C# forbids capturing an sslice ref struct.
+// go2cs passes the params Span by ref into the defer/recover execution wrapper. The empty
+// deferred Go closure captures nothing; the wrapper can still use an aliasing sslice view.
 func deferredLen(bs ...*box) int {
 	defer func() {}()
+	return len(bs)
+}
+
+// Index mutation remains visible through a spread caller even when defer requires an execution
+// wrapper: the wrapper receives the original Span rather than capturing a copied heap slice.
+func deferredReplaceFirst(bs ...*box) {
+	defer func() {}()
+	bs[0] = &box{v: 45}
+}
+
+// Named results stay outside the execution wrapper while the variadic Span is passed into it.
+// The deferred closure captures n, but not bs.
+func deferredNamedLen(bs ...*box) (n int) {
+	defer func() { n++ }()
 	return len(bs)
 }
 
@@ -103,6 +117,9 @@ func main() {
 	fmt.Println(boxes[0].v) // 40: spread aliases the caller backing array
 	fmt.Println(countCap(a, b, c))
 	fmt.Println(deferredLen(a, b))
+	deferredReplaceFirst(boxes...)
+	fmt.Println(boxes[0].v) // 45: aliasing survives the defer/recover wrapper
+	fmt.Println(deferredNamedLen(a, b, c))
 	fmt.Println(capturedLen(a, b, c))
 	fmt.Println(appendedLen(a, b))
 

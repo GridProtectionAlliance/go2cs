@@ -3664,6 +3664,7 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1>(ref TRef1 ref1, GoFunc<TRef1, object>.GoRefAction action)
+        where TRef1 : allows ref struct
     {
         new GoFunc<TRef1, object>(action).Execute(ref ref1);
     }
@@ -3674,6 +3675,7 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function)
+        where TRef1 : allows ref struct
     {
         return new GoFunc<TRef1, T>(function).Execute(ref ref1);
     }

@@ -471,10 +471,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// In namedReturnDeferMode the func() wrapper is nested inside an extra block body, so
 		// the lambda body sits one level deeper. Bump the indent across the body visit so the
 		// statements (and the closing `}` that the `);` attaches to) align under `func(…`.
-		// A VARIADIC function with defer/recover takes the same block form: its params-span
-		// prologue must hoist OUTSIDE the wrapper (a ref-like span param cannot be touched
-		// inside a lambda — CS9108, os/signal's Notify).
-		bodyInBlockForm := v.namedReturnDeferMode || ((v.hasDefer || v.hasRecover) && signature.Variadic())
+		bodyInBlockForm := v.namedReturnDeferMode
 
 		if bodyInBlockForm {
 			v.indentLevel++
@@ -491,11 +488,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasRecover
-	// A VARIADIC function with an execution wrapper hoists its params-span prologue
-	// (`var sig = sigʗp.slice();`) OUTSIDE the wrapper in a block body — a ref-like span
-	// parameter cannot be used inside a lambda (CS9108, os/signal's Notify).
-	variadicHoistMode := useFuncExecutionContext && signature.Variadic()
-	variadicPrologueStr := ""
+	// Pass a variadic params Span explicitly through the one-ref execution wrapper. The wrapper
+	// lambda uses its own ref Span parameter instead of capturing the outer ref-like parameter
+	// (CS9108), so the slice prologue remains inside and eligible uses retain an aliasing sslice.
+	variadicExecRefMode := useFuncExecutionContext && signature.Variadic()
+	variadicExecParamType := ""
+	variadicExecParamName := ""
+
+	if variadicExecRefMode {
+		param := signature.Params().At(signature.Params().Len() - 1)
+		variadicExecParamType = v.variadicParamType(param.Type().(*types.Slice).Elem())
+		variadicExecParamName = getVariadicParamName(param)
+	}
+
 	parameterSignature, receiverAccess := v.generateParametersSignature(signature, true)
 	blockPrefix := ""
 	// In namedReturnDeferMode this holds the named-return declarations, emitted outside the
@@ -715,8 +720,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// Check if parameter is variadic, in this case parameter is a C# params array that needs to be converted to a Go slice<T>
 			if i == parameters.Len()-1 && signature.Variadic() {
-				variadicDecls := resultParameters
-				useSSlice := v.ssliceEligible[param] && !variadicHoistMode
+				useSSlice := v.ssliceEligible[param]
 				sliceMethod := "slice"
 				sliceType := "slice"
 
@@ -725,20 +729,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					sliceType = "sslice"
 				}
 
-				if variadicHoistMode {
-					// Hoisted OUTSIDE the execution wrapper (block form) — see variadicHoistMode.
-					variadicDecls = &strings.Builder{}
-				}
-
 				if v.options.preferVarDecl {
-					v.writeString(variadicDecls, "%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+					v.writeString(resultParameters, "%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				} else {
-					v.writeString(variadicDecls, "%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
+					v.writeString(resultParameters, "%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				}
 
-				if variadicHoistMode {
-					variadicPrologueStr = variadicDecls.String()
-				}
 			}
 		}
 
@@ -978,27 +974,23 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		recoverParam := "recover"
 
 		if v.namedReturnDeferMode {
-			// Open a block body, declare the named returns outside the wrapper (so defers/recover
-			// mutate them by closure), then open the void func() wrapper. The trailing
-			// `return <named>;` and block close are emitted after the body below. A variadic
-			// function's hoisted params-span prologue joins the outside-the-wrapper decls.
-			funcExecutionContext = fmt.Sprintf(" {%s%s%s%sfunc((%s, %s) =>", variadicPrologueStr, namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), deferParam, recoverParam)
-		} else if variadicHoistMode {
-			// Block form: the params-span prologue sits outside the wrapper (CS9108); a
-			// value-returning function returns the wrapper call's result.
-			returnPrefix := ""
+			// Named results stay outside the wrapper so deferred code can mutate them. A variadic
+			// params Span is passed by ref into the wrapper rather than captured from outer scope.
+			wrapperHead := fmt.Sprintf("func((%s, %s) =>", deferParam, recoverParam)
 
-			if signature.Results().Len() > 0 {
-				returnPrefix = "return "
+			if variadicExecRefMode {
+				wrapperHead = fmt.Sprintf("func(ref %s, (ref %s %s, Defer %s, Recover %s) =>", variadicExecParamName, variadicExecParamType, variadicExecParamName, deferParam, recoverParam)
 			}
 
+			funcExecutionContext = fmt.Sprintf(" {%s%s%s%s", namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), wrapperHead)
+		} else if variadicExecRefMode {
 			resultTypeArg := ""
 
 			if signature.Results().Len() > 0 && (v.allExecWrapperReturnsAreTypeless(funcDecl) || v.execWrapperReturnsLackCommonType(funcDecl)) {
-				resultTypeArg = fmt.Sprintf("<%s>", v.generateResultSignature(signature))
+				resultTypeArg = fmt.Sprintf("<%s, %s>", variadicExecParamType, v.generateResultSignature(signature))
 			}
 
-			funcExecutionContext = fmt.Sprintf(" {%s%s%s%sfunc%s((%s, %s) =>", variadicPrologueStr, v.newline, v.indent(v.indentLevel+1), returnPrefix, resultTypeArg, deferParam, recoverParam)
+			funcExecutionContext = fmt.Sprintf(" => func%s(ref %s, (ref %s %s, Defer %s, Recover %s) =>", resultTypeArg, variadicExecParamName, variadicExecParamType, variadicExecParamName, deferParam, recoverParam)
 		} else {
 			// C# infers the value-returning wrapper's T (func<T>, builtin.cs GoFunction) from the
 			// lambda's return statements; a return whose expression contains a typeless `default!`
@@ -1047,14 +1039,6 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.indentLevel = 0
 			v.writeOutputLn(");")
 			v.writeOutputLn("%sreturn %s;", indentInner, returnExpr)
-			v.writeOutputLn("%s}", indentOuter)
-			v.indentLevel = savedIndent
-		} else if variadicHoistMode {
-			// Close the wrapper call, then the block body opened by the hoist form.
-			indentOuter := v.indent(v.indentLevel)
-			savedIndent := v.indentLevel
-			v.indentLevel = 0
-			v.writeOutputLn(");")
 			v.writeOutputLn("%s}", indentOuter)
 			v.indentLevel = savedIndent
 		} else {

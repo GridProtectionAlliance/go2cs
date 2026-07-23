@@ -28,10 +28,16 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
 * Browse transpiled code: [Converted Go Standard Library](https://github.com/ritchiecarroll/go2cs/tree/master/src/go-src-converted)
 * Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
+* Walk through an example: [Converting a real-world module](#converting-a-real-world-module)
 * Compile in Visual Studio: [Go Standard Library Solution](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted.slnx)
-* Reproduce test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
+* Run converted Go test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
-* Project activity: [Status](#status) — [Milestones](#milestones)
+* See current project [status](#status) and [milestones](#milestones)
+
+### Frequently ask questions:
+
+1)  Why is a Go to C# transpiler needed? _[Integration opportunities](https://go2cs.net/Background.html#background)._
+2)  Won't converted C# code be slower? _[Yes, slower is expected](https://go2cs.net/#performance)._
 
 ## Transpiler Goals
 
@@ -412,7 +418,7 @@ a harmless converter notice, not a failure; the final `Validated` line is what m
 
 ### Performance
 
-_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
+_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with [ref struct](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct) based [stack string](ConversionStrategies.md#strings-string-and-sstring) and a [stack slice](ConversionStrategies.md#slices-and-arrays), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
 What about newer versions of Go / .NET? These are planned, but the current focus is creating a baseline "here" to validate process and operations.
 

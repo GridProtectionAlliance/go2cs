@@ -96,9 +96,8 @@ func acquireAndWork(s *sema) {
 	fmt.Println("working, held:", s.held)
 }
 
-// notifyAll mirrors os/signal's Notify: a VARIADIC function with defer — the params-span
-// prologue (`var vals = valsʗp.slice();`) hoists OUTSIDE the execution wrapper in a block
-// body (a ref-like span param cannot be touched inside a lambda, CS9108).
+// notifyAll mirrors os/signal's Notify: a variadic function with defer. The params Span is
+// passed by ref into the execution wrapper, where an aliasing sslice prologue remains legal.
 func notifyAll(vals ...int) int {
 	defer fmt.Println("notified")
 	total := 0

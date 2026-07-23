@@ -126,6 +126,7 @@ public class GoFunc<T> : GoFuncRoot
 /// Represents a Go function execution context with 1 reference parameter for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, T> : GoFunc<T>
+    where TRef1 : allows ref struct
 {
     public delegate void GoRefAction(ref TRef1 ref1, Defer defer, Recover recover);
     public delegate T GoRefFunction(ref TRef1 ref1, Defer defer, Recover recover);

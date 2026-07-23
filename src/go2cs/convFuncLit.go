@@ -272,6 +272,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	_, parameterSignature = v.convFuncType(funcLit.Type)
 	v.funcLitHeapBoxParamNames = nil
 
+	litVariadicExecRefMode := litSig != nil && litSig.Variadic() && (litHasDefer || litHasRecover)
+	litVariadicExecParamType := ""
+	litVariadicExecParamName := ""
+
+	if litVariadicExecRefMode {
+		param := litSig.Params().At(litSig.Params().Len() - 1)
+		litVariadicExecParamType = v.variadicParamType(param.Type().(*types.Slice).Elem())
+		litVariadicExecParamName = getVariadicParamName(param)
+
+		if context.isIIFE {
+			litVariadicExecParamName = v.iifeParamName(param)
+		}
+	}
+
 	blockStatementContext := DefaultBlockStmtContext()
 	blockStatementContext.format.useNewLine = false
 
@@ -376,7 +390,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		if strings.HasPrefix(trimmedBody, "{") {
 			param := litSig.Params().At(litSig.Params().Len() - 1)
 			var prologue string
-			useSSlice := v.ssliceEligible[param] && !litHasDefer && !litHasRecover
+			useSSlice := v.ssliceEligible[param]
 			sliceMethod := "slice"
 			sliceType := "slice"
 
@@ -464,9 +478,15 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			body = "{" + aliases + strings.TrimPrefix(body, "{")
 		}
 
-		inner = fmt.Sprintf("{%s%s%sfunc((defer, recover) => %s);%s%sreturn %s;%s%s}",
+		execHead := "func((defer, recover) =>"
+
+		if litVariadicExecRefMode {
+			execHead = fmt.Sprintf("func(ref %s, (ref %s %s, Defer defer, Recover recover) =>", litVariadicExecParamName, litVariadicExecParamType, litVariadicExecParamName)
+		}
+
+		inner = fmt.Sprintf("{%s%s%s%s %s);%s%sreturn %s;%s%s}",
 			v.namedReturnDeclLines(litSig, v.indentLevel+1, true),
-			v.newline, v.indent(v.indentLevel+1), body,
+			v.newline, v.indent(v.indentLevel+1), execHead, body,
 			v.newline, v.indent(v.indentLevel+1), returnExpr,
 			v.newline, v.indent(v.indentLevel))
 	case litHasDefer || litHasRecover:
@@ -474,7 +494,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// `func((defer, recover) => …)` cannot return a value (CS8030 ×4, net
 		// lookup_windows' `getaddr := func() ([]IPAddr, error) { defer …; return … }`).
 		if litSig != nil && litSig.Results() != nil && litSig.Results().Len() > 0 && !litHasNamedResults {
-			inner = fmt.Sprintf("func<%s>((defer, recover) => %s)", v.generateResultSignature(litSig), body)
+			if litVariadicExecRefMode {
+				inner = fmt.Sprintf("func<%s, %s>(ref %s, (ref %s %s, Defer defer, Recover recover) => %s)", litVariadicExecParamType, v.generateResultSignature(litSig), litVariadicExecParamName, litVariadicExecParamType, litVariadicExecParamName, body)
+			} else {
+				inner = fmt.Sprintf("func<%s>((defer, recover) => %s)", v.generateResultSignature(litSig), body)
+			}
+		} else if litVariadicExecRefMode {
+			inner = fmt.Sprintf("func(ref %s, (ref %s %s, Defer defer, Recover recover) => %s)", litVariadicExecParamName, litVariadicExecParamType, litVariadicExecParamName, body)
 		} else {
 			inner = wrapIIFEFuncContext(body, litHasDefer, litHasRecover)
 		}

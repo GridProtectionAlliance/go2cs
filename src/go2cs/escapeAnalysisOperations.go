@@ -226,7 +226,7 @@ func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.Bl
 
 // ssliceUsesAreSafe reports whether every occurrence of obj is a non-escaping operation supported
 // directly by sslice<T>: len/cap, the base of an element index, or the expression ranged over.
-// A nested function literal always rejects the candidate because it would capture a ref struct.
+// A use inside a nested function literal rejects the candidate because it would capture a ref struct.
 // Taking an indexed element's address is also rejected: the converter's element-address helpers are
 // heap-slice based, and the resulting pointer may outlive the stack view.
 func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool {

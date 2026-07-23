@@ -49,13 +49,33 @@ internal static nint countCap(params ꓸꓸꓸжbox bsʗp) {
     return cap(bs);
 }
 
-internal static nint deferredLen(params ꓸꓸꓸжbox bsʗp) {
-    var bs = bsʗp.slice();
-    return func((defer, recover) => {
-        defer(() => {
-        });
-        return len(bs);
+internal static nint deferredLen(params ꓸꓸꓸжbox bsʗp) => func(ref bsʗp, (ref ꓸꓸꓸжbox bsʗp, Defer defer, Recover recover) => {
+    var bs = bsʗp.sslice();
+
+    defer(() => {
     });
+    return len(bs);
+});
+
+internal static void deferredReplaceFirst(params ꓸꓸꓸжbox bsʗp) => func(ref bsʗp, (ref ꓸꓸꓸжbox bsʗp, Defer defer, Recover recover) => {
+    var bs = bsʗp.sslice();
+
+    defer(() => {
+    });
+    bs[0] = Ꮡ(new box(v: 45));
+});
+
+internal static nint /*n*/ deferredNamedLen(params ꓸꓸꓸжbox bsʗp) {
+    nint n = default!;
+    func(ref bsʗp, (ref ꓸꓸꓸжbox bsʗp, Defer defer, Recover recover) => {
+    var bs = bsʗp.sslice();
+
+        defer(() => {
+            n++;
+        });
+        n = len(bs);
+    });
+    return n;
 }
 
 internal static nint capturedLen(params ꓸꓸꓸжbox bsʗp) {
@@ -86,6 +106,9 @@ internal static void Main() {
     fmt.Println((~boxes[0]).v);
     fmt.Println(countCap(a, b, c));
     fmt.Println(deferredLen(a, b));
+    deferredReplaceFirst(boxes.ꓸꓸꓸ);
+    fmt.Println((~boxes[0]).v);
+    fmt.Println(deferredNamedLen(a, b, c));
     fmt.Println(capturedLen(a, b, c));
     fmt.Println(appendedLen(a, b));
     fmt.Println(countPtrs(new @unsafe.Pointer(a), new @unsafe.Pointer(b), new @unsafe.Pointer(c)));

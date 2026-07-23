@@ -84,17 +84,16 @@ internal static void acquireAndWork(ж<sema> Ꮡs) => func((defer, recover) => {
     fmt.Println("working, held:", s.held);
 });
 
-internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
-    var vals = valsʗp.slice();
-    return func((defer, recover) => {
-        deferǃ(ᴛ1 => fmt.Println(ᴛ1), "notified", defer);
-        nint total = 0;
-        foreach (var (_, v) in vals) {
-            total += v;
-        }
-        return total;
-    });
-}
+internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) => func(ref valsʗp, (ref ꓸꓸꓸnint valsʗp, Defer defer, Recover recover) => {
+    var vals = valsʗp.sslice();
+
+    deferǃ(ᴛ1 => fmt.Println(ᴛ1), "notified", defer);
+    nint total = 0;
+    foreach (var (_, v) in vals) {
+        total += v;
+    }
+    return total;
+});
 
 [GoType] partial struct acc {
     internal nint total;

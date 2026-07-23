@@ -30,4 +30,15 @@ func main() {
 		return sum(a...)
 	}
 	fmt.Println(forward(10, 20, 30))
+
+	// A variadic closure with defer passes its params Span by ref into the execution wrapper,
+	// preserving spread aliasing for a direct element write.
+	values := []int{1, 2, 3}
+	mutate := func(nums ...int) {
+		defer func() {}()
+		nums[0] = 40
+	}
+	mutate(values...)
+	fmt.Println(values[0])
+
 }
