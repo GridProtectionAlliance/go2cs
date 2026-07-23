@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#071926">
+  <meta name="theme-color" content="#0b1d27">
   <title>Tour of go2cs</title>
   <link rel="icon" href="/assets/go2cs.ico">
   <link rel="stylesheet" href="/styles.css">
@@ -12,30 +12,17 @@
   <header class="app-header">
     <div class="brand">
       <img src="/assets/go2cs-small.png" alt="" width="124" height="63">
-      <div>
-        <p class="eyebrow">Learn by translation</p>
-        <h1>Tour of <span>go2cs</span></h1>
-      </div>
+      <strong>Tour of go2cs</strong>
+      <span>Reads like Go. Runs like Go.</span>
     </div>
-    <div class="header-state" aria-live="polite">
-      <span class="connection-dot" id="connection-dot"></span>
-      <span id="connection-label">Connecting to the Tour…</span>
-      <span class="lesson-pill" id="lesson-label">Waiting for a lesson</span>
+    <div class="header-status" aria-live="polite">
+      <i id="connection-dot"></i>
+      <span id="connection-label">Connecting to Tour of Go</span>
     </div>
   </header>
 
-  <main class="workspace">
-    <section class="language-panel go-panel" aria-labelledby="go-heading">
-      <div class="panel-heading">
-        <div>
-          <span class="language-mark go-mark">GO</span>
-          <div>
-            <p class="panel-kicker">Original lesson</p>
-            <h2 id="go-heading">A Tour of Go</h2>
-          </div>
-        </div>
-        <span class="sync-state" id="sync-state">Awaiting editor</span>
-      </div>
+  <main class="workspace" id="workspace">
+    <section class="tour-pane" aria-label="Tour of Go">
       <iframe
         id="tour-frame"
         title="Official Tour of Go"
@@ -44,66 +31,54 @@
       ></iframe>
     </section>
 
-    <section class="language-panel cs-panel" aria-labelledby="cs-heading">
-      <div class="panel-heading cs-heading">
-        <div>
-          <span class="language-mark cs-mark">C#</span>
+    <div
+      class="column-divider"
+      id="column-divider"
+      role="separator"
+      aria-label="Resize Go and .NET panes"
+      aria-orientation="vertical"
+      aria-valuemin="45"
+      aria-valuemax="80"
+      aria-valuenow="67"
+      tabindex="0"
+    ></div>
+
+    <section class="dotnet-pane" aria-label="Generated .NET">
+      <div class="dotnet-toolbar">
+        <div class="dotnet-title">
+          <span class="cs-badge">C#</span>
           <div>
-            <p class="panel-kicker">Live translation</p>
-            <h2 id="cs-heading">Generated .NET</h2>
+            <strong id="lesson-label">Generated .NET</strong>
+            <span id="conversion-status">Waiting for Go source</span>
           </div>
         </div>
         <div class="actions">
-          <button class="quiet-button" id="copy-button" type="button" disabled>Copy C#</button>
-          <button class="run-button" id="run-button" type="button" disabled>
-            <span class="play-icon">▶</span>
-            Convert &amp; run
-          </button>
+          <button id="convert-button" class="button secondary" type="button" disabled>Convert</button>
+          <button id="run-button" class="button primary" type="button" disabled>Run</button>
         </div>
       </div>
 
-      <div class="pipeline-strip" id="pipeline-strip" aria-label="Pipeline status">
-        <div class="pipeline-stage" data-stage="go"><i></i><span>Go run</span></div>
-        <b></b>
-        <div class="pipeline-stage" data-stage="transpile"><i></i><span>Transpile</span></div>
-        <b></b>
-        <div class="pipeline-stage" data-stage="build"><i></i><span>Build</span></div>
-        <b></b>
-        <div class="pipeline-stage" data-stage="run"><i></i><span>.NET run</span></div>
+      <div class="source-tabs" role="tablist" aria-label="Generated files">
+        <button id="code-tab" role="tab" type="button" data-view="code" aria-selected="true">Code</button>
+        <button id="project-tab" role="tab" type="button" data-view="project" aria-selected="false">Project</button>
       </div>
 
-      <div class="code-shell">
-        <div class="file-tab">
-          <span class="file-dot"></span>
-          <span id="project-label">main.cs</span>
-          <span class="generated-label">generated</span>
-        </div>
-        <pre id="csharp-code" tabindex="0" aria-label="Generated C# source"><code>// Edit the Go source in the Tour, then choose “Convert &amp; run”.
-// The generated C# will appear here.</code></pre>
+      <div class="source-area">
+        <pre id="code-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="code-tab"><code>// C# appears automatically when a Tour page opens.</code></pre>
+        <pre id="project-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="project-tab" hidden><code>&lt;!-- The generated project file appears here. --&gt;</code></pre>
       </div>
 
-      <section class="console-shell" aria-labelledby="console-heading">
-        <div class="console-header">
-          <div>
-            <span class="terminal-icon">&gt;_</span>
-            <h3 id="console-heading">Pipeline output</h3>
-          </div>
-          <span id="elapsed-label">Ready</span>
+      <section class="output-panel" aria-label="Conversion and .NET output">
+        <div class="output-tabs" role="tablist" aria-label="Output type">
+          <button role="tab" type="button" data-output="transpile" aria-selected="true">Transpile</button>
+          <button role="tab" type="button" data-output="build" aria-selected="false">Build</button>
+          <button role="tab" type="button" data-output="run" aria-selected="false">.NET Run</button>
+          <span id="output-timing"></span>
         </div>
-        <div class="console-tabs" id="console-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected="true" data-tab="welcome">Overview</button>
-        </div>
-        <pre class="console-output" id="console-output" tabindex="0">Every run keeps its stages separate, so transpile, compiler, and runtime failures stay easy to find.
-
-Keyboard: Ctrl/⌘ + Shift + Enter</pre>
+        <pre id="output-view" tabindex="0">Open a Tour page to convert its Go code.</pre>
       </section>
     </section>
   </main>
-
-  <footer>
-    <span>Official Go lessons on the left. Native go2cs + .NET execution on the right.</span>
-    <span>Local execution · 20 second stage limit</span>
-  </footer>
 
   <script src="/app.js"></script>
 </body>

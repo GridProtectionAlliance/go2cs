@@ -3,69 +3,75 @@
 
   let currentEditor = null;
   let lastSource = null;
-  let scheduled = false;
+  let lastPath = "";
+  let pendingNavigation = null;
 
   function editor() {
     const element = document.querySelector(".CodeMirror");
-    return element && element.CodeMirror ? element.CodeMirror : null;
+    return element?.CodeMirror || null;
+  }
+
+  function currentPath() {
+    return location.pathname + location.hash;
   }
 
   function lessonTitle() {
-    const candidates = [
-      ".lesson-title",
-      ".page h2",
-      "article h1",
-      "article h2",
-      "h1",
-      "h2"
-    ];
+    const candidates = [".lesson-title", ".page h2", "article h1", "article h2", "h1", "h2"];
     for (const selector of candidates) {
       const value = document.querySelector(selector)?.textContent?.trim();
       if (value && value.length < 120) return value;
     }
-    return "Tour lesson";
+    return "Generated .NET";
   }
 
-  function publish(force = false) {
-    scheduled = false;
+  function publish(reason, force = false) {
     const instance = editor();
-    if (!instance) return;
-    const source = instance.getValue();
-    if (!force && source === lastSource) return;
+    const source = instance ? instance.getValue() : "";
+    const path = currentPath();
+    if (!force && source === lastSource && path === lastPath) return;
     lastSource = source;
+    lastPath = path;
     window.parent.postMessage({
       type: "go-tour-source",
       source,
       title: lessonTitle(),
-      path: location.pathname + location.hash
+      path,
+      reason
     }, window.location.origin);
-  }
-
-  function schedulePublish() {
-    if (scheduled) return;
-    scheduled = true;
-    setTimeout(publish, 80);
   }
 
   function attach() {
     const instance = editor();
     if (!instance) return;
+
+    // Keep the Go side visually parallel with the highlighted C# pane.
+    instance.setOption("mode", "text/x-go");
+    instance.setOption("lineNumbers", true);
+
     if (instance !== currentEditor) {
       currentEditor = instance;
-      instance.on("change", schedulePublish);
-      publish(true);
+      instance.on("change", () => publish("edit"));
+      publish("navigation", true);
     }
+  }
+
+  function inspectNavigation() {
+    attach();
+    if (currentPath() === lastPath) return;
+    clearTimeout(pendingNavigation);
+    pendingNavigation = setTimeout(() => publish("navigation", true), 100);
   }
 
   window.addEventListener("message", event => {
     if (event.origin !== window.location.origin) return;
-    if (event.data?.type === "go2cs-request-source") publish(true);
+    if (event.data?.type === "go2cs-request-source") {
+      attach();
+      publish(lastPath ? "sync" : "navigation", true);
+    }
   });
-  window.addEventListener("hashchange", () => setTimeout(() => publish(true), 100));
-  new MutationObserver(() => {
-    attach();
-    schedulePublish();
-  }).observe(document.documentElement, { childList: true, subtree: true });
-  setInterval(attach, 500);
+  window.addEventListener("hashchange", inspectNavigation);
+  window.addEventListener("popstate", inspectNavigation);
+  new MutationObserver(inspectNavigation).observe(document.documentElement, { childList: true, subtree: true });
+  setInterval(inspectNavigation, 400);
   attach();
 })();

@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -16,19 +18,32 @@ import (
 )
 
 const (
-	maxSourceBytes  = 256 << 10
-	maxRequestBytes = maxSourceBytes + (16 << 10)
-	commandTimeout  = 20 * time.Second
+	maxSourceBytes    = 256 << 10
+	maxRequestBytes   = maxSourceBytes + (16 << 10)
+	commandTimeout    = 20 * time.Second
+	conversionMaxAge  = 30 * time.Minute
+	maxSavedArtifacts = 20
 )
 
-type pipelineRequest struct {
+type convertRequest struct {
 	Source string `json:"source"`
 	Name   string `json:"name,omitempty"`
 }
 
-type pipelineResult struct {
-	CSharp     string        `json:"csharp,omitempty"`
-	Project    string        `json:"project,omitempty"`
+type runRequest struct {
+	ConversionID string `json:"conversionId"`
+}
+
+type convertResult struct {
+	ConversionID string      `json:"conversionId,omitempty"`
+	CSharp       string      `json:"csharp,omitempty"`
+	Project      string      `json:"project,omitempty"`
+	ProjectName  string      `json:"projectName,omitempty"`
+	Successful   bool        `json:"successful"`
+	Stage        stageResult `json:"stage"`
+}
+
+type runResult struct {
 	Successful bool          `json:"successful"`
 	Stages     []stageResult `json:"stages"`
 }
@@ -41,11 +56,21 @@ type stageResult struct {
 	DurationMS int64  `json:"durationMs"`
 }
 
+type conversionArtifact struct {
+	id        string
+	workDir   string
+	outputDir string
+	project   string
+	createdAt time.Time
+}
+
 type pipelineRunner struct {
 	repoRoot string
 	cacheDir string
 	slots    chan struct{}
 	buildMu  sync.Mutex
+	mu       sync.Mutex
+	saved    map[string]*conversionArtifact
 }
 
 func newPipelineRunner(repoRoot string) *pipelineRunner {
@@ -53,90 +78,148 @@ func newPipelineRunner(repoRoot string) *pipelineRunner {
 		repoRoot: repoRoot,
 		cacheDir: filepath.Join(repoRoot, "src", "tour", ".cache"),
 		slots:    make(chan struct{}, 2),
+		saved:    make(map[string]*conversionArtifact),
 	}
 }
 
-func (p *pipelineRunner) run(ctx context.Context, request pipelineRequest) (pipelineResult, error) {
+func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (convertResult, error) {
 	source := strings.TrimPrefix(request.Source, "\ufeff")
 	if len(source) == 0 {
-		return pipelineResult{}, validationError("the Go editor is empty")
+		return convertResult{}, validationError("the Go editor is empty")
 	}
 	if len(source) > maxSourceBytes {
-		return pipelineResult{}, validationError("source exceeds the 256 KiB local limit")
+		return convertResult{}, validationError("source exceeds the 256 KiB local limit")
 	}
 
-	select {
-	case p.slots <- struct{}{}:
-		defer func() { <-p.slots }()
-	case <-ctx.Done():
-		return pipelineResult{}, ctx.Err()
+	if err := p.acquire(ctx); err != nil {
+		return convertResult{}, err
 	}
+	defer p.release()
+	p.cleanupExpired()
 
 	workDir, err := os.MkdirTemp("", "tour-go2cs-")
 	if err != nil {
-		return pipelineResult{}, err
+		return convertResult{}, err
 	}
-	defer os.RemoveAll(workDir)
+	keepWorkspace := false
+	defer func() {
+		if !keepWorkspace {
+			_ = os.RemoveAll(workDir)
+		}
+	}()
 
 	inputDir := filepath.Join(workDir, "go")
 	outputDir := filepath.Join(workDir, "cs")
 	if err := os.MkdirAll(inputDir, 0o755); err != nil {
-		return pipelineResult{}, err
+		return convertResult{}, err
 	}
-
 	if err := os.WriteFile(filepath.Join(inputDir, "main.go"), []byte(source), 0o600); err != nil {
-		return pipelineResult{}, err
+		return convertResult{}, err
 	}
 	if err := os.WriteFile(filepath.Join(inputDir, "go.mod"), []byte("module tour.local/session\n\ngo 1.23.1\n"), 0o600); err != nil {
-		return pipelineResult{}, err
+		return convertResult{}, err
 	}
 
-	result := pipelineResult{}
-	result.Stages = append(result.Stages, p.runStage(ctx, "go", "Go run", inputDir, commandTimeout, "go", "run", "."))
-
 	go2csBin, toolStage := p.ensureGo2CS(ctx)
+	if toolStage != nil && toolStage.Status != "passed" {
+		toolStage.ID = "transpile"
+		toolStage.Label = "Transpile"
+		return convertResult{Stage: *toolStage}, nil
+	}
+
+	transpile := p.runStage(ctx, "transpile", "Transpile", p.repoRoot, commandTimeout,
+		go2csBin, "-go2cspath", filepath.Join(p.repoRoot, "src"), inputDir, outputDir)
 	if toolStage != nil {
-		result.Stages = append(result.Stages, *toolStage)
-		if toolStage.Status == "failed" {
-			result.Stages = append(result.Stages, skippedStage("transpile", "go2cs transpile"), skippedStage("build", ".NET build"), skippedStage("run", ".NET run"))
-			return result, nil
+		transpile.DurationMS += toolStage.DurationMS
+		if toolStage.Output != "" {
+			transpile.Output = strings.TrimSpace(toolStage.Output + "\n" + transpile.Output)
 		}
 	}
 
-	transpile := p.runStage(ctx, "transpile", "go2cs transpile", p.repoRoot, commandTimeout,
-		go2csBin, "-go2cspath", filepath.Join(p.repoRoot, "src"), inputDir, outputDir)
-	result.Stages = append(result.Stages, transpile)
-
+	result := convertResult{Stage: transpile}
 	result.CSharp, _ = collectCSharp(outputDir)
 	project, _ := findProject(outputDir)
 	if project != "" {
-		if relative, err := filepath.Rel(outputDir, project); err == nil {
-			result.Project = filepath.ToSlash(relative)
+		projectBytes, readErr := os.ReadFile(project)
+		if readErr == nil {
+			result.Project = string(projectBytes)
+			result.ProjectName = filepath.Base(project)
 		}
 	}
 
 	if transpile.Status != "passed" || project == "" {
 		if project == "" && transpile.Status == "passed" {
-			result.Stages[len(result.Stages)-1].Status = "failed"
-			result.Stages[len(result.Stages)-1].Output += "\ngo2cs did not emit a .csproj file."
+			result.Stage.Status = "failed"
+			result.Stage.Output = strings.TrimSpace(result.Stage.Output + "\ngo2cs did not emit a .csproj file.")
 		}
-		result.Stages = append(result.Stages, skippedStage("build", ".NET build"), skippedStage("run", ".NET run"))
 		return result, nil
 	}
 
-	build := p.runStage(ctx, "build", ".NET build", outputDir, commandTimeout,
-		"dotnet", "build", project, "--nologo", "--verbosity:minimal", "-p:go2csPath="+filepath.Join(p.repoRoot, "src")+string(filepath.Separator))
-	result.Stages = append(result.Stages, build)
-	if build.Status != "passed" {
-		result.Stages = append(result.Stages, skippedStage("run", ".NET run"))
-		return result, nil
+	id, err := newConversionID()
+	if err != nil {
+		return convertResult{}, err
 	}
+	artifact := &conversionArtifact{
+		id:        id,
+		workDir:   workDir,
+		outputDir: outputDir,
+		project:   project,
+		createdAt: time.Now(),
+	}
+	p.mu.Lock()
+	p.saved[id] = artifact
+	p.mu.Unlock()
 
-	run := p.runStage(ctx, "run", ".NET run", outputDir, commandTimeout,
-		"dotnet", "run", "--no-build", "--project", project, "-p:go2csPath="+filepath.Join(p.repoRoot, "src")+string(filepath.Separator))
-	result.Stages = append(result.Stages, run)
-	result.Successful = transpile.Status == "passed" && build.Status == "passed" && run.Status == "passed"
+	keepWorkspace = true
+	result.ConversionID = id
+	result.Successful = true
 	return result, nil
+}
+
+func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult, error) {
+	if strings.TrimSpace(request.ConversionID) == "" {
+		return runResult{}, validationError("conversionId is required")
+	}
+	if err := p.acquire(ctx); err != nil {
+		return runResult{}, err
+	}
+	defer p.release()
+	p.cleanupExpired()
+
+	p.mu.Lock()
+	artifact := p.saved[request.ConversionID]
+	p.mu.Unlock()
+	if artifact == nil {
+		return runResult{}, conversionNotFoundError("that conversion has expired; convert the current Go source again")
+	}
+
+	property := "-p:go2csPath=" + filepath.Join(p.repoRoot, "src") + string(filepath.Separator)
+	build := p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout,
+		"dotnet", "build", artifact.project, "--nologo", "--verbosity:minimal", property)
+	result := runResult{Stages: []stageResult{build}}
+	if build.Status != "passed" {
+		result.Stages = append(result.Stages, skippedStage("run", ".NET Run"))
+		return result, nil
+	}
+
+	run := p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout,
+		"dotnet", "run", "--no-build", "--project", artifact.project, property)
+	result.Stages = append(result.Stages, run)
+	result.Successful = run.Status == "passed"
+	return result, nil
+}
+
+func (p *pipelineRunner) acquire(ctx context.Context) error {
+	select {
+	case p.slots <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (p *pipelineRunner) release() {
+	<-p.slots
 }
 
 func (p *pipelineRunner) ensureGo2CS(ctx context.Context) (string, *stageResult) {
@@ -190,9 +273,13 @@ func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string,
 	status := "passed"
 	if err != nil {
 		status = "failed"
-		if ctx.Err() != nil {
+		switch {
+		case errors.Is(parent.Err(), context.Canceled):
+			status = "killed"
+			text += "\nKilled."
+		case errors.Is(ctx.Err(), context.DeadlineExceeded):
 			text += fmt.Sprintf("\nTimed out after %s.", timeout)
-		} else if text == "" {
+		case text == "":
 			text = err.Error()
 		}
 	}
@@ -206,6 +293,60 @@ func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string,
 	}
 }
 
+func (p *pipelineRunner) cleanupExpired() {
+	now := time.Now()
+	var remove []*conversionArtifact
+
+	p.mu.Lock()
+	for id, artifact := range p.saved {
+		if now.Sub(artifact.createdAt) > conversionMaxAge {
+			remove = append(remove, artifact)
+			delete(p.saved, id)
+		}
+	}
+	if len(p.saved) > maxSavedArtifacts {
+		artifacts := make([]*conversionArtifact, 0, len(p.saved))
+		for _, artifact := range p.saved {
+			artifacts = append(artifacts, artifact)
+		}
+		sort.Slice(artifacts, func(i, j int) bool {
+			return artifacts[i].createdAt.Before(artifacts[j].createdAt)
+		})
+		for len(p.saved) > maxSavedArtifacts {
+			artifact := artifacts[0]
+			artifacts = artifacts[1:]
+			remove = append(remove, artifact)
+			delete(p.saved, artifact.id)
+		}
+	}
+	p.mu.Unlock()
+
+	for _, artifact := range remove {
+		_ = os.RemoveAll(artifact.workDir)
+	}
+}
+
+func (p *pipelineRunner) close() {
+	p.mu.Lock()
+	artifacts := make([]*conversionArtifact, 0, len(p.saved))
+	for _, artifact := range p.saved {
+		artifacts = append(artifacts, artifact)
+	}
+	p.saved = make(map[string]*conversionArtifact)
+	p.mu.Unlock()
+	for _, artifact := range artifacts {
+		_ = os.RemoveAll(artifact.workDir)
+	}
+}
+
+func newConversionID() (string, error) {
+	value := make([]byte, 16)
+	if _, err := rand.Read(value); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(value), nil
+}
+
 func skippedStage(id, label string) stageResult {
 	return stageResult{ID: id, Label: label, Status: "skipped", Output: "Skipped because an earlier stage failed."}
 }
@@ -215,40 +356,48 @@ func failedStage(id, label, output string) stageResult {
 }
 
 func collectCSharp(root string) (string, error) {
-	var files []string
+	var sourceFiles []string
+	var fallbackFiles []string
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if entry.IsDir() {
-			if entry.Name() == "obj" || entry.Name() == "bin" {
+			if entry.Name() == "obj" || entry.Name() == "bin" || entry.Name() == "Generated" {
 				return filepath.SkipDir
 			}
 			return nil
 		}
-		if strings.HasSuffix(strings.ToLower(entry.Name()), ".cs") {
-			files = append(files, path)
+		if !strings.HasSuffix(strings.ToLower(entry.Name()), ".cs") {
+			return nil
+		}
+		fallbackFiles = append(fallbackFiles, path)
+		name := strings.ToLower(entry.Name())
+		if name != "package_info.cs" && name != "go2cs_test_host.cs" {
+			sourceFiles = append(sourceFiles, path)
 		}
 		return nil
 	})
 	if err != nil {
 		return "", err
 	}
-	sort.Strings(files)
+	if len(sourceFiles) == 0 {
+		sourceFiles = fallbackFiles
+	}
+	sort.Strings(sourceFiles)
 
 	var result strings.Builder
-	for _, file := range files {
+	for _, file := range sourceFiles {
 		content, err := os.ReadFile(file)
 		if err != nil {
 			return "", err
 		}
-		relative, _ := filepath.Rel(root, file)
 		if result.Len() > 0 {
-			result.WriteString("\n\n")
+			relative, _ := filepath.Rel(root, file)
+			result.WriteString("\n\n// -- ")
+			result.WriteString(filepath.ToSlash(relative))
+			result.WriteString(" --\n")
 		}
-		result.WriteString("// ── ")
-		result.WriteString(filepath.ToSlash(relative))
-		result.WriteString(" ──\n")
 		result.Write(content)
 	}
 	return result.String(), nil
@@ -274,3 +423,7 @@ func findProject(root string) (string, error) {
 	}
 	return projects[0], nil
 }
+
+type conversionNotFoundError string
+
+func (e conversionNotFoundError) Error() string { return string(e) }

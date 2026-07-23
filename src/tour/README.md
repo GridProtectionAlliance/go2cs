@@ -1,17 +1,20 @@
 # Tour of go2cs
 
 Tour of go2cs places the official, locally hosted **Tour of Go** beside a live
-Go-to-C# pipeline. The Go lesson remains owned and rendered by the upstream
-Tour. A small same-origin bridge reads the current editor text, and the local
-server uses that exact text for every stage:
+Go-to-C# workspace. The Go lesson remains owned and rendered by the upstream
+Tour. A same-origin bridge reads the current editor text and sends that exact
+text to the local go2cs server.
 
-1. `go run`
-2. `go2cs`
-3. `dotnet build`
-4. `dotnet run`
+The interface is deliberately parallel:
 
-Each stage gets its own output tab. A transpile, compiler, timeout, or runtime
-failure stops only the dependent stages and remains visible in the UI.
+- The original Tour occupies the left two-thirds of the window.
+- Generated C# occupies the right third, with a draggable divider.
+- **Code** and **Project** tabs show the matching `.cs` and `.csproj`.
+- **Transpile**, **Build**, and **.NET Run** keep their output separate.
+- Navigating to a Tour page converts it automatically.
+- Editing Go marks the C# stale until **Convert** is selected.
+- **Run** builds and executes the current conversion; it becomes **Kill** while
+  the process is active.
 
 ## Requirements
 
@@ -68,6 +71,12 @@ Useful options:
 to a prebuilt go2cs executable; otherwise the server builds and caches one in
 `src/tour/.cache`.
 
+## Keyboard controls
+
+- `Ctrl`/`Cmd` + `Enter`: convert edited Go
+- `Shift` + `Enter`: run the current .NET conversion
+- Focus the divider and use `Left Arrow` / `Right Arrow`: resize the panes
+
 ## Development checks
 
 ```sh
@@ -76,19 +85,19 @@ go test ./...
 go vet ./...
 ```
 
-The first real conversion can take longer because go2cs is built lazily. Each
-user program runs in a fresh temporary directory, the request body is limited
-to 256 KiB, and each normal pipeline stage has a 20-second timeout.
+The first conversion can take longer because go2cs is built lazily. Converted
+workspaces are isolated in temporary directories and expire after 30 minutes.
+The request body is limited to 256 KiB, and each normal tool stage has a
+20-second timeout. Aborting the Run request cancels the active build or program.
 
 ## Integration design
 
 The official Tour runs unchanged on a private loopback port. This server
-reverse-proxies `/tour/` and its socket endpoint, injects only `bridge.js` and a
-small thematic stylesheet into the HTML response, and hosts the outer interface
-on port 4000. Because the iframe and outer page share an origin, the bridge can
-publish CodeMirror changes without weakening browser security or maintaining a
-fork of the Tour content.
+reverse-proxies `/tour/`, `/images/`, and the websocket endpoint, injects only
+the source bridge and a small thematic stylesheet, and hosts the outer
+interface on port 4000.
 
-The server intentionally owns the go2cs/.NET half. Generated files are read
-before the temporary workspace is removed, and paths in tool output are
-normalized to avoid leaking machine-specific repository locations into the UI.
+The websocket proxy translates the browser-facing origin to the private Tour
+origin so the upstream same-origin check remains effective. The server owns
+only the go2cs/.NET half. A successful conversion is retained briefly so Run
+can build and execute the exact project shown in the Project tab.

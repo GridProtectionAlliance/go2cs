@@ -66,6 +66,7 @@ func main() {
 		tour:     tour,
 		static:   http.FileServer(http.FS(staticFS)),
 	}
+	defer s.pipeline.close()
 
 	httpServer := &http.Server{
 		Addr:              *addr,
@@ -102,12 +103,17 @@ func main() {
 
 func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /api/pipeline", s.handlePipeline)
+	mux.HandleFunc("POST /api/convert", s.handleConvert)
+	mux.HandleFunc("POST /api/build", s.handleBuild)
+	mux.HandleFunc("POST /api/execute", s.handleExecute)
+	mux.HandleFunc("POST /api/run", s.handleRun)
 	mux.HandleFunc("GET /api/health", s.handleHealth)
 	mux.HandleFunc("GET /assets/go2cs.ico", s.handleImage("go2cs.ico"))
 	mux.HandleFunc("GET /assets/go2cs-small.png", s.handleImage("go2cs-small.png"))
 	mux.HandleFunc("GET /assets/GopherDotNetBotFrisbee.png", s.handleImage("GopherDotNetBotFrisbee.png"))
 	mux.Handle("/tour/", s.tour)
+	mux.Handle("/images/", s.tour)
+	mux.Handle("/_/", s.tour)
 	mux.Handle("/socket", s.tour)
 	mux.Handle("/", s.static)
 	return withSecurityHeaders(mux)
@@ -121,28 +127,59 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
-func (s *server) handlePipeline(w http.ResponseWriter, r *http.Request) {
+func (s *server) handleConvert(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
-	var request pipelineRequest
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&request); err != nil {
+	var request convertRequest
+	if err := decodeJSON(r, &request); err != nil {
+		writeJSON(w, http.StatusBadRequest, apiError{Error: "invalid request: " + err.Error()})
+		return
+	}
+
+	result, err := s.pipeline.convert(r.Context(), request)
+	if err != nil {
+		s.writePipelineError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (s *server) handleRun(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
+	var request runRequest
+	if err := decodeJSON(r, &request); err != nil {
 		writeJSON(w, http.StatusBadRequest, apiError{Error: "invalid request: " + err.Error()})
 		return
 	}
 
 	result, err := s.pipeline.run(r.Context(), request)
 	if err != nil {
-		var validation validationError
-		if errors.As(err, &validation) {
-			writeJSON(w, http.StatusBadRequest, apiError{Error: validation.Error()})
-			return
-		}
-		writeJSON(w, http.StatusInternalServerError, apiError{Error: err.Error()})
+		s.writePipelineError(w, err)
 		return
 	}
-
 	writeJSON(w, http.StatusOK, result)
+}
+
+func decodeJSON(r *http.Request, value any) error {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(value)
+}
+
+func (s *server) writePipelineError(w http.ResponseWriter, err error) {
+	var validation validationError
+	if errors.As(err, &validation) {
+		writeJSON(w, http.StatusBadRequest, apiError{Error: validation.Error()})
+		return
+	}
+	var notFound conversionNotFoundError
+	if errors.As(err, &notFound) {
+		writeJSON(w, http.StatusNotFound, apiError{Error: notFound.Error()})
+		return
+	}
+	if errors.Is(err, context.Canceled) {
+		return
+	}
+	writeJSON(w, http.StatusInternalServerError, apiError{Error: err.Error()})
 }
 
 func (s *server) handleImage(name string) http.HandlerFunc {

@@ -36,6 +36,12 @@ func newTourProxy(address, repoRoot string) *tourProxy {
 	proxy.Director = func(request *http.Request) {
 		originalDirector(request)
 		request.Header.Del("Accept-Encoding")
+		if request.Header.Get("Upgrade") != "" {
+			// The Tour websocket enforces a same-origin handshake. The browser
+			// quite correctly sends the wrapper's origin, so translate it to the
+			// private upstream origin while forwarding the upgrade.
+			request.Header.Set("Origin", target.Scheme+"://"+target.Host)
+		}
 	}
 	proxy.ModifyResponse = t.modifyResponse
 	proxy.ErrorHandler = t.proxyError
