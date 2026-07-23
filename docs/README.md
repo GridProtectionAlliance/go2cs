@@ -34,9 +34,10 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
 * See current project [status](#status) and [milestones](#milestones)
 
-### Frequently ask questions:
+### Frequently asked questions
 
 1)  Why is a Go to C# transpiler needed? _[Integration opportunities](https://go2cs.net/Background.html#background)._
+
 2)  Won't converted C# code be slower? _[Yes, slower is expected](https://go2cs.net/#performance)._
 
 ## Transpiler Goals
