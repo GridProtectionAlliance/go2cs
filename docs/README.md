@@ -418,7 +418,7 @@ a harmless converter notice, not a failure; the final `Validated` line is what m
 
 ### Performance
 
-_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with [ref struct](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct) based [stack string](ConversionStrategies.md#strings-string-and-sstring) and a [stack slice](ConversionStrategies.md#slices-and-arrays), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
+_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [ref struct](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct) based [stack string](ConversionStrategies.md#strings-string-and-sstring) and [stack slice](ConversionStrategies.md#slices-and-arrays), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
 What about newer versions of Go / .NET? These are planned, but the current focus is creating a baseline "here" to validate process and operations.
 
