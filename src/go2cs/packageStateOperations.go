@@ -134,6 +134,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		referencedForeignPackages: HashSet[string]{},
 		canonicalAliasImported:    HashSet[string]{},
 		importAliasesEmitted:      HashSet[string]{},
+		importAliasTargets:        map[string]string{},
 		importPathAliases:         map[string]string{},
 		typeAliasDeclarations:     &strings.Builder{},
 		standAloneComments:        map[token.Pos]string{},

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using ꓸꓸꓸShape = Span<main_package.Shape>;
 
 partial class main_package {
 
@@ -28,7 +29,7 @@ internal static ж<Rect> newRect(nint w, nint h) {
     return Ꮡ(new Rect(w: w, h: h));
 }
 
-internal static nint totalArea(nint scale, params Span<main_package.Shape> shapesʗp) {
+internal static nint totalArea(nint scale, params ꓸꓸꓸShape shapesʗp) {
     var shapes = shapesʗp.slice();
 
     nint sum = 0;

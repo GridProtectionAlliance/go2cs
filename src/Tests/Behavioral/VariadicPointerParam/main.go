@@ -27,9 +27,12 @@ func total(bs ...*box) int {
 	return sum
 }
 
-// variadic of a qualified type — the C# element name `@unsafe.Pointer` contains a '.', which
-// (like '<' for pointer/generic elements) is invalid in a using-alias identifier, so it must also
-// emit the span type inline (`params Span<@unsafe.Pointer>`).
+// variadic of a qualified (cross-package) type. Unlike the pointer element above, this one DOES get
+// an alias: the identifier joins the qualifier with the `ꓸ` glyph (`params ꓸꓸꓸunsafeꓸPointer`), so it
+// still reads like Go's `...unsafe.Pointer`. The referent, however, cannot use the file-local
+// `using @unsafe = unsafe_package;` alias — C# resolves a using-alias referent with the compilation
+// unit's own usings NOT in effect (CS0246) — so it is rewritten to that alias's own target:
+// `using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;`.
 func countPtrs(ps ...unsafe.Pointer) int {
 	return len(ps)
 }

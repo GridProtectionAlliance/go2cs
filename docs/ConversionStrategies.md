@@ -464,7 +464,9 @@ See [the reference](ConversionStrategies-Reference.md#a-fixed-array-composite-li
 for the keyed/`SparseArray` form and the nested-array gap.
 
 `append`, `len`, `make`, and sub-slicing map to golib builtins/methods, and a variadic `...T` parameter
-arrives as `params ꓸꓸꓸT` rebound to a slice at the top of the body. From the real stdlib:
+arrives as `params ꓸꓸꓸT` rebound to a slice at the top of the body — where `ꓸꓸꓸT` is a using alias for
+`Span<T>`, falling back to an inline `params Span<T>` for an element type that cannot form a legal alias
+identifier (a type parameter, or a constructed type such as `ж<box>`). From the real stdlib:
 
 ```go
 func Join(errs ...error) error {          // errors/join.go

@@ -208,6 +208,16 @@ type Visitor struct {
 	// resolving to alias `asn1` (cryptobyte's `encoding/asn1` + `.../cryptobyte/asn1`, CS1537).
 	importAliasesEmitted HashSet[string]
 
+	// importAliasTargets maps each C# alias name a file's imports bound to the TARGET that using
+	// resolves to (`@unsafe` → `unsafe_package`, `ast` → `go.ast_package`). C# resolves a using-alias
+	// REFERENT with the compilation unit's own using directives NOT in effect, so a referent may not
+	// name another file-local alias — variadicElementType substitutes the recorded target to keep the
+	// ellipsis alias legal (`using ꓸꓸꓸPointer = Span<unsafe_package.Pointer>;`, never
+	// `Span<@unsafe.Pointer>` which fails CS0246). Recorded at the emit sites rather than re-derived,
+	// so the `-tests` package-under-test rebinding (visitImportSpec's isPackageUnderTest) is honored
+	// automatically instead of silently diverging.
+	importAliasTargets map[string]string
+
 	// importPathAliases maps a Go import PATH to the C# alias THIS FILE bound for it, for the
 	// EXPLICITLY-ALIASED imports only. getTypeName consults it so a foreign type renders via the
 	// file's ACTUAL alias, not the canonical package name: cryptobyte's asn1.go imports

@@ -239,6 +239,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 			emittedAlias := getSanitizedImport(importQualifier(alias))
 			v.importAliasesEmitted.Add(emittedAlias)
+			v.importAliasTargets[emittedAlias] = importPath
 			v.importPathAliases[v.currentImportPath] = emittedAlias
 			v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", emittedAlias, importPath))
 		}
@@ -261,6 +262,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 		emittedAlias := getSanitizedImport(importQualifier(strings.TrimSuffix(importName, PackageSuffix)))
 		v.importAliasesEmitted.Add(emittedAlias)
+		v.importAliasTargets[emittedAlias] = importPath
 		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", emittedAlias, importPath))
 	}
 

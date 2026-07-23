@@ -77,19 +77,34 @@ func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	return found
 }
 
-// variadicElementType returns the C# element type name for a variadic parameter and whether it must
-// be emitted inline as `Span<T>` rather than via a `using ꓸꓸꓸT = Span<T>` alias. Both the alias and
-// the inline form sit at namespace scope, so a SAME-PACKAGE named element type must be qualified with
-// the package class — a bare nested name like `statDep` does not resolve there (CS0246). Qualifying it
-// introduces a '.', which (like a type parameter, or a generic/pointer/cross-package element whose
-// name already carries '<'/'.') also forces the inline form, since a using-alias identifier cannot
-// contain '<', '>' or '.'.
-func (v *Visitor) variadicElementType(elem types.Type) (typeName string, inline bool) {
+// variadicElementType returns the C# element type name for a variadic parameter, the ellipsis alias
+// identifier that stands for `Span<element>` in a signature, and whether the parameter must instead be
+// emitted inline as `Span<T>`. Both the alias and the inline form sit at namespace scope, so a
+// SAME-PACKAGE named element type must be qualified with the package class — a bare nested name like
+// `statDep` does not resolve there (CS0246). Only the alias NAME is constrained to a plain identifier
+// though; its REFERENT may be qualified freely, so the readable form survives qualification by keying
+// the identifier off the element's GO-facing name (`ꓸꓸꓸShape` = `Span<main_package.Shape>`,
+// `ꓸꓸꓸunsafeꓸPointer` = `Span<unsafe_package.Pointer>`). Only a type parameter or a CONSTRUCTED
+// element has no such name to key on and stays inline.
+func (v *Visitor) variadicElementType(elem types.Type) (typeName string, aliasName string, inline bool) {
 	typeName = v.getCSTypeName(elem)
 
+	// A type parameter is not in scope at namespace scope, so it can be neither an alias referent nor
+	// an alias name — `First<T>(params Span<T> valsʗp)` has no readable form.
 	if _, isTypeParam := elem.(*types.TypeParam); isTypeParam {
-		return typeName, true
+		return typeName, "", true
 	}
+
+	// A constructed type carries '<'/'>', which a using-alias identifier cannot contain and which no
+	// transliteration removes (`ж<ast.File>`, `Action<ж<options>>`, `map<@string, any>`).
+	if strings.ContainsAny(typeName, "<>") {
+		return typeName, "", true
+	}
+
+	// Derived BEFORE the referent is qualified/rewritten below — the identifier tracks the Go source,
+	// the referent tracks what C# can resolve, and the two deliberately diverge.
+	aliasIdent := v.variadicAliasIdent(elem, typeName)
+	selfQualified := false
 
 	if named, ok := elem.(*types.Named); ok {
 		// A methodless named func type has already been rendered AS its base delegate
@@ -98,11 +113,103 @@ func (v *Visitor) variadicElementType(elem types.Type) (typeName string, inline 
 		if _, isCollapsed := methodlessNamedFuncSignature(elem); !isCollapsed {
 			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && !strings.Contains(typeName, ".") {
 				typeName = fmt.Sprintf("%s%s.%s", packageName, PackageSuffix, typeName)
+				selfQualified = true
 			}
 		}
 	}
 
-	return typeName, strings.ContainsAny(typeName, "<.")
+	// C# resolves a using-alias REFERENT with the compilation unit's own using directives NOT in
+	// effect, so the referent may only name what resolves without them: a bare name (a golib type in
+	// `namespace go`, or a GLOBAL-using alias from package_info.cs — `osꓸSignal`/`CorpusEntry` DO
+	// carry over, which is why those two already ship as aliases), or a namespace-qualified class.
+	// A cross-package SHORT form (`@unsafe.Pointer`, `ast.Expr`) leads with a FILE-LOCAL alias, so it
+	// must be rewritten to that alias's own target — which is using-independent by construction,
+	// being what the `using <alias> = <target>;` line itself resolves. Left as-is it fails CS0246
+	// here, and go2cs-gen (which copies the using into its generated file) cannot resolve the symbol
+	// either and falls back to unescaped text, `Span<unsafe.Pointer>`, whose bare keyword cascades
+	// to CS8956.
+	if !selfQualified {
+		if head, member, qualified := strings.Cut(typeName, "."); qualified {
+			switch {
+			case v.importAliasTargets[head] != "":
+				typeName = v.importAliasTargets[head] + "." + member
+			case strings.HasSuffix(head, PackageSuffix):
+				// Already a package CLASS (`io_package.Writer`), not an alias — a member of the
+				// root `go` namespace, so it resolves from any converted file's namespace.
+			default:
+				// An alias this file has not bound yet — visitFile synthesizes canonical aliases for
+				// inference-only foreign references AFTER the declarations are visited, so the target
+				// is genuinely unknown here. Degrade to the inline form, which never needs one.
+				return typeName, "", true
+			}
+		}
+	}
+
+	return typeName, EllipsisOperator + aliasIdent, false
+}
+
+// variadicAliasIdent renders the body of a variadic element's ellipsis alias identifier so the
+// signature reads like the Go source it came from: a qualifier is KEPT but joined with TypeAliasDot
+// (`...unsafe.Pointer` → `params ꓸꓸꓸunsafeꓸPointer`), the same `pkgꓸType` convention package_info.cs
+// already uses for its global usings — which is why os/signal's long-standing `ꓸꓸꓸosꓸSignal` and
+// text/template's `ꓸꓸꓸreflectꓸValue` come out byte-identical through this path.
+//
+// The GO names are preferred over the emitted C# ones: they need no '@' keyword-escape stripping ('@'
+// is legal only at identifier START, so `ꓸꓸꓸ@string` is a lex error, CS1002/CS0116), they carry no
+// `_package` class suffix, and they undo a Δ collision-rename so go/types' `...Type` reads `ꓸꓸꓸType`
+// rather than `ꓸꓸꓸΔType`. Any Go identifier is a legal C# one, and the ellipsis
+// prefix means even a C# keyword (`...event`) cannot collide. Types with no such name — a basic type
+// (`unsafe.Pointer`), a universe type (`error`), a lifted anonymous struct (internal/fuzz's
+// `CorpusEntry`) — fall back to transliterating the emitted C# name.
+func (v *Visitor) variadicAliasIdent(elem types.Type, typeName string) string {
+	if named, ok := elem.(*types.Named); ok {
+		if obj := named.Obj(); obj != nil && obj.Pkg() != nil {
+			if obj.Pkg() == v.pkg {
+				return obj.Name()
+			}
+
+			return obj.Pkg().Name() + TypeAliasDot + obj.Name()
+		}
+	}
+
+	head, member, qualified := strings.Cut(typeName, ".")
+
+	if !qualified {
+		return strings.TrimPrefix(typeName, "@")
+	}
+
+	return strings.TrimSuffix(strings.TrimPrefix(head, "@"), PackageSuffix) + TypeAliasDot + member
+}
+
+// variadicParamType renders a variadic parameter's C# type, registering the file-local
+// `using ꓸꓸꓸT = Span<…>;` alias whenever one applies. The alias is what keeps a variadic signature
+// reading like its Go original (`shapes ...Shape` → `params ꓸꓸꓸShape shapesʗp`); it already backs
+// os/signal's `Notify(…, params ꓸꓸꓸosꓸSignal sigʗp)` and internal/fuzz's `ꓸꓸꓸCorpusEntry`.
+func (v *Visitor) variadicParamType(elem types.Type) string {
+	typeName, aliasName, inline := v.variadicElementType(elem)
+	spanType := fmt.Sprintf("Span<%s>", typeName)
+
+	if inline {
+		return spanType
+	}
+
+	// Two element types transliterating to ONE identifier in a single file would bind it twice
+	// (CS1537). Keeping the qualifier makes that rare — a same-package `Shape` and an imported
+	// `pkg.Shape` land on distinct `ꓸꓸꓸShape`/`ꓸꓸꓸpkgꓸShape` — but same-NAMED packages still collide
+	// (`math/rand` and `crypto/rand` both yield `randꓸRand`). The first claim wins; the loser falls
+	// back to the inline form, which is always correct if less readable.
+	requiredUsing := fmt.Sprintf("%s = %s", aliasName, spanType)
+	aliasPrefix := aliasName + " = "
+
+	for _, existing := range v.requiredUsings.Keys() {
+		if existing != requiredUsing && strings.HasPrefix(existing, aliasPrefix) {
+			return spanType
+		}
+	}
+
+	v.addRequiredUsing(requiredUsing)
+
+	return aliasName
 }
 
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
@@ -699,19 +806,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 					// If parameter is a slice, convert it to a Span
 					if sliceType, ok := param.Type().(*types.Slice); ok {
-						typeName, inline := v.variadicElementType(sliceType.Elem())
-
-						if inline {
-							updatedSignature.WriteString("Span<" + typeName + ">")
-						} else {
-							// A keyword-escaped element type ("@string") cannot compose into the alias
-							// identifier: '@' is only legal at identifier START, so "ꓸꓸꓸ@string" is a lex
-							// error (CS1002/CS0116). Strip the escape — "ꓸꓸꓸstring" no longer matches a
-							// keyword — while the Span<> referent keeps the escaped name.
-							aliasName := EllipsisOperator + strings.TrimPrefix(typeName, "@")
-							updatedSignature.WriteString(aliasName)
-							v.addRequiredUsing(fmt.Sprintf("%s = Span<%s>", aliasName, typeName))
-						}
+						updatedSignature.WriteString(v.variadicParamType(sliceType.Elem()))
 					} else {
 						updatedSignature.WriteString("object[]")
 					}
@@ -1352,17 +1447,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// If parameter is a slice, convert it to a Span
 			if sliceType, ok := param.Type().(*types.Slice); ok {
-				typeName, inline := v.variadicElementType(sliceType.Elem())
-
-				if inline {
-					result.WriteString("Span<" + typeName + ">")
-				} else {
-					// Strip a keyword-escape from the alias identifier — see generateParametersSignature
-					// note above: '@' is only legal at identifier start ("ꓸꓸꓸ@string" is a lex error).
-					aliasName := EllipsisOperator + strings.TrimPrefix(typeName, "@")
-					result.WriteString(aliasName)
-					v.addRequiredUsing(fmt.Sprintf("%s = Span<%s>", aliasName, typeName))
-				}
+				result.WriteString(v.variadicParamType(sliceType.Elem()))
 			} else {
 				result.WriteString("object[]")
 			}

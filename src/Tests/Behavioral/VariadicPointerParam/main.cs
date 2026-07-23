@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
 
 partial class main_package {
 
@@ -19,7 +20,7 @@ internal static nint total(params Span<ж<box>> bsʗp) {
     return sum;
 }
 
-internal static nint countPtrs(params Span<@unsafe.Pointer> psʗp) {
+internal static nint countPtrs(params ꓸꓸꓸunsafeꓸPointer psʗp) {
     var ps = psʗp.slice();
 
     return len(ps);
