@@ -84,9 +84,22 @@ func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 // `statDep` does not resolve there (CS0246). Only the alias NAME is constrained to a plain identifier
 // though; its REFERENT may be qualified freely, so the readable form survives qualification by keying
 // the identifier off the element's GO-facing name (`ꓸꓸꓸShape` = `Span<main_package.Shape>`,
-// `ꓸꓸꓸunsafeꓸPointer` = `Span<unsafe_package.Pointer>`). Only a type parameter or a CONSTRUCTED
-// element has no such name to key on and stays inline.
+// `ꓸꓸꓸunsafeꓸPointer` = `Span<unsafe_package.Pointer>`). A POINTER transliterates through go2cs's own
+// `ж` notation (`ꓸꓸꓸжbox`); only a type parameter or a constructed element with no such rendering
+// (`map<@string, any>`, `slice<byte>`, `Action<…>`) has nothing to key on and stays inline.
 func (v *Visitor) variadicElementType(elem types.Type) (typeName string, aliasName string, inline bool) {
+	typeName, identBody, inline := v.variadicElementParts(elem)
+
+	if inline {
+		return typeName, "", true
+	}
+
+	return typeName, EllipsisOperator + identBody, false
+}
+
+// variadicElementParts is variadicElementType's recursive core, returning the alias identifier BODY
+// (no ellipsis prefix) so a pointer element can compose its pointee's.
+func (v *Visitor) variadicElementParts(elem types.Type) (typeName string, identBody string, inline bool) {
 	typeName = v.getCSTypeName(elem)
 
 	// A type parameter is not in scope at namespace scope, so it can be neither an alias referent nor
@@ -95,8 +108,32 @@ func (v *Visitor) variadicElementType(elem types.Type) (typeName string, aliasNa
 		return typeName, "", true
 	}
 
-	// A constructed type carries '<'/'>', which a using-alias identifier cannot contain and which no
-	// transliteration removes (`ж<ast.File>`, `Action<ж<options>>`, `map<@string, any>`).
+	// A POINTER is the one CONSTRUCTED form with an identifier-safe rendering: go2cs already writes
+	// `*T` as `ж<T>`, so the identifier transliterates to `жT` and still reads like the Go source
+	// (`bs ...*box` → `params ꓸꓸꓸжbox bsʗp`). The pointee resolves through this same routine because
+	// it needs the identical namespace-scope qualification — the alias referent must say
+	// `ж<main_package.box>` where the INLINE form can say bare `ж<box>`, since only the inline form
+	// sits inside the package class. A pointee with no alias form of its own (a type parameter, a
+	// constructed pointee such as `*[]byte`) takes the whole element inline with it.
+	if pointer, ok := elem.(*types.Pointer); ok {
+		if typeName != fmt.Sprintf("%s<%s>", PointerPrefix, v.getCSTypeName(pointer.Elem())) {
+			// getCSTypeName rendered this pointer some other way (an erased pointer-core type
+			// parameter, a lifted type) — do not guess at its structure.
+			return typeName, "", true
+		}
+
+		pointeeType, pointeeIdent, pointeeInline := v.variadicElementParts(pointer.Elem())
+
+		if pointeeInline {
+			return typeName, "", true
+		}
+
+		return fmt.Sprintf("%s<%s>", PointerPrefix, pointeeType), PointerPrefix + pointeeIdent, false
+	}
+
+	// Every other constructed type carries '<'/'>', which a using-alias identifier cannot contain and
+	// for which there is no established transliteration (`Action<ж<options>>`, `map<@string, any>`,
+	// `slice<byte>`).
 	if strings.ContainsAny(typeName, "<>") {
 		return typeName, "", true
 	}
@@ -145,7 +182,7 @@ func (v *Visitor) variadicElementType(elem types.Type) (typeName string, aliasNa
 		}
 	}
 
-	return typeName, EllipsisOperator + aliasIdent, false
+	return typeName, aliasIdent, false
 }
 
 // variadicAliasIdent renders the body of a variadic element's ellipsis alias identifier so the

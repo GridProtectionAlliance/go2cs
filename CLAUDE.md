@@ -207,16 +207,18 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
 
   | Command | Measured (warm) | Set timeout | Notes |
   |---|---|---|---|
-  | `run-behavioral.ps1` (full, 4 phases) | **~386s (6.5 min)** | 600–900s | 457/457 Transpile+Compile+Target; 427 Output-compared, 30 skipped (no `package main`) |
-  | `check-no-regression.ps1` (full) | **~317s (5.3 min)** | 480–600s | transpile-only, no compile/run; re-transpiles unconditionally |
+  | `run-behavioral.ps1` (full, 4 phases) | **~385–475s (6.5–8 min)** | 600–900s | 457/457 Transpile+Compile+Target; 427 Output-compared, 30 skipped (no `package main`) |
+  | `check-no-regression.ps1` (full) | **~285–320s (5–5.5 min)** | 480–600s | transpile-only, no compile/run; re-transpiles unconditionally |
   | `run-behavioral.ps1 --filter <Name>` | **~10–20s** (8 projects) | default | the iteration loop — use this, not the full suite |
   | `go2cs -stdlib -comments` (full reconvert) | **~195s (3m 14s)** | 600s | 304 projects; per-file work is sub-second, the cost is `go/packages` |
   | single `go-src-converted` pkg build | **~6s** (log/slog) – **~60s** cold (go/types) | 180–400s | cold includes the dependency chain |
 
   Materially *past* these means the test host has hung under lock contention, not real work — stop and
   clear it rather than waiting 10–20 min. **Re-measure and update this table when the corpus grows again**;
-  a stale baseline is what makes a healthy run look hung (and vice versa). A converter rebuild invalidates
-  every project's up-to-date check, so the *next* full run after one always pays full price.
+  a stale baseline is what makes a healthy run look hung (and vice versa). The spreads above are real
+  run-to-run variance on the same corpus (machine load), so budget from the TOP of the range, not the
+  midpoint. A converter rebuild invalidates every project's up-to-date check, so the *next* full run
+  after one always pays full price.
   ⚠ **Piping a long run through `Select-Object -Last N` buffers ALL output until it completes** — a
   backgrounded suite will look stuck at its first line for its entire duration. Check liveness with
   `Get-Process BehavioralRunner,dotnet`, not the output file.

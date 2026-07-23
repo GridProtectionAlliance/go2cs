@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
+using ꓸꓸꓸжbox = Span<ж<main_package.box>>;
 
 partial class main_package {
 
@@ -10,7 +11,7 @@ partial class main_package {
     internal nint v;
 }
 
-internal static nint total(params Span<ж<box>> bsʗp) {
+internal static nint total(params ꓸꓸꓸжbox bsʗp) {
     var bs = bsʗp.slice();
 
     nint sum = 0;
@@ -26,6 +27,16 @@ internal static nint countPtrs(params ꓸꓸꓸunsafeꓸPointer psʗp) {
     return len(ps);
 }
 
+internal static nint totalLens(params Span<slice<byte>> bssʗp) {
+    var bss = bssʗp.slice();
+
+    nint sum = 0;
+    foreach (var (_, bs) in bss) {
+        sum += len(bs);
+    }
+    return sum;
+}
+
 internal static void Main() {
     var a = Ꮡ(new box(v: 1));
     var b = Ꮡ(new box(v: 2));
@@ -37,6 +48,8 @@ internal static void Main() {
     fmt.Println(total(boxes.ꓸꓸꓸ));
     fmt.Println(countPtrs(new @unsafe.Pointer(a), new @unsafe.Pointer(b), new @unsafe.Pointer(c)));
     fmt.Println(countPtrs());
+    fmt.Println(totalLens(slice<byte>("ab"u8), slice<byte>("cde"u8)));
+    fmt.Println(totalLens());
     fmt.Println(pairTotal(a, b, c));
 }
 
