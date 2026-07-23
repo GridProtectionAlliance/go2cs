@@ -1078,6 +1078,16 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets the length of the stack-only <paramref name="slice"/>.
+    /// </summary>
+    /// <param name="slice">Target stack slice.</param>
+    /// <returns>The length of the <paramref name="slice"/>.</returns>
+    public static nint len<T>(in sslice<T> slice)
+    {
+        return slice.Length;
+    }
+
+    /// <summary>
     /// Gets the length of the <paramref name="slice"/>.
     /// </summary>
     /// <param name="slice">Target slice.</param>
