@@ -590,6 +590,13 @@ public sealed class TestRunner
 
 public sealed class TestExecution
 {
+    // Go goroutine stacks GROW (to ~1GB on 64-bit), so deeply recursive test code is legal Go —
+    // io/fs's TestCVE202230630 legitimately recurses 10,001 frames through globWithLimit before
+    // its own depth guard fires. A .NET thread's stack is a FIXED reservation (default ~1MB) and
+    // an overflow is uncatchable, killing the whole host. 256MB reserves address space only
+    // (pages commit on demand), giving Go-scale headroom at no real memory cost.
+    private const int TestThreadStackSize = 256 * 1024 * 1024;
+
     private readonly TestRunner m_runner;
     private readonly TestExecution? m_parent;
     private readonly object m_syncRoot = new();
@@ -664,7 +671,7 @@ public sealed class TestExecution
             {
                 completion.TrySetResult();
             }
-        })
+        }, TestThreadStackSize)
         {
             IsBackground = true,
             Name = $"go2cs test: {Name}"
