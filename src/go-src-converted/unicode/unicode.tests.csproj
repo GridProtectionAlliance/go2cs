@@ -66,7 +66,6 @@
        can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="digit_test.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="graphic_test.cs" />
     <Compile Include="letter_test.cs" />
