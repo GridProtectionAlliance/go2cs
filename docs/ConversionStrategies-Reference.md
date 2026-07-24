@@ -5199,6 +5199,47 @@ the publicize.)
 
 **A publicized wrapper reaches through an UNNAMED composite RHS to its element type.** A defined type whose `[GoType]` wrapper is emitted `public` (exported, or unexported-but-publicized) exposes its written RHS through the wrapper's `Value`/ctor/indexer/operators, so an unexported RHS type must be publicized too. This holds not just for a NAMED RHS (`type EncoderBuffer encoder`) but for an UNNAMED composite RHS whose ELEMENT is an unexported named type: `type ringElement [256]fieldElement` exposes `fieldElement` through the array-wrapper's indexer/`Value`/`ToSpan`, so `fieldElement` must be publicized (crypto/internal/mlkem768, CS0050/CS0051/CS0053/CS0054/CS0056/CS0057). `collectPublicizedWrapperRHS` therefore feeds the RHS unconditionally to the pointer/slice/array/map/chan-peeling walk (`collectUnexportedNamedTypes`) rather than gating on a named RHS. The walk has no `*types.Struct` case, so a struct RHS stays a no-op — an exported field of an unexported struct-field type is the CS0052 domain and is intentionally left internal. (Guarded by the `NamedArrayWrapper` extension — an exported `Grid [3]unit` over an unexported `unit`, output vs Go.)
 
+### A test-file exported helper over an unexported PRODUCTION type is emitted `internal` (the MIRROR)
+The publicization passes above run over a single `*types.Package` and raise a production type's
+accessibility to match the exported production surface that exposes it. A `_test.go`-declared helper
+is the **mirror** case and needs the *opposite* resolution. In the `-tests` pipeline the production
+sources are converted first and independently (no test files), so an unexported production type is
+already emitted `internal` on disk; the test files are converted afterward. Go's `strconv/internal_test.go`
+declares an EXPORTED helper returning that internal production type:
+
+```go
+// internal_test.go (package strconv) — exports access to strconv internals for tests
+func NewDecimal(i uint64) *decimal { … }   // decimal is package-private, emitted `internal`
+```
+
+Emitting `NewDecimal` `public` (its capitalized name) makes it a public method whose result is the
+less-accessible internal `decimal` — CS0050. Publicizing `decimal` is **not** the fix here: production
+was already emitted (and is not re-emitted in the test pass), so the map entry would be inert, and a
+public API surface for a test-only helper is semantically wrong. In the recompile test model the test
+assembly is self-contained (production + internal-`package strconv` + external-`package strconv_test`
+files all compile into ONE assembly, with no cross-assembly consumer of a test symbol), so the correct
+and sufficient resolution is to downgrade the helper to `internal`:
+
+```csharp
+internal static ж<@decimal> NewDecimal(uint64 i) { … }   // was public → CS0050; internal ≤ any prod access
+```
+
+`visitFuncDecl` downgrades an exported free function (`Recv == nil`) declared in a `_test.go` file when
+its signature references, in any param/result position (peeling pointer/slice/array/map/chan),
+an unexported same-package named type **declared in a production file**
+(`signatureReferencesUnexportedProductionType`). The production-file restriction is essential and is
+what distinguishes this from `sort`'s `example_multi_test.go`, whose exported `OrderedBy(...) *multiSorter`
+returns an unexported type declared **in a test file**: that type is publicized AND re-emitted `public`
+within the same test pass (the framework above), so its referrer compiles as public and must **not**
+be flipped. Only a production-declared unexported type stays `internal`-on-disk and forces the
+downgrade. The change fires solely inside `_test.go` conversion, so normal-path output is byte-identical
+(check-no-regression clean across the behavioral corpus) and no already-validated package drifts
+(`sort` re-validates 63/63, `SetOptimize(bool) bool` in the same file stays `public`). This is the
+blocker that lets `strconv`'s test host reach compilation of its file-reading suites (`TestFp`/`TestAtof`
+read `testdata/testfp.txt` via `os.Open` + `bufio.Scanner`). No behavioral guard is expressible — the
+`-tests` recompile model has no normal-path analogue — so the guard is the `strconv` pipeline (its
+`internal_test.cs` emits `NewDecimal` `internal`; the CS0050 no longer blocks).
+
 ### A publicized unexported interface is emitted `public`
 The accessibility pass records an unexported **interface** used in an exported surface exactly like a
 struct or func type — testing's `type testDeps interface { … }` reached through `func MainStart(deps

@@ -430,6 +430,20 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
 	functionAccess := getAccess(goFunctionName)
+
+	// A test-file-declared EXPORTED free function whose signature references an unexported same-
+	// package type is downgraded to `internal`: production emits that type internal and is converted
+	// independently of (and before) the test files, so a public helper over it is CS0050/CS0051 (Go's
+	// `func NewDecimal(uint64) *decimal` in strconv's internal_test.go). The recompile test model puts
+	// production + internal + external test files in one self-contained assembly, so internal is both
+	// correct and sufficient (see signatureReferencesUnexportedType). Methods (Recv != nil) already
+	// track their receiver's access below, and unexported helpers are internal already, so this only
+	// touches exported free functions declared in *_test.go.
+	if functionAccess == "public" && funcDecl.Recv == nil && v.isTestFileDecl(funcDecl.Pos()) &&
+		v.signatureReferencesUnexportedProductionType(signature, v.pkg) {
+		functionAccess = "internal"
+	}
+
 	isModuleInitializer := false
 
 	if funcDecl.Recv == nil {

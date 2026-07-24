@@ -8,7 +8,9 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"go/types"
+	"strings"
 )
 
 // packagePublicizedTypes holds unexported named types in the package that must be emitted as
@@ -404,6 +406,84 @@ func isPublicizedLiftedType(t types.Type) bool {
 	}
 
 	return packagePublicizedLiftedTypes[types.Unalias(t)]
+}
+
+// signatureReferencesUnexportedProductionType reports whether a function/method signature references,
+// in any parameter or result position (peeling pointer/slice/array/map/channel wrappers to the
+// element), an unexported named type of pkg that is declared in a PRODUCTION (non-test) file.
+//
+// It is the MIRROR of the production publicization framework, used for test-file-declared symbols:
+// production emits an unexported type as `internal` and is converted independently of (and before)
+// the test files, so a test file's EXPORTED helper — Go's `func NewDecimal(uint64) *decimal` in
+// strconv's internal_test.go — would be a public method whose result type is the less-accessible
+// internal production `decimal` (CS0050). In the recompile test model the test assembly is self-
+// contained (production + internal + external test files compile into ONE assembly, no cross-assembly
+// consumer of a test symbol), so downgrading such a helper to `internal` is both correct and
+// sufficient — internal is at least as restrictive as any accessibility the helper references, and
+// every caller (other test files) lives in the same assembly.
+//
+// The PRODUCTION-file restriction is essential: an unexported type declared in a TEST file (sort's
+// `multiSorter` in example_multi_test.go, returned by the exported `OrderedBy`) is publicized AND
+// re-emitted `public` within this same test pass by the framework above, so its exported referrer
+// compiles as public with no CS0050 — flipping it to internal would be a needless emission change.
+// Only a production-declared unexported type stays internal-on-disk and forces the downgrade.
+func (v *Visitor) signatureReferencesUnexportedProductionType(sig *types.Signature, pkg *types.Package) bool {
+	if sig == nil {
+		return false
+	}
+
+	if params := sig.Params(); params != nil {
+		for i := range params.Len() {
+			if v.typeReferencesUnexportedProductionNamed(params.At(i).Type(), pkg) {
+				return true
+			}
+		}
+	}
+
+	if results := sig.Results(); results != nil {
+		for i := range results.Len() {
+			if v.typeReferencesUnexportedProductionNamed(results.At(i).Type(), pkg) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// typeReferencesUnexportedProductionNamed reports whether t is, or wraps (through pointer/slice/array/
+// map/channel), an unexported named type of pkg declared in a production (non-test) file — the read-
+// only counterpart of collectUnexportedNamedTypes, with the production-file gate described on
+// signatureReferencesUnexportedProductionType.
+func (v *Visitor) typeReferencesUnexportedProductionNamed(t types.Type, pkg *types.Package) bool {
+	switch t := t.(type) {
+	case *types.Named:
+		obj := t.Obj()
+		return obj.Pkg() == pkg && !obj.Exported() && !v.isTestFileDecl(obj.Pos())
+	case *types.Pointer:
+		return v.typeReferencesUnexportedProductionNamed(t.Elem(), pkg)
+	case *types.Slice:
+		return v.typeReferencesUnexportedProductionNamed(t.Elem(), pkg)
+	case *types.Array:
+		return v.typeReferencesUnexportedProductionNamed(t.Elem(), pkg)
+	case *types.Map:
+		return v.typeReferencesUnexportedProductionNamed(t.Key(), pkg) || v.typeReferencesUnexportedProductionNamed(t.Elem(), pkg)
+	case *types.Chan:
+		return v.typeReferencesUnexportedProductionNamed(t.Elem(), pkg)
+	}
+
+	return false
+}
+
+// isTestFileDecl reports whether the declaration at pos originates from a Go test file (`*_test.go`).
+// Used to gate test-only accessibility handling; resolves the source filename through the visitor's
+// FileSet so it is independent of which file the visitor currently has open.
+func (v *Visitor) isTestFileDecl(pos token.Pos) bool {
+	if v.fset == nil || !pos.IsValid() {
+		return false
+	}
+
+	return strings.HasSuffix(strings.ToLower(v.fset.Position(pos).Filename), "_test.go")
 }
 
 // isPublicizedType reports whether the named type identified by ident must be emitted as public
