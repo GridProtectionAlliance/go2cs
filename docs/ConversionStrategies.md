@@ -297,6 +297,21 @@ public static error Unwrap(error err) {     // errors/wrap.cs
 }
 ```
 
+A nil→pointer **conversion** — Go's typed nil, `(*T)(nil)` — instead yields the pointer type's
+**canonical typed nil instance** (`ж<T>.NilBox`), so the boxed value keeps its Go dynamic type:
+`any((*T)(nil)) != nil`, `%T` prints `*T`, and the stdlib's descriptor idiom
+`reflect.TypeOf((*T)(nil)).Elem()` resolves — a bare `null` erased all three:
+
+```go
+var errorType = reflectlite.TypeOf((*error)(nil)).Elem()   // errors/wrap.go
+```
+```csharp
+internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
+```
+
+Detail (pointer-identity rules, adapter seeding, the structural-vs-dereference nil distinction):
+[Canonical typed-nil pointer boxing](ConversionStrategies-Reference.md#canonical-typed-nil-pointer-boxing).
+
 Zero-value reference-backed values are null-safe: a `default!` `@string` reads as `""` rather than
 throwing.
 

@@ -1,11 +1,10 @@
 # DESIGN — Native reflection bridge (Phase 4 operational)
 
-> **Status (2026-07-22): Phases 1 and 2 are SHIPPED. Phase 3 is the open work** — and it is a
-> chip-class arc, per §6.1 of [`Phase4-Autonomous-Loop-Charter.md`](Phase4-Autonomous-Loop-Charter.md).
-> Companion to the Phase-4 operational campaign in [`../Roadmap.md`](../Roadmap.md). The `reflect`
-> package *compiled* at the project's Phase-3 milestone (see
-> [`../Phase3/Reflect-Census.md`](../Phase3/Reflect-Census.md)) but did not *run* — this is the
-> operational bridge that makes it work.
+> **Status (2026-07-24): Phases 1, 2, and PHASE-3 INCREMENT 1 (the write-back half) are SHIPPED.**
+> Increment 1 landed via the §6.1 chip (session `optimistic-bassi-496625`; design + adversarial-review
+> ledger in [`DESIGN-reflection-bridge-phase3-plan.md`](DESIGN-reflection-bridge-phase3-plan.md)),
+> validating **errors (#34, 61/61 vs `go test -json`)** as its demonstrated consumer.
+> Companion to the Phase-4 operational campaign in [`../Roadmap.md`](../Roadmap.md).
 >
 > ⚠ **"Phase 1/2/3" below are THIS DOCUMENT's scope phases** (§ *Scope*), unrelated to the project's
 > Phase-3 / Phase-4 milestones.
@@ -20,14 +19,35 @@
 > `internal/reflectlite` mini-bridge (`ValueOf`/`Len`/`Swapper`), and the `synthType.Equal`
 > comparability signal (encoding/csv, 2026-07-21).
 >
-> **NOT implemented — the chip's scope:** everything in *Phase 3* (`Value.Set*` + addressability/
-> `CanSet`, `Value.Call`/`MakeFunc` dynamic invocation, `MakeSlice`/`MakeMap`/`New`), the
-> `getcallersp` stub (`PartialStubGenerator` `NotImplementedException` in `runtime`; errors TestAs →
-> `reflect.mustBeAssignableSlow`), open question 3 (field-name/tag fidelity) beyond what `rtype.Field`
-> returns today, and the **adapter-type follow-up**: `GoReflect.KindOf`/`ElementType` still report the
-> *adapter class* for `IжAdapter` / ᴠ-adapter types, where `GoTypeName` already unwraps them via
-> `TryAdapterWrappedType` (flagged by R10 in
-> [`StringsBytes-BlockerMap.md`](StringsBytes-BlockerMap.md)).
+> **Phase-3 increment 1 (SHIPPED 2026-07-24, the chip):** the ONE new primitive — an **addressable
+> Value carries the `ж<T>` box it aliases** (`addrBox` companion; reads go through the box lazily,
+> `Set` writes through its slot ref via cached compiled accessors over `ValueSlot`) — plus
+> `reflect.{Value.Set, Zero, methodName}` and the reflectlite errors.As surface
+> (`Value.{Elem,IsNil,Set}`, `rtype.{Elem,Implements,AssignableTo}`, `methodName`), all over shared
+> golib machinery (`GoReflect.{TryMarshalAssignable, GoImplements, ReadPointerSlot/WritePointerSlot,
+> CanonicalNilPointer, GoDynamicTypeOf}`) so reflection and emitted `_<T>` asserts can never disagree
+> about a method set. With it landed: **canonical typed-nil pointer boxing** (X2 — converter + golib
+> `ж<T>.NilBox` + gen; see ConversionStrategies-Reference `Canonical typed-nil pointer boxing`),
+> structural nil-pointer identity (`INilPointer`; heap-box-holding-nil ≠ nil pointer), the R10
+> adapter unwrap (`GoDynamicTypeOf` — descriptors classify the Go dynamic type, so adapter-held and
+> raw-box values intern to ONE canonical Type), the golib assert-fallback unwrap + ж-overload
+> closing (X1) with the non-generic `TryTypeAssert(object, Type, out object)`, dyn-wrapper
+> `IInterfaceAdapter` transparency + the `[GoRecv]` method-set fix (X3), Go-parity empty-name
+> subtest numbering (X4), the oracle's two-phase address-token pairing (X5), and `%v`-of-
+> method-bearing-pointer fidelity (handleMethods wins, never `&`-prefixed). The `getcallersp`
+> `NotImplementedException` chain is severed at `methodName` — the semantic boundary where a
+> managed answer exists.
+>
+> **NOT implemented — Phase-3 increment 2 (the same chip, next arc):** `Value.Call` (delegate
+> `DynamicInvoke`, multi-return tuple destructure into `NumOut`/`Out(i)`) → **testing/quick**;
+> `MakeSlice`/`MakeMap`/`New`/`SetMapIndex`/`Set{Int,Uint,…}` + `Field(i)`/`Index(i)`
+> addressability (the ж field-ref/element-ref alias boxes + a runtime ref-accessor builder) →
+> **quick + encoding/binary**, then gob; map/chan/func `Zero` kinds; the Go unnamed↔named
+> `directlyAssignable` refinement; reflect-side `Implements`/`AssignableTo` mirrors; named-pointer
+> wrapper `KindOf` classification; open question 3 (field-name/tag fidelity). Known limitation
+> (recorded): named func types collapse to their structural `Func<>`/`Action<>` under `canonType`
+> System.Type interning — carried named-func identity is needed if a consumer (gob's type
+> registry) lands on it.
 
 ## The problem
 

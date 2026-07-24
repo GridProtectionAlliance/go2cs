@@ -774,6 +774,43 @@ In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses
 
 The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default!`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
 
+### Canonical typed-nil pointer boxing
+Go's typed nil is a real value: `any((*T)(nil))` is a **non-nil** interface carrying dynamic type
+`*T`, `%T` prints `*T`, and the pervasive descriptor idiom `reflect.TypeOf((*T)(nil)).Elem()`
+resolves the pointee type. A bare C# `null` erases all of that, so a nil→pointer **conversion**
+renders in pointer context and yields the type's **canonical typed nil instance** — one shared,
+write-protected instance per pointer type (`ж<T>.NilBox`; a generated named-pointer wrapper's
+`NilInstance`), which the `NilType` implicit conversion returns:
+
+```go
+var errorType = reflectlite.TypeOf((*error)(nil)).Elem()
+var x any = (*int)(nil)   // x != nil; %T prints *int
+```
+```csharp
+internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
+any x = ((ж<nint>)nil);
+```
+
+Supporting semantics, all structural (`m_isNull` — never the value-peeking `IsNull`, which remains
+the dereference guard):
+
+- **Pointer identity**: a null reference and a nil box are the same Go nil pointer and compare
+  equal; a heap box *holding* a nil value (`ж<ж<T>>` captured local) is a **non-nil pointer holding
+  nil** — two such distinct addresses are unequal and neither equals nil (`&p1 != &p2` though
+  `p1 == p2 == nil`), including when both slots share the canonical singleton.
+- **Interface adapters** null-coalesce their receiver box to the canonical instance, so an
+  interface holding a nil `*T` keeps its dynamic type, typed nils compare correctly across the
+  `any`/interface boundary (`(*A)(nil)`-error ≠ `(*B)(nil)`-error), and `case *T:` matches with a
+  nil pointee.
+- The non-generic `INilPointer` surface exposes the structural predicate to runtime machinery
+  holding a pointer only as `object` (equality tails, the reflection bridge's `IsNil`/`Elem`).
+
+`(*T)(nil)` conversion **expressions** are the scope — pointer-typed locals, parameters, and
+fields keep plain `null` (their statically-typed world never needed the type carried). Guarded by
+`TypedNilInterface`, `PointerToNilPointerIdentity`, and `NamedPointerReinterpret` (the canonical
+singleton keeps its `object`-reference nil compare working); part of the reflection-bridge
+Phase-3 chip (see `docs/Phase4/DESIGN-reflection-bridge.md`).
+
 ### Pointer-to-interface assignment through selector fields
 A selector assignment whose LHS field is an interface (`h.d = s`) uses the type of the **whole selector expression**, not just the selected identifier name, when deciding whether to wrap the RHS in an interface adapter. If the RHS is a pointer-typed identifier, the adapter receives the pointer box so a dereferenced value alias is not copied into a pointer-only implementation. The generated form matches other pointer-to-interface conversion sites:
 
