@@ -65,8 +65,19 @@ button {
 }
 
 .brand img {
+  display: block;
   width: 64px;
   height: auto;
+}
+
+.brand-link {
+  flex: 0 0 auto;
+  border-radius: 3px;
+}
+
+.brand-link:focus-visible {
+  outline: 2px solid var(--go);
+  outline-offset: 2px;
 }
 
 .brand strong {
@@ -341,27 +352,27 @@ button {
 }
 
 .output-tabs button.passed::before {
-  content: "✓ ";
+  content: "\2713  ";
   color: var(--green);
 }
 
 .output-tabs button.failed::before {
-  content: "× ";
+  content: "\00d7  ";
   color: var(--red);
 }
 
 .output-tabs button.running::before {
-  content: "● ";
+  content: "\25cf  ";
   color: var(--amber);
 }
 
 .output-tabs button.killed::before {
-  content: "■ ";
+  content: "\25a0  ";
   color: var(--red);
 }
 
 .output-tabs button.skipped::before {
-  content: "– ";
+  content: "\2013  ";
   color: var(--muted);
 }
 
@@ -372,17 +383,28 @@ button {
   font-size: 9px;
 }
 
-#output-view {
+.output-scroll {
   width: 100%;
   height: 100%;
+  overflow: auto;
+  background-color: var(--output);
+  background-image: url("/dotnet-bot.png");
+  background-repeat: no-repeat;
+  background-position: center calc(100% - 8px);
+  background-size: auto min(72%, 132px);
+  scrollbar-color: #35515d transparent;
+}
+
+#output-view {
+  width: 100%;
+  min-height: 0;
   margin: 0;
   padding: 10px 13px 22px;
-  overflow: auto;
   color: #b9ced6;
   background: var(--output);
-  font: 11px/1.5 "Cascadia Mono", Consolas, monospace;
+  font: 16px/24px "Inconsolata", monospace;
   white-space: pre-wrap;
-  scrollbar-color: #35515d transparent;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {

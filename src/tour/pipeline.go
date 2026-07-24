@@ -147,11 +147,12 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 		}
 	}
 
-	if transpile.Status != "passed" || project == "" {
-		if project == "" && transpile.Status == "passed" {
-			result.Stage.Status = "failed"
-			result.Stage.Output = strings.TrimSpace(result.Stage.Output + "\ngo2cs did not emit a .csproj file.")
-		}
+	if project == "" && result.Stage.Status == "passed" {
+		result.Stage.Status = "failed"
+		result.Stage.Output = appendOutputLine(result.Stage.Output, "go2cs did not emit a .csproj file.")
+	}
+	result.Stage.Output = formatTranspileTranscript(result.Stage.Output, outputDir, result.Stage.Status)
+	if result.Stage.Status != "passed" || project == "" {
 		return result, nil
 	}
 
@@ -256,6 +257,80 @@ func (p *pipelineRunner) ensureGo2CS(ctx context.Context) (string, *stageResult)
 	return target, &stage
 }
 
+func formatTranspileTranscript(output, root, status string) string {
+	lines := []string{"$ go2cs main.go"}
+	if output = strings.TrimSpace(output); output != "" {
+		lines = append(lines, output)
+	}
+	if files, err := generatedArtifactNames(root); err == nil && len(files) > 0 {
+		lines = append(lines, "Generated files:")
+		for _, file := range files {
+			lines = append(lines, "  "+file)
+		}
+	}
+	switch status {
+	case "passed":
+		lines = append(lines, "Transpile completed.")
+	case "killed":
+		lines = append(lines, "Transpile killed.")
+	default:
+		lines = append(lines, "Transpile failed.")
+	}
+	return strings.Join(lines, "\n")
+}
+
+func generatedArtifactNames(root string) ([]string, error) {
+	var files []string
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case "bin", "obj", "Generated":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		extension := strings.ToLower(filepath.Ext(entry.Name()))
+		if extension != ".cs" && extension != ".csproj" {
+			return nil
+		}
+		relative, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		files = append(files, filepath.ToSlash(relative))
+		return nil
+	})
+	sort.Strings(files)
+	return files, err
+}
+
+func appendOutputLine(output, line string) string {
+	output = strings.TrimSpace(output)
+	if output == "" {
+		return line
+	}
+	return output + "\n" + line
+}
+
+func programExitMessage(parent, command context.Context, err error) string {
+	switch {
+	case err == nil:
+		return "Program exited."
+	case errors.Is(parent.Err(), context.Canceled):
+		return "Program exited: killed"
+	case errors.Is(command.Err(), context.DeadlineExceeded):
+		return "Program exited: process took too long."
+	}
+
+	var exitError *exec.ExitError
+	if errors.As(err, &exitError) && exitError.ExitCode() >= 0 {
+		return fmt.Sprintf("Program exited: status %d.", exitError.ExitCode())
+	}
+	return "Program exited: " + strings.TrimSuffix(strings.TrimSpace(err.Error()), ".") + "."
+}
 func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string, timeout time.Duration, name string, args ...string) stageResult {
 	started := time.Now()
 	ctx, cancel := context.WithTimeout(parent, timeout)
@@ -276,12 +351,19 @@ func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string,
 		switch {
 		case errors.Is(parent.Err(), context.Canceled):
 			status = "killed"
-			text += "\nKilled."
+			if id != "run" {
+				text = appendOutputLine(text, "Killed.")
+			}
 		case errors.Is(ctx.Err(), context.DeadlineExceeded):
-			text += fmt.Sprintf("\nTimed out after %s.", timeout)
-		case text == "":
+			if id != "run" {
+				text = appendOutputLine(text, fmt.Sprintf("Timed out after %s.", timeout))
+			}
+		case text == "" && id != "run":
 			text = err.Error()
 		}
+	}
+	if id == "run" {
+		text = appendOutputLine(text, programExitMessage(parent, ctx, err))
 	}
 
 	return stageResult{

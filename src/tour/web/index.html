@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1d27">
   <title>Tour of go2cs</title>
-  <link rel="icon" href="/assets/go2cs.ico">
+  <link rel="icon" type="image/x-icon" href="/assets/go2cs.ico">
+  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <header class="app-header">
     <div class="brand">
-      <img src="/assets/go2cs-small.png" alt="" width="124" height="63">
+      <a class="brand-link" href="https://go2cs.net" target="_blank" rel="noopener noreferrer" aria-label="Open go2cs.net in a new tab">
+        <img src="/assets/go2cs-small.png" alt="go2cs" width="124" height="63">
+      </a>
       <strong>Tour of go2cs</strong>
       <span>Reads like Go. Runs like Go.</span>
     </div>
@@ -75,7 +78,9 @@
           <button role="tab" type="button" data-output="run" aria-selected="false">.NET Run</button>
           <span id="output-timing"></span>
         </div>
-        <pre id="output-view" tabindex="0">Open a Tour page to convert its Go code.</pre>
+        <div id="output-scroll" class="output-scroll" tabindex="0">
+          <pre id="output-view">Open a Tour page to convert its Go code.</pre>
+        </div>
       </section>
     </section>
   </main>

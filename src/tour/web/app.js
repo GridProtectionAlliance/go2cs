@@ -10,6 +10,7 @@
   const projectView = document.querySelector("#project-view code");
   const sourceTabs = document.querySelector(".source-tabs");
   const outputTabs = document.querySelector(".output-tabs");
+  const outputScroll = document.querySelector("#output-scroll");
   const outputView = document.querySelector("#output-view");
   const outputTiming = document.querySelector("#output-timing");
   const lessonLabel = document.querySelector("#lesson-label");
@@ -208,7 +209,7 @@
     } catch (error) {
       const active = outputs.run.status === "running" ? "run" : "build";
       if (error.name === "AbortError") {
-        outputs[active] = { id: active, status: "killed", output: "Killed by user.", durationMs: 0 };
+        outputs[active] = { id: active, status: "killed", output: active === "run" ? "Program exited: killed" : "Killed.", durationMs: 0 };
         if (active === "build") outputs.run = idleStage("run", "Run was not started.");
         conversionStatus.textContent = ".NET process killed";
       } else {
@@ -256,6 +257,7 @@
   }
 
   function renderOutputState() {
+    const followOutput = outputScroll.scrollTop + outputScroll.clientHeight >= outputScroll.scrollHeight - 4;
     for (const button of outputTabs.querySelectorAll("[data-output]")) {
       const stage = outputs[button.dataset.output];
       button.className = stage.status;
@@ -264,6 +266,11 @@
     const stage = outputs[activeOutput];
     outputView.textContent = stage.output || "(no output)";
     outputTiming.textContent = stage.durationMs ? `${(stage.durationMs / 1000).toFixed(2)}s` : "";
+    if (followOutput) {
+      requestAnimationFrame(() => {
+        outputScroll.scrollTop = outputScroll.scrollHeight;
+      });
+    }
   }
 
   function highlightCSharp(source) {
