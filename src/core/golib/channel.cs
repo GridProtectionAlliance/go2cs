@@ -534,14 +534,30 @@ internal sealed class ChanCore<T> : ChanCore
 /// whose channel core matches its own, so frames cannot be delivered to the wrong channel.
 /// </summary>
 /// <remarks>
-/// Known bounded residual (accepted, per the channels-redesign verification round): a panic or
-/// exception unwinding between a select's commit (frame pushed) and the winning guard's consume
-/// (frame popped) strands the frame on this thread's stack. A stranded frame is inert — later
-/// guards match by channel core against the TOP frame only, and every well-formed select pushes
-/// its winner's frame above any strand — so the failure is a bounded per-thread leak, not value
-/// corruption; the same unwind loses the committed value in Go terms (the panic abandoned the
-/// communication's result). Debug builds emit a depth-growth warning (never a process-killing
-/// assert) when the stack keeps growing, which is the observable signature of stranding.
+/// <para>
+/// Known residual (accepted, per the channels-redesign verification rounds): a panic or exception
+/// unwinding between a select's commit (frame pushed) and the winning guard's consume (frame
+/// popped) strands the frame on this thread's stack — and a select statement retried in a
+/// panic/recover loop grows the stack WITHOUT BOUND absent the cap below, each stranded frame
+/// pinning its boxed value. Frames are never MIS-consumed: every consume matches the top frame by
+/// channel core, so a strand can never deliver its value to the wrong channel. A strand below the
+/// top is inert (later selects stack and consume above it). A strand created ABOVE a live frame —
+/// a panic recovered between an INNER select's commit and consume, inside an outer guard's target
+/// expression — blocks the outer frame's consume: the outer guard's core match refuses the strand
+/// and the outer select fires zero cases, abandoning the committed value exactly as the panic
+/// abandoned the communication; wrong-value delivery remains impossible. Debug builds emit a
+/// depth-growth warning (never a process-killing assert), the observable signature of stranding.
+/// </para>
+/// <para>
+/// Cap-and-drop keeps the leak bounded: a frame is LIVE only while its select statement sits
+/// between commit and consume on this thread, which requires a strictly nested chain of selects,
+/// each running inside the previous one's guard target expression — reaching even a handful of
+/// simultaneously-live frames requires that many textually nested selects-in-out-target on one
+/// call stack (the deepest known real code is 2). At <see cref="MaxDepth"/> frames, everything
+/// below the newest <c>MaxDepth - 1</c> is therefore a strand in any plausible execution, and
+/// dropping a strand is behaviorally identical to leaving it (it could never be consumed — only
+/// refused). The oldest frames are dropped; the newest survive.
+/// </para>
 /// </remarks>
 internal static class SelectPending
 {
@@ -553,6 +569,7 @@ internal static class SelectPending
     }
 
     private const int DepthWarnThreshold = 8;
+    private const int MaxDepth = 64;
 
     [ThreadStatic] private static Stack<Frame>? t_frames;
 
@@ -560,6 +577,19 @@ internal static class SelectPending
     internal static void Push(ChanCore core, object? value, bool ok)
     {
         Stack<Frame> frames = t_frames ??= new Stack<Frame>();
+
+        if (frames.Count >= MaxDepth)
+        {
+            // Cap-and-drop (see remarks): everything below the newest MaxDepth - 1 frames is an
+            // unreachable strand in any plausible execution — drop the oldest to bound the leak.
+            Frame[] newestFirst = frames.ToArray();
+            frames.Clear();
+
+            for (int i = MaxDepth - 2; i >= 0; i--)
+                frames.Push(newestFirst[i]);
+
+            Debug.WriteLine($"go2cs WARNING: select pending-frame depth hit the {MaxDepth} cap on thread {Environment.CurrentManagedThreadId} — dropped {newestFirst.Length - (MaxDepth - 1)} stranded frame(s); frames are being stranded by panics unwinding between a select commit and its winning guard");
+        }
 
         frames.Push(new Frame { Core = core, Value = value, Ok = ok });
 

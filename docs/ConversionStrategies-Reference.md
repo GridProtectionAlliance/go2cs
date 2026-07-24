@@ -2938,10 +2938,15 @@ legacy `Sending` path):
   single slot was destroyed by the inner select's entry (outer value lost, or the next buffered
   value stolen — found by the adversarial verification round). Only receive commits push frames; a
   send-case win touches nothing (a select may have send and receive cases on the SAME channel, and
-  clearing would destroy an outer frame mid-nest). Known bounded residual: an exception unwinding
-  between commit and consume strands a frame — inert (later guards match the top frame by core),
-  signaled by a Debug-only depth-growth warning, never a process-killing assert. With no matching
-  frame the same guards are non-blocking probes, unchanged.
+  clearing would destroy an outer frame mid-nest). Known residual: a panic unwinding between
+  commit and consume strands a frame — unbounded under a repeated panic-in-target/recover loop
+  absent the depth-64 cap-and-drop (frames below the newest 63 are unreachable strands — a LIVE
+  frame requires its select to sit mid-guard on the call stack, so live depth equals textual
+  select-in-out-target nesting, never plausibly near 64). Frames are never MIS-consumed (every
+  consume matches the top frame by channel core); a strand stacked above a live frame makes the
+  outer select fire zero cases — the committed value is abandoned exactly as the panic abandoned
+  the communication, never delivered wrongly. Debug-only depth warnings, never a process-killing
+  assert. With no matching frame the same guards are non-blocking probes, unchanged.
 * **Close/panic semantics are Go's**: send on closed panics (even from within a select, and even
   when a `default:` exists); close of closed and close of nil panic; a parked select-send woken by
   close panics on its own thread; parked receivers (plain and select) wake with `(zero, false)`;

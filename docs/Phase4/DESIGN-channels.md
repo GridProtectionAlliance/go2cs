@@ -97,8 +97,10 @@ evaluated BEFORE the guard call, and legal Go can run another select there
 (`case a[f()] = <-ch:` where `f()` selects), which destroyed a single slot (outer value lost or the
 next buffered value stolen). Frames push/pop balanced across nesting, so the clear-on-send-win and
 assert-empty-on-entry hardenings above are superseded (both are destructive in a nested context);
-the accepted bounded residual — an exception unwinding between commit and consume strands an inert
-frame — is documented in `SelectPending` with a Debug-only depth-growth warning. Guard:
+the accepted residual — a panic unwinding between commit and consume strands a frame, unbounded
+under a panic/recover retry loop absent `SelectPending`'s depth-64 cap-and-drop; frames are never
+mis-consumed, and a strand above a live frame abandons (never misdelivers) the outer commit — is
+documented in `SelectPending` with Debug-only depth warnings. Guard:
 `NestedSelectRecvTarget`.**]**
 
 **Emission/generator footprint (the entire visible change):**
@@ -146,6 +148,14 @@ through the `-tests` pipeline; re-validate all banked packages 0-fail.
   scope here). Documented divergence.
 - **Deadlock detection** stays the existing nil/all-nil approximation; a genuinely deadlocked
   all-real-channel program now parks forever (more Go-correct than the old accidental escape).
+- **Close-wake recv bias on a dual-case select (determinism bias, deferred).** A PARKED select
+  holding both a receive and a send case on ONE channel that then closes always fires the receive
+  case: `closechan` drains `Recvq` before `Sendq`, and the first claim wins the select's CAS, so
+  the recv waiter is always claimed first. Go re-polls the woken select and may uniformly-randomly
+  take the SEND case instead — and panic ("send on closed channel"). Both outcomes are legal
+  single-fire commits; ours is deterministic where Go's is random, and never takes the
+  panic branch. Pre-existing Unit-1 scope, recorded by the round-2 verification — deferred, do not
+  fix without re-gating the close family.
 - **NuGet lockstep:** golib signatures and the gen template change together — `go.lib` and `go.gen`
   must version-bump in the same release or `-recurse=nuget` apps can restore mismatched pairs.
 
