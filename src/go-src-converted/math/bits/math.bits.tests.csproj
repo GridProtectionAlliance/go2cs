@@ -69,8 +69,6 @@
     <Compile Include="bits_errors.cs" />
     <Compile Include="bits_tables.cs" />
     <Compile Include="bits_test.cs" />
-    <Compile Include="example_math_test.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="package_test_info.cs" />
@@ -92,7 +90,6 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)core\testing\testing.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\runtime\runtime.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
     <ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
