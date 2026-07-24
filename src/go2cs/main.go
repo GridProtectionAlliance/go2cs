@@ -765,8 +765,18 @@ func main() {
 	// A bare `-stdlib` conversion (the whole-library corpus) applies `-tags purego` by default; the
 	// converted standard library is defined to reproduce Go built with that tag (see
 	// defaultStdLibBuildTags). Detect whether the caller passed `-tags` at all: if they did — even
-	// `-tags=` to clear it — that is a deliberate override and we honor it verbatim. Only `-stdlib`
-	// gets the default; `-recurse`/single-file conversions stay tag-neutral (their build tags govern).
+	// `-tags=` to clear it — that is a deliberate override and we honor it verbatim.
+	//
+	// `-tests` gets the SAME purego default: a `-tests` run reconverts the package's PRODUCTION
+	// sources and recompiles them into the test assembly, so it must select the exact same source
+	// files the committed go-src-converted tree was built from (that tree is defined as Go built with
+	// -tags purego). Without this, a stdlib package whose asm variant and pure-Go variant are gated
+	// `!purego`/`purego` (crypto/subtle's xor_amd64.go declares a bodyless `func xorBytes` the .s
+	// provides, while xor_generic.go declares the same func WITH a body) has BOTH files converted and
+	// collides — CS0111 duplicate member — and the regenerated production .cs diverges from the
+	// committed purego emission. A managed C# runtime can never execute the hand-written .s assembly,
+	// so purego (the portable pure-Go implementations) is the correct default for a `-tests` run too.
+	// `-recurse`/single-file conversions stay tag-neutral (their build tags govern).
 	tagsExplicit := false
 	commandLine.Visit(func(f *flag.Flag) {
 		if f.Name == "tags" {
@@ -774,10 +784,7 @@ func main() {
 		}
 	})
 
-	buildTags := parseBuildTags(*buildTagsCmd)
-	if convertStdLib && !tagsExplicit {
-		buildTags = defaultStdLibBuildTags
-	}
+	buildTags := resolveBuildTags(convertStdLib, *convertTestsCmd, tagsExplicit, parseBuildTags(*buildTagsCmd))
 
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
 		if err != nil {
@@ -997,10 +1004,27 @@ Examples:
 // default (amd64/arm64/…) build binds hot crypto/hash functions to, so those declarations would
 // convert to throwing stubs that COMPILE but cannot RUN. `purego` selects the portable pure-Go
 // variants (real bodies the transpiler can convert), making "the corpus reproduces Go -tags purego"
-// a claim go2cs can actually honor. This default applies ONLY to `-stdlib` (the whole-library
-// corpus); `-recurse` end-user conversions and single-file/dir conversions stay tag-neutral so the
-// user's own build tags govern, and an explicit `-tags` on `-stdlib` overrides this default verbatim.
+// a claim go2cs can actually honor. This default applies to `-stdlib` (the whole-library corpus) AND
+// to `-tests` (see resolveBuildTags); `-recurse` end-user conversions and single-file/dir conversions
+// stay tag-neutral so the user's own build tags govern, and an explicit `-tags` overrides it verbatim.
 var defaultStdLibBuildTags = []string{"purego"}
+
+// resolveBuildTags picks the effective build tags for a conversion run. A bare `-stdlib` run and a
+// `-tests` run both apply the purego default (unless `-tags` was passed explicitly, even `-tags=` to
+// clear it — a deliberate override honored verbatim). `-tests` needs the SAME default as `-stdlib`
+// because it reconverts the package's PRODUCTION sources and recompiles them into the test assembly:
+// it must select the exact same source files the committed go-src-converted tree was built from (that
+// tree is Go built with `-tags purego`). Without this, a package whose asm and pure-Go variants are
+// gated `!purego`/`purego` (crypto/subtle's xor_amd64.go vs xor_generic.go, both declaring xorBytes)
+// gets BOTH files converted and collides (CS0111), and the regenerated production .cs diverges from
+// the committed purego emission. All other conversions stay tag-neutral (explicit tags only).
+func resolveBuildTags(convertStdLib, convertTests, tagsExplicit bool, explicit []string) []string {
+	if (convertStdLib || convertTests) && !tagsExplicit {
+		return defaultStdLibBuildTags
+	}
+
+	return explicit
+}
 
 // parseBuildTags splits a -tags value into individual build tags. Commas and whitespace are both
 // accepted as separators (the go command has used each form over time), and empty fields are dropped
