@@ -988,6 +988,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerToInterfaceParamDeref() => CheckTarget("PointerToInterfaceParamDeref");
 
     [TestMethod]
+    public void CheckPointerToNilPointerIdentity() => CheckTarget("PointerToNilPointerIdentity");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]

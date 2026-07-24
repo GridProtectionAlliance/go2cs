@@ -389,6 +389,7 @@
     <Project Path="Tests/Behavioral/PointerRvalueFieldReceiver/PointerRvalueFieldReceiver.csproj" />
     <Project Path="Tests/Behavioral/PointerToArrayElementAddress/PointerToArrayElementAddress.csproj" />
     <Project Path="Tests/Behavioral/PointerToInterfaceParamDeref/PointerToInterfaceParamDeref.csproj" />
+    <Project Path="Tests/Behavioral/PointerToNilPointerIdentity/PointerToNilPointerIdentity.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
     <Project Path="Tests/Behavioral/PointerValueToInterfaceArg/PointerValueToInterfaceArg.csproj" />
     <Project Path="Tests/Behavioral/PrintfWidthFlags/PrintfWidthFlags.csproj" />

@@ -328,6 +328,16 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     public bool IsNull => m_isNull || (m_nativeAddr == 0 && m_val is null);
 
     /// <summary>
+    /// Gets a flag indicating whether this box IS the nil pointer — the STRUCTURAL predicate
+    /// (the nil-constructed / canonical typed-nil form), as opposed to <see cref="IsNull"/>,
+    /// which additionally reports a real heap box whose held reference-typed value is null
+    /// (a non-nil pointer HOLDING a nil value, e.g. a captured <c>ж&lt;ж&lt;T&gt;&gt;</c> local).
+    /// Pointer identity (equality, the reflection bridge's <c>IsNil</c>/<c>Elem</c>) keys off
+    /// this; dereference guards key off <see cref="IsNull"/>.
+    /// </summary>
+    public bool IsNilPointer => m_isNull;
+
+    /// <summary>
     /// Gets a flag indicating whether this pointer ALIASES a native address rather than managed
     /// storage — see the <c>m_nativeAddr</c> field.
     /// </summary>
@@ -493,15 +503,22 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <inheritdoc/>
     public bool Equals(ж<T>? other)
     {
+        // A null REFERENCE and a structurally nil box are the same Go nil pointer — the two
+        // representations coexist (`(ж<T>)default!` emits null; `ж<T> p = nil` and the canonical
+        // typed-nil box are IsNilPointer boxes) and must compare equal, as Go's `(*T)(nil) == nil`.
         if (other is null)
-            return false;
+            return m_isNull;
 
         if (ReferenceEquals(this, other))
             return true;
 
-        // A nil pointer compares equal only to another nil pointer.
-        if (IsNull || other.IsNull)
-            return IsNull && other.IsNull;
+        // A nil pointer compares equal only to another nil pointer. STRUCTURAL nil only
+        // (m_isNull): a real heap box whose held reference-typed value is null (a captured
+        // `ж<ж<T>>` local holding a nil *T) is a NON-nil pointer holding a nil value — two such
+        // distinct boxes are distinct addresses in Go (&p1 != &p2), and such a box never equals
+        // nil. The value-peeking IsNull is for dereference guards, never pointer identity.
+        if (m_isNull || other.m_isNull)
+            return m_isNull && other.m_isNull;
 
         // Go pointer comparison is by identity — the same storage location — NOT by the pointed-to
         // value. A value-comparison fallback is both wrong (two distinct addresses that happen to
@@ -544,7 +561,9 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         // Two standard heap pointers, each a distinct allocation: equal only if they wrap the same
         // reference-type object (the ReferenceEquals(this, other) check above already handled the
         // same-box case, so distinct value-type allocations are distinct addresses → not equal).
-        return IsReferenceType && ReferenceEquals(m_val, other.m_val);
+        // The m_val null-guard matters now that the nil clause above is structural: two distinct
+        // boxes each HOLDING a null reference value are distinct addresses, never equal.
+        return IsReferenceType && m_val is not null && ReferenceEquals(m_val, other.m_val);
     }
 
     // Reduces an array-index referent to the identity of its actual storage: a PinnedBuffer view
@@ -636,7 +655,9 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static bool operator ==(ж<T>? value1, ж<T>? value2)
     {
-        return value1?.Equals(value2) ?? value2 is null;
+        // A null reference is the nil pointer, equal to the other side's null reference OR
+        // structurally nil box (the two nil representations — see Equals).
+        return value1 is null ? value2 is null || value2.m_isNull : value1.Equals(value2);
     }
 
     public static bool operator !=(ж<T>? value1, ж<T>? value2)
@@ -644,10 +665,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         return !(value1 == value2);
     }
 
-    // Enable comparisons between nil and ж<T> instance
+    // Enable comparisons between nil and ж<T> instance. STRUCTURAL nil (see Equals): a heap box
+    // holding a null reference-typed value is a non-nil pointer holding nil — `&p == nil` is
+    // false in Go even when p itself is nil.
     public static bool operator ==(ж<T>? value, NilType _)
     {
-        return value?.IsNull ?? true;
+        return value is null || value.m_isNull;
     }
 
     public static bool operator !=(ж<T>? value, NilType nil)
