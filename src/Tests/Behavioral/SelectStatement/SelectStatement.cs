@@ -195,8 +195,8 @@ internal static @string firstMsg(channel<@string> a, channel<@string> b) {
 }
 
 internal static @string poll(channel<EmptyStruct> done) {
-    switch (ᐧ) {
-    case ᐧ when done.ꟷᐳ(out _): {
+    switch (trySelect(ᐸꟷ(done, ꓸꓸꓸ))) {
+    case 0 when done.ꟷᐳ(out _): {
         return "done"u8;
     }
     default: {

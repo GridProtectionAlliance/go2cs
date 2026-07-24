@@ -6,8 +6,8 @@ partial class main_package {
 
 internal static void Main() {
     channel<nint> nilRecv = default!;
-    switch (ᐧ) {
-    case ᐧ when nilRecv.ꟷᐳ(out var v): {
+    switch (trySelect(ᐸꟷ(nilRecv, ꓸꓸꓸ))) {
+    case 0 when nilRecv.ꟷᐳ(out var v): {
         fmt.Println("nil recv took case", v);
         break;
     }
@@ -16,8 +16,8 @@ internal static void Main() {
         break;
     }}
     fmt.Println("nil len:", len(nilRecv), "nil cap:", cap(nilRecv));
-    switch (ᐧ) {
-    case ᐧ when nilRecv.ꟷᐳ(out var v, out var ok): {
+    switch (trySelect(ᐸꟷ(nilRecv, ꓸꓸꓸ))) {
+    case 0 when nilRecv.ꟷᐳ(out var v, out var ok): {
         fmt.Println("nil comma-ok took case", v, ok);
         break;
     }
@@ -26,8 +26,8 @@ internal static void Main() {
         break;
     }}
     var ready = new channel<nint>(1);
-    switch (ᐧ) {
-    case ᐧ when ready.ꟷᐳ(out var v): {
+    switch (trySelect(ᐸꟷ(ready, ꓸꓸꓸ))) {
+    case 0 when ready.ꟷᐳ(out var v): {
         fmt.Println("real recv took case", v);
         break;
     }
@@ -36,8 +36,8 @@ internal static void Main() {
         break;
     }}
     ready.ᐸꟷ(7);
-    switch (ᐧ) {
-    case ᐧ when ready.ꟷᐳ(out var v): {
+    switch (trySelect(ᐸꟷ(ready, ꓸꓸꓸ))) {
+    case 0 when ready.ꟷᐳ(out var v): {
         fmt.Println("real recv", v);
         break;
     }

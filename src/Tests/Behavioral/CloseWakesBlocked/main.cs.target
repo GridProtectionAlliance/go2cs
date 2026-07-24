@@ -107,8 +107,8 @@ internal static void Main() {
     expectPanic("select send on closed with default"u8, () => {
         var sd = new channel<nint>(1);
         close(sd);
-        switch (ᐧ) {
-        case ᐧ when sd.ᐸꟷ(1, ꟷ): {
+        switch (trySelect(sd.ᐸꟷ(1, ꓸꓸꓸ))) {
+        case 0: {
             fmt.Println("sent (wrong)");
             break;
         }

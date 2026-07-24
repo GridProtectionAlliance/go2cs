@@ -41,16 +41,33 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 	v.writeOutput("switch (")
 
+	// Both select forms register every comm case as a golib SelectOp and dispatch on the ordinal
+	// of the single case the runtime commits: the blocking form calls `select(…)` (selectgo —
+	// commits one ready case uniformly at random or parks), the default form calls `trySelect(…)`
+	// (the same poll pass, returning -1 when nothing is ready so the C# `default:` label runs).
+	// Send cases are performed BY the runtime commit, so their case labels carry no guard;
+	// receive cases keep their `when ch.ꟷᐳ(out v):` guard, which consumes the committed value
+	// from the runtime's per-thread pending slot.
 	if hasDefault {
-		v.targetFile.WriteString(TrueMarker)
+		v.targetFile.WriteString("trySelect(")
 	} else {
 		v.targetFile.WriteString("select(")
+	}
 
-		for i, comClause := range comClauses {
-			if i > 0 {
+	{
+		regIndex := 0
+
+		for _, comClause := range comClauses {
+			// The default clause (appended last) registers nothing.
+			if comClause.Comm == nil {
+				continue
+			}
+
+			if regIndex > 0 {
 				v.targetFile.WriteString(", ")
 			}
 
+			regIndex++
 			handled := false
 
 			// Check if CommClause.Comm is an AssignStmt
@@ -133,9 +150,9 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 				v.showWarning("@visitSelectStmt - unexpected Stmt type \"" + v.getPrintedNode(comClause.Comm) + "\" encountered in SelectStmt")
 			}
 		}
-
-		v.targetFile.WriteRune(')')
 	}
+
+	v.targetFile.WriteRune(')')
 
 	v.targetFile.WriteString(") {")
 	v.targetFile.WriteString(v.newline)
@@ -159,12 +176,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.writeOutput("default: {")
 		} else {
 			v.writeOutput("case ")
-
-			if hasDefault {
-				v.targetFile.WriteString(TrueMarker)
-			} else {
-				v.targetFile.WriteString(strconv.Itoa(i))
-			}
+			v.targetFile.WriteString(strconv.Itoa(i))
 
 			if comClause.Comm != nil {
 				// Check if CommClause.Comm is an AssignStmt
@@ -229,43 +241,14 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 							}
 						}
 					}
-				} else if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok && hasDefault {
-					// A send case in a select that HAS a `default:` must be chosen only if the
-					// channel can accept the value right now — otherwise Go takes the default. The
-					// switch expression in this mode is the constant `ᐧ` (no `select(…)` call is
-					// emitted), so nothing has probed the channel and nothing has performed the
-					// send: an unguarded `case ᐧ:` took the case unconditionally AND silently
-					// dropped the value. Guard it with the non-blocking send, exactly as a receive
-					// case is guarded by the non-blocking `Received`/`ꟷᐳ` — golib's `Sent` both
-					// probes and, when ready, delivers, so the guard IS the communication. Go's
-					// remaining rules come from golib: a nil channel is never ready (its case is
-					// never chosen), and a send on a CLOSED channel panics rather than falling to
-					// the default.
-					//
-					// The blocking form (no `default:`) is deliberately excluded: there the
-					// `select(…)` call already performed the send through `Sending`, so a guard
-					// here would either send the value a second time or fail and silently skip the
-					// chosen clause body.
-					v.targetFile.WriteString(" when ")
-					v.targetFile.WriteString(v.convExpr(sendStmt.Chan, nil))
-					v.targetFile.WriteRune('.')
-
-					if v.options.useChannelOperators {
-						v.targetFile.WriteString(ChannelLeftOp)
-					} else {
-						v.targetFile.WriteString("Sent")
-					}
-
-					v.targetFile.WriteRune('(')
-					v.targetFile.WriteString(v.convSendValueExpr(sendStmt))
-
-					if v.options.useChannelOperators {
-						v.targetFile.WriteString(", ")
-						v.targetFile.WriteString(OverloadDiscriminator)
-					}
-
-					v.targetFile.WriteRune(')')
 				} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
+					// (No SendStmt arm: a SEND comm case deliberately gets a bare `case N:` label
+					// in BOTH forms — the runtime call in the switch expression (`select`/
+					// `trySelect`) performed the winning send itself, so a guard here would either
+					// send the value a second time or fail and silently skip the chosen clause
+					// body. Go's remaining rules live in the runtime: a nil channel is never
+					// ready, and a send on a CLOSED channel panics — even when a default exists —
+					// rather than falling to the default.)
 					if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {
 							v.targetFile.WriteString(" when ")

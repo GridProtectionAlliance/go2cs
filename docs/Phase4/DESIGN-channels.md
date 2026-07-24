@@ -1,9 +1,18 @@
 # DESIGN — golib channels: real rendezvous, cap/len, single-fire select, uniform-random choice
 
-> **Status: PROPOSED — awaiting user blessing (charter §7/§10).** Produced 2026-07-24 by an
-> adversarial design panel (three independent design lenses + a critic that verified claims against
-> the real goldens and golib source), synthesized by the campaign coordinator. Implementation does
-> not start until the user blesses the design. Companion to
+> **Status: IMPLEMENTED-pending-integration (2026-07-24, branch `claude/wave3-channels`).** Design
+> blessed by the user; Units 1 and 2 are implemented as specified in §3: **Unit 1** =
+> `d637e9c31` (ChanCore/selectgo golib rewrite + SelectOp registration + hardened pending slot +
+> unbuffered-make converter flip + gen-template de-clamp + ThreadPool floor + the 7 new behavioral
+> guards), **Unit 2** = the follow-up commit on the same branch (default-form `trySelect` ordinal
+> lowering + the 5 default-form golden re-baselines + these doc updates). Unit 3 (waiter pooling /
+> lock tuning) remains deferred until profiled. Gates run on the branch: CNR drift = exactly the
+> intended ctor-flip/default-form re-baselines (every line inspected), full behavioral suite
+> 464/464 with Output 434/0 after each unit; corpus + banked-package re-validation results are in
+> the branch report. Coordinator re-gates all-ships-rise at integration before landing on master.
+> Produced 2026-07-24 by an adversarial design panel (three independent design lenses + a critic
+> that verified claims against the real goldens and golib source), synthesized by the campaign
+> coordinator. Companion to
 > [`Phase4-Autonomous-Loop-Charter.md`](Phase4-Autonomous-Loop-Charter.md) Tier-0 item 1.
 
 ## 1. The four gaps (all confirmed in `src/core/golib/channel.cs`)

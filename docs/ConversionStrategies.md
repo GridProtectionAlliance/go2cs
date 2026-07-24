@@ -656,10 +656,10 @@ goǃ(() => {                     // context/context.cs
 });
 ```
 
-With a `default:` clause the select becomes non-blocking: the switch is over the constant `ᐧ` and each
-case is guarded by a try-operation that both probes readiness and performs the communication — `ꟷᐳ`
-for a receive, `ᐸꟷ(value, ꟷ)` for a send. A send is chosen only if the channel can accept the value
-right now, so a full channel falls to the `default:` exactly as in Go:
+With a `default:` clause the select becomes non-blocking: the same registrations feed `trySelect(…)`,
+which commits at most ONE ready case (uniformly at random among the ready ones) and returns -1 when
+none is — so the C# `default:` label runs exactly when Go's would. A full channel falls to the
+`default:` exactly as in Go, and a send on a closed channel panics even though a default exists:
 
 ```go
 select {                        // os/signal/signal.go
@@ -668,8 +668,8 @@ default:                        // send but do not block for it
 }
 ```
 ```csharp
-switch (ᐧ) {                    // os/signal/signal.cs
-case ᐧ when c.ᐸꟷ(sig, ꟷ): {
+switch (trySelect(c.ᐸꟷ(sig, ꓸꓸꓸ))) {   // os/signal/signal.cs
+case 0: {
     break;
 }
 default: {
@@ -678,9 +678,9 @@ default: {
 ```
 
 **Full detail:** [Reference → Maps and Channels](ConversionStrategies-Reference.md#maps-and-channels) —
-named map/channel types, constrained map access through type parameters, and full `select` lowering
-(terminating/empty clauses, escaping comm-clause bindings, the send-case readiness guard and the
-remaining channel-semantics gaps).
+named map/channel types, constrained map access through type parameters, the real channel runtime
+(hchan + selectgo: rendezvous, cap/len, single-fire, uniform-random), and full `select` lowering
+(terminating/empty clauses, escaping comm-clause bindings).
 
 ---
 

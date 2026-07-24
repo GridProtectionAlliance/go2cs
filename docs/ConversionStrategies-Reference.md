@@ -2764,7 +2764,7 @@ ReaderFrom;`. (This is one root among several in the io test suite, which remain
 
 ### Select statement lowering (terminating and empty clauses)
 
-A `select` lowers to a C# `switch`: with a `default:` clause present, the non-blocking form `switch (ᐧ)` whose case guards are try-operations (`case ᐧ when ch.ꟷᐳ(out v):`); without one, the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` dispatching on the committed case's ordinal. The registration calls (`ᐸꟷ(ch, ꓸꓸꓸ)` receive, `ch.ᐸꟷ(v, ꓸꓸꓸ)` send) return `SelectOp` case descriptors and `select(params SelectOp[])` runs a faithful selectgo (see the channel-runtime section below): it commits exactly ONE ready case — chosen uniformly at random — or parks until one becomes ready. A committed receive's value crosses to the winning case's unchanged guard (`case N when ch.ꟷᐳ(out v):`) through a per-thread pending slot the guard consumes, so the emitted select text is identical to the pre-redesign form. Two structural completions (io pipe.go's `read`):
+A `select` lowers to a C# `switch` over a golib runtime call that commits exactly ONE case and returns its ordinal: the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` (selectgo — commits a uniformly-random ready case or parks), and the default form `switch (trySelect(…))` (the same poll pass, returning -1 so the C# `default:` label runs when no case is ready). Receive cases keep a `case N when ch.ꟷᐳ(out v):` guard that consumes the committed value; send cases are performed by the runtime commit and get a bare `case N:` label. The registration calls (`ᐸꟷ(ch, ꓸꓸꓸ)` receive, `ch.ᐸꟷ(v, ꓸꓸꓸ)` send) return `SelectOp` case descriptors and `select(params SelectOp[])` runs a faithful selectgo (see the channel-runtime section below): it commits exactly ONE ready case — chosen uniformly at random — or parks until one becomes ready. A committed receive's value crosses to the winning case's unchanged guard (`case N when ch.ꟷᐳ(out v):`) through a per-thread pending slot the guard consumes, so the emitted select text is identical to the pre-redesign form. Two structural completions (io pipe.go's `read`):
 
 * **An EMPTY clause body still needs its jump.** C# requires every switch section to end in a jump statement (CS8070 on a final `default:`, CS0163 otherwise); the emitted `break;` was suppressed when the *previous* clause ended in a terminal `return` (the was-return flag is reset per statement, and an empty body has none). The flag resets per *clause* now — a bare Go `default:` emits `default: { break; }`.
 * **A terminating blocking select gets an unreachable trailing `return default!;`.** Go's spec makes a select with no `default:` whose every comm-clause body ends in a terminating statement itself terminating, so a value-returning function may end with it. The lowered form's guarded `case N when <recv>:` labels cannot prove exhaustiveness to C# (CS0161). Mirroring the switch guarded-terminal-default rule, the emission appends `return default!;` after the closing brace — gated on: no default, every clause terminating (`isTerminatingStmtList`, conservative), no select-targeting `break`, a value-returning signature, and not named-return-defer mode (void wrapper).
@@ -2801,13 +2801,17 @@ nil receive and comma-ok receive taking the default, `len`/`cap` of a nil channe
 behaving normally alongside, and a mixed select where the nil case must never win over a ready real
 case.)
 
-### A select SEND case with a default is guarded by the non-blocking send
+### The default form routes through trySelect — send cases are unguarded in both forms
 
-The receive side's rule has a send-side twin, and until it was implemented the send case was emitted
-as a bare, unguarded `case ᐧ:`. In the default form the switch expression is the constant `ᐧ` and no
-`select(…)` call is emitted, so nothing probed the channel *and nothing performed the send*: the
-clause ran unconditionally and the value was silently dropped. os/signal's `process` shows the shape
-at its starkest — the whole point of the function vanished:
+The `default:` form was originally lowered as `switch (ᐧ)` with per-case try-operation guards
+(`case ᐧ when ch.ꟷᐳ(out v):` / `case ᐧ when ch.ᐸꟷ(v, ꟷ):` — the interim fix for the dropped-send
+defect os/signal's `process` exposed, where an unguarded `case ᐧ:` ran unconditionally and silently
+dropped the value). That shape is single-fire by construction (C# evaluates the ordered guards until
+the first true) but its ready-case choice is the **case order**, never uniform-random — provably
+unfixable against an ordered C# `switch`. The default form now routes through golib's non-blocking
+`trySelect(…)`: the same registrations as the blocking form, the same selectgo poll pass (distinct
+cores locked in Id order, Fisher-Yates pollorder, exactly one commit under the held locks), no
+parking, and -1 — the default sentinel matched by the C# `default:` label — when no case is ready:
 
 ```go
 select {
@@ -2817,8 +2821,8 @@ default:   // send but do not block for it
 ```
 
 ```csharp
-switch (ᐧ) {                        // BEFORE — the send is simply gone
-case ᐧ: {
+switch (trySelect(c.ᐸꟷ(sig, ꓸꓸꓸ))) {
+case 0: {
     break;
 }
 default: {
@@ -2826,30 +2830,15 @@ default: {
 }}
 ```
 
-The send case now carries the same kind of guard the receive case does — a non-blocking operation
-that both *probes* and, when ready, *performs* the communication:
-
-```csharp
-switch (ᐧ) {
-case ᐧ when c.ᐸꟷ(sig, ꟷ): {       // AFTER — golib Sent: probe + deliver
-    break;
-}
-default: {
-    break;
-}}
-```
-
-`ᐸꟷ(value, ꟷ)` is golib's `Sent` under the established overload-discriminator idiom (`ꟷ` is the
-`false` const, as in the comma-ok receive `ᐸꟷ(ch, ꟷ)`); `-uco=false` emits `ch.Sent(value)`. `Sent`
-delegates to `TrySend`, so there is exactly ONE non-blocking send implementation and Go's rules fall
-out of it: a **closed** channel panics (the open-assert runs *before* the readiness test — a closed
-FULL channel is not send-ready, yet Go panics rather than taking the `default:`), and a **nil**
-channel is never ready (`SendIsReady` null-checks the absent queue), so its case is never chosen.
-
-The guard is emitted **only** in the default form. The blocking form's `select(…)` call already
-performed the winning send itself (the `Sending`/`ᐸꟷ(v, ꓸꓸꓸ)` registration only *describes* the
-case; selectgo commits it), so a guard there would either send the value twice or fail and silently
-skip the chosen clause body.
+Send cases get a bare `case N:` label in BOTH forms — the runtime call performed the winning send
+itself, so a guard would either send the value a second time or fail and silently skip the chosen
+clause body. Receive cases keep their `case N when ch.ꟷᐳ(out v):` guard, which consumes the
+committed value from the runtime's per-thread pending slot. Go's remaining rules live in the
+runtime: a **closed** channel's send case panics (Go panics even when a `default:` exists — the
+poll pass checks `closed` before readiness, so a closed FULL channel panics rather than taking the
+default), and a **nil** channel's case is never ready, so it is never chosen. golib's non-blocking
+`Sent`/`ᐸꟷ(v, ꟷ)`/`TrySend` surface remains for direct non-blocking sends (and the `-uco=false`
+named-method mode), delegating to the same single runtime send implementation.
 
 A pointer-element channel forced two further root fixes, both pre-existing and both previously
 unreachable because the dropped send never compiled the value expression. net/rpc's

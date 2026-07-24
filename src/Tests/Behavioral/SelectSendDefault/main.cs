@@ -8,8 +8,8 @@ partial class main_package {
 internal static void fullBuffered() {
     var ch = new channel<nint>(1);
     ch.ᐸꟷ(1);
-    switch (ᐧ) {
-    case ᐧ when ch.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(ch.ᐸꟷ(2, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("full buffered: sent");
         break;
     }
@@ -18,8 +18,8 @@ internal static void fullBuffered() {
         break;
     }}
     fmt.Println("full buffered: held =", ᐸꟷ(ch));
-    switch (ᐧ) {
-    case ᐧ when ch.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(ch.ᐸꟷ(2, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("drained buffered: sent");
         break;
     }
@@ -33,8 +33,8 @@ internal static void fullBuffered() {
 internal static void freeBuffered() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
-    switch (ᐧ) {
-    case ᐧ when ch.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(ch.ᐸꟷ(2, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("free buffered: sent");
         break;
     }
@@ -56,8 +56,8 @@ internal static void unbufferedWithReceiver() {
     });
     var sent = false;
     for (nint i = 0; i < 1000 && !sent; i++) {
-        switch (ᐧ) {
-        case ᐧ when ch.ᐸꟷ(7, ꟷ): {
+        switch (trySelect(ch.ᐸꟷ(7, ꓸꓸꓸ))) {
+        case 0: {
             sent = true;
             break;
         }
@@ -71,8 +71,8 @@ internal static void unbufferedWithReceiver() {
 
 internal static void nilChannel() {
     channel<nint> ch = default!;
-    switch (ᐧ) {
-    case ᐧ when ch.ᐸꟷ(1, ꟷ): {
+    switch (trySelect(ch.ᐸꟷ(1, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("nil channel: sent");
         break;
     }
@@ -92,8 +92,8 @@ internal static void closedChannel() => func((defer, recover) => {
     });
     var ch = new channel<nint>(1);
     close(ch);
-    switch (ᐧ) {
-    case ᐧ when ch.ᐸꟷ(1, ꟷ): {
+    switch (trySelect(ch.ᐸꟷ(1, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("closed channel: sent");
         break;
     }
@@ -108,12 +108,12 @@ internal static void oneOfManyReady() {
     var full = new channel<nint>(1);
     full.ᐸꟷ(1);
     var open = new channel<nint>(1);
-    switch (ᐧ) {
-    case ᐧ when full.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(full.ᐸꟷ(2, ꓸꓸꓸ), open.ᐸꟷ(3, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("one of many: chose full");
         break;
     }
-    case ᐧ when open.ᐸꟷ(3, ꟷ): {
+    case 1: {
         fmt.Println("one of many: chose open");
         break;
     }
@@ -128,12 +128,12 @@ internal static void neitherReady() {
     var full = new channel<nint>(1);
     full.ᐸꟷ(1);
     var empty = new channel<nint>(1);
-    switch (ᐧ) {
-    case ᐧ when full.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(full.ᐸꟷ(2, ꓸꓸꓸ), ᐸꟷ(empty, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("neither ready: sent");
         break;
     }
-    case ᐧ when empty.ꟷᐳ(out var v): {
+    case 1 when empty.ꟷᐳ(out var v): {
         fmt.Println("neither ready: received", v);
         break;
     }
@@ -146,11 +146,11 @@ internal static void neitherReady() {
 internal static void exactlyOneSend() {
     var a = new channel<nint>(2);
     var b = new channel<nint>(2);
-    switch (ᐧ) {
-    case ᐧ when a.ᐸꟷ(1, ꟷ): {
+    switch (trySelect(a.ᐸꟷ(1, ꓸꓸꓸ), b.ᐸꟷ(2, ꓸꓸꓸ))) {
+    case 0: {
         break;
     }
-    case ᐧ when b.ᐸꟷ(2, ꟷ): {
+    case 1: {
         break;
     }
     default: {
@@ -181,8 +181,8 @@ internal static void blockingSendStillBlocks() {
 
 internal static void namedChannelType() {
     var q = new queue(1);
-    switch (ᐧ) {
-    case ᐧ when q.ᐸꟷ(1, ꟷ): {
+    switch (trySelect(q.ᐸꟷ(1, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("named channel: sent");
         break;
     }
@@ -190,8 +190,8 @@ internal static void namedChannelType() {
         fmt.Println("named channel: default");
         break;
     }}
-    switch (ᐧ) {
-    case ᐧ when q.ᐸꟷ(2, ꟷ): {
+    switch (trySelect(q.ᐸꟷ(2, ꓸꓸꓸ))) {
+    case 0: {
         fmt.Println("named channel full: sent");
         break;
     }

@@ -466,6 +466,25 @@ public static class builtin
     }
 
     /// <summary>
+    /// Executes a non-blocking Go <c>select</c> (the <c>default:</c> form) over the registered
+    /// channel <paramref name="ops"/>: commits exactly ONE ready case — chosen uniformly at random
+    /// when several are ready — or returns -1 (the default sentinel) so the emitted switch's
+    /// <c>default:</c> label runs.
+    /// </summary>
+    /// <param name="ops">Registered send/receive case descriptors, in case order.</param>
+    /// <returns>Ordinal of the single case that fired, or -1 when no case was ready.</returns>
+    /// <remarks>
+    /// Shares <see cref="select"/>'s poll pass (same locking and pollorder) but never parks. A
+    /// committed receive's value crosses to the winning case's guard through the same per-thread
+    /// pending slot; a send case on a closed channel panics even though a default exists (Go
+    /// semantics).
+    /// </remarks>
+    public static int trySelect(params SelectOp[] ops)
+    {
+        return SelectRuntime.TryRun(ops);
+    }
+
+    /// <summary>
     /// Enumerates over a range of integers.
     /// </summary>
     /// <param name="n">Number of integers to enumerate.</param>
