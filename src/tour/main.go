@@ -35,6 +35,7 @@ func main() {
 	addr := flag.String("addr", "127.0.0.1:4000", "Tour of go2cs address")
 	tourAddr := flag.String("tour-addr", "127.0.0.1:3999", "official Tour of Go address")
 	repoRoot := flag.String("repo", "", "go2cs repository root (auto-detected by default)")
+	defaultRuntime := flag.String("runtime", runtimeCore, ".NET runtime source: core, deployed, or nuget")
 	deployedRoot := flag.String("deployed-root", "", "deploy-core root for the deployed stdlib runtime")
 	nugetSource := flag.String("nuget-source", "", "NuGet feed or folder containing go2cs packages")
 	nugetVersion := flag.String("nuget-version", "", "version of go2cs NuGet packages")
@@ -46,6 +47,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	pipeline := newPipelineRunner(root, pipelineOptions{
+		defaultRuntime: *defaultRuntime,
+		deployedRoot:   *deployedRoot,
+		nugetSource:    *nugetSource,
+		nugetVersion:   *nugetVersion,
+	})
+	if _, err := pipeline.resolveRuntime(""); err != nil {
+		log.Fatalf("invalid -runtime option: %v", err)
+	}
+	defer pipeline.close()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -65,15 +77,10 @@ func main() {
 
 	s := &server{
 		repoRoot: &root,
-		pipeline: newPipelineRunner(root, pipelineOptions{
-			deployedRoot: *deployedRoot,
-			nugetSource:  *nugetSource,
-			nugetVersion: *nugetVersion,
-		}),
-		tour:   tour,
-		static: http.FileServer(http.FS(staticFS)),
+		pipeline: pipeline,
+		tour:     tour,
+		static:   http.FileServer(http.FS(staticFS)),
 	}
-	defer s.pipeline.close()
 
 	httpServer := &http.Server{
 		Addr:              *addr,
@@ -131,6 +138,7 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		"ok":       true,
 		"tour":     s.tour.available(),
 		"repoRoot": *s.repoRoot,
+		"runtime":  s.pipeline.defaultRuntime,
 		"runtimes": s.pipeline.runtimeOptions(),
 	})
 }

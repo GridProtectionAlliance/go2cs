@@ -21,6 +21,7 @@
 
   let goSource = "";
   let runtimeMode = runtimeSelect.value;
+  let runtimeReady = false;
   let pagePath = "";
   let conversionID = "";
   let dirty = false;
@@ -56,6 +57,13 @@
         if (!runtime) continue;
         option.disabled = !runtime.available;
         option.title = runtime.detail || runtime.label;
+      }
+      if (!runtimeReady) {
+        runtimeSelect.value = health.runtime || "core";
+        runtimeMode = runtimeSelect.value;
+        runtimeReady = true;
+        updateButtons();
+        if (goSource && dirty) scheduleAutoConvert();
       }
     } catch {
       setConnection(false, "Local server disconnected");
@@ -106,6 +114,7 @@
   }
 
   function scheduleAutoConvert() {
+    if (!runtimeReady) return;
     clearTimeout(autoConvertTimer);
     autoConvertTimer = setTimeout(() => {
       if (converting || running) {
@@ -248,7 +257,7 @@
     runButton.disabled = !running && (!conversionID || dirty || converting);
     runButton.textContent = running ? "Kill" : "Run";
     runButton.classList.toggle("kill", running);
-    runtimeSelect.disabled = converting || running;
+    runtimeSelect.disabled = !runtimeReady || converting || running;
   }
 
   function renderGeneratedFiles(csharp, project) {
@@ -406,6 +415,7 @@
   window.addEventListener("resize", () => setDivider(Number(divider.getAttribute("aria-valuenow")) || 67));
 
   renderOutputState();
+  updateButtons();
   checkHealth();
   setInterval(checkHealth, 15000);
 })();

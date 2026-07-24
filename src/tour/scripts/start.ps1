@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$ListenAddress = "127.0.0.1:4000",
+    [ValidateSet("core", "deployed", "nuget")]
+    [string]$Runtime = "core",
     [switch]$NoOpen
 )
 
@@ -25,7 +27,7 @@ $env:GO_TOUR_BIN = $tourBinary
 
 Push-Location $tourRoot
 try {
-    $arguments = @("run", ".", "-addr=$ListenAddress", "-repo=$repoRoot")
+    $arguments = @("run", ".", "-addr=$ListenAddress", "-repo=$repoRoot", "-runtime=$Runtime")
     if ($NoOpen) {
         $arguments += "-no-open"
     }

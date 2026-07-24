@@ -68,15 +68,16 @@ type conversionArtifact struct {
 }
 
 type pipelineRunner struct {
-	repoRoot     string
-	cacheDir     string
-	slots        chan struct{}
-	buildMu      sync.Mutex
-	mu           sync.Mutex
-	saved        map[string]*conversionArtifact
-	deployedRoot string
-	nugetSource  string
-	nugetVersion string
+	repoRoot       string
+	cacheDir       string
+	slots          chan struct{}
+	buildMu        sync.Mutex
+	mu             sync.Mutex
+	saved          map[string]*conversionArtifact
+	defaultRuntime string
+	deployedRoot   string
+	nugetSource    string
+	nugetVersion   string
 }
 
 func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRunner {
@@ -86,13 +87,14 @@ func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRu
 	}
 	options = resolvePipelineOptions(repoRoot, options)
 	return &pipelineRunner{
-		repoRoot:     repoRoot,
-		cacheDir:     filepath.Join(repoRoot, "src", "tour", ".cache"),
-		slots:        make(chan struct{}, 2),
-		saved:        make(map[string]*conversionArtifact),
-		deployedRoot: options.deployedRoot,
-		nugetSource:  options.nugetSource,
-		nugetVersion: options.nugetVersion,
+		repoRoot:       repoRoot,
+		cacheDir:       filepath.Join(repoRoot, "src", "tour", ".cache"),
+		slots:          make(chan struct{}, 2),
+		saved:          make(map[string]*conversionArtifact),
+		defaultRuntime: options.defaultRuntime,
+		deployedRoot:   options.deployedRoot,
+		nugetSource:    options.nugetSource,
+		nugetVersion:   options.nugetVersion,
 	}
 }
 

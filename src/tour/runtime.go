@@ -16,9 +16,10 @@ const (
 )
 
 type pipelineOptions struct {
-	deployedRoot string
-	nugetSource  string
-	nugetVersion string
+	defaultRuntime string
+	deployedRoot   string
+	nugetSource    string
+	nugetVersion   string
 }
 
 type runtimeConfiguration struct {
@@ -44,6 +45,11 @@ var (
 )
 
 func resolvePipelineOptions(repoRoot string, supplied pipelineOptions) pipelineOptions {
+	supplied.defaultRuntime = strings.ToLower(strings.TrimSpace(supplied.defaultRuntime))
+	if supplied.defaultRuntime == "" {
+		supplied.defaultRuntime = runtimeCore
+	}
+
 	if supplied.deployedRoot == "" {
 		supplied.deployedRoot = strings.TrimSpace(os.Getenv("GO2CS_DEPLOYED_ROOT"))
 	}
@@ -81,8 +87,15 @@ func resolvePipelineOptions(repoRoot string, supplied pipelineOptions) pipelineO
 }
 
 func (p *pipelineRunner) resolveRuntime(value string) (runtimeConfiguration, error) {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "", runtimeCore:
+	mode := strings.ToLower(strings.TrimSpace(value))
+	if mode == "" {
+		mode = p.defaultRuntime
+	}
+	if mode == "" {
+		mode = runtimeCore
+	}
+	switch mode {
+	case runtimeCore:
 		return runtimeConfiguration{
 			mode:          runtimeCore,
 			label:         "Core source",

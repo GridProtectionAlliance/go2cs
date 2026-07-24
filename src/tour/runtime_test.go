@@ -22,6 +22,32 @@ func TestPackageIDForProjectReference(t *testing.T) {
 	}
 }
 
+func TestResolveRuntimeUsesConfiguredDefault(t *testing.T) {
+	runner := newPipelineRunner(t.TempDir(), pipelineOptions{
+		defaultRuntime: "NuGet",
+		nugetSource:    t.TempDir(),
+		nugetVersion:   "1.23.1.1",
+	})
+	defer runner.close()
+
+	resolved, err := runner.resolveRuntime("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.mode != runtimeNuGet {
+		t.Fatalf("default runtime = %q, want %q", resolved.mode, runtimeNuGet)
+	}
+}
+
+func TestResolveRuntimeRejectsUnknownDefault(t *testing.T) {
+	runner := newPipelineRunner(t.TempDir(), pipelineOptions{defaultRuntime: "unknown"})
+	defer runner.close()
+
+	if _, err := runner.resolveRuntime(""); err == nil {
+		t.Fatal("unknown default runtime was accepted")
+	}
+}
+
 func TestPrepareRuntimeProjectUsesNuGetPackages(t *testing.T) {
 	root := t.TempDir()
 	project := filepath.Join(root, "tour.local.csproj")
