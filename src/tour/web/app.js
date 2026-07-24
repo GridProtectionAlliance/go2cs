@@ -8,6 +8,7 @@
   const runButton = document.querySelector("#run-button");
   const syncRunCheckbox = document.querySelector("#sync-run");
   const codeView = document.querySelector("#code-view code");
+  const packageInfoView = document.querySelector("#package-info-view code");
   const projectView = document.querySelector("#project-view code");
   const sourceTabs = document.querySelector(".source-tabs");
   const outputTabs = document.querySelector(".output-tabs");
@@ -106,7 +107,7 @@
       conversionStatus.textContent = "This page has no editable Go source";
       conversionID = "";
       dirty = false;
-      renderGeneratedFiles("", "");
+      renderGeneratedFiles("", "", "");
       outputs.transpile = idleStage("transpile", "This Tour page has no code to convert.");
       outputs.build = idleStage("build", "Nothing to build.");
       outputs.run = idleStage("run", "Nothing to run.");
@@ -197,7 +198,7 @@
       if (!response.ok) throw new Error(result.error || `Conversion failed (${response.status})`);
 
       outputs.transpile = result.stage;
-      renderGeneratedFiles(result.csharp || "", result.project || "");
+      renderGeneratedFiles(result.csharp || "", result.packageInfo || "", result.project || "");
       conversionID = result.conversionId || "";
       dirty = goSource !== sourceAtStart;
 
@@ -310,8 +311,9 @@
     runtimeSelect.disabled = !runtimeReady || converting || running;
   }
 
-  function renderGeneratedFiles(csharp, project) {
+  function renderGeneratedFiles(csharp, packageInfo, project) {
     codeView.innerHTML = highlightCSharp(csharp || "// No C# source was emitted.");
+    packageInfoView.innerHTML = highlightCSharp(packageInfo || "// No package metadata was emitted.");
     projectView.innerHTML = highlightXML(project || "<!-- No project file was emitted. -->");
   }
 

@@ -38,6 +38,7 @@ type runRequest struct {
 type convertResult struct {
 	ConversionID string      `json:"conversionId,omitempty"`
 	CSharp       string      `json:"csharp,omitempty"`
+	PackageInfo  string      `json:"packageInfo,omitempty"`
 	Project      string      `json:"project,omitempty"`
 	ProjectName  string      `json:"projectName,omitempty"`
 	Successful   bool        `json:"successful"`
@@ -158,6 +159,7 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 
 	result := convertResult{Runtime: runtime.mode, Stage: transpile}
 	result.CSharp, _ = collectCSharp(outputDir)
+	result.PackageInfo, _ = readGeneratedFile(outputDir, "package_info.cs")
 	project, _ := findProject(outputDir)
 	if project != "" {
 		if err := prepareRuntimeProject(project, runtime); err != nil {
@@ -525,6 +527,17 @@ func collectCSharp(root string) (string, error) {
 		result.Write(content)
 	}
 	return result.String(), nil
+}
+
+func readGeneratedFile(root, name string) (string, error) {
+	content, err := os.ReadFile(filepath.Join(root, name))
+	if errors.Is(err, os.ErrNotExist) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }
 
 func findProject(root string) (string, error) {

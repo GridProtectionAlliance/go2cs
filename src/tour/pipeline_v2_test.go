@@ -28,6 +28,13 @@ func TestCollectCSharpPrefersSourceFiles(t *testing.T) {
 	if strings.Contains(got, "metadata") {
 		t.Fatal("package metadata obscures the matching source view")
 	}
+	packageInfo, err := readGeneratedFile(root, "package_info.cs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if packageInfo != "metadata" {
+		t.Fatalf("package info = %q, want metadata", packageInfo)
+	}
 }
 
 func TestGo2CSConvertArgsPreserveComments(t *testing.T) {

@@ -11,16 +11,16 @@
 </head>
 <body>
   <header class="app-header">
+    <div class="header-status" aria-live="polite">
+      <i id="connection-dot"></i>
+      <span id="connection-label">Connecting to Tour of Go</span>
+    </div>
     <div class="brand">
       <a class="brand-link" href="https://go2cs.net" target="_blank" rel="noopener noreferrer" aria-label="Open go2cs.net in a new tab">
         <img src="/assets/go2cs-small.png" alt="go2cs" width="124" height="63">
       </a>
       <strong>Tour of go2cs</strong>
       <span>Reads like Go. Runs like Go.</span>
-    </div>
-    <div class="header-status" aria-live="polite">
-      <i id="connection-dot"></i>
-      <span id="connection-label">Connecting to Tour of Go</span>
     </div>
   </header>
 
@@ -67,6 +67,7 @@
 
       <div class="source-tabs" role="tablist" aria-label="Generated files">
         <button id="code-tab" role="tab" type="button" data-view="code" aria-selected="true">Code</button>
+        <button id="package-info-tab" role="tab" type="button" data-view="package-info" aria-selected="false">Package Info</button>
         <button id="project-tab" role="tab" type="button" data-view="project" aria-selected="false">Project</button>
         <label class="runtime-picker" title="Choose the .NET runtime dependency source">
           <span>Runtime</span>
@@ -80,6 +81,7 @@
 
       <div class="source-area">
         <pre id="code-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="code-tab"><code>// C# appears automatically when a Tour page opens.</code></pre>
+        <pre id="package-info-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="package-info-tab" hidden><code>// Generated package metadata appears here.</code></pre>
         <pre id="project-view" class="source-view" tabindex="0" role="tabpanel" aria-labelledby="project-tab" hidden><code>&lt;!-- The generated project file appears here. --&gt;</code></pre>
       </div>
 
