@@ -95,8 +95,10 @@ public static partial class fmt_package
                 }
                 case "v":
                 {
+                    // Go's %v of a Stringer operand calls String() via handleMethods — never the
+                    // `&{fields}` pointer rendering (see golib error.cs's matching note).
                     if (m_target_is_ptr)
-                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
+                        return m_target_ptr is null ? "<nil>" : m_target_ptr.Value?.ToString() ?? "<nil>";
 
                     return m_target?.ToString() ?? "<nil>";
                 }

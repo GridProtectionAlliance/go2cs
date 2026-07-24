@@ -1594,7 +1594,7 @@ public static class builtin
 
         if (structuralType.IsGenericType && structuralType.GetGenericTypeDefinition() == typeof(ж<>))
         {
-            MethodInfo? pointerMethod = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asPtrTParams);
+            MethodInfo? pointerMethod = GetInterfaceConversionMethod(typeOfT, s_asPtrTParams);
 
             if (pointerMethod is not null)
             {
@@ -1610,7 +1610,7 @@ public static class builtin
         // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
         // define an interface that describes an abstract method implemented by another interface,
         // so we are forced to use reflection to find the static interface conversion method...
-        MethodInfo? method = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
+        MethodInfo? method = GetInterfaceConversionMethod(typeOfT, s_asTParams);
 
         // A NAMED interface has no generated runtime conversion method — its implementations
         // resolve nominally (case T above) or through the adapter registry. Reaching here means
@@ -1628,6 +1628,19 @@ public static class builtin
 
         value = (T)genericMethod.Invoke(null, [structuralTarget])!;
         return true;
+    }
+
+    // Resolves an interface's static duck-typing conversion method: generated dyn interfaces
+    // emit the marker-prefixed ᴛAs, while the hand-written golib core interfaces (error, fmt's
+    // Stringer) predate the marker and expose plain `As` with the same conversion signature. A
+    // Go interface cannot declare static methods, so no CONVERTED interface can collide with
+    // either name — without the second probe, a runtime assert of a raw receiver box to `error`
+    // missed, and the converted fmt's handleMethods fell through to printValue's `&`-prefixed
+    // pointer rendering for error-implementing pointees.
+    private static MethodInfo? GetInterfaceConversionMethod(Type interfaceType, Type[] parameterSignature)
+    {
+        return interfaceType.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, parameterSignature)
+            ?? interfaceType.GetMethod("As", 1, BindingFlags.Public | BindingFlags.Static, parameterSignature);
     }
 
     // Open generic definition of TryTypeAssert<T>, resolved once for the runtime-Type-driven

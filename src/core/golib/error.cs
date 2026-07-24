@@ -111,8 +111,13 @@ public class error<T> : error, IErrorTarget
             }
             case "v":
             {
+                // Go's %v of an error operand calls Error() via handleMethods — NEVER the
+                // `&{fields}` pointer rendering: the *T method set includes the value-receiver
+                // Error, so the method wins before pointer formatting. The pointee's ToString
+                // dispatches the Go method already; the old `&` prefix diverged from Go for
+                // every pointer-held error (errors TestAs subtest names).
                 if (m_target_is_ptr)
-                    return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
+                    return m_target_ptr is null ? "<nil>" : m_target_ptr.Value?.ToString() ?? "<nil>";
 
                 return m_target?.ToString() ?? "<nil>";
             }
