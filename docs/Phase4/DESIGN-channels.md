@@ -4,7 +4,7 @@
 > blessed by the user; Units 1 and 2 are implemented as specified in §3: **Unit 1** =
 > `d637e9c31` (ChanCore/selectgo golib rewrite + SelectOp registration + hardened pending slot +
 > unbuffered-make converter flip + gen-template de-clamp + ThreadPool floor + the 7 new behavioral
-> guards), **Unit 2** = the follow-up commit on the same branch (default-form `trySelect` ordinal
+> guards), **Unit 2** = `4281074fc` (default-form `trySelect` ordinal
 > lowering + the 5 default-form golden re-baselines + these doc updates). Unit 3 (waiter pooling /
 > lock tuning) remains deferred until profiled. Gates run on the branch: CNR drift = exactly the
 > intended ctor-flip/default-form re-baselines (every line inspected), full behavioral suite
