@@ -793,7 +793,14 @@ public sealed class TestExecution
         {
             int sequence = m_subtestNames.TryGetValue(baseName, out int current) ? current + 1 : 0;
             m_subtestNames[baseName] = sequence;
-            string unique = sequence == 0 ? baseName : $"{baseName}#{sequence:00}";
+            // Go names EVERY empty-name subtest by its per-parent sequence alone (#00, #01, …,
+            // matching Go's testing.tRunner naming) — the sequence IS the name, never a dedup
+            // suffix on a shared "#00" (the old form emitted #00, #00#01, … and every subtest
+            // row keyed one-sided against `go test -json`). Duplicate NON-empty names keep the
+            // Go dedup form name#NN, byte-identical to before (sort.TestFind's ab/ab#01/ab#02).
+            string unique = requested.Length == 0
+                ? $"#{sequence:00}"
+                : sequence == 0 ? baseName : $"{baseName}#{sequence:00}";
             return $"{Name}/{unique}";
         }
     }
