@@ -41,7 +41,7 @@ internal static nint sliceToArray(slice<byte> s) {
 }
 
 internal static @string classify(any v) {
-    if (v == ((intRef)default!)) {
+    if (v == ((intRef)nil)) {
         return "nilref"u8;
     }
     return "other"u8;
@@ -52,7 +52,7 @@ internal static void Main() {
     var pv = Ꮡ((view)(~pb));
     var bb = ((@base)(pv.Value));
     fmt.Println(bb.a, bb.b);
-    any boxed = ((intRef)default!);
+    any boxed = ((intRef)nil);
     fmt.Println(classify(boxed));
     ref var n = ref heap<int64>(out var Ꮡn);
     n = (int64)5;

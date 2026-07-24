@@ -6,9 +6,9 @@ partial class main_package {
 
 internal static void Main() {
     ref var p1 = ref heap<ж<nint>>(out var Ꮡp1);
-    p1 = (ж<nint>)(default!);
+    p1 = ((ж<nint>)nil);
     ref var p2 = ref heap<ж<nint>>(out var Ꮡp2);
-    p2 = (ж<nint>)(default!);
+    p2 = ((ж<nint>)nil);
     var pp1 = Ꮡp1;
     var pp2 = Ꮡp2;
     fmt.Println("pp1==pp2", pp1 == pp2);

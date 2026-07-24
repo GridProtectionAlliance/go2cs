@@ -66,7 +66,11 @@ internal class AdapterImplTemplate : TemplateBase
              {
                  private readonly ж<{{StructName}}> m_box;
 
-                 public {{AdapterName}}(ж<{{StructName}}> box) => m_box = box;
+                 // A nil *T entering the interface wraps the CANONICAL typed nil box (never a null
+                 // Box): the interface value keeps its Go dynamic type, typed-nil equality holds
+                 // across the any/interface boundary, and `case *T:` matches with a nil pointee —
+                 // Go's interface-holding-nil-pointer semantics. See ж<T>.NilBox.
+                 public {{AdapterName}}(ж<{{StructName}}> box) => m_box = box ?? ж<{{StructName}}>.NilBox;
 
                  public object? Box => m_box;{{RegistryInitialization}}
 

@@ -41,7 +41,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
-        "Pointer" => $" : IPointer<{TargetTypeName}>",
+        "Pointer" => $" : IPointer<{TargetTypeName}>, INilPointer",
         // Generic-math declarations so a [GoType num:] wrapper satisfies converter-emitted
         // numeric constraints as a type ARGUMENT — slices.Sort's `cmp.Ordered` maps to
         // IAddition/IEquality/IComparisonOperators (time.Duration in runtime/debug's
@@ -128,7 +128,21 @@ internal class InheritedTypeTemplate : TemplateBase
     private string NilComparisonExpression => TypeClass switch
     {
         "Slice" => "value.m_value == nil",
+        // STRUCTURAL nil for pointers (null-safe): a null reference and the canonical typed nil
+        // instance are the same Go nil pointer; the old `value.Equals(default)` NRE'd on a null
+        // reference and reported the canonical instance non-nil.
+        "Pointer" => "value is null || value.IsNilPointer",
         _ => $"value.Equals(default({ObjectName}))"
+    };
+
+    // A nil→named-POINTER conversion yields the type's CANONICAL typed nil instance (mirrors
+    // ж<T>.NilBox): the boxed value keeps its Go type (`%T`, reflect.TypeOf((*T)(nil)), typed-nil
+    // interface semantics) and reference-compares equal across conversion sites. Every other kind
+    // keeps its plain zero value.
+    private string NilConversionExpression => TypeClass switch
+    {
+        "Pointer" => "NilInstance",
+        _ => $"default({ObjectName})!"
     };
 
     private string ValueProperty => TypeClass switch
@@ -293,7 +307,7 @@ internal class InheritedTypeTemplate : TemplateBase
         
                 public static bool operator !=(NilType nil, {{ObjectName}} value) => value != nil;
         
-                public static implicit operator {{ObjectName}}(NilType nil) => default({{ObjectName}})!;
+                public static implicit operator {{ObjectName}}(NilType nil) => {{NilConversionExpression}};
             }
         """;
 }

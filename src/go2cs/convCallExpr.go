@@ -127,6 +127,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 
+		// A nil→POINTER conversion — `(*T)(nil)` or `NamedPtr(nil)` — renders the nil in
+		// POINTER context (golib `nil`), so the target's implicit NilType conversion yields its
+		// CANONICAL typed nil instance (ж<T>.NilBox / the named wrapper's NilInstance). The boxed
+		// value then carries its Go type: `any((*T)(nil)) != nil`, `%T` prints `*T`, and the
+		// pervasive descriptor idiom `reflect.TypeOf((*T)(nil)).Elem()` resolves — where the old
+		// `default!` rendering erased the type to a bare null reference. Two sites converting the
+		// same type reference-compare equal (one shared instance), which object-typed `==`
+		// comparisons of boxed typed nils rely on.
+		if tv, ok := v.info.Types[arg]; ok && tv.IsNil() {
+			if _, isPtr := v.info.TypeOf(callExpr).Underlying().(*types.Pointer); isPtr {
+				targetCS := convertToCSTypeName(targetTypeName)
+
+				if aliased, ok := v.foreignAliasedTypeName(v.info.TypeOf(callExpr)); ok {
+					targetCS = aliased
+				}
+
+				return fmt.Sprintf("((%s)nil)", targetCS)
+			}
+		}
+
 		// A compile-time FLOAT constant CONVERSION whose operand references a named untyped-float
 		// const — `float64(100000 * Pi)` / `float32(...)` — FOLDS to a single-rounded literal at the
 		// TARGET width, the conversion-operand counterpart of the package-level const fold in
@@ -2881,6 +2901,19 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 
 	if isPointer {
 		typeName = "*" + typeName
+	}
+
+	// An untyped-nil operand converting to a POINTER-shaped target — `(*T)(nil)` (isPointer:
+	// targetType resolved to the ELEM type) or `NamedPtr(nil)` — is a conversion the renderer
+	// must claim: ConvertibleTo reports false for the UntypedNil operand, which mis-routed the
+	// star form onto the regular call path, where the cast rendered `default!` and erased the
+	// typed nil to a bare null. The conversion renderer's nil interception then emits the
+	// canonical typed-nil instance. Other nil-able targets (slice/map/chan/func/interface/
+	// unsafe.Pointer) deliberately keep their existing routes.
+	if basic, ok := argType.(*types.Basic); ok && basic.Kind() == types.UntypedNil {
+		if _, targetIsPtr := targetType.Underlying().(*types.Pointer); targetIsPtr || isPointer {
+			return true, typeName
+		}
 	}
 
 	// Check if the argument type is convertible to the target type. For an INTERFACE target

@@ -89,6 +89,22 @@ public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemb
 }
 
 /// <summary>
+/// Non-generic pointer-nilness surface: implemented by <see cref="ж{T}"/> and the generated
+/// named-pointer wrapper classes, so runtime machinery holding a pointer only as <see cref="object"/>
+/// (equality tails, the reflection bridge's <c>IsNil</c>/<c>Elem</c> probes) can ask the STRUCTURAL
+/// nil question without reflection. See <see cref="ж{T}.IsNilPointer"/> for the structural-vs-
+/// value-peeking distinction.
+/// </summary>
+public interface INilPointer
+{
+    /// <summary>
+    /// Gets a flag indicating whether this box IS the nil pointer (structural — the
+    /// nil-constructed / canonical typed-nil form).
+    /// </summary>
+    bool IsNilPointer { get; }
+}
+
+/// <summary>
 /// Defines an interface that represents a pointer <see cref="ж{T}"/> type.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>
@@ -159,7 +175,7 @@ public interface IPointer<T>
 /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
 /// </para>
 /// </remarks>
-public class ж<T> : IPointer<T>, IEquatable<ж<T>>
+public class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer
 {
     // Item3 is the field's IDENTITY token for pointer equality: the ORIGINAL (typically static,
     // compiler-cached) field accessor delegate when the field ref was created through the typed
@@ -561,9 +577,13 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         // Two standard heap pointers, each a distinct allocation: equal only if they wrap the same
         // reference-type object (the ReferenceEquals(this, other) check above already handled the
         // same-box case, so distinct value-type allocations are distinct addresses → not equal).
-        // The m_val null-guard matters now that the nil clause above is structural: two distinct
-        // boxes each HOLDING a null reference value are distinct addresses, never equal.
-        return IsReferenceType && m_val is not null && ReferenceEquals(m_val, other.m_val);
+        // Guards, both required by structural nil identity: a null-HOLDING slot is a distinct
+        // address (never equal to another by holding null), and a slot holding the CANONICAL
+        // typed-nil box shares that instance with every other nil-holding slot of its type — the
+        // shared pointee is nil sameness, not slot sameness (&p1 != &p2 though p1 == p2 == nil).
+        return IsReferenceType && m_val is not null &&
+               m_val is not INilPointer { IsNilPointer: true } &&
+               ReferenceEquals(m_val, other.m_val);
     }
 
     // Reduces an array-index referent to the identity of its actual storage: a PinnedBuffer view
@@ -688,9 +708,21 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         return value != nil;
     }
 
+    /// <summary>
+    /// Gets the CANONICAL typed nil box for this pointer type — the shared instance every
+    /// nil→pointer conversion yields, so a typed nil boxed into an interface carries its Go type
+    /// (<c>any((*T)(nil)) != nil</c>, <c>%T</c>, <c>reflect.TypeOf((*T)(nil)).Elem()</c>) and two
+    /// typed nils of one type are reference-identical wherever the comparison is an untyped
+    /// <c>object</c> reference compare. Write-protected structurally: the <see cref="Value"/>
+    /// ref-getter throws <see cref="RuntimeErrorPanic.NilPointerDereference"/> on a nil box
+    /// before any ref exists, so no store through the shared instance is possible.
+    /// </summary>
+    public static ж<T> NilBox { get; } = new(nil);
+
     public static implicit operator ж<T>(NilType _)
     {
-        return new ж<T>(nil);
+        // The canonical instance, not a fresh box — see NilBox.
+        return NilBox;
     }
 
     // EXPLICIT by design: reinterpreting a raw address as a pointer is the runtime-unsafe reinterpret

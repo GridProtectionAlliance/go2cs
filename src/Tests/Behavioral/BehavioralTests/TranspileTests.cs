@@ -1279,6 +1279,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeConversionReturnType() => CheckTarget("TypeConversionReturnType");
 
     [TestMethod]
+    public void CheckTypedNilInterface() => CheckTarget("TypedNilInterface");
+
+    [TestMethod]
     public void CheckTypedPointerCastDeref() => CheckTarget("TypedPointerCastDeref");
 
     [TestMethod]
