@@ -35,7 +35,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
 * See current project [status](#status) and [milestones](#milestones)
 
-[![Tour of go2cs showing Go and generated C# side by side](images/tour-of-go2cs.png)](../src/tour/README.md)
+[![Tour of go2cs showing Go and generated C# side by side](images/tour-of-go2cs.png)](images/tour-of-go2cs.png)
 
 ### Frequently asked questions
 
