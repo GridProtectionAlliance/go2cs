@@ -11,6 +11,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/types"
@@ -76,6 +77,118 @@ const (
 
 const unsupportedCapabilityReasonPrefix = "requires unsupported testing capabilities: "
 
+// testProjectModel selects how the generated test project binds the PRODUCTION package.
+type testProjectModel int
+
+const (
+	// testProjectRecompile compiles the production .cs INTO the test assembly alongside the
+	// converted test sources (the original -tests model). Required whenever the suite has an
+	// in-package (internal) test variant — its files reach unexported production symbols,
+	// which only a same-assembly compile can bind — and whenever the external variant records
+	// production-anchored metadata (see recordsRequireProductionAnchor).
+	testProjectRecompile testProjectModel = iota
+
+	// testProjectReference references the colocated production csproj instead of recompiling
+	// its sources, so the production ASSEMBLY stays the single identity for the production
+	// types. A black-box (external-only) suite touches only the package's exported API, which
+	// resolves cross-assembly exactly as it does for every other converted consumer — while a
+	// recompile there DUPLICATES the production types: a referenced stdlib assembly whose API
+	// mentions a production type (strings.ToLowerSpecial(unicode.SpecialCase, …)) names the
+	// type in the PRODUCTION assembly, and the test assembly's recompiled copy is a distinct
+	// type — CS0012 (unicode's letter_test). Applies to every black-box-only package
+	// (unicode, unicode/utf8, path, …), never to a suite with an internal variant.
+	testProjectReference
+)
+
+func (m testProjectModel) String() string {
+	if m == testProjectReference {
+		return "reference"
+	}
+
+	return "recompile"
+}
+
+// selectTestProjectModel gates the reference model STRICTLY on the suite being black-box only:
+// no internal variant exists (internal == nil), so no test file can need same-assembly access
+// to unexported production symbols. The selection can still FALL BACK to the recompile model
+// when the external variant's converted records demand a production anchor
+// (errProductionAnchoredRecords — see processTestConversion).
+func selectTestProjectModel(internal, external *packages.Package) testProjectModel {
+	if internal == nil && external != nil {
+		return testProjectReference
+	}
+
+	return testProjectRecompile
+}
+
+// errProductionAnchoredRecords signals that a reference-model conversion attempt collected
+// GoImplement/GoImplicitConv records whose GENERATED code must anchor to the production
+// package class (a partial struct merged into a production type declaration, or conversion
+// operators on one) — impossible across an assembly boundary, where the referenced production
+// types are closed. The caller falls back to the recompile model, which reconverts with the
+// production types local.
+var errProductionAnchoredRecords = errors.New("external test variant records production-anchored metadata")
+
+// recordsRequireProductionAnchor reports whether the LIVE record globals — the just-converted
+// external variant's collected records — contain any entry that must anchor to the production
+// class, evaluated with the recompile-model partition predicates (isTestAnchoredImplementRecord /
+// isTestAnchoredConversionRecord). Under the reference model nothing is seeded and
+// testLocalTypePrefixes stays empty, so every production type renders package-qualified, and any
+// record landing in the production partition is one whose generated partial/adapter/operator
+// would need to merge with a production declaration. A record that renders a production type
+// through its imported ꓸ type-alias form (`<pkg>ꓸ<Type>`, TypeAliasDot) is likewise treated as
+// production-anchored — conservatively, since the partition predicates cannot see the production
+// qualifier inside the alias identifier.
+func recordsRequireProductionAnchor(productionClassName, productionPackageName string) bool {
+	_, productionAnchored := splitExternalVariantRecords(productionClassName)
+
+	if !productionAnchored.isEmpty() {
+		return true
+	}
+
+	aliasPrefix := getSanitizedIdentifier(productionPackageName) + TypeAliasDot
+	names := make([]string, 0)
+
+	for ifaceName, implementations := range interfaceImplementations {
+		names = append(names, ifaceName)
+		names = append(names, implementations.Keys()...)
+	}
+
+	for ifaceName, implementations := range promotedInterfaceImplementations {
+		names = append(names, ifaceName)
+		names = append(names, implementations.Keys()...)
+	}
+
+	for _, proxy := range constraintProxies {
+		names = append(names, proxy[0], proxy[1])
+	}
+
+	for _, conversions := range []map[string]HashSet[string]{implicitConversions, invertedImplicitConversions, indirectImplicitConversions} {
+		for sourceType, targetTypes := range conversions {
+			names = append(names, sourceType)
+			names = append(names, targetTypes.Keys()...)
+		}
+	}
+
+	for _, conversions := range []map[string]map[string]string{numericConversions, indirectNumericConversions} {
+		for sourceType, targetTypes := range conversions {
+			names = append(names, sourceType)
+
+			for targetType := range targetTypes {
+				names = append(names, targetType)
+			}
+		}
+	}
+
+	for _, name := range names {
+		if strings.Contains(name, aliasPrefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // isGo2CSRoot reports whether dir is a go2cs project-reference root — the directory the
 // $(go2csPath) MSBuild property points at, identified by the shared runtime living at
 // core\golib\golib.csproj beneath it.
@@ -136,6 +249,7 @@ type testManifest struct {
 	SourceRevision          string            `json:"sourceRevision,omitempty"`
 	ConverterRevision       string            `json:"converterRevision"`
 	InputDigest             string            `json:"inputDigest"`
+	TestProjectModel        string            `json:"testProjectModel,omitempty"`
 	ProductionFiles         []string          `json:"productionFiles"`
 	TestSources             []testSource      `json:"testSources"`
 	Fixtures                []string          `json:"fixtures"`
@@ -198,108 +312,32 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		return writeNoTestsManifest(production, inputPath, outputPath, targetParts, options)
 	}
 
-	// Session-scoped, not per-variant (B2/B9): both variants come from the ONE load above, so the
-	// external variant's references to an internal-variant-renamed method (the export_test
-	// pattern) resolve by object identity to entries registered during the internal pass —
-	// resetPackageState deliberately does not clear this map.
-	testMethodRenames = make(map[types.Object]bool)
-
-	// Seed package_test_info.cs from the production package_info.cs so the production
-	// assembly-level metadata carries over verbatim; each converted variant's ADDITIONS are then
-	// merged in by the shared writePackageInfoFile (identical emission semantics to production —
-	// pointer-form unwrapping, dedup, pruning — because it IS the production writer).
-	productionInfoPath := filepath.Join(outputPath, PackageInfoFileName)
-	productionInfo, err := os.ReadFile(productionInfoPath)
-	if err != nil {
-		return fmt.Errorf("read production package metadata (convert the package itself before its tests): %w", err)
-	}
-
-	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
-	if err := os.WriteFile(testInfoPath, productionInfo, 0644); err != nil {
-		return fmt.Errorf("seed test package metadata: %w", err)
-	}
-
 	projectName, projectNamespace := getProjectName(inputPath, options)
 	supported := NewHashSet(supportedTestCapabilities())
-	allImports := HashSet[string]{}
-	for importPath := range production.Imports {
-		allImports.Add(importPath)
-	}
-	requiredCapabilities := HashSet[string]{}
-	outputFiles := make([]string, 0)
-	declarations := make([]testDeclaration, 0)
-	includedSources := HashSet[string]{}
-	var testMain *testDeclaration
+	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
 
-	for _, variant := range []*packages.Package{internal, external} {
-		if variant == nil {
-			continue
-		}
+	model := selectTestProjectModel(internal, external)
+	conversion, err := convertTestVariants(model, production, internal, external, inputPath, outputPath, projectNamespace, supported, options)
 
-		if len(variant.Errors) > 0 {
-			return fmt.Errorf("test package variant %q failed to load: %v", variant.ID, variant.Errors)
-		}
-
-		entries := testFileEntries(variant)
-		if len(entries) == 0 {
-			continue
-		}
-
-		for _, entry := range entries {
-			includedSources.Add(filepath.Clean(entry.filePath))
-		}
-
-		capabilities := analyzeTestingCapabilities(variant)
-		found, foundMain := discoverTestDeclarations(variant, entries, inputPath, capabilities, supported)
-		declarations = append(declarations, found...)
-
-		// Package-level capability reporting aggregates over RUNNABLE declaration kinds only
-		// (tests + TestMain) — benchmark/fuzz/example requirements must not block the package,
-		// they are excluded-disclosed by their own status (F4: attribution is per-test).
-		for _, declaration := range found {
-			if declaration.Kind == "test" {
-				requiredCapabilities.UnionWith(declaration.RequiredCapabilities)
-			}
-		}
-
-		if foundMain != nil {
-			if testMain != nil {
-				return fmt.Errorf("multiple valid TestMain declarations: %s and %s", testMain.Source, foundMain.Source)
-			}
-			testMain = foundMain
-			requiredCapabilities.UnionWith(foundMain.RequiredCapabilities)
-		}
-
-		variantOutputs, imports, err := convertTestVariant(variant, entries, outputPath, projectNamespace, options)
-		if err != nil {
-			return err
-		}
-
-		// Merge this variant's collected metadata globals while they are still live (the next
-		// variant's conversion resets them). The EXTERNAL variant's records are split across
-		// TWO anchor files (B4/B5): records whose generated code must live in the test package
-		// class go to package_info_external_test.cs; production-anchored records stay in
-		// package_test_info.cs.
-		if variant == external {
-			unitName, err := writeExternalVariantMetadata(testInfoPath, outputPath, production.Name)
-			if err != nil {
-				return err
-			}
-
-			if unitName != "" {
-				outputFiles = append(outputFiles, unitName)
-			}
-		} else {
-			writePackageInfoFile(testInfoPath, true)
-		}
-
-		outputFiles = append(outputFiles, variantOutputs...)
-		allImports.UnionWithSet(imports)
+	if errors.Is(err, errProductionAnchoredRecords) {
+		// The black-box suite records metadata that must anchor to production types — only a
+		// same-assembly recompile can host it. Reconvert under the recompile model: conversion
+		// is deterministic and the expensive go/packages load above is reused, so the fallback
+		// costs one extra emission pass.
+		model = testProjectRecompile
+		conversion, err = convertTestVariants(model, production, internal, external, inputPath, outputPath, projectNamespace, supported, options)
 	}
 
-	if err := appendExternalTestPackageClass(testInfoPath, projectNamespace, production.Name, external); err != nil {
+	if err != nil {
 		return err
 	}
+
+	declarations := conversion.declarations
+	testMain := conversion.testMain
+	outputFiles := conversion.outputFiles
+	allImports := conversion.allImports
+	requiredCapabilities := conversion.requiredCapabilities
+	includedSources := conversion.includedSources
 
 	sort.Slice(declarations, func(i, j int) bool {
 		if declarations[i].Name == declarations[j].Name {
@@ -347,7 +385,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		aliasScanFiles, production.PkgPath, dependencies)...)
 
 	testProjectName := projectName + ".tests.csproj"
-	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
+	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
 		return err
 	}
 
@@ -375,6 +413,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		TargetGOARCH:            targetParts[1],
 		SourceRevision:          gitRevision(inputPath),
 		ConverterRevision:       converterRevision(),
+		TestProjectModel:        model.String(),
 		ProductionFiles:         productionFiles,
 		TestSources:             sources,
 		Fixtures:                fixtures,
@@ -392,6 +431,217 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	return writeJSONFile(filepath.Join(outputPath, testManifestFileName), manifest)
+}
+
+// testVariantConversionResult carries everything one convertTestVariants pass produced — the
+// model-dependent conversion state a reference→recompile fallback re-run rebuilds from scratch.
+type testVariantConversionResult struct {
+	declarations         []testDeclaration
+	testMain             *testDeclaration
+	outputFiles          []string
+	allImports           HashSet[string]
+	requiredCapabilities HashSet[string]
+	includedSources      HashSet[string]
+}
+
+// convertTestVariants converts the package's test variants under the given test-project model:
+// seeds the package_test_info.cs anchor, discovers and converts each variant, and merges the
+// collected metadata into the model's anchor file(s). Under testProjectReference it returns
+// errProductionAnchoredRecords when the external variant's records demand a production anchor —
+// the caller then re-runs the whole pass under testProjectRecompile (deterministic; the
+// go/packages load is shared, so the fallback costs only a second emission pass).
+func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, inputPath, outputPath, projectNamespace string, supported HashSet[string], options Options) (testVariantConversionResult, error) {
+	result := testVariantConversionResult{
+		declarations:         make([]testDeclaration, 0),
+		outputFiles:          make([]string, 0),
+		allImports:           HashSet[string]{},
+		requiredCapabilities: HashSet[string]{},
+		includedSources:      HashSet[string]{},
+	}
+
+	if model == testProjectReference {
+		// The production package binds as an ORDINARY imported package: its exported metadata
+		// (type aliases, implements) loads from the colocated package_info.cs like any other
+		// dependency's, its types render package-qualified, and isSameAssemblyPkg answers false
+		// so cast sites compose the same foreign adapter names go2cs-gen generates for a
+		// project-referenced package. Clearing the self-import binding is what flips all of it
+		// (visitImportSpec's isPackageUnderTest, convertTestVariant's testLocalTypePrefixes and
+		// loadPackageImplements are each gated on these fields).
+		options.testPackagePath = ""
+		options.testPackageName = ""
+	}
+
+	// Session-scoped, not per-variant (B2/B9): both variants come from the ONE load the caller
+	// performed, so the external variant's references to an internal-variant-renamed method (the
+	// export_test pattern) resolve by object identity to entries registered during the internal
+	// pass — resetPackageState deliberately does not clear this map.
+	testMethodRenames = make(map[types.Object]bool)
+
+	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
+
+	if model == testProjectReference {
+		// The reference model must NOT declare the production package class: the production
+		// types' single identity is the referenced production assembly, and a local partial
+		// declaration (or generated code anchored to one) would re-introduce exactly the
+		// duplicate-type shadow the model exists to eliminate. Seed a test-class-only anchor
+		// instead of the production package_info.cs.
+		seed := referenceModelTestPackageInfoSeed(projectNamespace, getSanitizedImport(external.Name+PackageSuffix), external.Name)
+
+		if err := os.WriteFile(testInfoPath, []byte(seed), 0644); err != nil {
+			return result, fmt.Errorf("seed test package metadata: %w", err)
+		}
+	} else {
+		// Seed package_test_info.cs from the production package_info.cs so the production
+		// assembly-level metadata carries over verbatim; each converted variant's ADDITIONS are
+		// then merged in by the shared writePackageInfoFile (identical emission semantics to
+		// production — pointer-form unwrapping, dedup, pruning — because it IS the production
+		// writer).
+		productionInfoPath := filepath.Join(outputPath, PackageInfoFileName)
+		productionInfo, err := os.ReadFile(productionInfoPath)
+		if err != nil {
+			return result, fmt.Errorf("read production package metadata (convert the package itself before its tests): %w", err)
+		}
+
+		if err := os.WriteFile(testInfoPath, productionInfo, 0644); err != nil {
+			return result, fmt.Errorf("seed test package metadata: %w", err)
+		}
+
+		// The production sources recompile into the test assembly, so their imports are test
+		// project references too. Under the reference model the production ASSEMBLY carries its
+		// own dependencies, and the test project references only what the test files import
+		// (plus the alias-scan additions — B2c).
+		for importPath := range production.Imports {
+			result.allImports.Add(importPath)
+		}
+	}
+
+	for _, variant := range []*packages.Package{internal, external} {
+		if variant == nil {
+			continue
+		}
+
+		if len(variant.Errors) > 0 {
+			return result, fmt.Errorf("test package variant %q failed to load: %v", variant.ID, variant.Errors)
+		}
+
+		entries := testFileEntries(variant)
+		if len(entries) == 0 {
+			continue
+		}
+
+		for _, entry := range entries {
+			result.includedSources.Add(filepath.Clean(entry.filePath))
+		}
+
+		capabilities := analyzeTestingCapabilities(variant)
+		found, foundMain := discoverTestDeclarations(variant, entries, inputPath, capabilities, supported)
+		result.declarations = append(result.declarations, found...)
+
+		// Package-level capability reporting aggregates over RUNNABLE declaration kinds only
+		// (tests + TestMain) — benchmark/fuzz/example requirements must not block the package,
+		// they are excluded-disclosed by their own status (F4: attribution is per-test).
+		for _, declaration := range found {
+			if declaration.Kind == "test" {
+				result.requiredCapabilities.UnionWith(declaration.RequiredCapabilities)
+			}
+		}
+
+		if foundMain != nil {
+			if result.testMain != nil {
+				return result, fmt.Errorf("multiple valid TestMain declarations: %s and %s", result.testMain.Source, foundMain.Source)
+			}
+			result.testMain = foundMain
+			result.requiredCapabilities.UnionWith(foundMain.RequiredCapabilities)
+		}
+
+		variantOutputs, imports, err := convertTestVariant(variant, entries, outputPath, projectNamespace, options)
+		if err != nil {
+			return result, err
+		}
+
+		// Merge this variant's collected metadata globals while they are still live (the next
+		// variant's conversion resets them). Under the RECOMPILE model the EXTERNAL variant's
+		// records are split across TWO anchor files (B4/B5): records whose generated code must
+		// live in the test package class go to package_info_external_test.cs; production-
+		// anchored records stay in package_test_info.cs. Under the REFERENCE model there is a
+		// single anchor — the test package class — and a record that would need the production
+		// anchor triggers the recompile fallback instead.
+		if variant == external {
+			if model == testProjectReference {
+				if recordsRequireProductionAnchor(getSanitizedImport(production.Name+PackageSuffix), production.Name) {
+					return result, errProductionAnchoredRecords
+				}
+
+				writePackageInfoFile(testInfoPath, true)
+			} else {
+				unitName, err := writeExternalVariantMetadata(testInfoPath, outputPath, production.Name)
+				if err != nil {
+					return result, err
+				}
+
+				if unitName != "" {
+					result.outputFiles = append(result.outputFiles, unitName)
+				}
+			}
+		} else {
+			writePackageInfoFile(testInfoPath, true)
+		}
+
+		result.outputFiles = append(result.outputFiles, variantOutputs...)
+		result.allImports.UnionWithSet(imports)
+	}
+
+	// The reference-model seed already declares the attribute-bearing test package class as its
+	// first — and only — class; the append is a recompile-model concern (the production-seeded
+	// file needs the test class and its widened `using static` scope added).
+	if model == testProjectRecompile {
+		if err := appendExternalTestPackageClass(testInfoPath, projectNamespace, production.Name, external); err != nil {
+			return result, err
+		}
+	}
+
+	return result, nil
+}
+
+// referenceModelTestPackageInfoSeed composes package_test_info.cs for a REFERENCE-model test
+// project. The structure mirrors package_info-template.txt (the shared writer requires all four
+// marker sections); the FIRST — and only — class declaration is the external test package class,
+// which is what the go2cs-gen generators anchor generated adapters and partials to
+// (GetFirstClassName), carrying [GoPackage] directly (no second partial exists to make that a
+// CS0579). Deliberately absent, versus the recompile model's production-seeded file: the
+// production class declaration and every production-anchored record — the referenced production
+// assembly already owns them, and a local shadow would duplicate its types.
+func referenceModelTestPackageInfoSeed(projectNamespace, testClassName, externalPackageName string) string {
+	var b strings.Builder
+
+	b.WriteString("// go2cs metadata anchor for a REFERENCE-model test project (black-box, external-only\r\n")
+	b.WriteString("// suite): the test assembly REFERENCES the colocated production project instead of\r\n")
+	b.WriteString("// recompiling its sources, so the production assembly is the single identity for the\r\n")
+	b.WriteString("// production types and no production class partial may be declared here. The first —\r\n")
+	b.WriteString("// and only — class is the external test package class the go2cs-gen generators anchor\r\n")
+	b.WriteString("// generated adapters and partials to.\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <ImportedTypeAliases>\r\n")
+	b.WriteString("// </ImportedTypeAliases>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("using go;\r\n")
+	b.WriteString(fmt.Sprintf("using static %s.%s;\r\n", projectNamespace, testClassName))
+	b.WriteString("\r\n")
+	b.WriteString("// <ExportedTypeAliases>\r\n")
+	b.WriteString("// </ExportedTypeAliases>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <InterfaceImplementations>\r\n")
+	b.WriteString("// </InterfaceImplementations>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <ImplicitConversions>\r\n")
+	b.WriteString("// </ImplicitConversions>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("namespace %s;\r\n", projectNamespace))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("[GoPackage(\"%s\")]\r\n", externalPackageName))
+	b.WriteString(fmt.Sprintf("public static partial class %s\r\n{\r\n}\r\n", testClassName))
+
+	return b.String()
 }
 
 // collectSiblingTestClosure populates siblingClosureImportPaths with the transitive import closure
@@ -1275,10 +1525,18 @@ func writeTestHost(outputPath, namespace, importPath string, declarations []test
 // compile items via EnableDefaultCompileItems=false, generated-files exposure, the go2csPath
 // fallback chain with the $(HOME) non-Windows fallback, the Go type-alias usings); the markers
 // carry the per-project values.
-func writeTestProject(projectFile, projectName, namespace string, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
+func writeTestProject(projectFile, projectName, namespace string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
 	references := HashSet[string]{
 		`$(go2csPath)core\golib\golib.csproj`:     {},
 		`$(go2csPath)core\testing\testing.csproj`: {},
+	}
+
+	// REFERENCE model: the production package compiles ONLY in its own project; reference it so
+	// its assembly stays the single identity for the production types. Colocated-relative — the
+	// -tests contract colocates the test project with the production csproj — so the reference
+	// is layout-independent (no $(go2csPath) tree mapping involved).
+	if model == testProjectReference {
+		references.Add(projectName + ".csproj")
 	}
 
 	for _, dependency := range dependencies {
@@ -1309,7 +1567,14 @@ func writeTestProject(projectFile, projectName, namespace string, productionFile
 	}
 
 	var compileItems strings.Builder
-	compileFiles := append(append([]string{}, productionFiles...), testFiles...)
+	compileFiles := append([]string{}, testFiles...)
+
+	// The production sources are compile items only under the RECOMPILE model; the reference
+	// model binds them through the production project reference above instead.
+	if model == testProjectRecompile {
+		compileFiles = append(compileFiles, productionFiles...)
+	}
+
 	compileFiles = append(compileFiles, testPackageInfoFileName, testHostFileName)
 	sort.Strings(compileFiles)
 	for _, file := range compileFiles {

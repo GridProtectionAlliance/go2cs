@@ -416,13 +416,142 @@ func TestAppendExternalTestPackageClassAddsTestUsingAndAnchor(t *testing.T) {
 	}
 }
 
+// Change C guard: the REFERENCE model is gated STRICTLY on the suite being black-box only —
+// an internal (in-package) variant forces the recompile model, because its files reach
+// unexported production symbols only a same-assembly compile can bind.
+func TestSelectTestProjectModelGatesOnBlackBoxOnly(t *testing.T) {
+	internal := &packages.Package{Name: "value"}
+	external := &packages.Package{Name: "value_test"}
+
+	if got := selectTestProjectModel(nil, external); got != testProjectReference {
+		t.Fatalf("black-box-only suite (internal==nil) must select the reference model, got %v", got)
+	}
+	if got := selectTestProjectModel(internal, external); got != testProjectRecompile {
+		t.Fatalf("a suite with an internal variant must select the recompile model, got %v", got)
+	}
+	if got := selectTestProjectModel(internal, nil); got != testProjectRecompile {
+		t.Fatalf("an internal-only suite must select the recompile model, got %v", got)
+	}
+}
+
+// Change C fallback gate: a reference-model conversion must fall back to the recompile model
+// exactly when the external variant's records demand a PRODUCTION anchor — a partial/adapter
+// merged into a production type declaration, impossible across an assembly boundary. Records
+// that anchor to the test class (bare test-local impls, adapter-class pairs) must NOT trigger
+// the fallback, or every black-box package with any interface cast loses the model.
+func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	if recordsRequireProductionAnchor("value_package", "value") {
+		t.Fatal("an empty record set must not require a production anchor")
+	}
+
+	// A bare (test-package-local) implementer and an adapter-class-marked foreign pair both
+	// generate in the test class — no fallback.
+	interfaceImplementations["io_package.Writer"] = NewHashSet([]string{"errWriter"})
+	adapterClassImplementations.Add("io_package.Writer|strings_package.Builder")
+	interfaceImplementations["io_package.Writer"].Add("strings_package.Builder")
+
+	if recordsRequireProductionAnchor("value_package", "value") {
+		t.Fatal("test-anchored records (bare impl, adapter-class pair) must not require a production anchor")
+	}
+
+	// A production-qualified pointer implementer needs a ж adapter generated on the production
+	// class — reference model impossible, fallback required.
+	interfaceImplementations["io_package.Writer"].Add(PointerPrefix + "<value_package.Buffer>")
+
+	if !recordsRequireProductionAnchor("value_package", "value") {
+		t.Fatal("a production-qualified pointer implementer must require the production anchor")
+	}
+
+	// A record rendering a production type through its imported ꓸ alias form hides the
+	// production qualifier from the partition predicates — conservatively production-anchored.
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+	implicitConversions["value"+TypeAliasDot+"Kind"] = NewHashSet([]string{"@string"})
+
+	if !recordsRequireProductionAnchor("value_package", "value") {
+		t.Fatal("a ꓸ-alias-form production type reference must require the production anchor")
+	}
+}
+
+// Change C project shape: a REFERENCE-model test project binds the production package through a
+// colocated ProjectReference and carries NO production compile items; the recompile model keeps
+// the original recompiled shape and no production reference.
+func TestWriteTestProjectReferenceModelBindsProductionProject(t *testing.T) {
+	dir := t.TempDir()
+	importPackageDirs = map[string]importedPackageMeta{}
+	productionFiles := []string{"value.cs"}
+	testFiles := []string{"value_test.cs"}
+
+	projectFile := filepath.Join(dir, "value.tests.csproj")
+	if err := writeTestProject(projectFile, "value", "go", testProjectReference, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := os.ReadFile(projectFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents := string(data)
+	if !strings.Contains(contents, `<ProjectReference Include="value.csproj" />`) {
+		t.Fatalf("reference model must reference the colocated production csproj:\n%s", contents)
+	}
+	if strings.Contains(contents, `<Compile Include="value.cs" />`) {
+		t.Fatalf("reference model must not recompile production sources:\n%s", contents)
+	}
+	if !strings.Contains(contents, `<Compile Include="value_test.cs" />`) {
+		t.Fatalf("reference model must keep the converted test sources as compile items:\n%s", contents)
+	}
+
+	recompileFile := filepath.Join(dir, "value.recompile.tests.csproj")
+	if err := writeTestProject(recompileFile, "value", "go", testProjectRecompile, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err = os.ReadFile(recompileFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents = string(data)
+	if strings.Contains(contents, `<ProjectReference Include="value.csproj" />`) {
+		t.Fatalf("recompile model must not reference the production csproj:\n%s", contents)
+	}
+	if !strings.Contains(contents, `<Compile Include="value.cs" />`) {
+		t.Fatalf("recompile model must recompile production sources:\n%s", contents)
+	}
+}
+
+// Change C anchor seed: the reference-model package_test_info.cs declares the external test
+// package class as its FIRST (and only) class — the go2cs-gen anchor — carrying [GoPackage]
+// directly, and must not declare the production package class (the referenced production
+// assembly is the single identity for those types).
+func TestReferenceModelSeedAnchorsTestClassOnly(t *testing.T) {
+	seed := referenceModelTestPackageInfoSeed("go", "value_test_package", "value_test")
+
+	if !strings.Contains(seed, "[GoPackage(\"value_test\")]\r\npublic static partial class value_test_package\r\n{\r\n}\r\n") {
+		t.Fatalf("seed must declare the attributed external test package class:\n%s", seed)
+	}
+	if strings.Contains(seed, "class value_package") {
+		t.Fatalf("seed must not declare the production package class:\n%s", seed)
+	}
+	for _, marker := range []string{"<ImportedTypeAliases>", "<ExportedTypeAliases>", "<InterfaceImplementations>", "<ImplicitConversions>"} {
+		if !strings.Contains(seed, marker) {
+			t.Fatalf("seed is missing the %s writer marker section:\n%s", marker, seed)
+		}
+	}
+}
+
 // F14b guard: a dependency that fails to resolve fails the test-project emission loudly, naming
 // the dependency — never a silent reference drop.
 func TestWriteTestProjectFailsLoudlyOnDependencyError(t *testing.T) {
 	dir := t.TempDir()
 	importPackageDirs = map[string]importedPackageMeta{}
 
-	err := writeTestProject(filepath.Join(dir, "broken.tests.csproj"), "broken", "go", nil, nil, nil,
+	err := writeTestProject(filepath.Join(dir, "broken.tests.csproj"), "broken", "go", testProjectRecompile, nil, nil, nil,
 		[]string{"go2cs.invalid/definitely/not/resolvable"}, Options{go2csPath: dir})
 
 	if err == nil {
