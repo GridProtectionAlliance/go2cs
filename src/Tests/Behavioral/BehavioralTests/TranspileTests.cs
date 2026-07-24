@@ -25,6 +25,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
+
+    [TestMethod]
     public void CheckAnonIfaceThroughPointerAdapter() => CheckTarget("AnonIfaceThroughPointerAdapter");
 
     [TestMethod]

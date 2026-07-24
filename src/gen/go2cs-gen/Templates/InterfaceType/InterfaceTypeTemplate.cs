@@ -156,28 +156,39 @@ internal class InterfaceTypeTemplate : TemplateBase
                     // when the interface was not able to be implemented at transpile time, e.g., with
                     // dynamically declared anonymous interfaces used with type assertions.
                     [{{GeneratedCodeAttribute}}]
-                    {{Scope}} class {{ConversionTypeName}} : {{ImplementedInterfaceName}}
+                    {{Scope}} class {{ConversionTypeName}} : {{ImplementedInterfaceName}}, IInterfaceAdapter
                     {
                         private {{TypeTTarget}} m_target = default!;
                         private readonly {{PointerPrefix}}<{{TypeTTarget}}>? m_target_ptr;
                         private readonly bool m_target_is_ptr;
-                    
+
                         public ref {{TypeTTarget}} Target
                         {
                             get
                             {
                                 if (m_target_is_ptr && m_target_ptr is not null)
                                     return ref m_target_ptr.Value;
-                    
+
                                 return ref m_target;
                             }
                         }
-                    
+
+                        // The Go dynamic value this duck-typing wrapper stands in for — the receiver box
+                        // (the *T) when pointer-backed, the wrapped struct value otherwise. Joining the
+                        // IInterfaceAdapter unwrap protocol makes the wrapper transparent to interface
+                        // equality (AreEqual), type() switches, GetGoTypeName, and re-asserts — so a
+                        // reflection-driven interface store (reflect.Value.Set) compares equal to the
+                        // original interface value it wrapped, and Go's value-vs-pointer method-set rule
+                        // is preserved on re-assert (a value-backed wrapper unwraps to the STRUCT,
+                        // exposing only its value method set). Explicit implementation: the wrapped
+                        // interface may itself declare a member named Value.
+                        object? IInterfaceAdapter.Value => m_target_is_ptr ? m_target_ptr : (object?)m_target;
+
                         public {{NonGenericConversionTypeName}}(in {{TypeTTarget}} target)
                         {
                             m_target = target;
                         }
-                    
+
                         public {{NonGenericConversionTypeName}}({{PointerPrefix}}<{{TypeTTarget}}> target_ptr)
                         {
                             m_target_ptr = target_ptr;

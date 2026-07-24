@@ -390,7 +390,12 @@ public static class TypeExtensions
             ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
 
             // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
-            if (!valueIsPointer && receiverIsPointer)
+            // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
+            // (receiverIsPointer above) and the original [GoRecv] `this ref X` extension — the
+            // byref strip on the line above erases the latter's pointer-ness, so ask the marker
+            // attribute directly (a `this ref` receiver without [GoRecv] does not exist in
+            // emitted code; value receivers are always by-value `this X`).
+            if (!valueIsPointer && (receiverIsPointer || method.GetCustomAttribute<GoRecvAttribute>() is not null))
                 continue;
 
             if (ReceiverElementMatches(receiverElement, valueElement))
