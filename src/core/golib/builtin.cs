@@ -32,6 +32,7 @@ public static class builtin
 
     private static readonly ThreadLocal<bool> s_fallthrough = new();
     private static readonly Type[] s_asTParams = [Type.MakeGenericMethodParameter(0).MakeByRefType()];
+    private static readonly Type[] s_asPtrTParams = [typeof(ж<>).MakeGenericType(Type.MakeGenericMethodParameter(0))];
 
     [ModuleInitializer]
     internal static void InitializeGoLib()
@@ -1567,10 +1568,43 @@ public static class builtin
             }
         }
 
-        if (!typeOfT.IsInterface || !Implements<T>(target))
+        // The structural fallback resolves the GO DYNAMIC VALUE's method set. A pointer-sourced
+        // interface value is a generated IжAdapter standing in for the *T it wraps — the adapter
+        // class itself carries NONE of T's methods, so probing (or ᴛAs-converting) the adapter
+        // never matches: a pointer-sourced error could not assert to any dyn interface, and
+        // errors.Is's `err.(interface{ Is(error) bool })` silently failed for every wrapped
+        // error. Unwrap to the receiver box — exactly as the registry path above and error.cs's
+        // interface-assert route already do — so the probe and the Δ-wrapper both see the box's
+        // (= *T's) method set. Null-guarded: an adapter holding a nil *T keeps the adapter view,
+        // since no dispatchable receiver exists to build a wrapper over.
+        object structuralTarget = target is IжAdapter { Box: not null } boxAdapter ? boxAdapter.Box : target;
+
+        if (!typeOfT.IsInterface || !Implements<T>(structuralTarget))
         {
             value = default!;
             return false;
+        }
+
+        // A receiver box closes the Δ-wrapper over its POINTEE via the generated ж<T> ᴛAs
+        // overload: the wrapper then dispatches pointer-receiver methods on the box itself and
+        // value-receiver methods on a dereferenced copy, matching Go's *T method set. Closing
+        // over the box type instead (Δ<ж<X>>) fails the wrapper's static initializer whenever
+        // the interface has a value-receiver method — those have no ж<X> extension overload.
+        Type structuralType = structuralTarget.GetType();
+
+        if (structuralType.IsGenericType && structuralType.GetGenericTypeDefinition() == typeof(ж<>))
+        {
+            MethodInfo? pointerMethod = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asPtrTParams);
+
+            if (pointerMethod is not null)
+            {
+            #pragma warning disable IL2060
+                MethodInfo closedPointerMethod = pointerMethod.MakeGenericMethod(structuralType.GetGenericArguments()[0]);
+            #pragma warning restore IL2060
+
+                value = (T)closedPointerMethod.Invoke(null, [structuralTarget])!;
+                return true;
+            }
         }
 
         // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
@@ -1589,11 +1623,45 @@ public static class builtin
         }
 
     #pragma warning disable IL2060
-        MethodInfo genericMethod = method.MakeGenericMethod(targetType);
+        MethodInfo genericMethod = method.MakeGenericMethod(structuralType);
     #pragma warning restore IL2060
 
-        value = (T)genericMethod.Invoke(null, [target])!;
+        value = (T)genericMethod.Invoke(null, [structuralTarget])!;
         return true;
+    }
+
+    // Open generic definition of TryTypeAssert<T>, resolved once for the runtime-Type-driven
+    // overload below (the two TryTypeAssert members are disambiguated by generic arity).
+    private static readonly MethodInfo s_tryTypeAssertDefinition = typeof(builtin)
+        .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+        .Single(static method => method.Name == nameof(TryTypeAssert) && method.IsGenericMethodDefinition);
+
+    private static readonly ConcurrentDictionary<Type, MethodInfo> s_tryTypeAssertByType = new();
+
+    /// <summary>
+    /// Non-generic type assertion of <paramref name="target"/> to a runtime-only interface
+    /// <paramref name="type"/>, with the full duck-typed machinery of the generic form.
+    /// </summary>
+    /// <param name="target">Source value to type assert.</param>
+    /// <param name="type">Target interface type, known only at run time.</param>
+    /// <param name="value">Asserted value implementing <paramref name="type"/>, if successful.</param>
+    /// <returns><c>true</c> if the assertion succeeded; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// The reflection bridge's <c>Value.Set</c> into an interface-typed destination only knows the
+    /// destination interface as a <see cref="Type"/> — this routes it through the same assert
+    /// machinery emitted <c>_&lt;T&gt;</c> sites use, so reflection and direct asserts can never
+    /// disagree about a method set. See docs/Phase4/DESIGN-reflection-bridge.md.
+    /// </remarks>
+    public static bool TryTypeAssert(object? target, Type type, [NotNullWhen(true)] out object? value)
+    {
+        MethodInfo closedAssert = s_tryTypeAssertByType.GetOrAdd(type, static assertedType =>
+            s_tryTypeAssertDefinition.MakeGenericMethod(assertedType));
+
+        object?[] args = [target, null];
+        bool matched = (bool)closedAssert.Invoke(null, args)!;
+
+        value = matched ? args[1] : null;
+        return matched && value is not null;
     }
 
     /// <summary>
