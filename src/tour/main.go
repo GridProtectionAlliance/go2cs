@@ -35,7 +35,7 @@ func main() {
 	addr := flag.String("addr", "127.0.0.1:4000", "Tour of go2cs address")
 	tourAddr := flag.String("tour-addr", "127.0.0.1:3999", "official Tour of Go address")
 	repoRoot := flag.String("repo", "", "go2cs repository root (auto-detected by default)")
-	defaultRuntime := flag.String("runtime", runtimeCore, ".NET runtime source: core, deployed, or nuget")
+	defaultRuntime := flag.String("runtime", "", ".NET runtime source: core, deployed, or nuget (default: deployed when detected, otherwise core)")
 	deployedRoot := flag.String("deployed-root", "", "deploy-core root for the deployed stdlib runtime")
 	nugetSource := flag.String("nuget-source", "", "NuGet feed or folder containing go2cs packages")
 	nugetVersion := flag.String("nuget-version", "", "version of go2cs NuGet packages")

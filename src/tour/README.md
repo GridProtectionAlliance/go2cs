@@ -49,10 +49,10 @@ To leave the browser closed or use another loopback port:
 .\src\tour\scripts\start.ps1 -NoOpen -ListenAddress 127.0.0.1:4100
 ```
 
-To start with a different .NET runtime source:
+To force a specific .NET runtime source:
 
 ```powershell
-.\src\tour\scripts\start.ps1 -Runtime deployed
+.\src\tour\scripts\start.ps1 -Runtime core
 ```
 
 ## Start on macOS or Linux
@@ -75,7 +75,8 @@ Useful options:
 - `-addr=127.0.0.1:4000`: address for Tour of go2cs
 - `-tour-addr=127.0.0.1:3999`: private address for the upstream Tour
 - `-repo=/path/to/go2cs`: explicit repository root
-- `-runtime=core|deployed|nuget`: initial .NET runtime source
+- `-runtime=core|deployed|nuget`: initial .NET runtime source; when omitted,
+  deployed stdlib is selected if detected, otherwise core source
 - `-deployed-root=/path/to/go2cs`: root created by `deploy-core.ps1 stdlib`
 - `-nuget-source=/path/or/feed`: folder or feed containing go2cs packages
 - `-nuget-version=1.23.1.1`: package version to restore
@@ -89,9 +90,10 @@ prevents a converter cached by an older checkout from being used with a newer To
 
 ## .NET runtime sources
 
-**Core source** is the default (`-runtime=core`). It converts and builds
-against the current checkout's `src/core`, `src/gen`, and converted package projects, which is the
-best mode while developing go2cs itself.
+**Core source** (`-runtime=core`) converts and builds against the current
+checkout's `src/core`, `src/gen`, and converted package projects, which is the
+best mode while developing go2cs itself. It is the automatic fallback when no
+valid deployed stdlib is detected.
 
 **Deployed stdlib** (`-runtime=deployed`) uses the compiled/full
 standard-library tree produced by:
@@ -101,7 +103,8 @@ standard-library tree produced by:
 ```
 
 The server discovers this at `$GOPATH/src/go2cs`. Override it with
-`-deployed-root` or `GO2CS_DEPLOYED_ROOT`.
+`-deployed-root` or `GO2CS_DEPLOYED_ROOT`. A valid deployed tree becomes the
+default runtime when `-runtime` is omitted.
 
 **NuGet packages** (`-runtime=nuget`) rewrites the generated project
 references to `go.gen`,

@@ -39,6 +39,36 @@ func TestResolveRuntimeUsesConfiguredDefault(t *testing.T) {
 	}
 }
 
+func TestResolvePipelineOptionsSelectsAvailableDeployedDefault(t *testing.T) {
+	deployedRoot := t.TempDir()
+	writeRuntimeRoot(t, deployedRoot)
+
+	options := resolvePipelineOptions(t.TempDir(), pipelineOptions{deployedRoot: deployedRoot})
+	if options.defaultRuntime != runtimeDeployed {
+		t.Fatalf("default runtime = %q, want %q", options.defaultRuntime, runtimeDeployed)
+	}
+}
+
+func TestResolvePipelineOptionsFallsBackToCore(t *testing.T) {
+	options := resolvePipelineOptions(t.TempDir(), pipelineOptions{deployedRoot: t.TempDir()})
+	if options.defaultRuntime != runtimeCore {
+		t.Fatalf("default runtime = %q, want %q", options.defaultRuntime, runtimeCore)
+	}
+}
+
+func TestResolvePipelineOptionsHonorsExplicitCore(t *testing.T) {
+	deployedRoot := t.TempDir()
+	writeRuntimeRoot(t, deployedRoot)
+
+	options := resolvePipelineOptions(t.TempDir(), pipelineOptions{
+		defaultRuntime: runtimeCore,
+		deployedRoot:   deployedRoot,
+	})
+	if options.defaultRuntime != runtimeCore {
+		t.Fatalf("default runtime = %q, want explicit %q", options.defaultRuntime, runtimeCore)
+	}
+}
+
 func TestResolveRuntimeRejectsUnknownDefault(t *testing.T) {
 	runner := newPipelineRunner(t.TempDir(), pipelineOptions{defaultRuntime: "unknown"})
 	defer runner.close()
@@ -136,5 +166,22 @@ func TestRuntimeMSBuildArgs(t *testing.T) {
 	nugetArgs := runtimeMSBuildArgs(nuget)
 	if len(nugetArgs) != 1 || nugetArgs[0] != "-p:GoStdLibVersion=1.23.1.7" {
 		t.Fatalf("NuGet runtime args = %v", nugetArgs)
+	}
+}
+
+func writeRuntimeRoot(t *testing.T, root string) {
+	t.Helper()
+	for _, name := range []string{
+		filepath.Join("core", "VERSION"),
+		filepath.Join("core", "golib", "golib.csproj"),
+		filepath.Join("gen", "go2cs-gen", "go2cs-gen.csproj"),
+	} {
+		path := filepath.Join(root, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
 	}
 }

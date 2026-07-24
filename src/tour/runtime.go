@@ -46,9 +46,6 @@ var (
 
 func resolvePipelineOptions(repoRoot string, supplied pipelineOptions) pipelineOptions {
 	supplied.defaultRuntime = strings.ToLower(strings.TrimSpace(supplied.defaultRuntime))
-	if supplied.defaultRuntime == "" {
-		supplied.defaultRuntime = runtimeCore
-	}
 
 	if supplied.deployedRoot == "" {
 		supplied.deployedRoot = strings.TrimSpace(os.Getenv("GO2CS_DEPLOYED_ROOT"))
@@ -56,6 +53,13 @@ func resolvePipelineOptions(repoRoot string, supplied pipelineOptions) pipelineO
 	if supplied.deployedRoot == "" {
 		if output, err := exec.Command("go", "env", "GOPATH").Output(); err == nil {
 			supplied.deployedRoot = filepath.Join(strings.TrimSpace(string(output)), "src", "go2cs")
+		}
+	}
+	if supplied.defaultRuntime == "" {
+		if validRuntimeRoot(supplied.deployedRoot) {
+			supplied.defaultRuntime = runtimeDeployed
+		} else {
+			supplied.defaultRuntime = runtimeCore
 		}
 	}
 
