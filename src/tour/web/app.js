@@ -374,7 +374,9 @@
       "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "var", "virtual",
       "void", "volatile", "while"
     ]);
-    const token = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|@"(?:""|[^"])*"|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])+'|\b\d+(?:\.\d+)?\b|\b[A-Za-z_@][A-Za-z0-9_@]*\b/g;
+    // Keep CR out of line-comment tokens so highlighted CRLF remains one
+    // line break when HTML normalizes text across span boundaries.
+    const token = /\/\/[^\r\n]*|\/\*[\s\S]*?\*\/|@"(?:""|[^"])*"|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])+'|\b\d+(?:\.\d+)?\b|\b[A-Za-z_@][A-Za-z0-9_@]*\b/g;
     let result = "";
     let index = 0;
     for (const match of source.matchAll(token)) {
