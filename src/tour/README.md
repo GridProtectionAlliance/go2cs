@@ -106,6 +106,8 @@ The server discovers this at `$GOPATH/src/go2cs`. Override it with
 `-deployed-root` or `GO2CS_DEPLOYED_ROOT`. A valid deployed tree becomes the
 default runtime when `-runtime` is omitted.
 
+> **NOTE:** This option will produce the best runtime results for converted tour code. 
+
 **NuGet packages** (`-runtime=nuget`) rewrites the generated project
 references to `go.gen`,
 `go.lib`, and the required `go.*` packages. The server prefers the local
