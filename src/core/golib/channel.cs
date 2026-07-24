@@ -24,10 +24,6 @@ public interface IChannel : IEnumerable
 
     nint Length { get; }
 
-    bool SendIsReady { get; }
-
-    bool ReceiveIsReady { get; }
-
     void Send(object value);
 
     object Receive();
@@ -885,16 +881,6 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// context.Background().Done(), which IS a nil channel).
     /// </remarks>
     public bool IsClosed => m_core is not null && m_core.Closed;
-
-    /// <summary>
-    /// Gets a flag that determines if a send could proceed right now (racy probe).
-    /// </summary>
-    public bool SendIsReady => m_core is not null && !m_core.Closed && (m_core.Qcount < m_core.Dataqsiz || !m_core.Recvq.IsEmpty);
-
-    /// <summary>
-    /// Gets a flag that determines if a receive could proceed right now (racy probe).
-    /// </summary>
-    public bool ReceiveIsReady => m_core is not null && (m_core.Qcount > 0 || !m_core.Sendq.IsEmpty || m_core.Closed);
 
     /// <summary>
     /// Gets the select-case descriptor registering a RECEIVE on this channel with

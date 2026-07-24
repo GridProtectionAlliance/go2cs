@@ -21,10 +21,6 @@ internal static class IChannelTypeTemplate
 
                 public bool IsClosed => m_value.IsClosed;
 
-                public bool SendIsReady => m_value.SendIsReady;
-
-                public bool ReceiveIsReady => m_value.ReceiveIsReady;
-
                 public global::go.SelectOp Receiving => m_value.Receiving;
 
                 // Explicit-only: Go code commonly defines its OWN Close() method on a named
