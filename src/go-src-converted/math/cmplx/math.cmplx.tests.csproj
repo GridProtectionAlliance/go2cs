@@ -69,7 +69,6 @@
     <Compile Include="asin.cs" />
     <Compile Include="cmath_test.cs" />
     <Compile Include="conj.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="exp.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="huge_test.cs" />
@@ -109,7 +108,6 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)core\testing\testing.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\bits\math.bits.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\math.csproj" />
     <ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
