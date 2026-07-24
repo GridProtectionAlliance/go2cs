@@ -16,7 +16,10 @@ import (
 	"time"
 )
 
-const tourModule = "golang.org/x/website/tour@latest"
+const (
+	tourModule    = "golang.org/x/website/tour@latest"
+	tourGoVersion = "1.23.1"
+)
 
 type tourProxy struct {
 	address   string
@@ -36,6 +39,10 @@ func newTourProxy(address, repoRoot string) *tourProxy {
 	proxy.Director = func(request *http.Request) {
 		originalDirector(request)
 		request.Header.Del("Accept-Encoding")
+		if request.URL.Path == "/tour/script.js" {
+			request.Header.Del("If-Modified-Since")
+			request.Header.Del("If-None-Match")
+		}
 		if request.Header.Get("Upgrade") != "" {
 			// The Tour websocket enforces a same-origin handshake. The browser
 			// quite correctly sends the wrapper's origin, so translate it to the
@@ -154,6 +161,9 @@ func (t *tourProxy) modifyResponse(response *http.Response) error {
 	if location := response.Header.Get("Location"); location != "" {
 		response.Header.Set("Location", strings.ReplaceAll(location, t.target.String(), ""))
 	}
+	if response.Request != nil && response.Request.URL.Path == "/tour/script.js" {
+		return addTourGoVersion(response)
+	}
 	if !strings.Contains(response.Header.Get("Content-Type"), "text/html") {
 		return nil
 	}
@@ -175,6 +185,25 @@ try { if (localStorage.getItem("syntax") === null) localStorage.setItem("syntax"
 	response.Body = io.NopCloser(bytes.NewReader(body))
 	response.ContentLength = int64(len(body))
 	response.Header.Set("Content-Length", fmt.Sprint(len(body)))
+	return nil
+}
+
+func addTourGoVersion(response *http.Response) error {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	_ = response.Body.Close()
+
+	const moduleLine = `'module example\n' +`
+	versionLine := moduleLine + "\n                    'go " + tourGoVersion + `\n' +`
+	body = bytes.Replace(body, []byte(moduleLine), []byte(versionLine), 1)
+	response.Body = io.NopCloser(bytes.NewReader(body))
+	response.ContentLength = int64(len(body))
+	response.Header.Set("Content-Length", fmt.Sprint(len(body)))
+	response.Header.Set("Cache-Control", "no-store")
+	response.Header.Del("ETag")
+	response.Header.Del("Last-Modified")
 	return nil
 }
 

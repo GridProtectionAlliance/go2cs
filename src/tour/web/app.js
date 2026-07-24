@@ -282,7 +282,7 @@
     } catch (error) {
       const active = outputs.run.status === "running" ? "run" : "build";
       if (error.name === "AbortError") {
-        outputs[active] = { id: active, status: "killed", output: active === "run" ? "Program exited: killed" : "Killed.", durationMs: 0 };
+        outputs[active] = { id: active, status: "killed", output: active === "run" ? killedProgramOutput() : "Killed.", durationMs: 0 };
         if (active === "build") outputs.run = idleStage("run", "Run was not started.");
         conversionStatus.textContent = ".NET process killed";
       } else {
@@ -301,6 +301,11 @@
 
   function killRun() {
     runController?.abort();
+  }
+
+  function killedProgramOutput() {
+    const platform = navigator.userAgentData?.platform || navigator.platform || "";
+    return `\nProgram exited: ${/^Win/i.test(platform) ? "exit status 1" : "signal: killed"}`;
   }
 
   function updateButtons() {
@@ -333,7 +338,6 @@
   }
 
   function renderOutputState() {
-    const followOutput = outputScroll.scrollTop + outputScroll.clientHeight >= outputScroll.scrollHeight - 4;
     for (const button of outputTabs.querySelectorAll("[data-output]")) {
       const stage = outputs[button.dataset.output];
       button.className = stage.status;
@@ -342,11 +346,7 @@
     const stage = outputs[activeOutput];
     renderOutputText(stage);
     outputTiming.textContent = stage.durationMs ? `${(stage.durationMs / 1000).toFixed(2)}s` : "";
-    if (followOutput) {
-      requestAnimationFrame(() => {
-        outputScroll.scrollTop = outputScroll.scrollHeight;
-      });
-    }
+    outputScroll.scrollTop = 0;
   }
 
   function renderOutputText(stage) {
