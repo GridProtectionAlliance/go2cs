@@ -231,6 +231,7 @@
     <Project Path="Tests/Behavioral/GoShiftSemantics/GoShiftSemantics.csproj" />
     <Project Path="Tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="Tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
+    <Project Path="Tests/Behavioral/GoUntypedConstArg/GoUntypedConstArg.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="Tests/Behavioral/HexByteStringLiteral/HexByteStringLiteral.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />
@@ -385,6 +386,7 @@
     <Project Path="Tests/Behavioral/PointerReceiverNilCompare/PointerReceiverNilCompare.csproj" />
     <Project Path="Tests/Behavioral/PointerReceiverPointerLocalField/PointerReceiverPointerLocalField.csproj" />
     <Project Path="Tests/Behavioral/PointerRvalueFieldReceiver/PointerRvalueFieldReceiver.csproj" />
+    <Project Path="Tests/Behavioral/PointerToArrayElementAddress/PointerToArrayElementAddress.csproj" />
     <Project Path="Tests/Behavioral/PointerToInterfaceParamDeref/PointerToInterfaceParamDeref.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
     <Project Path="Tests/Behavioral/PointerValueToInterfaceArg/PointerValueToInterfaceArg.csproj" />

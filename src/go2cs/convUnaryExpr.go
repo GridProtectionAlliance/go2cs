@@ -463,6 +463,28 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			exprType := v.getType(indexExpr.X, true)
 			ident := getIdentifier(indexExpr.X)
 
+			// `&t[i]` where t is a POINTER to an ARRAY (Go auto-derefs the index — `(*t)[i]`): the
+			// element lives in the pointed-to array on the heap. `t` already IS the `ж<[N]E>` box,
+			// so alias the element THROUGH THE BOX with `t.at<E>(i)` — ж's `at` materializes the
+			// lazy array backing on the REAL storage first, then returns an element pointer over the
+			// shared backing. The naive fallback further below boxes `Ꮡ(t.Value[i])` — a COPY of the
+			// element — silently dropping every write through the returned pointer (hash/crc32
+			// slicingMakeTable's `simplePopulateTable(poly, &t[0])` left the CRC tables all-zeros —
+			// TestGolden/TestSlicing). A pointer-to-SLICE cannot reach here (Go does not auto-deref
+			// `*[]E` for indexing; it is written `(*t)[i]`, a StarExpr the slice branch handles).
+			if ptr, isPtr := exprType.(*types.Pointer); isPtr {
+				if arrayType, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
+					elemCSType := convertToCSTypeName(v.getDisplayTypeName(arrayType.Elem(), false))
+					// Render the base in POINTER context so it yields the `ж<[N]E>` BOX (`Ꮡtab` for a
+					// deref-aliased pointer PARAMETER, or the box-valued LOCAL `t` from `@new`), not the
+					// deref value alias `tab` (a bare `[N]E` value has no `at`, CS1061).
+					boxIdentContext := DefaultIdentContext()
+					boxIdentContext.isPointer = true
+
+					return fmt.Sprintf("%s.at<%s>(%s)", v.convExpr(indexExpr.X, []ExprContext{boxIdentContext}), elemCSType, v.convArrayIndex(indexExpr.Index))
+				}
+			}
+
 			// Object identity, not name: a slice/array LOCAL shadowing the receiver name must
 			// keep the element-aliasing `Ꮡ(x, index)` form below — the receiver form `Ꮡ(x[i])`
 			// boxes a COPY of the element, silently dropping writes (identResolvesToReceiver).

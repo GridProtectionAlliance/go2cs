@@ -523,6 +523,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoStmtValueReturn() => CheckTarget("GoStmtValueReturn");
 
     [TestMethod]
+    public void CheckGoUntypedConstArg() => CheckTarget("GoUntypedConstArg");
+
+    [TestMethod]
     public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
 
     [TestMethod]
@@ -974,6 +977,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerSelectorDeref() => CheckTarget("PointerSelectorDeref");
+
+    [TestMethod]
+    public void CheckPointerToArrayElementAddress() => CheckTarget("PointerToArrayElementAddress");
 
     [TestMethod]
     public void CheckPointerToInterfaceParamDeref() => CheckTarget("PointerToInterfaceParamDeref");

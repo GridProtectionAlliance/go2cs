@@ -964,19 +964,36 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					v.indentLevel--
 				}
 
-				// A deferred/go method-value call routes its args through deferǃ(Action<T>, T arg, …),
-				// where T must unify from BOTH the method parameter and the argument. An untyped numeric
-				// constant (e.g. `0`) renders as C# int and won't unify with a wider concrete parameter
-				// (e.g. atomic.Uint64.Store(ulong)) — cast it to the parameter type. Only the method-value
-				// form (no rendered lambda params) is affected; the lambda form passes args into a lambda.
-				if context.callArgs != nil && !context.renderParams {
+				// A deferred/go call routes its args through deferǃ/goǃ, where the callee's parameter
+				// type must equal the C# type the arg renders as. In the METHOD-VALUE form
+				// (deferǃ(Action<T>, T arg, …)) T unifies from BOTH the method parameter and the
+				// argument; in the LAMBDA form (goǃ(ᴛ1 => f(ᴛ1), arg)) the arg's C# type drives ᴛ1's
+				// inference and the lambda body then calls f(ᴛ1) — so ᴛ1 must be f's parameter type.
+				// An untyped numeric constant (e.g. `0`, or crc32's untyped `Castagnoli` feeding
+				// MakeTable(uint32)) otherwise takes convExprList's DEFAULT-Go-type cast, which won't
+				// unify with a wider/other concrete parameter (atomic.Uint64.Store(ulong),
+				// MakeTable(uint32) — hash/crc32 TestCastagnoliRace, CS1503). Cast it to the parameter
+				// type. In the lambda form the override is applied ONLY when the parameter differs from
+				// that default type — when they match, the existing default-cast path already yields the
+				// right type, so overriding would only churn the golden (`(nint)x`→`(nint)(x)`).
+				if context.callArgs != nil {
 					deferParamType := params.At(i).Type()
 					if basic, ok := deferParamType.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 						if v.isUntypedNumericConstArg(callExpr.Args[i]) {
-							if callExprContext.castArgToType == nil {
-								callExprContext.castArgToType = make(map[int]string)
+							applyCast := !context.renderParams
+
+							if !applyCast {
+								if defaultType := v.untypedNumericConstArgDefaultType(callExpr.Args[i]); defaultType != nil {
+									applyCast = !types.Identical(defaultType, basic)
+								}
 							}
-							callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(deferParamType, false))
+
+							if applyCast {
+								if callExprContext.castArgToType == nil {
+									callExprContext.castArgToType = make(map[int]string)
+								}
+								callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(deferParamType, false))
+							}
 						}
 					}
 
@@ -984,12 +1001,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// deferǃ/goǃ type parameter as NilType and breaks the method-group match
 					// (CS0123 — exec_windows DuplicateHandle). Cast it to the parameter's C# type:
 					// ж<T>/interface/slice/map/channel all carry an implicit NilType conversion,
-					// so `(ж<ΔHandle>)(nil)` binds and keeps the visible `nil`.
-					if tv, ok := v.info.Types[callExpr.Args[i]]; ok && tv.IsNil() {
-						if callExprContext.castArgToType == nil {
-							callExprContext.castArgToType = make(map[int]string)
+					// so `(ж<ΔHandle>)(nil)` binds and keeps the visible `nil`. Method-value form
+					// only — the lambda form's untyped nil binds through NilType's own conversions.
+					if !context.renderParams {
+						if tv, ok := v.info.Types[callExpr.Args[i]]; ok && tv.IsNil() {
+							if callExprContext.castArgToType == nil {
+								callExprContext.castArgToType = make(map[int]string)
+							}
+							callExprContext.castArgToType[i] = v.getCSTypeName(deferParamType)
 						}
-						callExprContext.castArgToType[i] = v.getCSTypeName(deferParamType)
 					}
 				}
 			}
@@ -2287,6 +2307,50 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 	}
 
 	return false
+}
+
+// untypedNumericConstArgDefaultType returns the DEFAULT Go basic type an untyped numeric constant
+// argument renders as (the type convExprList already casts it to for a defer/go call arg), or nil
+// when the arg is not an untyped numeric constant. It mirrors isUntypedNumericConstArg's shape so
+// the two stay in lockstep. Used to decide whether the lambda-form defer/go arg needs an explicit
+// parameter-type override: when the parameter IS this default type the existing default-cast path
+// already yields the right C# type, so no override (and no golden drift) is needed.
+func (v *Visitor) untypedNumericConstArgDefaultType(arg ast.Expr) types.Type {
+	switch a := arg.(type) {
+	case *ast.BasicLit:
+		switch a.Kind {
+		case token.INT:
+			return types.Typ[types.Int]
+		case token.FLOAT:
+			return types.Typ[types.Float64]
+		case token.CHAR:
+			return types.Typ[types.Rune]
+		case token.IMAG:
+			return types.Typ[types.Complex128]
+		}
+	case *ast.Ident:
+		if constObj, ok := v.info.Uses[a].(*types.Const); ok {
+			if _, tightened := v.tightenedConsts[constObj]; tightened {
+				return nil
+			}
+			if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0 {
+				return types.Default(basic)
+			}
+		}
+	case *ast.SelectorExpr:
+		if constObj, ok := v.info.Uses[a.Sel].(*types.Const); ok {
+			if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0 {
+				return types.Default(basic)
+			}
+		}
+	case *ast.UnaryExpr:
+		switch a.Op {
+		case token.SUB, token.ADD, token.XOR:
+			return v.untypedNumericConstArgDefaultType(a.X)
+		}
+	}
+
+	return nil
 }
 
 // untypedIntGenericArgCastType returns the C# type an untyped INTEGER constant argument must be

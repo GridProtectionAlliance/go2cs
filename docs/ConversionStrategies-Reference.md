@@ -589,6 +589,22 @@ A same-package untyped const (a bare ident) is unchanged. (Guarded by the `Cross
 cross-package untyped consts reached through a selector, output-compared vs Go; without the fix the appends
 are CS0121.)
 
+The parameter-type cast also reaches the **lambda form** of a go/defer call, not just the method-value
+form. When the callee returns a value (or is a value-receiver method), `visitGoStmt`/`visitDeferStmt`
+force the temp-param lambda `goǃ(ᴛ1 => f(ᴛ1), arg)` (see *A value-returning goroutine callee is wrapped
+in a discarding lambda*); there the arg's C# type drives ᴛ1's inference, and the lambda body's `f(ᴛ1)`
+then needs ᴛ1 to be `f`'s parameter type. An untyped numeric const otherwise took `convExprList`'s
+DEFAULT-Go-type cast, so ᴛ1 inferred the default (`nint`) and `f(ᴛ1)` failed — hash/crc32's
+`go MakeTable(Castagnoli)` (Castagnoli an untyped `uint32` poly) emitted `goǃ(ᴛ1 => MakeTable(ᴛ1),
+(nint)Castagnoli)`, CS1503. `convCallExpr` now applies the parameter-type cast in the lambda form too, but
+ONLY when the parameter differs from the const's default type (`untypedNumericConstArgDefaultType` vs the
+param's underlying basic) — when they match, the existing default-cast path already yields the right type,
+so overriding would only churn the golden (`(nint)x`→`(nint)(x)`). Proven zero-drift on the behavioral
+corpus and the full stdlib reconvert (the fix fires only where a wider/other parameter demands it).
+(Guarded by the `GoUntypedConstArg` behavioral test — `go compute(poly)` with a value-returning callee and
+an untyped `uint32`-poly const, output-compared vs Go; without the fix the `goǃ` arg is `(nint)poly` and
+the lambda body is CS1503.)
+
 **A string-literal spread** — `append(b, "runtime error: "...)` (runtime `error.go`'s message builder) — renders the literal as a `"…"u8` `ReadOnlySpan<byte>`, which has no spread property (`.ꓸꓸꓸ` → CS1061). The spread emission wraps a direct string-literal source in the member-accessible `@string` — `append(b, ((@string)"runtime error: "u8).ꓸꓸꓸ)` — whose `ꓸꓸꓸ` returns the `Span<byte>` the `append<T>(slice<T>, params Span<T>)` overload binds; this is the same wrap the `string(r)...` conversion spread uses (above). A non-literal spread source (a slice, a `@string` variable) is unchanged. (Guarded by the `StringConvPostfix` extension — two literal spreads appended and value-compared vs Go.)
 
 **A string-literal CONCAT as an object/interface vararg argument** — runtime `stack.go`'s newline+tab join in `print`'s diagnostics — needs the same u8 suppression the direct literal argument already gets, propagated INTO the `BinaryExpr`'s operands: both halves otherwise render as `"…"u8` spans, and a `ReadOnlySpan<byte>` cannot box to `object` (CS1503) nor be `+`-concatenated. The binary-expression conversion now honors an incoming `BasicLitContext.u8StringOK=false`, so the operands render as plain C# strings whose `+` and boxing are fine; the default context leaves every other path unchanged. (Guarded by the `StringConvPostfix` extension — a concat with an escape into an `fmt.Println` vararg plus a nested three-way concat, values vs Go.)
@@ -1675,6 +1691,25 @@ storage with the cloned parameter — element reads and writes through the point
 correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param after taking an
 element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
 `first` — element address of a `[4]byte` parameter, value vs Go.)
+
+**Element address of a POINTER-to-array — `&t[i]` where `t` is `*[N]E`.** Go auto-derefs the index
+(`(*t)[i]`), so the element lives in the pointed-to array on the heap; `t` already IS the `ж<[N]E>`
+box. The converter emits `t.at<E>(i)` — ж's `at` materializes the array's lazy backing on the REAL
+storage (a non-boxing constrained interface call) and then returns an element pointer over the shared
+backing. The base is rendered in POINTER context so it yields the box: a deref-aliased pointer
+PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.Value` in
+the prologue), while a box-valued LOCAL from `new([N]E)` gives the plain `t`. Previously this shape
+fell through every array/slice branch (the base's type is a `*types.Pointer`, not an array or slice)
+to the generic `Ꮡ(t.Value[i])` **copy** form, which boxes a snapshot of the element and silently
+drops any write made through the returned pointer. This is exactly hash/crc32's
+`slicingMakeTable`/`simpleMakeTable`: `simplePopulateTable(poly, &t[0])` populated a throwaway copy,
+leaving every CRC table all-zeros (checksums degenerated to `~0`-with-shifts — `TestGolden`,
+`TestSlicing`). The same latent write-through-a-copy bug lurked corpus-wide wherever `&ptr[i]` on a
+pointer-to-array was written through — `crypto/internal/nistec` (`p224GG[i].SetBytes(…)` in static
+init), `internal/bisect` and `runtime` (`atomic.Store*(&arr[i], …)`) — all now alias correctly. (A
+pointer-to-SLICE cannot reach here: Go does not auto-deref `*[]E` for indexing; it is written
+`(*t)[i]`, a `StarExpr` the slice branch already aliases.) (Guarded by `PointerToArrayElementAddress`
+— write-through `&g[j]` on a `*grid` local, value vs Go.)
 
 ### Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)
 
