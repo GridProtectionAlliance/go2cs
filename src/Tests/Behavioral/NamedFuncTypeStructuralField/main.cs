@@ -25,7 +25,7 @@ public static void Sort(this By by, slice<item> items) {
     nint n = len(s.items);
     for (nint i = 0; i < n; i++) {
         for (nint j = i + 1; j < n; j++) {
-            if (s.by(Ꮡ(s.items[j]), Ꮡ(s.items[i]))) {
+            if (s.by(Ꮡ(s.items, j), Ꮡ(s.items, i))) {
                 (s.items[i], s.items[j]) = (s.items[j], s.items[i]);
             }
         }

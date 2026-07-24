@@ -500,15 +500,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			// `Ꮡ` onto the postfix chain — `Ꮡb.stk().at<uintptr>(0)` binds as `(Ꮡb).stk()…`,
 			// referencing a box that does not exist (CS0103).
 			if _, ok := exprType.Underlying().(*types.Slice); ok {
-				if refRecv {
+				// refRecv is computed from the ROOT identifier of the index base (getIdentifier walks
+				// selector chains), so a slice FIELD of the receiver — `&b.lines[i]`, whose base
+				// `b.lines` roots at the receiver `b` — matches it too. But the receiver copy-form
+				// `Ꮡ(b.lines[i])` boxes a COPY of the element via `Ꮡ(in T)` and silently drops writes
+				// back through the pointer: tabwriter's terminateCell does `line := &b.lines[len-1];
+				// *line = append(*line, c)`, and the append's length write never lands in b.lines, so
+				// every line stays empty (empty formatted output). The copy-form is valid ONLY when the
+				// receiver is DIRECTLY the slice (`indexExpr.X` is the bare receiver ident); any other
+				// slice base — a field, a call result, a local — must use the element-aliasing two-arg
+				// `Ꮡ(x, index)` form, which shares the backing array (see ж.ValueSlot's array-index ref).
+				_, indexBaseIsRecvIdent := indexExpr.X.(*ast.Ident)
+
+				if refRecv && indexBaseIsRecvIdent {
 					// For a receiver reference to a slice, we use the "Ꮡ(slice[index])" syntax
 					return fmt.Sprintf("%s(%s[%s])", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
-				} else {
-					// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax.
-					// The golib element-address overloads take `int`/`nint`, so an unsigned/wide index
-					// (`&pclntable[funcoff]`, funcoff uint32) is cast to int (CS1503 otherwise).
-					return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castWideIntegerToInt(indexExpr.Index))
 				}
+				// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax.
+				// The golib element-address overloads take `int`/`nint`, so an unsigned/wide index
+				// (`&pclntable[funcoff]`, funcoff uint32) is cast to int (CS1503 otherwise).
+				return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castWideIntegerToInt(indexExpr.Index))
 			}
 
 			typeName := v.getTypeName(exprType, false)

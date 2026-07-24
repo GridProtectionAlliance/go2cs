@@ -444,6 +444,7 @@
     <Project Path="Tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
     <Project Path="Tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
     <Project Path="Tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
+    <Project Path="Tests/Behavioral/SliceFieldElementAddress/SliceFieldElementAddress.csproj" />
     <Project Path="Tests/Behavioral/SliceNilVsEmpty/SliceNilVsEmpty.csproj" />
     <Project Path="Tests/Behavioral/Solitaire/Solitaire.csproj" />
     <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />

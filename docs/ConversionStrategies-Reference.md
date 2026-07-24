@@ -1711,6 +1711,27 @@ pointer-to-SLICE cannot reach here: Go does not auto-deref `*[]E` for indexing; 
 `(*t)[i]`, a `StarExpr` the slice branch already aliases.) (Guarded by `PointerToArrayElementAddress`
 — write-through `&g[j]` on a `*grid` local, value vs Go.)
 
+**Element address of a SLICE FIELD of the receiver — `&b.lines[i]`.** The address of a slice element
+uses one of two golib forms: the **element-aliasing** two-arg `Ꮡ(x, i)` (→ `new ж<T>(IArray, index)`,
+whose `ValueSlot` returns `ref backingArray[index]`, so writes land in the shared backing array), or the
+**copy-boxing** `Ꮡ(x[i])` (→ `Ꮡ(in T)`, which boxes a *copy* of the element value). For a slice the copy
+form is only sound when nothing is written back through the pointer. Inside a pointer-receiver method the
+converter had a `refRecv` fast-path that chose the copy form for a "receiver reference to a slice" — but
+its detection keyed off `getIdentifier(indexExpr.X)`, which walks the selector chain to its **root**
+identifier. So a slice *field* of the receiver — `&b.lines[i]`, whose base `b.lines` roots at the
+receiver `b` — matched the fast-path too, and emitted the copy form. text/tabwriter's `terminateCell`
+does `line := &b.lines[len-1]; *line = append(*line, cell)`: the `append` grew a *copy* of the row's
+slice header and wrote the new length into the boxed copy, never back into `b.lines`, so every line
+stayed length 0 and **all formatted output came out empty** (only the newlines survived). The fix
+restricts the copy form to the case the receiver is *directly* the slice (`indexExpr.X` is the bare
+receiver identifier); any slice base that is a field, call result, or other non-identifier expression
+uses the element-aliasing `Ꮡ(x, i)` form — which is correct for a slice in all cases, since a slice value
+always shares its backing array. This also corrected a benign read-only site (`NamedFuncTypeStructuralField`'s
+`s.by(&s.items[j], &s.items[i])` comparison) from copy to alias. Only the SLICE branch is narrowed; the
+array branch's `refRecv` (and its own box-routing machinery, above) is unchanged. (Guarded by
+`SliceFieldElementAddress` — append-through-pointer into a `[][]int` field of a pointer receiver plus an
+in-place element mutate, value vs Go; validated end-to-end by `text/tabwriter`'s test suite.)
+
 ### Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)
 
 Go array assignment copies the array — `data := ints` yields independent storage — but the emitted
