@@ -259,6 +259,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
+    public void CheckDeepSelectRecursion() => CheckTarget("DeepSelectRecursion");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

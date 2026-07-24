@@ -538,8 +538,8 @@ internal sealed class ChanCore<T> : ChanCore
 /// Known residual (accepted, per the channels-redesign verification rounds): a panic or exception
 /// unwinding between a select's commit (frame pushed) and the winning guard's consume (frame
 /// popped) strands the frame on this thread's stack — and a select statement retried in a
-/// panic/recover loop grows the stack WITHOUT BOUND absent the cap below, each stranded frame
-/// pinning its boxed value. Frames are never MIS-consumed: every consume matches the top frame by
+/// panic/recover loop grows the stack WITHOUT BOUND, each stranded frame pinning its boxed
+/// value — an accepted, benign memory residual. Frames are never MIS-consumed: every consume matches the top frame by
 /// channel core, so a strand can never deliver its value to the wrong channel. A strand below the
 /// top is inert (later selects stack and consume above it). A strand created ABOVE a live frame —
 /// a panic recovered between an INNER select's commit and consume, inside an outer guard's target
@@ -549,14 +549,14 @@ internal sealed class ChanCore<T> : ChanCore
 /// depth-growth warning (never a process-killing assert), the observable signature of stranding.
 /// </para>
 /// <para>
-/// Cap-and-drop keeps the leak bounded: a frame is LIVE only while its select statement sits
-/// between commit and consume on this thread, which requires a strictly nested chain of selects,
-/// each running inside the previous one's guard target expression — reaching even a handful of
-/// simultaneously-live frames requires that many textually nested selects-in-out-target on one
-/// call stack (the deepest known real code is 2). At <see cref="MaxDepth"/> frames, everything
-/// below the newest <c>MaxDepth - 1</c> is therefore a strand in any plausible execution, and
-/// dropping a strand is behaviorally identical to leaving it (it could never be consumed — only
-/// refused). The oldest frames are dropped; the newest survive.
+/// The stack must NEVER be capped: live depth is DYNAMIC, not textual — a single textual select
+/// whose guard out-target expression RECURSES (each level committing a receive before the outer
+/// consume) holds one live frame per recursion level, so live depth equals recursion depth and a
+/// depth cap silently drops LIVE outer frames (the DeepSelectRecursion guard is the
+/// counter-example that falsified an attempted depth-64 cap: 100-level recursion lost every
+/// frame beyond the cap, zero-case-firing 36 selects with no assert — the empty-stack consume
+/// branch is also the legitimate probe path). Live frames are inherently bounded by the call
+/// stack; only STRANDS accumulate beyond it, and those are a benign memory residual.
 /// </para>
 /// </remarks>
 internal static class SelectPending
@@ -569,7 +569,6 @@ internal static class SelectPending
     }
 
     private const int DepthWarnThreshold = 8;
-    private const int MaxDepth = 64;
 
     [ThreadStatic] private static Stack<Frame>? t_frames;
 
@@ -577,19 +576,6 @@ internal static class SelectPending
     internal static void Push(ChanCore core, object? value, bool ok)
     {
         Stack<Frame> frames = t_frames ??= new Stack<Frame>();
-
-        if (frames.Count >= MaxDepth)
-        {
-            // Cap-and-drop (see remarks): everything below the newest MaxDepth - 1 frames is an
-            // unreachable strand in any plausible execution — drop the oldest to bound the leak.
-            Frame[] newestFirst = frames.ToArray();
-            frames.Clear();
-
-            for (int i = MaxDepth - 2; i >= 0; i--)
-                frames.Push(newestFirst[i]);
-
-            Debug.WriteLine($"go2cs WARNING: select pending-frame depth hit the {MaxDepth} cap on thread {Environment.CurrentManagedThreadId} — dropped {newestFirst.Length - (MaxDepth - 1)} stranded frame(s); frames are being stranded by panics unwinding between a select commit and its winning guard");
-        }
 
         frames.Push(new Frame { Core = core, Value = value, Ok = ok });
 

@@ -256,6 +256,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeepEqual() => CheckTarget("DeepEqual");
 
     [TestMethod]
+    public void CheckDeepSelectRecursion() => CheckTarget("DeepSelectRecursion");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

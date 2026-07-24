@@ -2939,10 +2939,11 @@ legacy `Sending` path):
   value stolen — found by the adversarial verification round). Only receive commits push frames; a
   send-case win touches nothing (a select may have send and receive cases on the SAME channel, and
   clearing would destroy an outer frame mid-nest). Known residual: a panic unwinding between
-  commit and consume strands a frame — unbounded under a repeated panic-in-target/recover loop
-  absent the depth-64 cap-and-drop (frames below the newest 63 are unreachable strands — a LIVE
-  frame requires its select to sit mid-guard on the call stack, so live depth equals textual
-  select-in-out-target nesting, never plausibly near 64). Frames are never MIS-consumed (every
+  commit and consume strands a frame — unbounded under a repeated panic-in-target/recover loop,
+  an accepted benign memory residual. The stack must never be CAPPED: live depth is dynamic, not
+  textual — one textual select whose out-target expression recurses holds one live frame per
+  recursion level, so a depth cap silently drops live outer frames (the `DeepSelectRecursion`
+  guard, 100 levels, falsified an attempted depth-64 cap). Frames are never MIS-consumed (every
   consume matches the top frame by channel core); a strand stacked above a live frame makes the
   outer select fire zero cases — the committed value is abandoned exactly as the panic abandoned
   the communication, never delivered wrongly. Debug-only depth warnings, never a process-killing

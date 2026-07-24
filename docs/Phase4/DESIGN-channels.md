@@ -15,8 +15,9 @@
 > verification:** `bd0b41d79` (CRITICAL emission fix — every select receive-case channel operand
 > hoisted into a select-scoped `selᴛN` temp, evaluated exactly once at select entry per Go's
 > spec; supersedes the "blocking-select goldens byte-identical" property; guard
-> `SelectOperandOnceEval`) and `c7ab16feb` (strand remarks corrected — unbounded absent the new
-> depth-64 cap-and-drop — plus the close-wake recv-bias divergence note in §4). Gates run on the
+> `SelectOperandOnceEval`) and `c7ab16feb` (strand remarks corrected plus the close-wake recv-bias divergence note in §4;
+> its depth-64 cap-and-drop was FALSIFIED by recursion-through-the-out-target and reverted —
+> guard `DeepSelectRecursion`). Gates run on the
 > branch after every round: CNR drift = exactly the intended re-baselines (every line inspected,
 > byte-identical once committed), full behavioral suite green (466/466 with Output 436/0 after
 > round 2); corpus reconvert-diff 100%-classified + full 302-package build 0 errors; banked
@@ -104,7 +105,8 @@ evaluated BEFORE the guard call, and legal Go can run another select there
 next buffered value stolen). Frames push/pop balanced across nesting, so the clear-on-send-win and
 assert-empty-on-entry hardenings above are superseded (both are destructive in a nested context);
 the accepted residual — a panic unwinding between commit and consume strands a frame, unbounded
-under a panic/recover retry loop absent `SelectPending`'s depth-64 cap-and-drop; frames are never
+under a panic/recover retry loop (accepted benign memory residual; live frames are bounded by the
+call stack and the stack must never cap — `DeepSelectRecursion`); frames are never
 mis-consumed, and a strand above a live frame abandons (never misdelivers) the outer commit — is
 documented in `SelectPending` with Debug-only depth warnings. Guard:
 `NestedSelectRecvTarget`.**]**

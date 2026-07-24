@@ -139,6 +139,7 @@
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
     <Project Path="Tests/Behavioral/DeadPointerParamAlias/DeadPointerParamAlias.csproj" />
     <Project Path="Tests/Behavioral/DeepEqual/DeepEqual.csproj" />
+    <Project Path="Tests/Behavioral/DeepSelectRecursion/DeepSelectRecursion.csproj" />
     <Project Path="Tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
