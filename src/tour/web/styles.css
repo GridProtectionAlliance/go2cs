@@ -405,11 +405,15 @@ button {
 }
 
 .output-tabs {
+  align-items: center;
   background: var(--tabs);
 }
 
 .output-tabs button {
-  height: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .output-tabs button[aria-selected="true"] {
@@ -443,8 +447,11 @@ button {
 }
 
 #output-timing {
+  align-self: stretch;
   margin-left: auto;
-  padding: 0 10px 7px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
   color: var(--muted);
   font-size: 9px;
 }

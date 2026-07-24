@@ -25,6 +25,11 @@ button.primary,
   border-color: #008dad !important;
 }
 
+#file-menu #run,
+#file-menu #kill {
+  color: #fff !important;
+}
+
 .CodeMirror {
   box-shadow: inset 3px 0 0 rgba(0, 173, 216, .48);
 }
