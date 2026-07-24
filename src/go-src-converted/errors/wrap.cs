@@ -182,6 +182,6 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
     }
 }
 
-internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
+internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
 
 } // end errors_package

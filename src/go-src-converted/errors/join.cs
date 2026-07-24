@@ -17,7 +17,7 @@ partial class errors_package {
 //
 // A non-nil error returned by Join implements the Unwrap() []error method.
 public static error Join(params ꓸꓸꓸerror errsʗp) {
-    var errs = errsʗp.slice();
+    var errs = errsʗp.sslice();
 
     nint n = 0;
     foreach (var (_, err) in errs) {
