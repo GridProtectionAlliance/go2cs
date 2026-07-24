@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using static go.path_package;
+using static path_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 
@@ -89,7 +89,7 @@ public static void TestCleanMallocs(ж<testing.T> Ꮡt) {
         var allocs = testing.AllocsPerRun(100, () => {
             Clean(testʗ1.result);
         });
-        if (allocs > 0) {
+        if (allocs > 0D) {
             Ꮡt.Errorf("Clean(%q): %v allocs, want zero"u8, test.result, allocs);
         }
     }

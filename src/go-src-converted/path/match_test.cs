@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using static go.path_package;
+using static path_package;
 using testing = testing_package;
 
 partial class path_test_package {

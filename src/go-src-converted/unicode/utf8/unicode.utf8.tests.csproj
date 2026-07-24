@@ -68,7 +68,6 @@
     <Compile Include="example_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="package_test_info.cs" />
-    <Compile Include="utf8.cs" />
     <Compile Include="utf8_test.cs" />
   </ItemGroup>
 
@@ -85,6 +84,7 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\strings\strings.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\unicode.csproj" />
+    <ProjectReference Include="unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

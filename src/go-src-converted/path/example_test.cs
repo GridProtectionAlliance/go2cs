@@ -4,8 +4,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using Δpath = go.path_package;
-using go;
+using Δpath = path_package;
 
 partial class path_test_package {
 

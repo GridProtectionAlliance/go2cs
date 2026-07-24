@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using cmp = go.cmp_package;
+using cmp = cmp_package;
 using fmt = fmt_package;
 using Δmath = math_package;
 using slices = slices_package;
@@ -11,11 +11,10 @@ using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using go;
 
 partial class cmp_test_package {
 
-internal static ж<float64> Ꮡnegzero = new(Δmath.Copysign(0, -1D));
+internal static ж<float64> Ꮡnegzero = new(Δmath.Copysign(0D, -1D));
 internal static ref float64 negzero => ref Ꮡnegzero.Value;
 
 internal static uintptr nonnilptr = (uintptr)new @unsafe.Pointer(Ꮡnegzero);
