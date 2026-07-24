@@ -103,6 +103,8 @@
     pagePath = nextPath;
     lessonLabel.textContent = message.title || "Generated .NET";
 
+    if (navigation) selectSourceView("code");
+
     if (!goSource) {
       conversionStatus.textContent = "This page has no editable Go source";
       conversionID = "";
