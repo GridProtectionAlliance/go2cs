@@ -76,6 +76,15 @@ func TestProgramExitMessageMatchesTour(t *testing.T) {
 	}
 }
 
+func TestAppendProgramExitMatchesTourSpacing(t *testing.T) {
+	if got := appendProgramExit("hello\n", "Program exited."); got != "hello\n\nProgram exited." {
+		t.Fatalf("appendProgramExit = %q", got)
+	}
+	if got := appendProgramExit("", "Program exited: killed"); got != "Program exited: killed" {
+		t.Fatalf("empty appendProgramExit = %q", got)
+	}
+}
+
 func TestFormatTranspileTranscriptListsGeneratedFiles(t *testing.T) {
 	root := t.TempDir()
 	for name := range map[string]struct{}{

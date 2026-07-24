@@ -345,6 +345,14 @@ func appendOutputLine(output, line string) string {
 	return output + "\n" + line
 }
 
+func appendProgramExit(output, line string) string {
+	output = strings.TrimSpace(output)
+	if output == "" {
+		return line
+	}
+	return output + "\n\n" + line
+}
+
 func programExitMessage(parent, command context.Context, err error) string {
 	switch {
 	case err == nil:
@@ -393,7 +401,7 @@ func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string,
 		}
 	}
 	if id == "run" {
-		text = appendOutputLine(text, programExitMessage(parent, ctx, err))
+		text = appendProgramExit(text, programExitMessage(parent, ctx, err))
 	}
 
 	return stageResult{

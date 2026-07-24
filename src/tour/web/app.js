@@ -286,13 +286,28 @@
       button.setAttribute("aria-selected", String(button.dataset.output === activeOutput));
     }
     const stage = outputs[activeOutput];
-    outputView.textContent = stage.output || "(no output)";
+    renderOutputText(stage);
     outputTiming.textContent = stage.durationMs ? `${(stage.durationMs / 1000).toFixed(2)}s` : "";
     if (followOutput) {
       requestAnimationFrame(() => {
         outputScroll.scrollTop = outputScroll.scrollHeight;
       });
     }
+  }
+
+  function renderOutputText(stage) {
+    const text = stage.output || "(no output)";
+    const systemStart = stage.id === "run" ? text.lastIndexOf("Program exited") : -1;
+    outputView.replaceChildren();
+    if (systemStart < 0) {
+      outputView.textContent = text;
+      return;
+    }
+    outputView.append(document.createTextNode(text.slice(0, systemStart)));
+    const system = document.createElement("span");
+    system.className = "output-system";
+    system.textContent = text.slice(systemStart);
+    outputView.append(system);
   }
 
   function highlightCSharp(source) {

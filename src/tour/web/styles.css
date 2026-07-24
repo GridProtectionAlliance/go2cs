@@ -8,12 +8,14 @@
   --panel: #202224;
   --editor: #253443;
   --output: #202224;
+  --output-pre: #2b2d2f;
   --tabs: #171717;
   --line: #46535f;
   --text: #f0f1f2;
   --muted: #bababa;
   --code-text: #bababa;
-  --output-text: #f0f1f2;
+  --output-text: #bababa;
+  --output-system: #f0f1f2;
   --tok-comment: #fb6;
   --tok-keyword: #b984ff;
   --tok-string: #f585c0;
@@ -33,12 +35,14 @@ html[data-theme="light"] {
   --panel: #fff;
   --editor: #ffffd8;
   --output: #fff;
+  --output-pre: #fafafa;
   --tabs: #fafafa;
   --line: #ccc;
   --text: #333;
   --muted: #666;
   --code-text: #333;
   --output-text: #333;
+  --output-system: #888;
   --tok-comment: #a50;
   --tok-keyword: #708;
   --tok-string: #a11;
@@ -193,7 +197,8 @@ button {
 
 .dotnet-pane {
   display: grid;
-  grid-template-rows: 50px 34px minmax(0, 1fr) minmax(145px, 30%);
+  /* Mirrors the Tour: 33% bottom pane, offset by its 48px header. */
+  grid-template-rows: 50px 34px minmax(0, 1fr) minmax(145px, calc(33% - 48px));
   border-left: 1px solid var(--line);
   background: var(--panel);
 }
@@ -350,11 +355,11 @@ button {
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 14px 16px 28px;
+  padding: 4px 16px 28px;
   overflow: auto;
   color: var(--code-text);
   background: var(--editor);
-  font: 12px/1.55 "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font: 16px/1.2 "Inconsolata", monospace;
   tab-size: 4;
   white-space: pre;
   scrollbar-color: var(--scrollbar) transparent;
@@ -447,8 +452,8 @@ button {
   background-color: var(--output);
   background-image: url("/dotnet-bot.png");
   background-repeat: no-repeat;
-  background-position: center calc(100% + 103px);
-  background-size: 190px 190px;
+  background-position: center calc(100% + 198px);
+  background-size: 340px 340px;
   scrollbar-color: var(--scrollbar) transparent;
 }
 
@@ -456,12 +461,16 @@ button {
   width: 100%;
   min-height: 0;
   margin: 0;
-  padding: 10px 13px 22px;
+  padding: 10px;
   color: var(--output-text);
-  background: var(--output);
-  font: 16px/24px "Inconsolata", monospace;
+  background: var(--output-pre);
+  font: 400 16px/24px "Inconsolata", monospace;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.output-system {
+  color: var(--output-system);
 }
 
 @media (max-width: 900px) {
