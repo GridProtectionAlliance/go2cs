@@ -68,8 +68,6 @@
     <Compile Include="example_interface_test.cs" />
     <Compile Include="example_keys_test.cs" />
     <Compile Include="example_multi_test.cs" />
-    <Compile Include="example_search_test.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="example_wrapper_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
