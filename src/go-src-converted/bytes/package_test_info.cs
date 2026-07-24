@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using base64 = go.encoding.base64_package;
 using bytes = go.bytes_package;
 using testing = go.testing_package;
 // </ImportedTypeAliases>
