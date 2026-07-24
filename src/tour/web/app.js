@@ -103,13 +103,18 @@
     pagePath = nextPath;
     lessonLabel.textContent = message.title || "Generated .NET";
 
-    if (navigation) selectSourceView("code");
+    if (navigation) {
+      convertController?.abort();
+      runController?.abort();
+      synchronizedRunPending = false;
+      selectSourceView("code");
+      resetNavigationState();
+    }
 
     if (!goSource) {
       conversionStatus.textContent = "This page has no editable Go source";
       conversionID = "";
       dirty = false;
-      renderGeneratedFiles("", "", "");
       outputs.transpile = idleStage("transpile", "This Tour page has no code to convert.");
       outputs.build = idleStage("build", "Nothing to build.");
       outputs.run = idleStage("run", "Nothing to run.");
@@ -180,6 +185,7 @@
     const controller = new AbortController();
     convertController = controller;
     const sourceAtStart = goSource;
+    const pathAtStart = pagePath;
     let converted = false;
 
     converting = true;
@@ -198,6 +204,7 @@
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || `Conversion failed (${response.status})`);
+      if (pagePath !== pathAtStart || goSource !== sourceAtStart) return false;
 
       outputs.transpile = result.stage;
       renderGeneratedFiles(result.csharp || "", result.packageInfo || "", result.project || "");
@@ -214,7 +221,7 @@
         conversionStatus.textContent = "Transpile failed";
       }
     } catch (error) {
-      if (error.name !== "AbortError") {
+      if (error.name !== "AbortError" && pagePath === pathAtStart && goSource === sourceAtStart) {
         outputs.transpile = { id: "transpile", status: "failed", output: error.message, durationMs: 0 };
         conversionStatus.textContent = "Transpile failed";
       }
@@ -237,6 +244,8 @@
 
     const controller = new AbortController();
     runController = controller;
+    const conversionAtStart = conversionID;
+    const pathAtStart = pagePath;
     running = true;
     outputs.build = { id: "build", status: "running", output: "Building generated .NET project...", durationMs: 0 };
     outputs.run = idleStage("run", "Waiting for a successful build.");
@@ -245,7 +254,7 @@
     updateButtons();
 
     try {
-      const requestBody = JSON.stringify({ conversionId: conversionID });
+      const requestBody = JSON.stringify({ conversionId: conversionAtStart });
       const buildResponse = await fetch("/api/build", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -254,6 +263,7 @@
       });
       const buildStage = await buildResponse.json();
       if (!buildResponse.ok) throw new Error(buildStage.error || `Build failed (${buildResponse.status})`);
+      if (pagePath !== pathAtStart || conversionID !== conversionAtStart) return;
       outputs.build = buildStage;
       renderOutputState();
 
@@ -276,10 +286,13 @@
       });
       const runStage = await runResponse.json();
       if (!runResponse.ok) throw new Error(runStage.error || `.NET run failed (${runResponse.status})`);
+      if (pagePath !== pathAtStart || conversionID !== conversionAtStart) return;
       outputs.run = runStage;
       conversionStatus.textContent = runStage.status === "passed" ? ".NET run completed" : ".NET run failed";
       selectOutput("run");
     } catch (error) {
+      const stale = pagePath !== pathAtStart || conversionID !== conversionAtStart;
+      if (stale) return;
       const active = outputs.run.status === "running" ? "run" : "build";
       if (error.name === "AbortError") {
         outputs[active] = { id: active, status: "killed", output: active === "run" ? killedProgramOutput() : "Killed.", durationMs: 0 };
@@ -324,6 +337,16 @@
     projectView.innerHTML = highlightXML(project || "<!-- No project file was emitted. -->");
   }
 
+  function resetNavigationState() {
+    codeView.textContent = "";
+    packageInfoView.textContent = "";
+    projectView.textContent = "";
+    outputs.transpile = idleStage("transpile", "");
+    outputs.build = idleStage("build", "");
+    outputs.run = idleStage("run", "");
+    selectOutput("transpile");
+  }
+
   function selectSourceView(name) {
     for (const button of sourceTabs.querySelectorAll("[data-view]")) {
       const selected = button.dataset.view === name;
@@ -350,7 +373,7 @@
   }
 
   function renderOutputText(stage) {
-    const text = stage.output || "(no output)";
+    const text = stage.output ?? "(no output)";
     const systemStart = stage.id === "run" ? text.lastIndexOf("Program exited") : -1;
     outputView.replaceChildren();
     if (systemStart < 0) {
