@@ -51,9 +51,12 @@ public static ж<Type> synthType(System.Type? st) {
     return Ꮡt;
 }
 
-// TypeOf returns the abi.Type of some value.
+// TypeOf returns the abi.Type of some value. The descriptor stands for the value's GO dynamic
+// type: an interface-carrier wrapper (IжAdapter / IInterfaceAdapter chain) unwraps to the *T box
+// / original value it stands for (GoReflect.GoDynamicTypeOf, R10), so adapter-held and raw-box
+// values of one Go type share one canonical descriptor.
 public static ж<Type> TypeOf(any a) {
-    return a == default! ? default! : synthType(a.GetType());
+    return a == default! ? default! : synthType(GoReflect.GoDynamicTypeOf(a));
 }
 
 } // end abi_package

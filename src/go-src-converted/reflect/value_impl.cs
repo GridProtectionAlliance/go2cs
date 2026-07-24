@@ -40,7 +40,7 @@ internal static ΔValue makeReflectValue(object? boxed) {
         return new ΔValue(nil);
     }
     var t = abi.TypeOf(boxed);
-    var v = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(boxed.GetType())));
+    var v = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(GoReflect.GoDynamicTypeOf(boxed))));
     v.boxed = boxed;
     return v;
 }

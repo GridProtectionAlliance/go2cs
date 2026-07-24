@@ -54,16 +54,41 @@ public static class GoReflect
     }
 
     /// <summary>
+    /// Resolves the managed <see cref="Type"/> that stands for a value's GO DYNAMIC TYPE, seeing
+    /// through the runtime's interface-carrier wrappers: an <see cref="IInterfaceAdapter"/> chain
+    /// unwraps to the original dynamic value, and a pointer-sourced <see cref="IжAdapter"/> yields
+    /// the receiver box's type (<c>ж&lt;T&gt;</c> — Go's dynamic type is the <c>*T</c>, never the
+    /// adapter class). The reflection bridge's <c>TypeOf</c>/<c>ValueOf</c> classify THIS type, so
+    /// an adapter-held <c>*T</c> and a raw <c>ж&lt;T&gt;</c> intern to the same canonical
+    /// <c>reflect.Type</c> and compare assignable by identity, exactly as in Go (R10).
+    /// </summary>
+    public static Type GoDynamicTypeOf(object value)
+    {
+        while (value is IInterfaceAdapter { Value: not null } interfaceAdapter)
+            value = interfaceAdapter.Value;
+
+        if (value is IжAdapter { Box: not null } pointerAdapter)
+            return pointerAdapter.Box.GetType();
+
+        return value.GetType();
+    }
+
+    /// <summary>
     /// Classifies a managed <see cref="Type"/> to its Go <c>reflect.Kind</c> ordinal. A NAMED Go type
     /// (<c>type Celsius float64</c> → <c>[GoType("num:float64")]</c>, or a wrapper struct) reports its
-    /// UNDERLYING kind, matching Go — the name is recovered separately from the type itself.
+    /// UNDERLYING kind, matching Go — the name is recovered separately from the type itself. A
+    /// generated interface-implementation adapter CLASS classifies as the Go dynamic type it stands
+    /// for (<c>*T</c> → Pointer; a value-sourced ᴠ-adapter → the wrapped struct's kind), mirroring
+    /// <see cref="GoTypeName"/>'s unwrap (R10) — though value-level callers should prefer
+    /// <see cref="GoDynamicTypeOf"/>, which resolves instance state the type alone cannot.
     /// </summary>
     public static int KindOf(Type? t)
     {
         if (t is null)
             return Invalid;
 
-        // Unwrap a boxed pointer/value: nothing to do here — Type is already the concrete runtime type.
+        if (TryAdapterWrappedType(t, out Type? adapterWrapped, out bool adapterPointerSourced))
+            return adapterPointerSourced ? Pointer : KindOf(adapterWrapped);
 
         // Fast, exact matches for the built-in Go scalar representations.
         if (t == typeof(bool)) return Bool;
@@ -299,7 +324,14 @@ public static class GoReflect
     /// </summary>
     public static Type? ElementType(Type? t)
     {
-        if (t is null || !t.IsGenericType) return null;
+        if (t is null) return null;
+
+        // A pointer-sourced adapter class stands for *T — its element type is T (R10), matching
+        // the KindOf/GoTypeName unwrap.
+        if (TryAdapterWrappedType(t, out Type? adapterWrapped, out bool adapterPointerSourced) && adapterPointerSourced)
+            return adapterWrapped;
+
+        if (!t.IsGenericType) return null;
 
         Type gd = t.GetGenericTypeDefinition();
         Type[] a = t.GetGenericArguments();

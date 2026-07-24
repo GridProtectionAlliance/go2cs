@@ -64,7 +64,7 @@ partial class reflectlite_package
             return new Value(nil);
 
         ж<abi_package.Type> t = abi_package.TypeOf(boxed);
-        Value v = new Value(t, default!, (flag)(uintptr)(uint8)GoReflect.KindOf(boxed.GetType()));
+        Value v = new Value(t, default!, (flag)(uintptr)(uint8)GoReflect.KindOf(GoReflect.GoDynamicTypeOf(boxed)));
 
         v.boxed = boxed;
 
