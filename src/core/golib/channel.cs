@@ -1304,27 +1304,21 @@ public static class channel
 {
     public const int DeadLockDetectionTimeout = 200;
 
+    /// <summary>
+    /// Sleeps for the deadlock-grace <paramref name="timeout"/> used by operations on a nil
+    /// channel, returning <c>true</c> only if <paramref name="token"/> was canceled first —
+    /// <c>false</c> means the timeout elapsed (the caller reports the deadlock).
+    /// </summary>
     public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout)
     {
-        SemaphoreSlim semaphore = new(0, 1);
-        bool tokenCanceled = false;
-        bool result = true;
-
-        try
+        // Plain timed wait — every nil-channel op funnels here, so no per-call throwaway
+        // SemaphoreSlim. An uncancelable token (the in-tree callers all pass None) is a sleep.
+        if (!token.CanBeCanceled)
         {
-            result = semaphore.Wait(timeout, token);
-        }
-        catch (OperationCanceledException)
-        {
-            tokenCanceled = true;
-        }
-        finally
-        {
-            if (!tokenCanceled)
-                semaphore.Release();
+            Thread.Sleep(timeout);
+            return false;
         }
 
-        // Will return false if semaphore was not acquired, i.e., timeout occurred
-        return result;
+        return token.WaitHandle.WaitOne(timeout);
     }
 }
