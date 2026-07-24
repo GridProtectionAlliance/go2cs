@@ -284,9 +284,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
     throw panic("reflect: Elem of invalid type " + toRType(Ꮡt).String());
 }
 
-internal static ΔType Elem(this rtype t) {
-    return toType(elem(t.common()));
-}
+// go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ΔType In(this rtype t, nint i) {
     var tt = t.Type.FuncType();
@@ -361,24 +359,9 @@ public static ΔType TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
-internal static bool Implements(this rtype t, ΔType u) {
-    if (u == default!) {
-        throw panic("reflect: nil type passed to Type.Implements");
-    }
-    if (u.Kind() != Interface) {
-        throw panic("reflect: non-interface type passed to Type.Implements");
-    }
-    return implements(u.common(), t.common());
-}
+// go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableTo(this rtype t, ΔType u) {
-    if (u == default!) {
-        throw panic("reflect: nil type passed to Type.AssignableTo");
-    }
-    var uu = u.common();
-    var tt = t.common();
-    return directlyAssignable(uu, tt) || implements(uu, tt);
-}
+// go2cs generated this placeholder — func AssignableTo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static bool Comparable(this rtype t) {
     return t.Equal != default!;

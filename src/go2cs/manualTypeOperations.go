@@ -114,6 +114,14 @@ var manualConversionFuncs = map[string]map[string]bool{
 		// managed reference identity. DeepEqual itself stays auto (it only uses the bridged
 		// ValueOf/Type/AreEqual).
 		"deepValueEqual": true,
+		// Phase-3 write-back (the chip): Set writes through the addressable Value's aliased ж box
+		// (Go's assignTo semantics over the golib assert machinery); Zero builds valid zero Values
+		// (a pointer kind yields the canonical typed-nil box); methodName walks the managed stack
+		// (runtime.Caller has no managed form — its getcallersp chain NotImplementedException'd
+		// every mustBe* panic path, errors TestAs's first operational hit).
+		"Value.Set":  true,
+		"Zero":       true,
+		"methodName": true,
 	},
 	// internal/reflectlite mirrors the reflect bridge for the mini-surface sort.Slice
 	// exercises (ValueOf → Len, Swapper — sort's TestSlice was the first operational hit):
@@ -127,6 +135,18 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"unpackEface": true,
 		"Value.Len":   true,
 		"Swapper":     true,
+		// Phase-3 write-back — the errors.As surface. The auto forms read the never-populated
+		// v.ptr eface word (IsNil answered TRUE for every pointer; Elem returned the invalid
+		// Value) or descriptor sub-records synthType never populates (rtype.Elem panicked;
+		// implements() reinterpreted the descriptor). Bridged in value_impl.cs / type_impl.cs
+		// over the carried System.Type + the golib method-set machinery.
+		"Value.Elem":         true,
+		"Value.IsNil":        true,
+		"Value.Set":          true,
+		"rtype.Elem":         true,
+		"rtype.Implements":   true,
+		"rtype.AssignableTo": true,
+		"methodName":         true,
 	},
 }
 

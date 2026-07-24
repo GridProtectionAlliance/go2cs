@@ -164,16 +164,7 @@ internal static any packEface(Value v) {
     return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
 }
 
-// methodName returns the name of the calling method,
-// assumed to be two stack frames above.
-internal static @string methodName() {
-    var (pc, _, _, _) = Δruntime.Caller(2);
-    var f = Δruntime.FuncForPC(pc);
-    if (f == nil) {
-        return "unknown method"u8;
-    }
-    return f.Name();
-}
+// go2cs generated this placeholder — func methodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // mustBeExported panics if f records that the value was obtained using
 // an unexported field.
@@ -211,53 +202,13 @@ public static bool CanSet(this Value v) {
     return (flag)(v.flag & ((flag)(flagAddr | flagRO))) == flagAddr;
 }
 
-[GoType("dyn")] partial interface Elem_type {
-    void M();
-}
-
-// Elem returns the value that the interface v contains
-// or that the pointer v points to.
-// It panics if v's Kind is not Interface or Pointer.
-// It returns the zero Value if v is nil.
-public static Value Elem(this Value v) {
-    var k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == abi.Interface) {
-        any eface = default!;
-        if (v.typ().NumMethod() == 0){
-            eface = ~(ж<any>)(uintptr)(v.ptr);
-        } else {
-            eface = ((any)(((ж<Elem_type>)(uintptr)(v.ptr)).ValueSlot));
-        }
-        var x = unpackEface(eface);
-        if (x.flag != 0) {
-            x.flag |= v.flag.ro();
-        }
-        return x;
-    }
-    if (exprᴛ1 == abi.Pointer) {
-        @unsafe.Pointer ptr = v.ptr;
-        if ((flag)(v.flag & flagIndir) != 0) {
-            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
-        }
-        if (ptr == nil) {
-            // The returned value's address is v's value.
-            return new Value(nil);
-        }
-        var tt = (ж<ptrType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-        var typ = tt.Value.Elem;
-        var fl = (flag)((flag)((flag)(v.flag & flagRO) | flagIndir) | flagAddr);
-        fl |= (flag)(((flag)(uintptr)(uint8)typ.Kind()));
-        return new Value(typ, ptr.Value, fl);
-    }
-
-    throw panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
-}
+// go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 [GoType("dyn")] partial interface valueInterface_type {
     void M();
 }
 
+// The returned value's address is v's value.
 internal static any valueInterface(Value v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflectlite.Value.Interface", 0)));
@@ -274,34 +225,13 @@ internal static any valueInterface(Value v) {
     return packEface(v);
 }
 
-// IsNil reports whether its argument v is nil. The argument must be
-// a chan, func, interface, map, pointer, or slice value; if it is
-// not, IsNil panics. Note that IsNil is not always equivalent to a
-// regular comparison with nil in Go. For example, if v was created
-// by calling ValueOf with an uninitialized interface variable i,
-// i==nil will be true but v.IsNil will panic as v will be the zero
-// Value.
-public static bool IsNil(this Value v) {
-    var k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == abi.Chan || exprᴛ1 == abi.Func || exprᴛ1 == abi.Map || exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
-        @unsafe.Pointer ptr = v.ptr;
-        if ((flag)(v.flag & flagIndir) != 0) {
-            // if v.flag&flagMethod != 0 {
-            // 	return false
-            // }
-            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
-        }
-        return ptr == nil;
-    }
-    if (exprᴛ1 == abi.Interface || exprᴛ1 == abi.Slice) {
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr) == nil;
-    }
+// go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    // Both interface and slice are nil if first word is 0.
-    // Both are always bigger than a word; assume flagIndir.
-    throw panic(Ꮡ(new ValueError("reflectlite.Value.IsNil", v.kind())));
-}
+// if v.flag&flagMethod != 0 {
+// 	return false
+// }
+// Both interface and slice are nil if first word is 0.
+// Both are always bigger than a word; assume flagIndir.
 
 // IsValid reports whether v represents a value.
 // It returns false if v is the zero Value.
@@ -339,24 +269,9 @@ internal static nint numMethod(this Value v) {
     return v.typ().NumMethod();
 }
 
-// Set assigns x to the value v.
-// It panics if CanSet returns false.
-// As in Go, x's value must be assignable to v's type.
-public static void Set(this Value v, Value x) {
-    v.mustBeAssignable();
-    x.mustBeExported();
-    // do not let unexported x leak
-    @unsafe.Pointer target = default!;
-    if (v.kind() == abi.Interface) {
-        target = v.ptr;
-    }
-    x = x.assignTo("reflectlite.Set"u8, v.typ(), target);
-    if ((flag)(x.flag & flagIndir) != 0){
-        typedmemmove(v.typ(), v.ptr, x.ptr);
-    } else {
-        ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value = x.ptr;
-    }
-}
+// go2cs generated this placeholder — func Set is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+// do not let unexported x leak
 
 // Type returns v's type.
 public static ΔType Type(this Value v) {

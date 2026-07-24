@@ -27,9 +27,17 @@ namespace go;
 
 partial class reflect_package {
 
-// The managed backing for a Value: the boxed Go value this Value represents (null for the zero Value).
+// The managed backing for a Value: the boxed Go value this Value represents (null for the zero
+// Value — or for a VALID typed-nil/nil-interface Value, distinguished by typ_/flag being set),
+// plus, when the Value is ADDRESSABLE (flagAddr), the ж<T> box it ALIASES: every read goes
+// through the box lazily (a write through another alias of the same box — poser.As's direct
+// `x.Value = …` — must be visible to a later Interface() read), and Set writes through it.
 partial struct ΔValue {
     internal object? boxed;
+    internal object? addrBox;
+
+    // The LIVE value this Value represents (read-through for an addressable Value).
+    internal object? live => addrBox is null ? boxed : GoReflect.ReadPointerSlot(addrBox);
 }
 
 // makeReflectValue builds a Value carrying a boxed managed value. typ_ is the Phase-1 synthetic
@@ -54,21 +62,23 @@ internal static ΔValue unpackEface(any i) {
     return ValueOf(i);
 }
 
-// Interface returns v's current value as an interface{}.
+// Interface returns v's current value as an interface{}. A valid typed-nil pointer Value
+// yields its canonical nil box — a NON-nil `any` holding `(*T)(nil)`, exactly Go's packEface
+// (the type is never erased to a bare null one call after X2 restored it).
 public static any /*i*/ Interface(this ΔValue v) {
-    return v.boxed!;
+    return v.live!;
 }
 
 internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
-    return v.boxed!;
+    return v.live!;
 }
 
 public static bool Bool(this ΔValue v) {
-    return (bool)v.boxed!;
+    return (bool)v.live!;
 }
 
 public static int64 Int(this ΔValue v) {
-    return numericValue(v.boxed) switch {
+    return numericValue(v.live) switch {
         nint n => (int64)n,
         int i => i,
         long l => l,
@@ -79,7 +89,7 @@ public static int64 Int(this ΔValue v) {
 }
 
 public static uint64 Uint(this ΔValue v) {
-    return numericValue(v.boxed) switch {
+    return numericValue(v.live) switch {
         nuint n => (uint64)n,
         uintptr up => (uint64)up.Value,
         uint u => u,
@@ -91,7 +101,7 @@ public static uint64 Uint(this ΔValue v) {
 }
 
 public static float64 Float(this ΔValue v) {
-    return System.Convert.ToDouble(numericValue(v.boxed));
+    return System.Convert.ToDouble(numericValue(v.live));
 }
 
 // numericValue unwraps a NAMED numeric type (`type Celsius float64` → a [GoType("num:float64")] struct)
@@ -111,39 +121,47 @@ private static object? numericValue(object? boxed) {
 }
 
 public static complex128 Complex(this ΔValue v) {
-    return (complex128)v.boxed!;
+    return (complex128)v.live!;
 }
 
 public static @string String(this ΔValue v) {
     // fmt only calls String() for Kind String; a boxed @string returns itself, anything else the Go
     // "<T Value>" placeholder.
-    if (v.boxed is @string s) {
+    if (v.live is @string s) {
         return s;
     }
-    if (v.boxed is null) {
+    if (v.live is null) {
         return "<invalid Value>";
     }
     return (@string)("<" + v.Type().String().ToString() + " Value>");
 }
 
 // IsNil reports whether its argument v is nil (v must be a chan, func, interface, map, pointer, or slice).
+// STRUCTURAL nil for pointers (INilPointer — the canonical typed-nil form): a heap box holding a
+// nil value is a NON-nil pointer holding nil, and an adapter-held *T asks its receiver box.
 public static bool IsNil(this ΔValue v) {
-    switch (v.boxed) {
+    object? cur = v.live;
+    while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
+        cur = interfaceAdapter.Value;
+    }
+    if (cur is IжAdapter { Box: not null } pointerAdapter) {
+        cur = pointerAdapter.Box;
+    }
+    switch (cur) {
     case null:
         return true;
+    case INilPointer nilable:
+        return nilable.IsNilPointer;
     case IMap m:
         return m.IsNil;
     default:
-        // A pointer box (ж<T>) exposes IsNull; a nil vs empty slice both format identically under %v,
-        // so a slice reports non-nil here.
-        var isNull = v.boxed.GetType().GetProperty("IsNull");
-        return isNull != null && isNull.PropertyType == typeof(bool) && (bool)isNull.GetValue(v.boxed)!;
+        return false;
     }
 }
 
 // Len returns v's length (v must be an Array, Chan, Map, Slice, String, or pointer-to-Array).
 public static nint Len(this ΔValue v) {
-    return v.boxed switch {
+    return v.live switch {
         @string s => s.Length,
         IArray a => a.Length,
         IMap m => m.Length,
@@ -153,53 +171,68 @@ public static nint Len(this ΔValue v) {
 
 // Index returns v's i'th element (v must be an Array, Slice, or String).
 public static ΔValue Index(this ΔValue v, nint i) {
-    if (v.boxed is IArray a) {
+    if (v.live is IArray a) {
         return makeReflectValue(a[i]);
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.Index", v.kind())));
 }
 
 // Elem returns the value that the interface v contains or that the pointer v points to.
+// The pointer form returns an ADDRESSABLE Value ALIASING the receiver box (Go: "the returned
+// value's address is v's value") — reads go through the box lazily and Set writes through it.
+// An adapter-held *T aliases the adapter's receiver box; a structurally nil pointer yields the
+// invalid zero Value (Go).
 public static ΔValue Elem(this ΔValue v) {
     ΔKind k = v.kind();
     if (k == ΔInterface) {
-        return makeReflectValue(v.boxed);
+        return makeReflectValue(v.live);
     }
     if (k == ΔPointer) {
-        if (v.boxed is null) {
+        object? cur = v.live;
+        while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
+            cur = interfaceAdapter.Value;
+        }
+        if (cur is IжAdapter { Box: not null } pointerAdapter) {
+            cur = pointerAdapter.Box;
+        }
+        if (cur is null || (cur is INilPointer nilable && nilable.IsNilPointer)) {
             return new ΔValue(nil);
         }
-        Type bt = v.boxed.GetType();
-        var isNull = bt.GetProperty("IsNull");
-        if (isNull != null && (bool)isNull.GetValue(v.boxed)!) {
-            return new ΔValue(nil);
+        Type? pointee = GoReflect.ElementType(cur.GetType());
+        if (pointee is null) {
+            // Not a ж<T>-shaped box (a named-pointer wrapper — increment 2): fall back to a
+            // detached read so existing readers keep working.
+            return makeReflectValue(GoReflect.ReadPointerSlot(cur));
         }
-        var valProp = bt.GetProperty("Value");
-        return makeReflectValue(valProp?.GetValue(v.boxed));
+        var t = abi.synthType(pointee);
+        var elem = new ΔValue(t, default!, ((flag)(uintptr)(uint8)GoReflect.KindOf(pointee)) | flagAddr | flagIndir);
+        elem.addrBox = cur;
+        return elem;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.Elem", v.kind())));
 }
 
 // Bytes returns v's underlying value (v's underlying value must be a slice of bytes or an addressable array of bytes).
 public static slice<byte> Bytes(this ΔValue v) {
-    return (slice<byte>)v.boxed!;
+    return (slice<byte>)v.live!;
 }
 
 // NumField returns the number of fields in the struct v.
 public static nint NumField(this ΔValue v) {
-    return v.boxed is null ? 0 : goStructFields(v.boxed.GetType()).Length;
+    return v.live is null ? 0 : goStructFields(v.live.GetType()).Length;
 }
 
 // Field returns the i'th field of the struct v.
 public static ΔValue Field(this ΔValue v, nint i) {
-    if (v.boxed is null) {
+    object? cur = v.live;
+    if (cur is null) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Field", v.kind())));
     }
-    FieldInfo[] fields = goStructFields(v.boxed.GetType());
+    FieldInfo[] fields = goStructFields(cur.GetType());
     if ((nuint)i >= (nuint)fields.Length) {
         throw panic("reflect: Field index out of range");
     }
-    return makeReflectValue(fields[(int)i].GetValue(v.boxed));
+    return makeReflectValue(fields[(int)i].GetValue(cur));
 }
 
 // goStructFields returns the DECLARED Go fields of a [GoType] struct in source order. A converted
@@ -242,14 +275,17 @@ public static uintptr Pointer(this ΔValue v) {
 }
 
 private static uintptr reflectPointerToken(ΔValue v) {
-    if (v.boxed is null) {
+    object? cur = v.live;
+    while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
+        cur = interfaceAdapter.Value;
+    }
+    if (cur is IжAdapter { Box: not null } pointerAdapter) {
+        cur = pointerAdapter.Box;
+    }
+    if (cur is null || (cur is INilPointer nilable && nilable.IsNilPointer)) {
         return 0;
     }
-    var isNull = v.boxed.GetType().GetProperty("IsNull");
-    if (isNull != null && (bool)isNull.GetValue(v.boxed)!) {
-        return 0;
-    }
-    return ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(v.boxed));
+    return ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(cur));
 }
 
 // The managed backing for a MapIter: the map's enumerator (a golib map<K,V> enumerates as
@@ -261,10 +297,94 @@ partial struct MapIter {
 // MapRange returns a range iterator for a map.
 public static ж<MapIter> MapRange(this ΔValue v) {
     ref var it = ref heap<MapIter>(out var Ꮡit);
-    if (v.boxed is IEnumerable e) {
+    if (v.live is IEnumerable e) {
         it.mapEnum = e.GetEnumerator();
     }
     return Ꮡit;
+}
+
+// ==== Phase-3 write-back: Set, Zero, methodName ====
+
+// Set assigns x to the value v (v must be addressable and x assignable to v's type — Go's
+// assignTo). Marshalling and the assignability decision share the golib machinery emitted
+// asserts use (GoReflect.TryMarshalAssignable): identity — with adapter/box unwrap, so an
+// interface-held *T stores its receiver box — or interface-implements, where a typed-nil
+// pointer source stores its canonical nil box wrapped for the destination (a NON-nil interface
+// holding (*T)(nil), Go's packEface result). The store writes through the aliased ж box's slot
+// ref; a structurally nil box panics Go-style before any write (blessing condition Q1a).
+public static void Set(this ΔValue v, ΔValue x) {
+    v.flag.mustBeAssignable();
+    x.flag.mustBeExported();
+    System.Type? dstType = v.typ_ == nil ? null : v.typ_.Value.sysType;
+    if (dstType is null || v.addrBox is null) {
+        throw panic("reflect: Set using unaddressable value");
+    }
+    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled)) {
+        throw panic("reflect.Set: value of type " + GoReflect.GoTypeName(x.live?.GetType()) +
+                    " is not assignable to type " + GoReflect.GoTypeName(dstType));
+    }
+    GoReflect.WritePointerSlot(v.addrBox, marshalled);
+}
+
+// Zero returns a Value representing the zero value for the specified type. A pointer kind
+// yields a VALID typed-nil Value whose boxed value is the type's canonical nil box (one nil
+// encoding system-wide — Interface() of it is a non-nil any holding (*T)(nil)); interface and
+// func kinds a valid nil Value (boxed null); value kinds a zero instance.
+public static ΔValue Zero(ΔType typ) {
+    if (typ == default!) {
+        throw panic("reflect: Zero(nil)");
+    }
+    System.Type? st = sysTypeOfReflectType(typ);
+    if (st is null) {
+        throw panic("reflect: Zero of non-synthesized type");
+    }
+    int kind = GoReflect.KindOf(st);
+    var t = abi.synthType(st);
+    var zero = new ΔValue(t, default!, ((flag)(uintptr)(uint8)kind));
+    switch (kind) {
+    case GoReflect.Pointer:
+        zero.boxed = GoReflect.CanonicalNilPointer(st);
+        break;
+    case GoReflect.Interface:
+    case GoReflect.Func:
+        zero.boxed = null;
+        break;
+    case GoReflect.String:
+        zero.boxed = (@string)"";
+        break;
+    default:
+        // Value kinds (numerics, structs, arrays) and the nil-able container structs
+        // (slice/map/chan wrappers) — a default instance IS the Go zero value.
+        zero.boxed = System.Activator.CreateInstance(st);
+        break;
+    }
+    return zero;
+}
+
+// sysTypeOfReflectType recovers the managed System.Type a canonical reflect.Type wrapper
+// describes (the rtype's abi.Type carries it — synthType stamped it).
+private static System.Type? sysTypeOfReflectType(ΔType typ) {
+    var (rt, ok) = typ._<ж<rtype>>(ᐧ);
+    return ok && rt != nil ? rt.Value.t.sysType : null;
+}
+
+// methodName returns a best-effort Go-shaped name of the calling reflect method for panic
+// messages ("reflect.Value.Set using unaddressable value"). Go resolves it from the PC via
+// runtime.Caller — unimplementable here (no Go stack); walk the managed stack to the first
+// converted-package frame instead. The name is only ever observed in panic text.
+internal static @string methodName() {
+    var trace = new System.Diagnostics.StackTrace(2, false);
+    for (int i = 0; i < trace.FrameCount; i++) {
+        var method = trace.GetFrame(i)?.GetMethod();
+        System.Type? decl = method?.DeclaringType;
+        if (method is null || decl is null) {
+            continue;
+        }
+        if (decl.Name.EndsWith("_package") && !method.Name.StartsWith("mustBe")) {
+            return (@string)(decl.Name[..^"_package".Length] + "." + method.Name);
+        }
+    }
+    return "unknown method"u8;
 }
 
 // Next advances the map iterator and reports whether there is another entry.

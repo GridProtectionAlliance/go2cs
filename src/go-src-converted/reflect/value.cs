@@ -12,7 +12,8 @@ using Δmath = math_package;
 using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
-using sync = sync_package;
+using Δsync = sync_package;
+using ꓸꓸꓸValue = Span<reflect_package.ΔValue>;
 
 partial class reflect_package {
 
@@ -176,7 +177,7 @@ internal static @string valueMethodName() {
     array<uintptr> pc = new(5);
     nint n = Δruntime.Callers(1, pc[..]);
     var frames = Δruntime.CallersFrames(pc[..(int)(n)]);
-    Δruntime.Frame frame = default!;
+    Δruntime.Frame frame = new();
     for (var more = true; more; ) {
         @string prefix = "reflect.Value."u8;
         (frame, more) = frames.Next();
@@ -555,7 +556,7 @@ break_stepsLoop:;
     frameSize = align(frameSize, goarch.PtrSize);
     frameSize += abid.spill;
     // Mark pointers in registers for the return path.
-    regArgs.ReturnIsPtr = abid.outRegPtrs;
+    regArgs.ReturnIsPtr = abid.outRegPtrs.Clone();
     if (debugReflectCall) {
         regArgs.Dump();
     }
@@ -1114,7 +1115,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     methodFrameSize = align(methodFrameSize, goarch.PtrSize);
     methodFrameSize += methodABI.spill;
     // Mark pointers in registers for the return path.
-    methodRegs.ReturnIsPtr = methodABI.outRegPtrs;
+    methodRegs.ReturnIsPtr = methodABI.outRegPtrs.Clone();
     // Call.
     // Call copies the arguments from scratch to the stack, calls fn,
     // and then copies the results back into scratch.
@@ -1393,7 +1394,7 @@ public static array<uintptr> InterfaceData(this ΔValue v) {
     // has to import "unsafe" to turn it into something
     // that can be abused.
     // Interface value is always bigger than a word; assume flagIndir.
-    return ~(ж<array<uintptr>>)(uintptr)(v.ptr);
+    return (~(ж<array<uintptr>>)(uintptr)(v.ptr)).Clone();
 }
 
 // go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1424,10 +1425,10 @@ public static bool IsZero(this ΔValue v) {
         return v.Uint() == 0;
     }
     if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
-        return v.Float() == 0;
+        return v.Float() == 0D;
     }
     if (exprᴛ1 == Complex64 || exprᴛ1 == Complex128) {
-        return v.Complex() == 0;
+        return v.Complex() == 0D;
     }
     if (exprᴛ1 == Array) {
         if ((flag)(v.flag & flagIndir) == 0) {
@@ -1575,16 +1576,16 @@ public static void SetZero(this ΔValue v) {
         ((ж<uintptr>)(uintptr)(v.ptr)).Value = 0;
     }
     else if (exprᴛ1 == Float32) {
-        ((ж<float32>)(uintptr)(v.ptr)).Value = 0;
+        ((ж<float32>)(uintptr)(v.ptr)).Value = 0F;
     }
     else if (exprᴛ1 == Float64) {
-        ((ж<float64>)(uintptr)(v.ptr)).Value = 0;
+        ((ж<float64>)(uintptr)(v.ptr)).Value = 0D;
     }
     else if (exprᴛ1 == Complex64) {
-        ((ж<complex64>)(uintptr)(v.ptr)).Value = 0;
+        ((ж<complex64>)(uintptr)(v.ptr)).Value = 0F;
     }
     else if (exprᴛ1 == Complex128) {
-        ((ж<complex128>)(uintptr)(v.ptr)).Value = 0;
+        ((ж<complex128>)(uintptr)(v.ptr)).Value = 0D;
     }
     else if (exprᴛ1 == ΔString) {
         ((ж<@string>)(uintptr)(v.ptr)).Value = ""u8;
@@ -1943,7 +1944,7 @@ public static bool OverflowFloat(this ΔValue v, float64 x) {
 }
 
 internal static bool overflowFloat32(float64 x) {
-    if (x < 0) {
+    if (x < 0D) {
         x = -x;
     }
     return Δmath.MaxFloat32 < x && x <= Δmath.MaxFloat64;
@@ -1956,7 +1957,7 @@ public static bool OverflowInt(this ΔValue v, int64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
         var bitSize = v.typ().Size() * 8;
-        var trunc = (((x << (int)((64 - bitSize)))) >> (int)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
 
@@ -1970,7 +1971,7 @@ public static bool OverflowUint(this ΔValue v, uint64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔUint || exprᴛ1 == Uintptr || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64) {
         var bitSize = v.typ_.Size() * 8;
-        var trunc = (((x << (int)((64 - bitSize)))) >> (int)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
 
@@ -2013,7 +2014,7 @@ public static (ΔValue x, bool ok) Recv(this ΔValue v) {
 // internal recv, possibly non-blocking (nb).
 // v is known to be a channel.
 internal static (ΔValue val, bool ok) recv(this ΔValue v, bool nb) {
-    ΔValue val = new(nil);
+    ref var val = ref heap(new ΔValue(), out var Ꮡval);
     bool ok = default!;
 
     var tt = (ж<chanType>)(uintptr)(new @unsafe.Pointer(v.typ()));
@@ -2028,7 +2029,7 @@ internal static (ΔValue val, bool ok) recv(this ΔValue v, bool nb) {
         val.ptr = p;
         val.flag |= flagIndir;
     } else {
-        p = @unsafe.Pointer.FromRef(ref (Ꮡ(val).of(reflect_package.ΔValue.Ꮡptr)).Value);
+        p = @unsafe.Pointer.FromRef(ref (Ꮡval.of(reflect_package.ΔValue.Ꮡptr)).Value);
     }
     (var selected, ok) = chanrecv((uintptr)v.pointer(), nb, p);
     if (!selected) {
@@ -2066,29 +2067,9 @@ internal static bool /*selected*/ send(this ΔValue v, ΔValue x, bool nb) {
     return chansend((uintptr)v.pointer(), p, nb);
 }
 
-// Set assigns x to the value v.
-// It panics if [Value.CanSet] returns false.
-// As in Go, x's value must be assignable to v's type and
-// must not be derived from an unexported field.
-public static void Set(this ΔValue v, ΔValue x) {
-    v.mustBeAssignable();
-    x.mustBeExported();
-    // do not let unexported x leak
-    @unsafe.Pointer target = default!;
-    if (v.kind() == ΔInterface) {
-        target = v.ptr;
-    }
-    x = x.assignTo("reflect.Set"u8, v.typ(), target);
-    if ((flag)(x.flag & flagIndir) != 0){
-        if (x.ptr == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))){
-            typedmemclr(v.typ(), v.ptr);
-        } else {
-            typedmemmove(v.typ(), v.ptr, x.ptr);
-        }
-    } else {
-        ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value = x.ptr;
-    }
-}
+// go2cs generated this placeholder — func Set is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+// do not let unexported x leak
 
 // SetBool sets v's underlying value.
 // It panics if v's Kind is not [Bool] or if [Value.CanSet] returns false.
@@ -2350,7 +2331,7 @@ public static ΔValue Slice(this ΔValue v, nint i, nint j) {
             }
             return new ΔValue(v.typ(), new @unsafe.Pointer(Ꮡt), v.flag);
         }
-        { /* default: */
+        else { /* default: */
             throw panic(Ꮡ(new ValueError("reflect.Value.Slice", v.kind())));
         }
     }
@@ -2659,8 +2640,8 @@ public static void Clear(this ΔValue v) {
 
 // Append appends the values x to a slice s and returns the resulting slice.
 // As in Go, each x's value must be assignable to the slice's element type.
-public static ΔValue Append(ΔValue s, params Span<reflect_package.ΔValue> xʗp) {
-    var x = xʗp.slice();
+public static ΔValue Append(ΔValue s, params ꓸꓸꓸValue xʗp) {
+    var x = xʗp.sslice();
 
     s.mustBe(ΔSlice);
     nint n = s.Len();
@@ -2995,28 +2976,7 @@ public static ΔValue Indirect(ΔValue v) {
 
 // go2cs generated this placeholder — func ValueOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Zero returns a Value representing the zero value for the specified type.
-// The result is different from the zero value of the Value struct,
-// which represents no value at all.
-// For example, Zero(TypeOf(42)) returns a Value with Kind [Int] and value 0.
-// The returned value is neither addressable nor settable.
-public static ΔValue Zero(ΔType typ) {
-    if (typ == default!) {
-        throw panic("reflect: Zero(nil)");
-    }
-    var t = Ꮡ((~typ._<ж<rtype>>()).t);
-    var fl = ((flag)(uintptr)(uint8)t.Kind());
-    if (t.IfaceIndir()) {
-        @unsafe.Pointer p = default!;
-        if (t.Size() <= abi.ZeroValSize){
-            p = new @unsafe.Pointer(ᏑzeroVal.at<byte>(0));
-        } else {
-            p = (uintptr)unsafe_New(t);
-        }
-        return new ΔValue(t, p.Value, (flag)(fl | flagIndir));
-    }
-    return new ΔValue(t, nil, fl);
-}
+// go2cs generated this placeholder — func Zero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:linkname zeroVal runtime.zeroVal
 internal static ж<array<byte>> ᏑzeroVal = new(new array<byte>(1024));
@@ -3234,7 +3194,7 @@ public static bool Equal(this ΔValue v, ΔValue u) {
             return true;
         } while (false);
     }
-    if (exprᴛ1 == Struct) {
+    else if (exprᴛ1 == Struct) {
         nint nf = v.NumField();
         for (nint i = 0; i < nf; i++) {
             // u and v have the same type so they have the same fields
@@ -3244,7 +3204,7 @@ public static bool Equal(this ΔValue v, ΔValue u) {
         }
         return true;
     }
-    if (exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔSlice) {
         do {
             break;
         } while (false);
@@ -3276,7 +3236,7 @@ internal static Func<ΔValue, ΔType, ΔValue> convertOp(ж<abi.Type> Ꮡdst, ж
         }
 
     }
-    if (exprᴛ1 == ΔUint || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64 || exprᴛ1 == Uintptr) {
+    else if (exprᴛ1 == ΔUint || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64 || exprᴛ1 == Uintptr) {
         var exprᴛ3 = ((ΔKind)(nuint)(uint8)dst.Kind());
         if (exprᴛ3 == ΔInt || exprᴛ3 == Int8 || exprᴛ3 == Int16 || exprᴛ3 == Int32 || exprᴛ3 == Int64 || exprᴛ3 == ΔUint || exprᴛ3 == Uint8 || exprᴛ3 == Uint16 || exprᴛ3 == Uint32 || exprᴛ3 == Uint64 || exprᴛ3 == Uintptr) {
             return cvtUint;
@@ -3289,7 +3249,7 @@ internal static Func<ΔValue, ΔType, ΔValue> convertOp(ж<abi.Type> Ꮡdst, ж
         }
 
     }
-    if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
+    else if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
         var exprᴛ4 = ((ΔKind)(nuint)(uint8)dst.Kind());
         if (exprᴛ4 == ΔInt || exprᴛ4 == Int8 || exprᴛ4 == Int16 || exprᴛ4 == Int32 || exprᴛ4 == Int64) {
             return cvtFloatInt;
@@ -3302,14 +3262,14 @@ internal static Func<ΔValue, ΔType, ΔValue> convertOp(ж<abi.Type> Ꮡdst, ж
         }
 
     }
-    if (exprᴛ1 == Complex64 || exprᴛ1 == Complex128) {
+    else if (exprᴛ1 == Complex64 || exprᴛ1 == Complex128) {
         var exprᴛ5 = ((ΔKind)(nuint)(uint8)dst.Kind());
         if (exprᴛ5 == Complex64 || exprᴛ5 == Complex128) {
             return cvtComplex;
         }
 
     }
-    if (exprᴛ1 == ΔString) {
+    else if (exprᴛ1 == ΔString) {
         if (dst.Kind() == abi.Slice && pkgPathFor(Ꮡdst.Elem()) == ""u8) {
             var exprᴛ6 = ((ΔKind)(nuint)(uint8)Ꮡdst.Elem().Kind());
             if (exprᴛ6 == Uint8) {
@@ -3321,7 +3281,7 @@ internal static Func<ΔValue, ΔType, ΔValue> convertOp(ж<abi.Type> Ꮡdst, ж
 
         }
     }
-    if (exprᴛ1 == ΔSlice) {
+    else if (exprᴛ1 == ΔSlice) {
         if (dst.Kind() == abi.ΔString && pkgPathFor(Ꮡsrc.Elem()) == ""u8) {
             var exprᴛ7 = ((ΔKind)(nuint)(uint8)Ꮡsrc.Elem().Kind());
             if (exprᴛ7 == Uint8) {
@@ -3343,7 +3303,7 @@ internal static Func<ΔValue, ΔType, ΔValue> convertOp(ж<abi.Type> Ꮡdst, ж
             return cvtSliceArray;
         }
     }
-    if (exprᴛ1 == Chan) {
+    else if (exprᴛ1 == Chan) {
         if (dst.Kind() == abi.Chan && specialChannelAssignability(Ꮡdst, Ꮡsrc)) {
             return cvtDirect;
         }

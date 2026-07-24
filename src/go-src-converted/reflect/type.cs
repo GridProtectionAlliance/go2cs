@@ -517,7 +517,7 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> Ꮡt, aTextOff off) {
 }
 
 internal static nint Bits(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt == nil) {
         throw panic("reflect: Bits of nil Type");
@@ -821,7 +821,7 @@ internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
         var bitSize = t.Size() * 8;
-        var trunc = (((x << (int)((64 - bitSize)))) >> (int)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
 
@@ -835,7 +835,7 @@ internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔUint || exprᴛ1 == Uintptr || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64) {
         var bitSize = t.Size() * 8;
-        var trunc = (((x << (int)((64 - bitSize)))) >> (int)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
 
@@ -981,7 +981,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
     ΔMethod m = default!;
     bool ok = default!;
 
-    ref var t = ref Ꮡt.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
     if (Ꮡt == nil) {
         return (m, ok);
     }
@@ -1334,7 +1334,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     // of an *unsafe.Pointer.
     ref var iptr = ref heap<any>(out var Ꮡiptr);
 
-    iptr = ((ж<@unsafe.Pointer>)default!);
+    iptr = ((ж<@unsafe.Pointer>)nil);
     var prototype = ~(ж<ж<ptrType>>)(uintptr)(new @unsafe.Pointer(Ꮡiptr));
     ref var pp = ref heap<ptrType>(out var Ꮡpp);
     pp = prototype.Value;
@@ -1357,7 +1357,7 @@ internal static ж<abi.Type> ptrTo(ж<abi.Type> Ꮡt) {
 
 // fnv1 incorporates the list of bytes into the hash x using the FNV-1 hash function.
 internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
-    var list = listʗp.slice();
+    var list = listʗp.sslice();
 
     foreach (var (_, b) in list) {
         x = (uint32)(x * 16777619 ^ (uint32)b);
@@ -2842,7 +2842,7 @@ public static ΔType ArrayOf(nint length, ΔType elem) {
     // Make an array type.
     ref var iarray = ref heap<any>(out var Ꮡiarray);
 
-    iarray = new @unsafe.Pointer[]{}.array();
+    iarray = new @unsafe.Pointer[]{}.array(1);
     var prototype = ~(ж<ж<arrayType>>)(uintptr)(new @unsafe.Pointer(Ꮡiarray));
     ref var Δarray = ref heap<abiꓸArrayType>(out var Ꮡarray);
     Δarray = prototype.Value;
@@ -3118,7 +3118,7 @@ public static ΔType TypeFor<T>() {
         }
     }
     // optimize for T being a non-interface kind
-    return TypeOf((ж<T>)(default!)).Elem();
+    return TypeOf(((ж<T>)nil)).Elem();
 }
 
 // only for an interface kind

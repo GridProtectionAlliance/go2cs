@@ -7,11 +7,13 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using go.golib;
 using static go2cs.Symbols;
 
 namespace go;
@@ -340,6 +342,135 @@ public static class GoReflect
         if (gd == typeof(slice<>) || gd == typeof(array<>) || gd == typeof(channel<>) || gd == typeof(ж<>)) return a[0];
 
         return null;
+    }
+
+    // ==== Phase-3 write-back helpers (shared by the reflect and reflectlite bridges) ====
+
+    // Cached ref-accessor reads/writes of a ж<T> box's value slot, keyed by the closed box type.
+    // ValueSlot (not Value) both ways: reads must not panic on a slot HOLDING a nil value (Go's
+    // `*(&p)` yields nil, no dereference), and writes assign THROUGH the ref-returning property so
+    // they land in the real slot — field-ref and array-element alias boxes included, which is what
+    // Field(i)/Index(i) addressability builds on in the next increment. Writes to a structurally
+    // nil box panic exactly like Go's nil-pointer store (blessing condition Q1a: the canonical
+    // typed-nil singleton is write-protected).
+    private static readonly ConcurrentDictionary<Type, Func<object, object?>> s_slotReaders = new();
+    private static readonly ConcurrentDictionary<Type, Action<object, object?>> s_slotWriters = new();
+
+    /// <summary>Reads the value held by a <c>ж&lt;T&gt;</c> box (nil-safe — a nil box reads as the zero value).</summary>
+    public static object? ReadPointerSlot(object box)
+    {
+        return s_slotReaders.GetOrAdd(box.GetType(), static boxType =>
+        {
+            MethodInfo reader = typeof(GoReflect).GetMethod(nameof(readSlot), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(boxType.GetGenericArguments()[0]);
+            return reader.CreateDelegate<Func<object, object?>>();
+        })(box);
+    }
+
+    /// <summary>Writes a value through a <c>ж&lt;T&gt;</c> box's slot ref (panics Go-style on a nil box).</summary>
+    public static void WritePointerSlot(object box, object? value)
+    {
+        s_slotWriters.GetOrAdd(box.GetType(), static boxType =>
+        {
+            MethodInfo writer = typeof(GoReflect).GetMethod(nameof(writeSlot), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(boxType.GetGenericArguments()[0]);
+            return writer.CreateDelegate<Action<object, object?>>();
+        })(box, value);
+    }
+
+    private static object? readSlot<T>(object box)
+    {
+        return ((ж<T>)box).ValueSlot;
+    }
+
+    private static void writeSlot<T>(object box, object? value)
+    {
+        ж<T> typed = (ж<T>)box;
+
+        if (typed.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        typed.ValueSlot = (T)value!;
+    }
+
+    /// <summary>
+    /// The canonical typed nil instance for a closed <c>ж&lt;T&gt;</c> pointer type (<see cref="ж{T}.NilBox"/>),
+    /// resolved from the runtime <see cref="Type"/> — what <c>reflect.Zero</c> of a pointer kind yields.
+    /// </summary>
+    public static object? CanonicalNilPointer(Type pointerType)
+    {
+        return s_canonicalNils.GetOrAdd(pointerType, static t =>
+            t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ж<>)
+                ? t.GetProperty(nameof(ж<int>.NilBox), BindingFlags.Public | BindingFlags.Static)?.GetValue(null)
+                : null);
+    }
+
+    private static readonly ConcurrentDictionary<Type, object?> s_canonicalNils = new();
+
+    /// <summary>
+    /// Go's <c>implements</c> relation over managed types: <paramref name="ifaceType"/> is an
+    /// interface that <paramref name="valueType"/> satisfies nominally OR structurally by Go
+    /// method-set rules — the SAME probe the emitted <c>_&lt;T&gt;</c> asserts use, so reflection
+    /// and direct asserts can never disagree about a method set.
+    /// </summary>
+    public static bool GoImplements(Type? ifaceType, Type? valueType)
+    {
+        if (ifaceType is null || valueType is null || !ifaceType.IsInterface)
+            return false;
+
+        return ifaceType.IsAssignableFrom(valueType) || valueType.StructurallyImplements(ifaceType);
+    }
+
+    /// <summary>
+    /// Marshals a bridge Value's live source object for assignment into a destination slot of
+    /// <paramref name="dstType"/> under Go assignability (identity, or interface-implements) —
+    /// the write half of <c>reflect.Value.Set</c>. Returns false when Go would panic
+    /// ("value of type X is not assignable to type Y").
+    /// </summary>
+    public static bool TryMarshalAssignable(object? src, Type dstType, out object? marshalled)
+    {
+        marshalled = null;
+
+        // A valid-but-nil SOURCE (nil interface value): assignable to an interface destination
+        // (stays the nil interface); never to a concrete one.
+        if (src is null)
+            return dstType.IsInterface;
+
+        // Identity — including a pointer-sourced interface value unwrapping to its receiver box
+        // (Go: the interface holds the *T) and the canonical typed-nil box of the same type.
+        object dynamicSrc = src;
+
+        while (dynamicSrc is IInterfaceAdapter { Value: not null } interfaceAdapter)
+            dynamicSrc = interfaceAdapter.Value;
+
+        if (dynamicSrc is IжAdapter { Box: not null } pointerAdapter)
+            dynamicSrc = pointerAdapter.Box;
+
+        if (dynamicSrc.GetType() == dstType)
+        {
+            marshalled = dynamicSrc;
+            return true;
+        }
+
+        // Interface destination: nominal instance passes through unchanged (preserving the
+        // original interface value's identity); otherwise the golib assert machinery builds the
+        // duck-typed wrapper — the same route emitted `_<T>` asserts take.
+        if (dstType.IsInterface)
+        {
+            if (dstType.IsInstanceOfType(src))
+            {
+                marshalled = src;
+                return true;
+            }
+
+            if (builtin.TryTypeAssert(src, dstType, out object? wrapped))
+            {
+                marshalled = wrapped;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Reads a [GoType] definition string ("num:int32", "@string", "num:uintptr", ...) and maps its
