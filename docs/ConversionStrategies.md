@@ -1118,11 +1118,16 @@ interning, `Swapper`, and `DeepEqual`'s recursion keyed on managed reference ide
 whitelist of `//go:linkname` pulls emits forwarders to real implementations — the Windows DLL-loading
 helpers (hand-written `syscall` P/Invokes) and golib builtins such as `maps.Clone`'s `runtime.mapclone`
 (→ `builtin.mapclone`, a shallow independent map clone); non-whitelisted linkname pulls remain throwing stubs.
+Hand-owning is also how an **asm-backed architecture layer gets realized rather than stubbed**: where .NET
+exposes the same instructions the `.s` file issues, the port is real hardware acceleration — `hash/crc32`'s
+SSE4.2 `CRC32` and PCLMULQDQ folding paths, whose capabilities are probed **locally** (`.IsSupported`)
+instead of through `internal/cpu`'s global flags, which still gate other packages' stubs.
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations) —
 the guintptr family surface, the `unsafe.Pointer`→manual-type ctor cooperation, the runtime lock/note
 model, `sync/atomic.Value`, the reflection bridge (`abi.TypeOf`/`reflect` value+type side,
-`reflectlite`, `DeepEqual`), and whitelisted `//go:linkname` forwarders.
+`reflectlite`, `DeepEqual`), whitelisted `//go:linkname` forwarders, and
+[realizing an asm-backed arch layer with managed hardware intrinsics](ConversionStrategies-Reference.md#realizing-an-asm-backed-arch-layer-with-managed-hardware-intrinsics).
 
 ---
 
@@ -1136,9 +1141,12 @@ variants with real bodies. `-stdlib` applies `-tags purego` **by default** (an e
 overrides it, `-tags=` clears it) and prints the effective tags at the start of each run; the default
 is scoped to `-stdlib` only, so `-recurse` end-user conversions and single-file conversions stay
 tag-neutral. Asm-backed declarations split three ways: **purego-gated** (the tag gives a real body —
-the common case, `crypto/sha256` et al.), **GOARCH-gated with no purego escape** (hand-owned
-`*_impl.cs`, e.g. `internal/chacha8rand`), and **genuinely raw-metal** (`[module: GoManualConversion]`
-compiling stub). One accepted behavioral divergence from the default build: under purego,
+the common case, `crypto/sha256` et al.), **GOARCH-gated with no purego escape** (hand-owned, e.g.
+`internal/chacha8rand` and `hash/crc32` — whose `crc32_amd64.go` carries no build line at all, so
+purego selects it too), and **genuinely raw-metal** (`[module: GoManualConversion]` compiling stub).
+Hand-owning the second bucket need not mean stubbing: where .NET exposes the same instructions the
+`.s` file issues, the arch layer can be ported for real — `hash/crc32` runs on `Sse42.Crc32` and
+`Pclmulqdq` intrinsics. One accepted behavioral divergence from the default build: under purego,
 `crypto/elliptic` P256 `Inverse` panics — **exactly as real Go does under `-tags purego`** (an upstream
 gating inconsistency), so matching it is fidelity.
 
