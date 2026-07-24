@@ -214,6 +214,7 @@
       if (result.successful && !dirty) {
         conversionStatus.textContent = result.projectName ? `Converted  - ${result.projectName}` : "Converted";
         converted = true;
+        if (automatic) selectOutput("build");
       } else if (dirty) {
         conversionID = "";
         conversionStatus.textContent = "Go source changed -- convert to refresh";
