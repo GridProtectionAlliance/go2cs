@@ -33,6 +33,18 @@ const (
 	third  = 1.0 / 3.0
 )
 
+// MyFloat exercises conversion of a negated, imported, named untyped-float constant to a
+// defined float type. The C# representation of math.Sqrt2 is an UntypedFloat wrapper, so the
+// generated conversion must explicitly hop through float64 before converting to MyFloat.
+type MyFloat float64
+
+func (f MyFloat) Abs() float64 {
+	if f < 0 {
+		return float64(-f)
+	}
+	return float64(f)
+}
+
 // isInf mirrors Go's math.IsInf (math/bits.go), which decides infinity by comparing against
 // MaxFloat64. A truncated MaxFloat64 is smaller than the real maximum, so every finite value
 // between the two is misreported as infinite.
@@ -53,6 +65,10 @@ func bits32(label string, got uint32, want uint32) {
 }
 
 func main() {
+	fmt.Println("-- named float conversion --")
+	f := MyFloat(-math.Sqrt2)
+	fmt.Println(f.Abs())
+
 	fmt.Println("-- float64 constant expressions (IEEE 754 bits, want-match) --")
 	bits64("MaxFloat64            ", math.Float64bits(MaxFloat64), 0x7fefffffffffffff)
 	bits64("SmallestNonzeroFloat64", math.Float64bits(SmallestNonzeroFloat64), 0x1)

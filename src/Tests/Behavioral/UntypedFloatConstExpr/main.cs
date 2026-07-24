@@ -17,6 +17,15 @@ internal static readonly UntypedFloat twoPi = /* 2 * Pi */ 6.283185307179586;
 internal static readonly UntypedFloat halfPi = /* Pi / 2 */ 1.5707963267948966;
 internal static readonly UntypedFloat third = /* 1.0 / 3.0 */ 0.3333333333333333;
 
+[GoType("num:float64")] partial struct MyFloat;
+
+public static float64 Abs(this MyFloat f) {
+    if (f < 0D) {
+        return (float64)(-f);
+    }
+    return (float64)f;
+}
+
 internal static bool isInf(float64 f, nint sign) {
     return sign >= 0 && f > MaxFloat64 || sign <= 0 && f < -MaxFloat64;
 }
@@ -30,6 +39,9 @@ internal static void bits32(@string label, uint32 got, uint32 want) {
 }
 
 internal static void Main() {
+    fmt.Println("-- named float conversion --");
+    var f = ((MyFloat)(/* -math.Sqrt2 */ -1.4142135623730951D));
+    fmt.Println(f.Abs());
     fmt.Println("-- float64 constant expressions (IEEE 754 bits, want-match) --");
     bits64("MaxFloat64            "u8, Δmath.Float64bits(MaxFloat64), 0x7fefffffffffffffUL);
     bits64("SmallestNonzeroFloat64"u8, Δmath.Float64bits(SmallestNonzeroFloat64), 0x1);

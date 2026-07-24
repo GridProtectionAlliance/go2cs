@@ -143,6 +143,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion to a NAMED float type whose constant operand references a named UNTYPED
+		// constant needs an explicit hop through the target's underlying basic type. go/types gives
+		// the conversion operand the target type, so the general named-numeric path below sees an
+		// identity conversion and emits `(Named)(Untyped*)`; C# cannot chain Untyped* -> basic ->
+		// Named in one cast (CS0030). A computed float constant is folded first so Go's exact
+		// arbitrary-precision evaluation is rounded only once at the target width.
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if targetBasic, ok := targetNamed.Underlying().(*types.Basic); ok &&
+				targetBasic.Info()&types.IsFloat != 0 && v.containsUntypedNamedConstRef(arg) {
+				underlyingCS := v.getCSTypeName(targetBasic)
+				targetCS := convertToCSTypeName(targetTypeName)
+				if aliased, ok := v.foreignAliasedTypeName(v.info.TypeOf(callExpr)); ok {
+					targetCS = aliased
+				}
+
+				if folded := v.foldedNamedFloatConstLiteral(arg, underlyingCS); folded != "" {
+					return fmt.Sprintf("((%s)(%s))", targetCS, folded)
+				}
+
+				return fmt.Sprintf("((%s)(%s)(%s))", targetCS, underlyingCS, v.convExpr(arg, nil))
+			}
+		}
+
 		// A `string(x)` conversion the hoisting pre-pass elected to lift to a single function-scope
 		// `sstring` temp (see planSStringHoists) emits just the temp NAME at every use, instead of
 		// re-materializing `((sstring)x)` here. suppressSStringHoist is set only while the hoisted
