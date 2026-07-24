@@ -545,6 +545,51 @@ func TestReferenceModelSeedAnchorsTestClassOnly(t *testing.T) {
 	}
 }
 
+// Change C reference closure: under the reference model the test project binds the production
+// types from the REFERENCED production assembly, so C# requires the assemblies of every
+// CONVERTER-INTRODUCED structural interface base the production interfaces carry (io/fs's
+// `File : io.ReadCloser`). Those base edges live in no test import and no alias `using`, so
+// productionStructuralBaseImports must surface them — and ONLY them, never the whole import
+// graph, which would contribute child namespaces that break the CS0576 alias machinery.
+func TestProductionStructuralBaseImportsSurfacesForeignInterfaceBases(t *testing.T) {
+	// io/fs shape: File STRUCTURALLY satisfies io.ReadCloser (Read + Close) even though Go's
+	// fs.File lists the methods explicitly rather than embedding io — the converter emits
+	// `File : io.ReadCloser`, and binding File in the test compile then needs the io assembly.
+	fsysDir := t.TempDir()
+	writeModuleFiles(t, fsysDir, map[string]string{
+		"go.mod": "module example/closure\n\ngo 1.23\n",
+		"fs.go": "package closure\n" +
+			"import \"io\"\n" +
+			"type FileInfo interface{ Name() string }\n" +
+			"type File interface {\n" +
+			"\tStat() (FileInfo, error)\n" +
+			"\tRead([]byte) (int, error)\n" +
+			"\tClose() error\n" +
+			"}\n" +
+			"func ReadAll(f File) ([]byte, error) { return io.ReadAll(f) }\n",
+	})
+
+	if got := productionStructuralBaseImports(loadProductionForDir(t, fsysDir)); len(got) != 1 || got[0] != "io" {
+		t.Fatalf("File structurally implements io.ReadCloser, so the io assembly must be surfaced; got %v", got)
+	}
+
+	// Negative: an exported interface matching no imported interface, alongside an imported
+	// package used only inside a function body, surfaces NOTHING — the closure must stay minimal
+	// and never widen to the production package's plain import graph.
+	plainDir := t.TempDir()
+	writeModuleFiles(t, plainDir, map[string]string{
+		"go.mod": "module example/plain\n\ngo 1.23\n",
+		"plain.go": "package plain\n" +
+			"import \"strings\"\n" +
+			"type Greeter interface{ Greet() string }\n" +
+			"func Upper(s string) string { return strings.ToUpper(s) }\n",
+	})
+
+	if got := productionStructuralBaseImports(loadProductionForDir(t, plainDir)); len(got) != 0 {
+		t.Fatalf("no exported interface matches an imported interface, so the closure must be empty; got %v", got)
+	}
+}
+
 // F14b guard: a dependency that fails to resolve fails the test-project emission loudly, naming
 // the dependency — never a silent reference drop.
 func TestWriteTestProjectFailsLoudlyOnDependencyError(t *testing.T) {
@@ -660,6 +705,36 @@ func loadTestVariantForDir(t *testing.T, dir string) (*packages.Package, *packag
 		t.Fatal("same-package test variant was not loaded")
 	}
 	return production, internal
+}
+
+// writeModuleFiles materializes a throwaway Go module (name -> contents) into dir.
+func writeModuleFiles(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// loadProductionForDir loads just the production package for a module dir (no test variant
+// required) with full type information, for exercising the go/types-driven reference helpers.
+func loadProductionForDir(t *testing.T, dir string) *packages.Package {
+	t.Helper()
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: dir, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	production := findProductionPackage(loaded, dir)
+	if production == nil {
+		t.Fatal("production package was not loaded")
+	}
+	if len(production.Errors) > 0 {
+		t.Fatalf("production package load failed: %v", production.Errors)
+	}
+	return production
 }
 
 func TestUnsupportedTestingCapabilityIsDiscovered(t *testing.T) {

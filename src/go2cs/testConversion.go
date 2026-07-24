@@ -384,6 +384,16 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	referenceImports := append(append([]string{}, dependencies...), aliasReferenceImports(
 		aliasScanFiles, production.PkgPath, dependencies)...)
 
+	// REFERENCE model only: add the foreign assemblies the production package's exported
+	// interfaces inherit STRUCTURALLY (productionStructuralBaseImports). These converter-
+	// introduced base edges (io/fs's `File : io.ReadCloser`) appear in no test import or alias, so
+	// the import-derived + alias-scan set above misses them and binding the referenced production
+	// interfaces fails CS0012. The recompile model compiles the production sources locally with
+	// their own io reference, so its reference set is unchanged (kept byte-identical).
+	if model == testProjectReference {
+		referenceImports = append(referenceImports, productionStructuralBaseImports(production)...)
+	}
+
 	testProjectName := projectName + ".tests.csproj"
 	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
 		return err
@@ -1682,6 +1692,103 @@ func aliasReferenceImports(infoFiles []string, productionPkgPath string, directD
 				if target == token || strings.HasPrefix(target, token+".") {
 					sort.Strings(paths)
 					found.Add(paths[0])
+				}
+			}
+		}
+	}
+
+	result := found.Keys()
+	sort.Strings(result)
+
+	return result
+}
+
+// productionStructuralBaseImports returns the import paths of foreign packages whose exported
+// interface types the converter emits as STRUCTURAL C# interface bases of the production
+// package's own exported interfaces — the reference-model analogue of the B2c alias scan for a
+// class of dependency that scan cannot see.
+//
+// Go interfaces satisfy structurally, but C# interfaces are nominal, so the converter carries
+// the implicit satisfaction as C# inheritance at the interface declaration site
+// (getStructuralInterfaceBases): io/fs's `fs.File` lists `Read`/`Close` explicitly in Go, but
+// the converted `[GoType] partial interface File : io.ReadCloser` names an io base. Under the
+// reference model the test project NAMES the production types (`(fs.File, error) Open(...)` in a
+// converted test source, and every ImplementGenerator adapter for a test type implementing
+// `fs.FS`) but compiles them from the REFERENCED production assembly; binding an interface type
+// in C# requires its base interfaces' assemblies to be referenced too. That io base edge is
+// CONVERTER-INTRODUCED, so it appears in NO test-file import and NO alias `using` — the
+// import-derived + alias-scan reference set (B2c) misses it, `DisableTransitiveProjectReferences`
+// (B2b) hides the production assembly's own io reference, and the test compile fails CS0012
+// ('io_package.Reader'/'Closer'/'ReadCloser' not referenced — io/fs's whole suite).
+//
+// This reproduces exactly the structural-base match the converter runs at each interface
+// declaration site (the same Exported / non-alias / non-generic / method-set /
+// strictly-fewer-methods / types.Implements gates as getStructuralInterfaceBases), so it adds
+// precisely the assemblies that binding the production interfaces forces — never the production
+// package's whole import graph, which would contribute child namespaces that break the alias
+// machinery (CS0576). The recompile model compiles the production sources locally (with their own
+// io reference), so it needs no addition; the caller invokes this for the reference model only.
+func productionStructuralBaseImports(production *packages.Package) []string {
+	if production == nil || production.Types == nil {
+		return nil
+	}
+
+	imports := production.Types.Imports()
+	if len(imports) == 0 {
+		return nil
+	}
+
+	found := HashSet[string]{}
+	scope := production.Types.Scope()
+
+	for _, name := range scope.Names() {
+		typeName, ok := scope.Lookup(name).(*types.TypeName)
+
+		if !ok || !typeName.Exported() || typeName.IsAlias() {
+			continue
+		}
+
+		named, ok := typeName.Type().(*types.Named)
+
+		if !ok {
+			continue
+		}
+
+		iface, ok := named.Underlying().(*types.Interface)
+
+		if !ok || iface.NumMethods() == 0 {
+			continue
+		}
+
+		for _, imported := range imports {
+			if found.Contains(imported.Path()) {
+				continue
+			}
+
+			importedScope := imported.Scope()
+
+			for _, candidateName := range importedScope.Names() {
+				candidateTypeName, ok := importedScope.Lookup(candidateName).(*types.TypeName)
+
+				if !ok || !candidateTypeName.Exported() || candidateTypeName.IsAlias() {
+					continue
+				}
+
+				candidate, ok := candidateTypeName.Type().(*types.Named)
+
+				if !ok || candidate.TypeParams().Len() > 0 {
+					continue
+				}
+
+				candidateIface, ok := candidate.Underlying().(*types.Interface)
+
+				if !ok || candidateIface.NumMethods() == 0 || candidateIface.NumMethods() >= iface.NumMethods() || !candidateIface.IsMethodSet() {
+					continue
+				}
+
+				if types.Implements(named, candidateIface) {
+					found.Add(imported.Path())
+					break
 				}
 			}
 		}
