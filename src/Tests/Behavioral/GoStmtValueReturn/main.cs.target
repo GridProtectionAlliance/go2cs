@@ -27,7 +27,7 @@ internal static void emit(channel<nint> @out) {
 }
 
 internal static void Main() {
-    var @out = new channel<nint>(1);
+    var @out = new channel<nint>(0);
     goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
     fmt.Println("sum:", ᐸꟷ(@out));
     goǃ((ᴛ1, ᴛ2) => pair(ᴛ1, ᴛ2), @out, 6);

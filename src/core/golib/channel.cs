@@ -1,4 +1,4 @@
-﻿// channel.cs - Gbtc
+// channel.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // Use of this source code is governed by an MIT-style license
@@ -7,13 +7,12 @@
 // ReSharper disable UnusedMemberInSuper.Global
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
-// ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable StaticMemberInGenericType
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using go.golib;
 
@@ -50,165 +49,885 @@ public interface IChannel<T> : IChannel
 }
 
 /// <summary>
+/// Describes one registered case of a Go <c>select</c> statement — a pending send or receive on a
+/// specific channel. Returned by the select-registration methods (<see cref="channel{T}.Receiving"/>,
+/// <see cref="channel{T}.Sending"/> and their operator forms) and consumed by
+/// <c>builtin.select(params SelectOp[])</c>.
+/// </summary>
+/// <remarks>
+/// The descriptor is type-erased: the select algorithm operates on the channel's untyped core, and a
+/// send case carries its (boxed) value captured at registration time — matching Go, which evaluates
+/// every case's channel and send operands exactly once, before any case is chosen. A NIL channel
+/// registers a descriptor with no core; the select algorithm never registers it as a waiter (a nil
+/// channel's case is never ready — Go semantics).
+/// </remarks>
+public sealed class SelectOp
+{
+    internal readonly ChanCore? Core;
+    internal readonly bool IsSend;
+    internal readonly object? SendValue;
+
+    internal SelectOp(ChanCore? core, bool isSend, object? sendValue)
+    {
+        Core = core;
+        IsSend = isSend;
+        SendValue = sendValue;
+    }
+}
+
+/// <summary>
+/// The single-fire authority for one blocked <c>select</c>: every waker (a plain send, a plain
+/// receive, another select's commit, or a close) must claim the select by winning the
+/// <see cref="Winner"/> CAS before touching any of its waiters; exactly one claim can succeed.
+/// </summary>
+internal sealed class SelectState
+{
+    /// <summary>Case ordinal of the winning op; -1 until claimed.</summary>
+    internal int Winner = -1;
+
+    /// <summary>The park shared by all of the select's waiters — released once, by the claimant.</summary>
+    internal readonly SemaphoreSlim Park = new(0, 1);
+
+    internal bool TryClaim(int opIndex)
+    {
+        return Interlocked.CompareExchange(ref Winner, opIndex, -1) == -1;
+    }
+}
+
+/// <summary>
+/// A parked channel operation (Go's <c>sudog</c> analog): either a plain blocked send/receive, or
+/// one case of a blocked <c>select</c> (then <see cref="Sel"/> is non-null and all of the select's
+/// waiters share its park).
+/// </summary>
+internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex = -1)
+{
+    /// <summary>Send: the (boxed) value to deliver. Receive: the delivered value (null = zero value).</summary>
+    internal object? Elem;
+
+    /// <summary>
+    /// Receive: whether the value came from a send (false = channel closed). Send: whether the value
+    /// was taken by a receiver (false = channel closed — the woken sender panics).
+    /// </summary>
+    internal bool Ok;
+
+    /// <summary>Park for a PLAIN waiter; a select waiter parks on <see cref="SelectState.Park"/> instead.</summary>
+    internal readonly SemaphoreSlim Park = new(0, 1);
+
+    internal readonly SelectState? Sel = sel;
+    internal readonly int OpIndex = opIndex;
+    internal readonly bool IsSend = isSend;
+
+    // Intrusive queue links — owned by the channel lock of the queue the waiter is on.
+    internal Waiter? Next;
+    internal Waiter? Prev;
+    internal WaiterQueue? Queue;
+
+    /// <summary>
+    /// Publishes the waiter's result fields and then signals its park — the publish MUST precede the
+    /// release (the woken thread reads <see cref="Elem"/>/<see cref="Ok"/> immediately after its
+    /// wait returns; the semaphore release/wait pair provides the happens-before edge).
+    /// </summary>
+    internal void Wake()
+    {
+        (Sel?.Park ?? Park).Release();
+    }
+}
+
+/// <summary>
+/// Intrusive FIFO of parked channel operations (Go's <c>waitq</c>). All access is guarded by the
+/// owning channel core's lock.
+/// </summary>
+internal sealed class WaiterQueue
+{
+    private Waiter? m_head;
+    private Waiter? m_tail;
+
+    internal bool IsEmpty => m_head is null;
+
+    internal void Enqueue(Waiter waiter)
+    {
+        waiter.Queue = this;
+        waiter.Prev = m_tail;
+        waiter.Next = null;
+
+        if (m_tail is null)
+            m_head = waiter;
+        else
+            m_tail.Next = waiter;
+
+        m_tail = waiter;
+    }
+
+    /// <summary>
+    /// Removes a waiter if it is still on this queue; a no-op when a waker already unlinked it
+    /// (used by select's loser unregistration).
+    /// </summary>
+    internal void Remove(Waiter waiter)
+    {
+        if (waiter.Queue != this)
+            return;
+
+        if (waiter.Prev is null)
+            m_head = waiter.Next;
+        else
+            waiter.Prev.Next = waiter.Next;
+
+        if (waiter.Next is null)
+            m_tail = waiter.Prev;
+        else
+            waiter.Next.Prev = waiter.Prev;
+
+        waiter.Prev = waiter.Next = null;
+        waiter.Queue = null;
+    }
+
+    /// <summary>
+    /// Pops the first waiter this waker is entitled to wake. A plain waiter is always usable; a
+    /// select waiter is usable only if the waker wins the claim CAS on its select — a lost claim
+    /// means another case already fired, so the dead waiter is discarded (unlinked, never touched)
+    /// and the scan continues. Every waker — plain send, plain receive, a select commit, AND close —
+    /// routes through this claim discipline.
+    /// </summary>
+    internal Waiter? DequeueForWake()
+    {
+        while (true)
+        {
+            Waiter? waiter = m_head;
+
+            if (waiter is null)
+                return null;
+
+            Remove(waiter);
+
+            if (waiter.Sel is not null && !waiter.Sel.TryClaim(waiter.OpIndex))
+                continue;
+
+            return waiter;
+        }
+    }
+}
+
+/// <summary>
+/// Type-erased channel core (Go's <c>hchan</c> analog) — the part of the channel state the
+/// <c>select</c> algorithm operates on without knowing the element type.
+/// </summary>
+internal abstract class ChanCore
+{
+    private static long s_nextId;
+
+    /// <summary>Monotonic creation id — the total order used to lock multiple channels in select.</summary>
+    internal readonly long Id = Interlocked.Increment(ref s_nextId);
+
+    /// <summary>The channel lock (hchan.lock). Never held across a park.</summary>
+    internal readonly object SyncRoot = new();
+
+    /// <summary>Buffer capacity; 0 = unbuffered (rendezvous).</summary>
+    internal readonly int Dataqsiz;
+
+    /// <summary>Number of buffered elements.</summary>
+    internal int Qcount;
+
+    internal bool Closed;
+
+    internal readonly WaiterQueue Recvq = new();
+    internal readonly WaiterQueue Sendq = new();
+
+    protected ChanCore(nint size)
+    {
+        Dataqsiz = (int)size;
+    }
+
+    /// <summary>
+    /// Attempts to commit a send under the channel lock (held by the caller): direct handoff to a
+    /// parked receiver, or a buffer enqueue. Returns false if the send would block. The caller has
+    /// already checked <see cref="Closed"/>.
+    /// </summary>
+    internal abstract bool TryCommitSendLocked(object? value);
+
+    /// <summary>
+    /// Attempts to commit a receive under the channel lock (held by the caller): a closed-and-drained
+    /// channel commits the (zero, false) result, a parked sender hands off (with the buffered
+    /// head-take/tail-enqueue rotation), and a non-empty buffer dequeues. Returns false if the
+    /// receive would block.
+    /// </summary>
+    internal abstract bool TryCommitRecvLocked(out object? value, out bool ok);
+}
+
+/// <summary>
+/// Typed channel core implementing Go's chansend/chanrecv/closechan over a Monitor lock, a circular
+/// buffer (null when unbuffered) and intrusive parked-waiter queues.
+/// </summary>
+internal sealed class ChanCore<T> : ChanCore
+{
+    private readonly T[]? m_buf;
+    private int m_sendx;
+    private int m_recvx;
+
+    internal ChanCore(nint size) : base(size)
+    {
+        m_buf = size > 0 ? new T[size] : null;
+    }
+
+    /// <summary>
+    /// Go's chansend. Blocking mode parks until the value is delivered (panicking on wake if the
+    /// channel closed while parked); non-blocking mode returns false when the send would block.
+    /// Sends on a closed channel always panic, even when the channel is full.
+    /// </summary>
+    internal bool Send(in T value, bool block)
+    {
+        Monitor.Enter(SyncRoot);
+
+        if (Closed)
+        {
+            Monitor.Exit(SyncRoot);
+            throw new PanicException("send on closed channel");
+        }
+
+        Waiter? receiver = Recvq.DequeueForWake();
+
+        if (receiver is not null)
+        {
+            // Direct handoff to a parked receiver — the rendezvous. Unlock first (Go's send()
+            // unlockf), then publish value+ok and signal.
+            Monitor.Exit(SyncRoot);
+            receiver.Elem = value;
+            receiver.Ok = true;
+            receiver.Wake();
+            return true;
+        }
+
+        if (Qcount < Dataqsiz)
+        {
+            m_buf![m_sendx] = value;
+
+            if (++m_sendx == Dataqsiz)
+                m_sendx = 0;
+
+            Qcount++;
+            Monitor.Exit(SyncRoot);
+            return true;
+        }
+
+        if (!block)
+        {
+            Monitor.Exit(SyncRoot);
+            return false;
+        }
+
+        // Park: enqueue as a sender, release the channel lock, THEN wait — the lock is never held
+        // across a park. A receiver (or close) publishes into the waiter before signaling.
+        Waiter parked = new(isSend: true) { Elem = value };
+        Sendq.Enqueue(parked);
+        Monitor.Exit(SyncRoot);
+        parked.Park.Wait();
+
+        if (!parked.Ok)
+            throw new PanicException("send on closed channel");
+
+        return true;
+    }
+
+    /// <summary>
+    /// Go's chanrecv. Returns true when the receive committed (with <paramref name="ok"/> false for
+    /// the closed-and-drained zero value); non-blocking mode returns false when the receive would
+    /// block. A closed channel drains its buffered values first — only then yields (zero, false).
+    /// </summary>
+    internal bool Recv(out T value, out bool ok, bool block)
+    {
+        Monitor.Enter(SyncRoot);
+
+        if (Closed && Qcount == 0)
+        {
+            Monitor.Exit(SyncRoot);
+            value = default!;
+            ok = false;
+            return true;
+        }
+
+        Waiter? sender = Sendq.DequeueForWake();
+
+        if (sender is not null)
+        {
+            if (Dataqsiz == 0)
+            {
+                // Rendezvous: take the parked sender's value directly.
+                Monitor.Exit(SyncRoot);
+                value = sender.Elem is null ? default! : (T)sender.Elem;
+            }
+            else
+            {
+                // Buffer full with parked senders: take the buffer HEAD, slot the parked sender's
+                // value at the TAIL (Go's chanrecv rotation — FIFO order is preserved).
+                value = m_buf![m_recvx];
+                m_buf[m_recvx] = sender.Elem is null ? default! : (T)sender.Elem;
+
+                if (++m_recvx == Dataqsiz)
+                    m_recvx = 0;
+
+                m_sendx = m_recvx; // buffer stays full
+                Monitor.Exit(SyncRoot);
+            }
+
+            sender.Elem = null;
+            sender.Ok = true;
+            sender.Wake();
+            ok = true;
+            return true;
+        }
+
+        if (Qcount > 0)
+        {
+            value = m_buf![m_recvx];
+            m_buf[m_recvx] = default!;
+
+            if (++m_recvx == Dataqsiz)
+                m_recvx = 0;
+
+            Qcount--;
+            Monitor.Exit(SyncRoot);
+            ok = true;
+            return true;
+        }
+
+        if (!block)
+        {
+            Monitor.Exit(SyncRoot);
+            value = default!;
+            ok = false;
+            return false;
+        }
+
+        Waiter parked = new(isSend: false);
+        Recvq.Enqueue(parked);
+        Monitor.Exit(SyncRoot);
+        parked.Park.Wait();
+        value = parked.Elem is null ? default! : (T)parked.Elem;
+        ok = parked.Ok;
+        return true;
+    }
+
+    /// <summary>
+    /// Go's closechan: marks the channel closed and wakes every parked waiter — receivers with
+    /// (zero, false), senders with a failed delivery (they panic on their own thread). Select
+    /// waiters are woken only when the claim CAS is won; a waiter whose claim is lost is never
+    /// touched (its select already fired another case).
+    /// </summary>
+    internal void Close()
+    {
+        Monitor.Enter(SyncRoot);
+
+        if (Closed)
+        {
+            Monitor.Exit(SyncRoot);
+            throw new PanicException("close of closed channel");
+        }
+
+        Closed = true;
+
+        List<Waiter>? wake = null;
+        Waiter? waiter;
+
+        while ((waiter = Recvq.DequeueForWake()) is not null)
+            (wake ??= []).Add(waiter);
+
+        while ((waiter = Sendq.DequeueForWake()) is not null)
+            (wake ??= []).Add(waiter);
+
+        Monitor.Exit(SyncRoot);
+
+        if (wake is null)
+            return;
+
+        foreach (Waiter claimed in wake)
+        {
+            claimed.Elem = null;
+            claimed.Ok = false;
+            claimed.Wake();
+        }
+    }
+
+    internal override bool TryCommitSendLocked(object? value)
+    {
+        Waiter? receiver = Recvq.DequeueForWake();
+
+        if (receiver is not null)
+        {
+            receiver.Elem = value;
+            receiver.Ok = true;
+            receiver.Wake();
+            return true;
+        }
+
+        if (Qcount < Dataqsiz)
+        {
+            m_buf![m_sendx] = value is null ? default! : (T)value;
+
+            if (++m_sendx == Dataqsiz)
+                m_sendx = 0;
+
+            Qcount++;
+            return true;
+        }
+
+        return false;
+    }
+
+    internal override bool TryCommitRecvLocked(out object? value, out bool ok)
+    {
+        if (Closed && Qcount == 0)
+        {
+            value = null;
+            ok = false;
+            return true;
+        }
+
+        Waiter? sender = Sendq.DequeueForWake();
+
+        if (sender is not null)
+        {
+            if (Dataqsiz == 0)
+            {
+                value = sender.Elem;
+            }
+            else
+            {
+                value = m_buf![m_recvx];
+                m_buf[m_recvx] = sender.Elem is null ? default! : (T)sender.Elem;
+
+                if (++m_recvx == Dataqsiz)
+                    m_recvx = 0;
+
+                m_sendx = m_recvx;
+            }
+
+            sender.Elem = null;
+            sender.Ok = true;
+            sender.Wake();
+            ok = true;
+            return true;
+        }
+
+        if (Qcount > 0)
+        {
+            value = m_buf![m_recvx];
+            m_buf[m_recvx] = default!;
+
+            if (++m_recvx == Dataqsiz)
+                m_recvx = 0;
+
+            Qcount--;
+            ok = true;
+            return true;
+        }
+
+        value = null;
+        ok = false;
+        return false;
+    }
+}
+
+/// <summary>
+/// Per-thread hand-off slot carrying a blocking select's committed RECEIVE result from
+/// <c>builtin.select</c> to the winning case's guard (<c>case N when ch.ꟷᐳ(out v):</c>), which
+/// consumes it. Hardened per the channels redesign: ONLY receive commits are stashed, a send-case
+/// win explicitly clears the slot (a select may have send and receive cases on the SAME channel),
+/// guards consume unconditionally, and select() debug-asserts the slot is empty on entry.
+/// </summary>
+internal static class SelectPending
+{
+    [ThreadStatic] private static bool t_hasValue;
+    [ThreadStatic] private static object? t_value;
+    [ThreadStatic] private static bool t_ok;
+
+    internal static bool HasValue => t_hasValue;
+
+    internal static void Set(object? value, bool ok)
+    {
+        t_value = value;
+        t_ok = ok;
+        t_hasValue = true;
+    }
+
+    internal static void Clear()
+    {
+        t_hasValue = false;
+        t_value = null;
+        t_ok = false;
+    }
+
+    internal static bool TryConsume(out object? value, out bool ok)
+    {
+        if (!t_hasValue)
+        {
+            value = null;
+            ok = false;
+            return false;
+        }
+
+        value = t_value;
+        ok = t_ok;
+        Clear();
+        return true;
+    }
+}
+
+/// <summary>
+/// The Go selectgo algorithm over <see cref="SelectOp"/> descriptors: nil channels are partitioned
+/// out, all distinct cores are locked in Id order, a uniformly-random poll pass commits exactly one
+/// ready op under the held locks, and otherwise one SelectState-linked waiter per case is parked
+/// until a waker claims exactly one of them.
+/// </summary>
+internal static class SelectRuntime
+{
+    /// <summary>Blocking select: returns the ordinal of the single case that fired.</summary>
+    internal static int Run(SelectOp[] ops)
+    {
+        Debug.Assert(!SelectPending.HasValue, "select entered with an unconsumed pending receive commit");
+        SelectPending.Clear();
+
+        int liveCount = CountLive(ops);
+
+        if (liveCount == 0)
+        {
+            // select{} or every case on a nil channel: blocks forever — the standing
+            // nil-channel deadlock-grace path (matches plain send/receive on nil).
+            if (!channel.Wait(CancellationToken.None))
+                fatal(FatalError.DeadLock());
+
+            return -1; // unreachable
+        }
+
+        ChanCore[] lockOrder = BuildLockOrder(ops);
+        int[] pollOrder = BuildPollOrder(ops, liveCount);
+
+        LockAll(lockOrder);
+
+        int committed = PollPassLocked(ops, pollOrder, lockOrder);
+
+        if (committed >= 0)
+            return committed;
+
+        // Nothing ready — park one waiter per live case, all sharing one SelectState.
+        SelectState sel = new();
+        Waiter?[] waiters = new Waiter?[ops.Length];
+
+        for (int i = 0; i < ops.Length; i++)
+        {
+            SelectOp op = ops[i];
+
+            if (op.Core is null)
+                continue;
+
+            Waiter waiter = new(op.IsSend, sel, i);
+
+            if (op.IsSend)
+            {
+                waiter.Elem = op.SendValue;
+                op.Core.Sendq.Enqueue(waiter);
+            }
+            else
+            {
+                op.Core.Recvq.Enqueue(waiter);
+            }
+
+            waiters[i] = waiter;
+        }
+
+        UnlockAll(lockOrder);
+
+        // Park = unlock THEN wait. A waker that claimed us between the unlock and this wait has
+        // already released the semaphore, so the wait returns immediately — no lost wakeup.
+        sel.Park.Wait();
+
+        int winner = Volatile.Read(ref sel.Winner);
+
+        // Re-lock and unregister the losing waiters. A waiter a waker already unlinked (the winner,
+        // or a loser discarded on a failed claim) is a Remove no-op.
+        LockAll(lockOrder);
+
+        for (int i = 0; i < waiters.Length; i++)
+        {
+            Waiter? waiter = waiters[i];
+
+            if (waiter is not null && i != winner)
+                waiter.Queue?.Remove(waiter);
+        }
+
+        UnlockAll(lockOrder);
+
+        Waiter won = waiters[winner]!;
+
+        if (won.IsSend)
+        {
+            SelectPending.Clear();
+
+            if (!won.Ok)
+                throw new PanicException("send on closed channel");
+        }
+        else
+        {
+            SelectPending.Set(won.Elem, won.Ok);
+        }
+
+        return winner;
+    }
+
+    /// <summary>
+    /// Non-blocking select (the <c>default:</c> form): the same poll pass as <see cref="Run"/> —
+    /// uniformly-random single commit under the held locks — but never parks; returns -1 (the
+    /// default sentinel) when no case is ready.
+    /// </summary>
+    internal static int TryRun(SelectOp[] ops)
+    {
+        Debug.Assert(!SelectPending.HasValue, "select entered with an unconsumed pending receive commit");
+        SelectPending.Clear();
+
+        int liveCount = CountLive(ops);
+
+        if (liveCount == 0)
+            return -1;
+
+        ChanCore[] lockOrder = BuildLockOrder(ops);
+        int[] pollOrder = BuildPollOrder(ops, liveCount);
+
+        LockAll(lockOrder);
+
+        int committed = PollPassLocked(ops, pollOrder, lockOrder);
+
+        if (committed >= 0)
+            return committed;
+
+        UnlockAll(lockOrder);
+        return -1;
+    }
+
+    // Commits exactly one ready op scanning in pollOrder; returns its ordinal (having released all
+    // locks) or -1 with the locks still held. A send case on a closed channel panics — Go panics
+    // there even when the select has a default clause.
+    private static int PollPassLocked(SelectOp[] ops, int[] pollOrder, ChanCore[] lockOrder)
+    {
+        foreach (int i in pollOrder)
+        {
+            SelectOp op = ops[i];
+            ChanCore core = op.Core!;
+
+            if (op.IsSend)
+            {
+                if (core.Closed)
+                {
+                    UnlockAll(lockOrder);
+                    throw new PanicException("send on closed channel");
+                }
+
+                if (core.TryCommitSendLocked(op.SendValue))
+                {
+                    UnlockAll(lockOrder);
+                    SelectPending.Clear(); // a send-case win never leaves a receive commit behind
+                    return i;
+                }
+            }
+            else
+            {
+                if (core.TryCommitRecvLocked(out object? value, out bool ok))
+                {
+                    SelectPending.Set(value, ok);
+                    UnlockAll(lockOrder);
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private static int CountLive(SelectOp[] ops)
+    {
+        int liveCount = 0;
+
+        foreach (SelectOp op in ops)
+        {
+            if (op.Core is not null)
+                liveCount++;
+        }
+
+        return liveCount;
+    }
+
+    // Distinct cores in Id order — the total lock order. A select may list the same channel more
+    // than once (send and receive cases on one channel), so cores are deduplicated.
+    private static ChanCore[] BuildLockOrder(SelectOp[] ops)
+    {
+        List<ChanCore> cores = new(ops.Length);
+
+        foreach (SelectOp op in ops)
+        {
+            if (op.Core is not null && !cores.Contains(op.Core))
+                cores.Add(op.Core);
+        }
+
+        ChanCore[] lockOrder = cores.ToArray();
+        Array.Sort(lockOrder, static (x, y) => x.Id.CompareTo(y.Id));
+        return lockOrder;
+    }
+
+    // Fisher-Yates shuffle of the live case ordinals (Random.Shared is backed by a per-thread
+    // generator) — Go picks uniformly at random among ready cases.
+    private static int[] BuildPollOrder(SelectOp[] ops, int liveCount)
+    {
+        int[] pollOrder = new int[liveCount];
+        int next = 0;
+
+        for (int i = 0; i < ops.Length; i++)
+        {
+            if (ops[i].Core is not null)
+                pollOrder[next++] = i;
+        }
+
+        for (int i = liveCount - 1; i > 0; i--)
+        {
+            int j = Random.Shared.Next(i + 1);
+            (pollOrder[i], pollOrder[j]) = (pollOrder[j], pollOrder[i]);
+        }
+
+        return pollOrder;
+    }
+
+    private static void LockAll(ChanCore[] lockOrder)
+    {
+        foreach (ChanCore core in lockOrder)
+            Monitor.Enter(core.SyncRoot);
+    }
+
+    private static void UnlockAll(ChanCore[] lockOrder)
+    {
+        for (int i = lockOrder.Length - 1; i >= 0; i--)
+            Monitor.Exit(lockOrder[i].SyncRoot);
+    }
+}
+
+/// <summary>
 /// Represents a concurrency primitive that operates like a Go channel.
 /// </summary>
 /// <typeparam name="T">Target type for channel.</typeparam>
 public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 {
-    private readonly ManualResetEventSlim m_canAddEvent;
-    private readonly ManualResetEventSlim m_canTakeEvent;
-    private readonly ManualResetEventSlim m_selectSendEvent;
-    private readonly ConcurrentQueue<T> m_queue;
-    private readonly CancellationTokenSource m_enumeratorTokenSource;
-
-    // Following value type is heap allocated so read-only or struct copy calls can still update
-    // original value, e.g., allowing "builtin.close" method without requiring a "ref" parameter.
-    private readonly ж<bool> m_isClosed;
-
-    private static readonly WaitHandle s_signaled = new ManualResetEventSlim(true).WaitHandle;
-    private static readonly WaitHandle s_unsignaled = new ManualResetEventSlim(false).WaitHandle;
+    // The entire channel state lives in the heap core so struct copies share one channel (Go
+    // channel values are references) and the zero value (all-null) is the NIL channel.
+    private readonly ChanCore<T>? m_core;
 
     /// <summary>
     /// Creates a new channel.
     /// </summary>
     /// <param name="size">
-    /// Value greater than one will create a buffered channel; otherwise,
-    /// an unbuffered channel will be created.
+    /// Buffer capacity: 0 creates an unbuffered (rendezvous) channel; a positive value creates a
+    /// buffered channel of that capacity — matching Go's <c>make(chan T[, size])</c>.
     /// </param>
     public channel(nint size)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
-
-        m_canAddEvent = new ManualResetEventSlim(false);
-        m_canTakeEvent = new ManualResetEventSlim(false);
-        m_selectSendEvent = new ManualResetEventSlim(false);
-        m_queue = new ConcurrentQueue<T>();
-        m_enumeratorTokenSource = new CancellationTokenSource();
-        m_isClosed = new ж<bool>(false);
-        Capacity = size;
+        ArgumentOutOfRangeException.ThrowIfNegative(size);
+        m_core = new ChanCore<T>(size);
     }
 
     /// <summary>
-    /// Gets the capacity of the channel.
+    /// Gets the capacity of the channel (0 for an unbuffered or nil channel) — Go's <c>cap()</c>.
     /// </summary>
-    public nint Capacity { get; }
+    public nint Capacity => m_core?.Dataqsiz ?? 0;
 
     /// <summary>
-    /// Gets the count of items in the channel.
+    /// Gets the count of buffered items in the channel — Go's <c>len()</c> (0 for an unbuffered or
+    /// nil channel).
     /// </summary>
-    public nint Length => IsUnbuffered ? 0 : m_queue?.Count ?? 0;
+    public nint Length => m_core?.Qcount ?? 0;
 
     /// <summary>
     /// Gets a flag that determines if the channel is unbuffered.
     /// </summary>
-    public bool IsUnbuffered => Capacity == 1;
+    public bool IsUnbuffered => m_core is null || m_core.Dataqsiz == 0;
 
     /// <summary>
     /// Gets a flag that determines if the channel is closed.
     /// </summary>
-    public bool IsClosed
-    {
-        // A NIL channel is the struct's ZERO value (see the NilType operator), so every field is
-        // null. Go treats a nil channel as never closed and never ready — a receive or send on one
-        // blocks forever, and in a `select` with a `default` the nil case simply is not chosen. It
-        // is not an error to ASK about one, so this must report false rather than dereference the
-        // absent state: os/exec's Start runs Go's `select { case <-c.ctx.Done(): … default: }`, and
-        // context.Background().Done() IS a nil channel, so every child launch through a background
-        // context threw a NullReferenceException here. The sibling readiness members below
-        // (SendIsReady / ReceiveIsReady / Receiving) already guard exactly this way.
-        get => m_isClosed is not null && m_isClosed.Value;
-        private set => m_isClosed!.Value = value;
-    }
+    /// <remarks>
+    /// A NIL channel is the struct's ZERO value, so the core is null. Go treats a nil channel as
+    /// never closed and never ready — it is not an error to ASK about one (os/exec's Start polls
+    /// context.Background().Done(), which IS a nil channel).
+    /// </remarks>
+    public bool IsClosed => m_core is not null && m_core.Closed;
 
     /// <summary>
-    /// Gets a flag that determines if the channel is ready to send.
+    /// Gets a flag that determines if a send could proceed right now (racy probe).
     /// </summary>
-    public bool SendIsReady => m_queue is not null && m_queue.Count < Capacity;
+    public bool SendIsReady => m_core is not null && !m_core.Closed && (m_core.Qcount < m_core.Dataqsiz || !m_core.Recvq.IsEmpty);
 
     /// <summary>
-    /// Gets a flag that determines if the channel is ready to receive.
+    /// Gets a flag that determines if a receive could proceed right now (racy probe).
     /// </summary>
-    public bool ReceiveIsReady => m_queue is not null && !m_queue.IsEmpty;
+    public bool ReceiveIsReady => m_core is not null && (m_core.Qcount > 0 || !m_core.Sendq.IsEmpty || m_core.Closed);
 
     /// <summary>
-    /// Gets the wait handle that is set when data is being received from the channel.
+    /// Gets the select-case descriptor registering a RECEIVE on this channel with
+    /// <c>builtin.select</c>. A nil channel registers a never-ready descriptor.
     /// </summary>
-    public WaitHandle Receiving => m_isClosed is not null && IsClosed ? s_signaled : m_canTakeEvent?.WaitHandle ?? s_unsignaled;
+    public SelectOp Receiving => new(m_core, isSend: false, sendValue: null);
 
     /// <summary>
     /// Closes the channel.
     /// </summary>
     public void Close()
     {
-        if (IsClosed)
-            throw new PanicException("close of closed channel");
+        if (m_core is null)
+            throw new PanicException("close of nil channel");
 
-        IsClosed = true;
-
-        m_enumeratorTokenSource.Cancel();
+        m_core.Close();
     }
 
     /// <summary>
     /// Attempt to send an item to channel.
     /// </summary>
     /// <param name="value">Value to send.</param>
-    /// <returns>
-    /// <c>true</c> if value was sent; otherwise,
-    /// <c>false</c> as send would have blocked
-    /// </returns>
-    /// <remarks>
-    /// This method will not block.
-    /// </remarks>
-    public bool TrySend(in T value)
-    {
-        return TrySend(value, CancellationToken.None);
-    }
-
-    /// <summary>
-    /// Attempt to send an item to channel.
-    /// </summary>
-    /// <param name="value">Value to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
     /// <c>true</c> if value was sent; otherwise,
     /// <c>false</c> as send would have blocked.
     /// </returns>
     /// <remarks>
-    /// This method will not block.
+    /// This method will not block. A send on a CLOSED channel panics (Go semantics — even when the
+    /// channel is full); a NIL channel is never ready.
     /// </remarks>
-    public bool TrySend(in T value, CancellationToken cancellationToken)
+    public bool TrySend(in T value)
     {
-        AssertChannelIsOpenForSend();
-
-        if (!SendIsReady)
-            return false;
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        m_queue.Enqueue(value);
-        m_canTakeEvent.Set();
-        return true;
+        return m_core is not null && m_core.Send(value, block: false);
     }
 
     /// <summary>
-    /// Sends an item to channel. 
+    /// Sends an item to channel.
     /// </summary>
     /// <param name="value">Value to send.</param>
     /// <remarks>
-    /// For a buffered channel, method will block the current thread if channel is full.
+    /// Blocks the current thread until the value is delivered: an unbuffered channel waits for a
+    /// receiver (rendezvous), a full buffered channel waits for space.
     /// </remarks>
     public void Send(in T value)
     {
-        Send(value, CancellationToken.None);
+        // Sending to a nil channel blocks forever
+        if (m_core is null)
+        {
+            if (channel.Wait(CancellationToken.None))
+                return;
+
+            fatal(FatalError.DeadLock());
+            return;
+        }
+
+        m_core.Send(value, block: true);
     }
 
     /// <summary>
-    /// Sends an item to channel. 
+    /// Sends an item to channel.
     /// </summary>
     /// <param name="value">Value to send.</param>
     /// <remarks>
     /// <para>
-    /// For a buffered channel, method will block the current thread if channel is full.
+    /// Blocks the current thread until the value is delivered (see <see cref="Send(in T)"/>).
     /// </para>
     /// <para>
     /// Defines a Go style channel Send operation.
@@ -216,46 +935,31 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// </remarks>
     public void ᐸꟷ(in T value)
     {
-        Send(value, CancellationToken.None);
+        Send(value);
     }
 
     /// <summary>
-    /// Gets a wait handle that is set when the send operation is complete.
+    /// Gets the select-case descriptor registering a SEND of <paramref name="value"/> on this
+    /// channel with <c>builtin.select</c>.
     /// </summary>
-    /// <param name="value">Value to send.</param>
-    /// <returns>Wait handle for send operation.</returns>
-    public WaitHandle Sending(in T value)
+    /// <param name="value">Value to send (captured now — Go evaluates send operands before choosing a case).</param>
+    /// <returns>Send-case descriptor.</returns>
+    public SelectOp Sending(in T value)
     {
-        // Select send on a nil channel will return immediately
-        if (m_queue is null)
-            return s_unsignaled;
-
-        // If channel is ready, send immediately on current thread
-        if (TrySend(value))
-            return s_signaled;
-
-        // Otherwise, queue send operation for processing on separate thread
-        m_selectSendEvent.Reset();
-        ThreadPool.QueueUserWorkItem(ProcessSendQueue, value);
-        return m_selectSendEvent.WaitHandle;
-    }
-
-    private void ProcessSendQueue(object? state)
-    {
-        Send((T)state!, m_enumeratorTokenSource.Token);
-        m_selectSendEvent.Set();
+        return new SelectOp(m_core, isSend: true, sendValue: value);
     }
 
     /// <summary>
-    /// Gets a wait handle that is set when the send operation is complete.
+    /// Gets the select-case descriptor registering a SEND of <paramref name="value"/> on this
+    /// channel with <c>builtin.select</c>.
     /// </summary>
     /// <param name="value">Value to send.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
-    /// <returns>Wait handle for send operation.</returns>
+    /// <returns>Send-case descriptor.</returns>
     /// <remarks>
-    /// Defines a Go style channel <see cref="Sending"/>> wait handle.
+    /// Defines a Go style channel <see cref="Sending"/> select registration.
     /// </remarks>
-    public WaitHandle ᐸꟷ(in T value, NilType _)
+    public SelectOp ᐸꟷ(in T value, NilType _)
     {
         return Sending(value);
     }
@@ -274,40 +978,6 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     public bool ᐸꟷ(in T value, bool _)
     {
         return Sent(value);
-    }
-
-    /// <summary>
-    /// Sends an item to channel. 
-    /// </summary>
-    /// <param name="value">Value to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    /// For a buffered channel, method will block the current thread
-    /// if channel is full.
-    /// </remarks>
-    public void Send(in T value, CancellationToken cancellationToken)
-    {
-        // Sending to a nil channel blocks forever
-        if (m_queue is null)
-        {
-            if (channel.Wait(cancellationToken))
-                return;
-
-            fatal(FatalError.DeadLock());
-        }
-
-        while (!SendIsReady)
-        {
-            AssertChannelIsOpenForSend();
-            m_canAddEvent.Wait(cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            m_canAddEvent.Reset();
-        }
-
-        AssertChannelIsOpenForSend();
-
-        m_queue!.Enqueue(value);
-        m_canTakeEvent.Set();
     }
 
     void IChannel.Send(object value)
@@ -330,10 +1000,9 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// </para>
     /// <para>
     /// Deferring to <see cref="TrySend(in T)"/> keeps ONE non-blocking send implementation, so Go's
-    /// rules fall out by construction: a CLOSED channel panics (the assert runs before the
-    /// readiness test — a closed FULL channel is not send-ready, yet Go still panics rather than
-    /// taking the <c>default:</c>), and a NIL channel is never ready (<see cref="SendIsReady"/>
-    /// null-checks the absent queue), so its case is never chosen.
+    /// rules fall out by construction: a CLOSED channel panics (a closed FULL channel is not
+    /// send-ready, yet Go still panics rather than taking the <c>default:</c>), and a NIL channel
+    /// is never ready, so its case is never chosen.
     /// </para>
     /// </remarks>
     public bool Sent(in T value)
@@ -350,93 +1019,43 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// <c>false</c> as receive would have blocked.
     /// </returns>
     /// <remarks>
-    /// This method will not block.
+    /// This method will not block. A closed channel drains its buffered values first, then reports
+    /// <c>false</c> once empty (use <see cref="Received(out T)"/> for the guard form that reports
+    /// the closed zero-value receive as taken).
     /// </remarks>
     public bool TryReceive(out T value)
     {
-        return TryReceive(out value, CancellationToken.None);
-    }
-
-    /// <summary>
-    /// Attempts to remove an item from channel.
-    /// </summary>
-    /// <param name="value">Returned value.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>
-    /// <c>true</c> if value was received; otherwise,
-    /// <c>false</c> as receive would have blocked.
-    /// </returns>
-    /// <remarks>
-    /// This method will not block.
-    /// </remarks>
-    public bool TryReceive(out T value, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        if (m_queue is null)
+        if (m_core is null)
         {
             value = default!;
             return false;
         }
 
-        if (!m_queue.TryDequeue(out value!))
-            return false;
-
-        m_canAddEvent.Set();
-        return true;
+        return m_core.Recv(out value, out bool ok, block: false) && ok;
     }
 
     /// <summary>
     /// Removes an item from channel.
     /// </summary>
     /// <remarks>
-    /// If the channel is empty, method will block the current thread until a value is sent to the channel.
+    /// If the channel is empty, method will block the current thread until a value is sent to the
+    /// channel; a receive on a closed empty channel returns the zero value.
     /// </remarks>
     /// <returns>Value received.</returns>
     public T Receive()
     {
-        return Receive(CancellationToken.None);
-    }
-
-    /// <summary>
-    /// Removes an item from channel.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    /// If the channel is empty, method will block the current thread until a value is sent to the channel.
-    /// </remarks>
-    /// <returns>Value received.</returns>
-    public T Receive(CancellationToken cancellationToken)
-    {
         // Receiving from a nil channel blocks forever
-        if (m_queue is null)
+        if (m_core is null)
         {
-            if (channel.Wait(cancellationToken))
+            if (channel.Wait(CancellationToken.None))
                 return default!;
 
             fatal(FatalError.DeadLock());
+            return default!;
         }
 
-        while (true)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            m_canTakeEvent.Reset();
-
-            if (m_queue!.TryDequeue(out T? value))
-            {
-                m_canAddEvent.Set();
-                return value;
-            }
-
-            if (m_queue.IsEmpty)
-            {
-                // Receiving on a closed channel with no data will return a zero value
-                if (IsClosed)
-                    return default!;
-            }
-
-            m_canTakeEvent.Wait(cancellationToken);
-        }
+        m_core.Recv(out T value, out _, block: true);
+        return value;
     }
 
     /// <summary>
@@ -445,68 +1064,91 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>
     /// Received value and boolean result reporting whether the communication succeeded which is
-    /// <c>true</c> if the value received was delivered by a successful send operation ; otherwise,
-    /// <c>false</c> if a zero value generated because the channel is closed and empty.
+    /// <c>true</c> if the value received was delivered by a successful send operation; otherwise,
+    /// <c>false</c> if a zero value was generated because the channel is closed AND drained — a
+    /// closed channel yields its remaining buffered values with <c>ok == true</c> first (Go's
+    /// drain-before-zero comma-ok semantics).
     /// </returns>
     /// <remarks>
     /// <para>
     /// If the channel is empty, method will block the current thread until a value is sent to the channel.
     /// </para>
     /// <para>
-    /// Defines a Go style channel <see cref="channel{T}.Receive()"/>> operation.
+    /// Defines a Go style channel <see cref="channel{T}.Receive()"/> operation.
     /// </para>
     /// </remarks>
     public (T val, bool ok) Receive(bool _)
     {
-        return IsClosed ?
-            (zero<T>(), false) :
-            (Receive(), true);
+        // Receiving from a nil channel blocks forever
+        if (m_core is null)
+        {
+            if (channel.Wait(CancellationToken.None))
+                return (default!, false);
+
+            fatal(FatalError.DeadLock());
+            return (default!, false);
+        }
+
+        m_core.Recv(out T value, out bool ok, block: true);
+        return (value, ok);
     }
 
     /// <summary>
-    /// Attempts to receive a value from the channel.
+    /// Attempts to receive a value from the channel — the guard emitted for a <c>select</c>
+    /// receive case.
     /// </summary>
     /// <param name="value">Output parameter for received value.</param>
     /// <returns><c>true</c> if a value was received; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// When a blocking <c>select</c> committed a receive on this thread, the pending commit is
+    /// consumed here (unconditionally — the winning case's guard is the next expression the emitted
+    /// switch evaluates). Otherwise this is the non-blocking probe used by the <c>default:</c> form:
+    /// an OPEN empty channel is NOT ready (the default must be taken), while a CLOSED drained
+    /// channel IS ready with the zero value (Go semantics).
+    /// </remarks>
     public bool Received(out T value)
     {
-        if (ReceiveIsReady)
+        if (SelectPending.TryConsume(out object? pending, out _))
         {
-            if (m_queue.TryDequeue(out value!))
-            {
-                m_canAddEvent.Set();
-                m_canTakeEvent.Reset();
-                return true;
-            }
+            value = pending is null ? default! : (T)pending;
+            return true;
         }
 
-        // A CLOSED empty channel is receive-ready with the zero value (Go semantics); an OPEN
-        // empty channel is NOT ready — a select's `case <-ch:` guard with a `default:` present
-        // must fail so the default is taken (returning true here made every such poll take the
-        // receive case immediately — SelectStatement's poll probe).
-        value = default!;
-        return IsClosed;
+        if (m_core is null)
+        {
+            value = default!;
+            return false;
+        }
+
+        return m_core.Recv(out value, out _, block: false);
     }
 
     /// <summary>
-    /// Attempts to receive a value from the channel and boolean flag indicating if
-    /// the channel is not closed.
+    /// Attempts to receive a value from the channel and boolean flag indicating if the value was
+    /// delivered by a send — the guard emitted for a comma-ok <c>select</c> receive case.
     /// </summary>
     /// <param name="value">Output parameter for received value.</param>
-    /// <param name="ok">Boolean flag indicating if the channel is not closed.</param>
-    /// <returns>
-    /// <c>true</c> if a value was received and channel was not closed;
-    /// otherwise, <c>false</c>.
-    /// </returns>
+    /// <param name="ok">
+    /// <c>true</c> if the value was delivered by a send; <c>false</c> for the zero value of a
+    /// closed AND drained channel (buffered values drain with <c>ok == true</c> first).
+    /// </param>
+    /// <returns><c>true</c> if a receive committed; otherwise, <c>false</c>.</returns>
     public bool Received(out T value, out bool ok)
     {
-        ok = !IsClosed;
+        if (SelectPending.TryConsume(out object? pending, out ok))
+        {
+            value = pending is null ? default! : (T)pending;
+            return true;
+        }
 
-        if (ok)
-            return Received(out value);
+        if (m_core is null)
+        {
+            value = default!;
+            ok = false;
+            return false;
+        }
 
-        value = zero<T>();
-        return true;
+        return m_core.Recv(out value, out ok, block: false);
     }
 
     /// <summary>
@@ -525,14 +1167,11 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 
     /// <summary>
     /// Attempts to receive a value from the channel and boolean flag indicating if
-    /// the channel is not closed.
+    /// the value was delivered by a send.
     /// </summary>
     /// <param name="value">Output parameter for received value.</param>
-    /// <param name="ok">Boolean flag indicating if the channel is not closed.</param>
-    /// <returns>
-    /// <c>true</c> if a value was received and channel was not closed;
-    /// otherwise, <c>false</c>.
-    /// </returns>
+    /// <param name="ok">Boolean flag indicating if the value was delivered by a send.</param>
+    /// <returns><c>true</c> if a receive committed; otherwise, <c>false</c>.</returns>
     /// <remarks>
     /// Defines a Go style channel Receive operation.
     /// </remarks>
@@ -565,71 +1204,29 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     /// <summary>
-    /// Returns an enumerator that iterates through the collection.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    public IEnumerator<T> GetEnumerator(CancellationToken cancellationToken)
-    {
-        // Receiving from a nil channel blocks forever
-        if (m_queue is null)
-        {
-            if (channel.Wait(cancellationToken))
-                yield break;
-
-            fatal(FatalError.DeadLock());
-        }
-
-        while (!IsClosed)
-        {
-            T value = default!;
-            bool assigned;
-
-            try
-            {
-                value = Receive(cancellationToken);
-                assigned = true;
-            }
-            catch (OperationCanceledException)
-            {
-                assigned = false;
-            }
-            catch (PanicException)
-            {
-                assigned = false;
-            }
-
-            if (!assigned)
-                break;
-
-            yield return value;
-        }
-
-        if (IsClosed)
-        {
-            while (TryReceive(out T value))
-                yield return value;
-        }
-    }
-
-    /// <summary>
-    /// Returns an enumerator that iterates through the collection.
+    /// Returns an enumerator that iterates through the collection — Go's <c>for range ch</c>:
+    /// blocks for each value and terminates when the channel is closed and drained.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        return GetEnumerator(m_enumeratorTokenSource.Token);
+        // Ranging over a nil channel blocks forever
+        if (m_core is null)
+        {
+            if (channel.Wait(CancellationToken.None))
+                yield break;
+
+            fatal(FatalError.DeadLock());
+            yield break;
+        }
+
+        while (m_core.Recv(out T value, out bool ok, block: true) && ok)
+            yield return value;
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    private void AssertChannelIsOpenForSend()
-    {
-        if (IsClosed)
-            throw new PanicException("send on closed channel");
     }
 
     // Stylistic support for channel send operation: "ch <- 12" becomes "ch <<= 12"
@@ -644,7 +1241,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     // From Go spec: Two channel values are equal if they were created by the same call to make or if both have value nil.
     public static bool operator ==(channel<T> left, channel<T> right)
     {
-        return ReferenceEquals(left.m_queue, right.m_queue);
+        return ReferenceEquals(left.m_core, right.m_core);
     }
 
     public static bool operator !=(channel<T> left, channel<T> right)

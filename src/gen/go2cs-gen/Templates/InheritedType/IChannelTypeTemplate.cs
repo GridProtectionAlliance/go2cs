@@ -25,7 +25,7 @@ internal static class IChannelTypeTemplate
 
                 public bool ReceiveIsReady => m_value.ReceiveIsReady;
 
-                public global::System.Threading.WaitHandle Receiving => m_value.Receiving;
+                public global::go.SelectOp Receiving => m_value.Receiving;
 
                 // Explicit-only: Go code commonly defines its OWN Close() method on a named
                 // channel type (net/http's closeWaiter) — a public instance Close here would
@@ -37,9 +37,9 @@ internal static class IChannelTypeTemplate
 
                 public void {{ChannelLeftOp}}(in {{targetTypeName}} value) => m_value.Send(value);
 
-                public global::System.Threading.WaitHandle Sending(in {{targetTypeName}} value) => m_value.Sending(value);
+                public global::go.SelectOp Sending(in {{targetTypeName}} value) => m_value.Sending(value);
 
-                public global::System.Threading.WaitHandle {{ChannelLeftOp}}(in {{targetTypeName}} value, NilType _) => m_value.Sending(value);
+                public global::go.SelectOp {{ChannelLeftOp}}(in {{targetTypeName}} value, NilType _) => m_value.Sending(value);
 
                 public bool Sent(in {{targetTypeName}} value) => m_value.Sent(value);
 
@@ -71,6 +71,6 @@ internal static class IChannelTypeTemplate
 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1);
 
-                public {{structName}}(nint size) => m_value = new {{typeName}}(size < 1 ? 1 : size);
+                public {{structName}}(nint size) => m_value = new {{typeName}}(size);
         """;
 }

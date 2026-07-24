@@ -101,8 +101,10 @@
     <Project Path="Tests/Behavioral/CaptureModeValueParamLib/CaptureModeValueParamLib.csproj" />
     <Project Path="Tests/Behavioral/CaptureModeValueParamUser/CaptureModeValueParamUser.csproj" />
     <Project Path="Tests/Behavioral/CastNegativeNamedType/CastNegativeNamedType.csproj" />
+    <Project Path="Tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
+    <Project Path="Tests/Behavioral/ChannelRendezvous/ChannelRendezvous.csproj" />
     <Project Path="Tests/Behavioral/ChannelSendToClosed/ChannelSendToClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelSendToNil/ChannelSendToNil.csproj" />
     <Project Path="Tests/Behavioral/ClearBuiltinShadow/ClearBuiltinShadow.csproj" />
@@ -117,6 +119,7 @@
     <Project Path="Tests/Behavioral/ClosureReturnAnonStruct/ClosureReturnAnonStruct.csproj" />
     <Project Path="Tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
     <Project Path="Tests/Behavioral/ClosureWriteVisibility/ClosureWriteVisibility.csproj" />
+    <Project Path="Tests/Behavioral/CloseWakesBlocked/CloseWakesBlocked.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
     <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="Tests/Behavioral/ComplexConstContext/ComplexConstContext.csproj" />
@@ -356,6 +359,7 @@
     <Project Path="Tests/Behavioral/NestedPromotedEmbedInit/NestedPromotedEmbedInit.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
     <Project Path="Tests/Behavioral/NewAnonStructIfaceEmbed/NewAnonStructIfaceEmbed.csproj" />
+    <Project Path="Tests/Behavioral/NilChannelInSelect/NilChannelInSelect.csproj" />
     <Project Path="Tests/Behavioral/NilChannelSelectDefault/NilChannelSelectDefault.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/NilPointerParamUnsafePointer/NilPointerParamUnsafePointer.csproj" />
@@ -429,7 +433,10 @@
     <Project Path="Tests/Behavioral/SStringElision/SStringElision.csproj" />
     <Project Path="Tests/Behavioral/SameUnderlyingNamedConv/SameUnderlyingNamedConv.csproj" />
     <Project Path="Tests/Behavioral/SelectEscapeBinding/SelectEscapeBinding.csproj" />
+    <Project Path="Tests/Behavioral/SelectRandomFairness/SelectRandomFairness.csproj" />
     <Project Path="Tests/Behavioral/SelectSendDefault/SelectSendDefault.csproj" />
+    <Project Path="Tests/Behavioral/SelectSendRecvMix/SelectSendRecvMix.csproj" />
+    <Project Path="Tests/Behavioral/SelectSingleFire/SelectSingleFire.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayIfaceElem/SparseArrayIfaceElem.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />

@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static void Main() {
     fmt.Println("before goroutine panic");
-    var done = new channel<EmptyStruct>(1);
+    var done = new channel<EmptyStruct>(0);
     goǃ(() => {
         throw panic("goroutine boom");
     });

@@ -106,7 +106,7 @@ internal static void probeE2() => func((defer, recover) => {
 internal static void probeF1() {
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s");
-    var done = new channel<nint>(1);
+    var done = new channel<nint>(0);
     var doneʗ1 = done;
     goǃ(() => {
         Ꮡt.Value.total += 100;

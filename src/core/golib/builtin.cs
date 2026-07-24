@@ -39,6 +39,18 @@ public static class builtin
     {
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
+
+        // Goroutines are synchronous ThreadPool work items, and a goroutine parked on a channel
+        // operation (a true unbuffered rendezvous, a full buffer, or a blocked select) holds its
+        // pool thread while parked. Below the pool's minimum the hill-climbing injector adds
+        // threads at ~1/500 ms, so a burst of parked goroutines could starve the not-yet-started
+        // goroutine that would unblock them for seconds. A generous floor (256, or 4× the
+        // processor count if larger) keeps injection immediate at go2cs scales; min threads are
+        // created on demand, so the floor costs nothing until actually parked. This is a
+        // mitigation, not a scheduler: programs parking thousands of goroutines remain out of
+        // reach until a cooperative scheduler exists (documented divergence).
+        ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
+        ThreadPool.SetMinThreads(Math.Max(Math.Max(workerThreads, Environment.ProcessorCount * 4), 256), completionPortThreads);
         return;
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -118,8 +130,8 @@ public static class builtin
     /// <remarks>
     /// Often used with functions that have an operation that will be continued, e.g.:
     /// <c>switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(quit, ꓸꓸꓸ)))</c>
-    /// The above channel operations return a wait handle that is triggered when the
-    /// operation is complete.
+    /// The above channel operations return a <see cref="SelectOp"/> case descriptor that
+    /// registers the pending operation with the select.
     /// </remarks>
     public static readonly NilType ꓸꓸꓸ = nil;
 
@@ -423,30 +435,34 @@ public static class builtin
     }
 
     /// <summary>
-    /// Gets a wait handle that is set when data is ready to be received from the channel.
+    /// Gets the select-case descriptor registering a receive on the channel.
     /// </summary>
     /// <param name="channel">Target channel.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
-    /// <returns>Wait handle that is set when data is ready to be received from the channel.</returns>
+    /// <returns>Receive-case descriptor for <see cref="select"/>.</returns>
     /// <remarks>
-    /// Defines a Go style channel <see cref="channel{T}.Receiving"/> wait handle.
+    /// Defines a Go style channel <see cref="channel{T}.Receiving"/> select registration.
     /// </remarks>
-    public static WaitHandle ᐸꟷ<T>(channel<T> channel, NilType _)
+    public static SelectOp ᐸꟷ<T>(channel<T> channel, NilType _)
     {
         return channel.Receiving;
     }
 
     /// <summary>
-    /// Waits for any of the specified <paramref name="handles"/> to be set.
+    /// Executes a blocking Go <c>select</c> over the registered channel <paramref name="ops"/>:
+    /// commits exactly ONE ready case — chosen uniformly at random when several are ready — or
+    /// parks until one becomes ready.
     /// </summary>
-    /// <param name="handles">Handles to wait for.</param>
-    /// <returns>Index of the handle that satisfied the wait condition.</returns>
-    public static int select(params WaitHandle[] handles)
+    /// <param name="ops">Registered send/receive case descriptors, in case order.</param>
+    /// <returns>Ordinal of the single case that fired.</returns>
+    /// <remarks>
+    /// A committed receive's value is handed to the winning case's guard
+    /// (<c>case N when ch.ꟷᐳ(out v):</c>) through a per-thread pending slot the guard consumes.
+    /// Nil-channel cases are never ready; a send case on a closed channel panics.
+    /// </remarks>
+    public static int select(params SelectOp[] ops)
     {
-        if (handles.Length == 0)
-            fatal(FatalError.DeadLock());
-
-        return WaitHandle.WaitAny(handles);
+        return SelectRuntime.Run(ops);
     }
 
     /// <summary>

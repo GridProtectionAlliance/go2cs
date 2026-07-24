@@ -68,4 +68,11 @@ func main() {
 	case y := <-sel:
 		fmt.Println(y)
 	}
+
+	// Unbuffered NAMED channel (the de-clamped wrapper ctor): make(intQueue) is cap 0,
+	// not cap 1 — a real rendezvous through the named type.
+	pipe := make(intQueue)
+	fmt.Println(len(pipe), cap(pipe))
+	go func() { pipe <- 77 }()
+	fmt.Println(<-pipe)
 }

@@ -617,13 +617,21 @@ send/receive/`select` use runtime operators. Map reads honor Go's nil-map and co
 ```go
 m := make(map[string]int)
 c := make(chan int, 3)
+u := make(chan int)             // unbuffered: rendezvous
 unit, ok := unitMap[u]          // comma-ok read (time/format.go)
 ```
 ```csharp
 var m = new map<@string, nint>();
 var c = new channel<nint>(3);
+var u = new channel<nint>(0);        // capacity 0 — real rendezvous semantics
 var (unit, ok) = unitMap[u, ꟷ];      // two-value indexer via the ꟷ sentinel
 ```
+
+golib's `channel<T>` is a faithful port of Go's runtime channel (hchan + selectgo): an unbuffered
+send really waits for a receiver, `cap`/`len` report Go's values, a blocking `select` commits
+exactly ONE case chosen uniformly at random among the ready ones, and close/panic semantics match
+Go — see the [channel runtime](ConversionStrategies-Reference.md#real-channel-runtime--the-hchanselectgo-port-rendezvous-caplen-single-fire-uniform-random)
+section of the reference.
 
 A goroutine over a `select` — the concurrency core — lowers to `goǃ(...)` and a `switch` over `select(...)`,
 with `ᐸꟷ` marking a receive-case and `ꟷᐳ` performing the receive:

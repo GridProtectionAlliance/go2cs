@@ -145,10 +145,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckChannelCapLen() => CheckTarget("ChannelCapLen");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]
     public void CheckChannelReceiveFromNil() => CheckTarget("ChannelReceiveFromNil");
+
+    [TestMethod]
+    public void CheckChannelRendezvous() => CheckTarget("ChannelRendezvous");
 
     [TestMethod]
     public void CheckChannelSendToClosed() => CheckTarget("ChannelSendToClosed");
@@ -158,6 +164,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
+
+    [TestMethod]
+    public void CheckCloseWakesBlocked() => CheckTarget("CloseWakesBlocked");
 
     [TestMethod]
     public void CheckClosureBareReturnNamedResults() => CheckTarget("ClosureBareReturnNamedResults");
@@ -889,6 +898,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNilChannelInSelect() => CheckTarget("NilChannelInSelect");
+
+    [TestMethod]
     public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
 
     [TestMethod]
@@ -1105,7 +1117,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectRandomFairness() => CheckTarget("SelectRandomFairness");
+
+    [TestMethod]
     public void CheckSelectSendDefault() => CheckTarget("SelectSendDefault");
+
+    [TestMethod]
+    public void CheckSelectSendRecvMix() => CheckTarget("SelectSendRecvMix");
+
+    [TestMethod]
+    public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");

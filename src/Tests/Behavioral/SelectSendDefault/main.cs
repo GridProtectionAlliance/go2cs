@@ -47,7 +47,7 @@ internal static void freeBuffered() {
 }
 
 internal static void unbufferedWithReceiver() {
-    var ch = new channel<nint>(1);
+    var ch = new channel<nint>(0);
     var got = new channel<nint>(1);
     var chʗ1 = ch;
     var gotʗ1 = got;
@@ -161,7 +161,7 @@ internal static void exactlyOneSend() {
 }
 
 internal static void blockingSendStillBlocks() {
-    var ch = new channel<nint>(1);
+    var ch = new channel<nint>(0);
     var got = new channel<nint>(1);
     var chʗ1 = ch;
     var gotʗ1 = got;

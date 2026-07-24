@@ -33,7 +33,7 @@ internal static void Main() {
     probe("mapEmptyLiteral"u8, emptyMap == default!);
     IntChan zeroChan = default!;
     probe("chanZero"u8, zeroChan == default!);
-    var madeChan = new IntChan(1);
+    var madeChan = new IntChan(0);
     probe("chanMade"u8, madeChan == default!);
 }
 

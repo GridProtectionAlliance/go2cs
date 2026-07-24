@@ -91,10 +91,17 @@ public class NilType : IConvertible
         return slice != nil;
     }
 
-    // IChannel to nil comparisons
+    // IChannel to nil comparisons — REPRESENTATION nilness: only a genuinely-null reference is nil.
+    // The former `{ Length: 0, Capacity: 0 }` pattern predates real unbuffered channels: under the
+    // old model a live channel always had Capacity >= 1, so the pattern could only match a boxed
+    // ZERO-value channel struct. Now that `make(chan T)` really has cap 0, an EMPTY UNBUFFERED
+    // channel would satisfy it and be misclassified as nil. A boxed channel value is never nil in
+    // Go anyway (an interface holding even a nil channel is itself != nil), and a CONCRETE
+    // channel<T> (or named channel wrapper) binds its own == NilType operator, never this
+    // interface one — the same representation-nilness ruling ISlice received above.
     public static bool operator ==(IChannel? channel, NilType _)
     {
-        return channel is null or { Length: 0, Capacity: 0 };
+        return channel is null;
     }
 
     public static bool operator !=(IChannel? channel, NilType nil)

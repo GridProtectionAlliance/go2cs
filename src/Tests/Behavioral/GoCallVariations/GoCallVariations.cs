@@ -22,7 +22,7 @@ internal static void Main() {
     count = 10;
     fmt.Println("Count before Go:", count);
     time.Sleep(200);
-    var done = new channel<EmptyStruct>(1);
+    var done = new channel<EmptyStruct>(0);
     runPair(done);
     ᐸꟷ(done);
     var acc = Ꮡ(new accum(nil));

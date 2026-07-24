@@ -146,10 +146,19 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckChannelCapLen() => CheckTarget("ChannelCapLen");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]
+    public void CheckChannelRendezvous() => CheckTarget("ChannelRendezvous");
+
+    [TestMethod]
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
+
+    [TestMethod]
+    public void CheckCloseWakesBlocked() => CheckTarget("CloseWakesBlocked");
 
     [TestMethod]
     public void CheckClosureBareReturnNamedResults() => CheckTarget("ClosureBareReturnNamedResults");
@@ -833,6 +842,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNilChannelInSelect() => CheckTarget("NilChannelInSelect");
+
+    [TestMethod]
     public void CheckNilChannelSelectDefault() => CheckTarget("NilChannelSelectDefault");
 
     [TestMethod]
@@ -1034,7 +1046,16 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectRandomFairness() => CheckTarget("SelectRandomFairness");
+
+    [TestMethod]
     public void CheckSelectSendDefault() => CheckTarget("SelectSendDefault");
+
+    [TestMethod]
+    public void CheckSelectSendRecvMix() => CheckTarget("SelectSendRecvMix");
+
+    [TestMethod]
+    public void CheckSelectSingleFire() => CheckTarget("SelectSingleFire");
 
     [TestMethod]
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");

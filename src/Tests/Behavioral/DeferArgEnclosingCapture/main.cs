@@ -39,7 +39,7 @@ internal static void Main() {
     ((Action)(() => func((defer, recover) => {
         deferǃ(report, (@string)"named:", baseʗ2, (nint)(5), defer);
     })))();
-    var done = new channel<bool>(1);
+    var done = new channel<bool>(0);
     var baseʗ3 = @base;
     var doneʗ1 = done;
 

@@ -1472,9 +1472,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// Underlying: `make(closeWaiter)` of a NAMED channel type (`type closeWaiter
 				// chan struct{}`) takes the same unbuffered default as a plain `make(chan T)` —
 				// the wrapper's `(nint size)` constructor forwards to `channel<T>(size)`.
+				// Capacity 0 is a REAL unbuffered (rendezvous) channel: golib's channel<T> now
+				// models Go's hchan, so `make(chan T)` and `make(chan T, 1)` are distinct
+				// (cap 0 vs 1) — the old "1" default conflated them.
 				if _, ok := typeParam.Underlying().(*types.Chan); ok && !isTypeParam {
 					if len(remainingArgs) == 0 {
-						remainingArgs = "1"
+						remainingArgs = "0"
 					}
 				}
 

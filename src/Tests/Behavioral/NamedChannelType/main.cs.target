@@ -7,7 +7,7 @@ partial class main_package {
 [GoType("chan EmptyStruct")] partial struct closeWaiter;
 
 [GoRecv] internal static void Init(this ref closeWaiter cw) {
-    cw = new closeWaiter(1);
+    cw = new closeWaiter(0);
 }
 
 internal static void Close(this closeWaiter cw) {
@@ -53,6 +53,13 @@ internal static void Main() {
         fmt.Println(y);
         break;
     }}
+    var pipe = new intQueue(0);
+    fmt.Println(len(pipe), cap(pipe));
+    var pipeʗ1 = pipe;
+    goǃ(() => {
+        pipeʗ1.ᐸꟷ(77);
+    });
+    fmt.Println(ᐸꟷ<nint>(pipe));
 }
 
 } // end main_package

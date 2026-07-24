@@ -56,7 +56,7 @@ internal static void Main() {
     ᐸꟷ((~(~e).tally).done);
     fmt.Println("pinged:", (~(~e).tally).n);
     ref var vs = ref heap<valueSender>(out var Ꮡvs);
-    vs = new valueSender(c: new channel<nint>(1));
+    vs = new valueSender(c: new channel<nint>(0));
     var vsʗ1 = vs;
     goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7);
     fmt.Println("value-recv go:", ᐸꟷ(vs.c));

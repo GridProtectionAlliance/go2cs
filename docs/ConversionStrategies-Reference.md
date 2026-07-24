@@ -2679,8 +2679,10 @@ implemented by go2cs-gen's Channel template: the wrapper holds a `channel<T>` an
 surface — the Go-visual send/receive members (`ᐸꟷ`, `ꟷᐳ`, including the select-registration
 `ᐸꟷ(v, ꓸꓸꓸ)`/`Sending`/`Receiving` forms), the comma-ok `Receive(ꟷ)`/`Received` pair, `IChannel`'s
 object-typed members, enumeration for `range`, the `ISupportMake` factory, and a `(nint size)`
-constructor so `make(closeWaiter)` emits `new closeWaiter(1)` (the make path resolves the chan
-through `Underlying()`, giving named channels the same unbuffered default as plain `chan T`):
+constructor so `make(closeWaiter)` emits `new closeWaiter(0)` — a REAL unbuffered channel (the make
+path resolves the chan through `Underlying()`, giving named channels the same unbuffered default as
+plain `chan T`; the wrapper constructor forwards the size unclamped, so named channels can be
+unbuffered — see the channel-runtime section below):
 
 ```go
 type closeWaiter chan struct{}
@@ -2693,7 +2695,7 @@ func (cw closeWaiter) Wait()  { <-cw }
 [GoType("chan EmptyStruct")] partial struct closeWaiter;
 
 [GoRecv] internal static void Init(this ref closeWaiter cw) {
-    cw = new closeWaiter(1);
+    cw = new closeWaiter(0);
 }
 
 internal static void Close(this closeWaiter cw) {
@@ -2762,7 +2764,7 @@ ReaderFrom;`. (This is one root among several in the io test suite, which remain
 
 ### Select statement lowering (terminating and empty clauses)
 
-A `select` lowers to a C# `switch`: with a `default:` clause present, the non-blocking form `switch (ᐧ)` whose case guards are try-operations (`case ᐧ when ch.ꟷᐳ(out v):`); without one, the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` dispatching on the ready index. Two structural completions (io pipe.go's `read`):
+A `select` lowers to a C# `switch`: with a `default:` clause present, the non-blocking form `switch (ᐧ)` whose case guards are try-operations (`case ᐧ when ch.ꟷᐳ(out v):`); without one, the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` dispatching on the committed case's ordinal. The registration calls (`ᐸꟷ(ch, ꓸꓸꓸ)` receive, `ch.ᐸꟷ(v, ꓸꓸꓸ)` send) return `SelectOp` case descriptors and `select(params SelectOp[])` runs a faithful selectgo (see the channel-runtime section below): it commits exactly ONE ready case — chosen uniformly at random — or parks until one becomes ready. A committed receive's value crosses to the winning case's unchanged guard (`case N when ch.ꟷᐳ(out v):`) through a per-thread pending slot the guard consumes, so the emitted select text is identical to the pre-redesign form. Two structural completions (io pipe.go's `read`):
 
 * **An EMPTY clause body still needs its jump.** C# requires every switch section to end in a jump statement (CS8070 on a final `default:`, CS0163 otherwise); the emitted `break;` was suppressed when the *previous* clause ended in a terminal `return` (the was-return flag is reset per statement, and an empty body has none). The flag resets per *clause* now — a bare Go `default:` emits `default: { break; }`.
 * **A terminating blocking select gets an unreachable trailing `return default!;`.** Go's spec makes a select with no `default:` whose every comm-clause body ends in a terminating statement itself terminating, so a value-returning function may end with it. The lowered form's guarded `case N when <recv>:` labels cannot prove exhaustiveness to C# (CS0161). Mirroring the switch guarded-terminal-default rule, the emission appends `return default!;` after the closing brace — gated on: no default, every clause terminating (`isTerminatingStmtList`, conservative), no select-targeting `break`, a value-returning signature, and not named-return-defer mode (void wrapper).
@@ -2845,8 +2847,9 @@ FULL channel is not send-ready, yet Go panics rather than taking the `default:`)
 channel is never ready (`SendIsReady` null-checks the absent queue), so its case is never chosen.
 
 The guard is emitted **only** in the default form. The blocking form's `select(…)` call already
-performed the send through `Sending`, so a guard there would either send the value twice or fail and
-silently skip the chosen clause body.
+performed the winning send itself (the `Sending`/`ᐸꟷ(v, ꓸꓸꓸ)` registration only *describes* the
+case; selectgo commits it), so a guard there would either send the value twice or fail and silently
+skip the chosen clause body.
 
 A pointer-element channel forced two further root fixes, both pre-existing and both previously
 unreachable because the dropped send never compiled the value expression. net/rpc's
@@ -2864,23 +2867,60 @@ once drained, free-capacity buffered delivering the value, unbuffered with a wai
 closed-panics-through-the-default, one-ready-among-several, a send and a receive case with neither
 ready, exactly-one-send when several are ready, and a no-default select still blocking.)
 
-**Remaining channel-semantics gaps** (deliberately uncovered, so no golden bakes in output golib
-does not yet produce):
+### Real channel runtime — the hchan/selectgo port (rendezvous, cap/len, single-fire, uniform-random)
 
-* **Unbuffered send readiness has no rendezvous.** golib models an unbuffered channel as a one-slot
-  buffer, so a send into one reports ready even with no waiting receiver; Go takes the `default:`.
-  Fixing this needs waiting-receiver tracking, and it interacts with the item below.
-* **`make(chan T)` and `make(chan T, 1)` are indistinguishable.** Both emit `new channel<T>(1)`, and
-  `IsUnbuffered` is `Capacity == 1`. So `cap` of an unbuffered channel reports 1 (Go: 0) and `len` of
-  a capacity-1 buffered channel reports 0 (Go: its count). The fix is to carry Go's declared capacity
-  (0 for unbuffered) separately from the internal slot budget, which changes emission for every
-  unbuffered `make` — its own campaign.
-* **A blocking select performs EVERY send case.** `select(a.ᐸꟷ(1, ꓸꓸꓸ), b.ᐸꟷ(2, ꓸꓸꓸ))` evaluates
-  `Sending` for each case as an argument, so every send is performed and only the winner's body runs;
-  Go performs exactly one. A correct fix needs a real two-phase select (offer, then commit).
-* **Choice among several ready cases is first-match, not uniform-random.** Go randomizes; the lowered
-  `switch` takes the first matching guard. Deterministic rather than fair — observable only by a
-  program that depends on the distribution.
+The four long-standing channel-semantics gaps (no unbuffered rendezvous; `make(chan T)` conflated
+with `make(chan T, 1)`; a blocking select performing EVERY send case; first-match instead of
+uniform-random ready choice) were closed together by rewriting golib `channel<T>` over a faithful
+port of Go's runtime machinery (`docs/Phase4/DESIGN-channels.md` — the blessed synthesized design;
+rendezvous and the select rework land as ONE unit because staging rendezvous first regresses the
+legacy `Sending` path):
+
+* **`ChanCore<T>` is the `hchan` analog**: a Monitor lock, a circular `T[]` buffer (null when
+  `dataqsiz == 0`), `sendx`/`recvx`/`qcount`, `closed`, intrusive `recvq`/`sendq` parked-waiter
+  queues, and a monotonic `Id` (the total lock order for select). The `channel<T>` struct holds only
+  a reference to its core, so the zero value is the NIL channel and struct copies share one channel.
+  `chansend`/`chanrecv`/`closechan` follow Go's routines exactly, including the buffered-full
+  parked-sender head-take/tail-enqueue rotation and drain-before-zero comma-ok (a closed channel
+  yields its remaining buffered values with `ok == true` first, then `(zero, false)`).
+* **`make(chan T)` emits `new channel<T>(0)`** — capacity 0 is a real rendezvous channel; `cap()` is
+  `dataqsiz` and `len()` is `qcount`, so `make(chan T)` vs `make(chan T, 1)` are finally distinct
+  (the make default in `convCallExpr.go` covers plain and named channels; the gen Channel template's
+  wrapper constructor no longer clamps `size < 1` to 1). A parked operation holds its ThreadPool
+  thread (goroutines are pool work items), so golib's module initializer raises the pool's
+  min-thread floor to `max(256, 4 × processor count)` — a mitigation, not a scheduler: programs
+  parking thousands of goroutines remain out of reach until a cooperative scheduler exists
+  (documented divergence).
+* **Blocking select is a selectgo port behind the unchanged emitted text.** The registration
+  methods (`Receiving`, `Sending`, `ᐸꟷ(ch, ꓸꓸꓸ)`, `ch.ᐸꟷ(v, ꓸꓸꓸ)`) return type-erased `SelectOp`
+  descriptors — invisible to overload resolution at every emitted call site — and
+  `select(params SelectOp[])` partitions out nil channels (never registered), locks the distinct
+  cores in `Id` order, scans a Fisher-Yates-shuffled poll order, and **commits exactly one ready op
+  under the held locks** (uniform-random single-fire, gaps 3+4); otherwise it parks one
+  `SelectState`-linked waiter per case, where a single `winner` CAS is the single-fire authority
+  every waker — plain send, plain receive, another select's commit, AND close — must win before
+  touching a waiter. Publish-before-signal ordering and park-outside-the-lock discipline throughout.
+* **The committed receive value crosses to the guard via a per-thread pending slot**, consumed
+  unconditionally by `Received`/`ꟷᐳ`; only receive commits are stashed, a send-case win explicitly
+  clears the slot (a select may have send and receive cases on the SAME channel), and `select()`
+  debug-asserts the slot is empty on entry. When no pending commit exists the same guards are the
+  non-blocking probes of the `default:` form, unchanged.
+* **Close/panic semantics are Go's**: send on closed panics (even from within a select, and even
+  when a `default:` exists); close of closed and close of nil panic; a parked select-send woken by
+  close panics on its own thread; parked receivers (plain and select) wake with `(zero, false)`;
+  range-over-channel terminates on closed-and-drained; `len`/`cap` of nil are 0. A boxed
+  `IChannel`'s nil comparison is representation nilness (`channel is null`) — the old
+  `{ Length: 0, Capacity: 0 }` pattern would misclassify a live empty unbuffered channel as nil.
+
+(Guarded by `ChannelRendezvous` — cap/len 0, not-ready probes with no counterpart, rendezvous
+round-trip, ping-pong alternation; `ChannelCapLen` — buffered fill/wrap/drain, nil/unbuffered
+len/cap, comma-ok drain-after-close; `SelectSingleFire` — exactly one delivery among multiple ready
+send cases, 100-iteration volume guard; `SelectSendRecvMix` — send+recv cases on the same channel,
+one-commit-per-select; `SelectRandomFairness` — both branches of a two-ready select taken over 200
+iterations; `CloseWakesBlocked` — close waking parked receivers/senders/selects in both directions
+plus the whole panic family; `NilChannelInSelect` — nil cases never ready beside live ready and
+parked cases; plus the extended `NamedChannelType` unbuffered named-channel rendezvous and the
+pre-existing select/channel suite.)
 
 ### An escaping comm-clause binding receives into a temp and heap-boxes at clause entry
 

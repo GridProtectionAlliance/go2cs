@@ -68,12 +68,12 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
 }
 
 internal static void sieve() {
-    var ch = new channel<nint>(1);
+    var ch = new channel<nint>(0);
     goǃ(generate, ch);
     while (ᐧ) {
         nint prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
-        var ch1 = new channel<nint>(1);
+        var ch1 = new channel<nint>(0);
         goǃ(filter, ch, ch1, prime);
         ch = ch1;
         if (prime > 40) {
@@ -93,10 +93,10 @@ internal static void Main() {
     fmt.Println(ᐸꟷ(ch));
     fmt.Println(ᐸꟷ(ch));
     var a = new slice<nint>(2);
-    var ch1 = new channel<nint>(1);
-    var ch2 = new channel<nint>(1);
-    var ch3 = new channel<nint>(1);
-    var ch4 = new channel<nint>(1);
+    var ch1 = new channel<nint>(0);
+    var ch2 = new channel<nint>(0);
+    var ch3 = new channel<nint>(0);
+    var ch4 = new channel<nint>(0);
     goǃ(g1, ch1);
     goǃ(g2, ch2);
     goǃ(g1, ch3);
@@ -144,7 +144,7 @@ internal static void Main() {
         break;
     }}
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
-    var c = new channel<nint>(1);
+    var c = new channel<nint>(0);
     goǃ(sum, s[..(int)(len(s) / 2)], c);
     goǃ(sum, s[(int)(len(s) / 2)..], c);
     goǃ(sum, s[2..5], c);
@@ -152,8 +152,8 @@ internal static void Main() {
     nint y = ᐸꟷ(c);
     nint z = ᐸꟷ(c);
     fmt.Println(x, y, x + y, z);
-    var fΔ1 = new channel<nint>(1);
-    var quit = new channel<nint>(1);
+    var fΔ1 = new channel<nint>(0);
+    var quit = new channel<nint>(0);
     var fʗ1 = fΔ1;
     var quitʗ1 = quit;
     goǃ(() => {
@@ -163,7 +163,7 @@ internal static void Main() {
         quitʗ1.ᐸꟷ(0);
     });
     fibonacci(fΔ1, quit);
-    var mychanl = new channel<@string>(1);
+    var mychanl = new channel<@string>(0);
     goǃ(sendOnly, mychanl);
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);
@@ -175,7 +175,7 @@ internal static void Main() {
     var cb = new channel<@string>(1);
     ca.ᐸꟷ("hello"u8);
     fmt.Println(firstMsg(ca, cb));
-    var done = new channel<EmptyStruct>(1);
+    var done = new channel<EmptyStruct>(0);
     fmt.Println(poll(done));
     close(done);
     fmt.Println(poll(done));
@@ -212,7 +212,7 @@ internal static @string poll(channel<EmptyStruct> done) {
 
 internal static (raceResult, bool) raceSend() {
     var results = new channel<raceResult>(1);
-    var done = new channel<EmptyStruct>(1);
+    var done = new channel<EmptyStruct>(0);
     var primary = true;
     var doneʗ1 = done;
     var resultsʗ1 = results;
