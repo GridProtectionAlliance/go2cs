@@ -86,29 +86,44 @@ func TestModuleConverterConvertSetOrder(t *testing.T) {
 }
 
 // TestModuleConverterOutputDir verifies the parallel-tree output routing (design 4): the app's own
-// packages (the main module) go to $(go2csPath)src\<import-path>, while every dependency — a
-// read-only module-cache dep or a co-located `replace` — goes to $(go2csPath)pkg\<import-path>. The
+// packages (the main module) go to <recurseOutputRoot>\src\<import-path>, while every dependency — a
+// read-only module-cache dep or a co-located `replace` — goes to <recurseOutputRoot>\pkg\<import-path>. The
 // path is built from the version-free import path (so a module-cache @version is stripped), and
 // nothing is written in place, keeping the original Go source pure.
 func TestModuleConverterOutputDir(t *testing.T) {
 	goPath := filepath.FromSlash("C:/gopath")
 	go2csPath := filepath.FromSlash("C:/gopath/src/go2cs")
-	m := &ModuleConverter{options: Options{goPath: goPath, go2csPath: go2csPath, mainModulePath: "example.com/app"}}
+	outputRoot := filepath.FromSlash("C:/temp/converted")
+	m := &ModuleConverter{options: Options{
+		goPath:            goPath,
+		go2csPath:         go2csPath,
+		recurseOutputRoot: outputRoot,
+		mainModulePath:    "example.com/app",
+	}}
 
 	cases := []struct {
 		name    string
 		pkgPath string
 		want    string
 	}{
-		{"module-cache dep to pkg (version stripped)", "github.com/fatih/color", filepath.Join(go2csPath, "pkg", "github.com", "fatih", "color")},
-		{"co-located replace dep to pkg", "example.com/lib", filepath.Join(go2csPath, "pkg", "example.com", "lib")},
-		{"app main package to src", "example.com/app", filepath.Join(go2csPath, "src", "example.com", "app")},
-		{"app sub-package to src", "example.com/app/internal/util", filepath.Join(go2csPath, "src", "example.com", "app", "internal", "util")},
+		{"module-cache dep to pkg (version stripped)", "github.com/fatih/color", filepath.Join(outputRoot, "pkg", "github.com", "fatih", "color")},
+		{"co-located replace dep to pkg", "example.com/lib", filepath.Join(outputRoot, "pkg", "example.com", "lib")},
+		{"app main package to src", "example.com/app", filepath.Join(outputRoot, "src", "example.com", "app")},
+		{"app sub-package to src", "example.com/app/internal/util", filepath.Join(outputRoot, "src", "example.com", "app", "internal", "util")},
 	}
 
 	for _, tc := range cases {
 		if got := m.outputDirFor(tc.pkgPath); got != tc.want {
 			t.Errorf("outputDirFor(%q) = %q, want %q", tc.name, got, tc.want)
 		}
+	}
+}
+
+func TestModuleConverterOutputDirDefaultsToGo2CSPath(t *testing.T) {
+	go2csPath := filepath.FromSlash("C:/gopath/src/go2cs")
+	m := &ModuleConverter{options: Options{go2csPath: go2csPath, mainModulePath: "example.com/app"}}
+
+	if got, want := m.outputDirFor("example.com/app"), filepath.Join(go2csPath, "src", "example.com", "app"); got != want {
+		t.Fatalf("outputDirFor default root = %q, want %q", got, want)
 	}
 }

@@ -21,8 +21,11 @@ const (
 	maxSourceBytes    = 256 << 10
 	maxRequestBytes   = maxSourceBytes + (16 << 10)
 	commandTimeout    = 20 * time.Second
+	dependencyTimeout = 2 * time.Minute
 	conversionMaxAge  = 30 * time.Minute
 	maxSavedArtifacts = 20
+	tourModulePath    = "tour.local/session"
+	tourProjectName   = "tour.local.session.csproj"
 )
 
 type convertRequest struct {
@@ -73,6 +76,7 @@ type pipelineRunner struct {
 	cacheDir       string
 	slots          chan struct{}
 	buildMu        sync.Mutex
+	go2csBin       string
 	mu             sync.Mutex
 	saved          map[string]*conversionArtifact
 	defaultRuntime string
@@ -137,19 +141,30 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	if err := os.WriteFile(filepath.Join(inputDir, "main.go"), []byte(source), 0o600); err != nil {
 		return convertResult{}, err
 	}
-	if err := os.WriteFile(filepath.Join(inputDir, "go.mod"), []byte("module tour.local/session\n\ngo 1.23.1\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(inputDir, "go.mod"), []byte("module "+tourModulePath+"\n\ngo 1.23.1\n"), 0o600); err != nil {
 		return convertResult{}, err
+	}
+
+	resolve := p.runStage(ctx, "resolve", "Resolve Go dependencies", inputDir, dependencyTimeout,
+		"go", "mod", "tidy")
+
+	if resolve.Status != "passed" {
+		resolve.ID = "transpile"
+		resolve.Label = "Transpile"
+		resolve.Output = formatTranspileTranscript(resolve.Output, "", outputDir, resolve.Status, runtime.label)
+		return convertResult{Runtime: runtime.mode, Stage: resolve}, nil
 	}
 
 	go2csBin, toolStage := p.ensureGo2CS(ctx)
 	if toolStage != nil && toolStage.Status != "passed" {
 		toolStage.ID = "transpile"
 		toolStage.Label = "Transpile"
-		return convertResult{Stage: *toolStage}, nil
+		toolStage.Output = formatTranspileTranscript(resolve.Output, toolStage.Output, outputDir, toolStage.Status, runtime.label)
+		return convertResult{Runtime: runtime.mode, Stage: *toolStage}, nil
 	}
 
 	transpile := p.runStage(ctx, "transpile", "Transpile", p.repoRoot, commandTimeout,
-		go2csBin, go2csConvertArgs(runtime.converterRoot, inputDir, outputDir)...)
+		go2csBin, go2csConvertArgs(runtime, inputDir, outputDir)...)
 	if toolStage != nil {
 		transpile.DurationMS += toolStage.DurationMS
 		if toolStage.Output != "" {
@@ -158,11 +173,18 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	}
 
 	result := convertResult{Runtime: runtime.mode, Stage: transpile}
-	result.CSharp, _ = collectCSharp(outputDir)
-	result.PackageInfo, _ = readGeneratedFile(outputDir, "package_info.cs")
-	project, _ := findProject(outputDir)
-	if project != "" {
-		if err := prepareRuntimeProject(project, runtime); err != nil {
+	appOutputDir := tourAppOutputDir(outputDir)
+	result.CSharp, err = collectCSharp(appOutputDir)
+	result.PackageInfo, _ = readGeneratedFile(appOutputDir, "package_info.cs")
+	project := filepath.Join(appOutputDir, tourProjectName)
+
+	if err != nil && result.Stage.Status == "passed" {
+		result.Stage.Status = "failed"
+		result.Stage.Output = appendOutputLine(result.Stage.Output, err.Error())
+	}
+
+	if _, statErr := os.Stat(project); statErr == nil {
+		if err := prepareRuntimeProject(project, outputDir, runtime); err != nil {
 			result.Stage.Status = "failed"
 			result.Stage.Output = appendOutputLine(result.Stage.Output, err.Error())
 		}
@@ -171,14 +193,12 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 			result.Project = string(projectBytes)
 			result.ProjectName = filepath.Base(project)
 		}
-	}
-
-	if project == "" && result.Stage.Status == "passed" {
+	} else if result.Stage.Status == "passed" {
 		result.Stage.Status = "failed"
-		result.Stage.Output = appendOutputLine(result.Stage.Output, "go2cs did not emit a .csproj file.")
+		result.Stage.Output = appendOutputLine(result.Stage.Output, "go2cs did not emit the submitted app project.")
 	}
-	result.Stage.Output = formatTranspileTranscript(result.Stage.Output, outputDir, result.Stage.Status, runtime.label)
-	if result.Stage.Status != "passed" || project == "" {
+	result.Stage.Output = formatTranspileTranscript(resolve.Output, result.Stage.Output, outputDir, result.Stage.Status, runtime.label)
+	if result.Stage.Status != "passed" {
 		return result, nil
 	}
 
@@ -204,8 +224,18 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	return result, nil
 }
 
-func go2csConvertArgs(converterRoot, inputDir, outputDir string) []string {
-	return []string{"-comments", "-go2cspath", converterRoot, inputDir, outputDir}
+func go2csConvertArgs(runtime runtimeConfiguration, inputDir, outputDir string) []string {
+	recurse := "-recurse"
+
+	if runtime.mode == runtimeNuGet {
+		recurse = "-recurse=nuget"
+	}
+
+	return []string{"-comments", recurse, "-go2cspath", runtime.converterRoot, inputDir, outputDir}
+}
+
+func tourAppOutputDir(outputRoot string) string {
+	return filepath.Join(outputRoot, "src", filepath.FromSlash(tourModulePath))
 }
 
 func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult, error) {
@@ -226,9 +256,7 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 	}
 
 	buildArgs := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
-	if artifact.runtime.projectRoot != "" {
-		buildArgs = append(buildArgs, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
-	}
+	buildArgs = append(buildArgs, runtimeMSBuildArgs(artifact.runtime)...)
 	build := p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout, "dotnet", buildArgs...)
 	result := runResult{Stages: []stageResult{build}}
 	if build.Status != "passed" {
@@ -237,9 +265,7 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 	}
 
 	runArgs := []string{"run", "--no-build", "--project", artifact.project}
-	if artifact.runtime.projectRoot != "" {
-		runArgs = append(runArgs, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
-	}
+	runArgs = append(runArgs, runtimeMSBuildArgs(artifact.runtime)...)
 	run := p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout, "dotnet", runArgs...)
 	result.Stages = append(result.Stages, run)
 	result.Successful = run.Status == "passed"
@@ -265,36 +291,46 @@ func (p *pipelineRunner) ensureGo2CS(ctx context.Context) (string, *stageResult)
 			return configured, nil
 		}
 	}
-	if found, err := exec.LookPath("go2cs"); err == nil {
-		return found, nil
-	}
 
 	name := "go2cs"
 	if filepath.Separator == '\\' {
 		name += ".exe"
 	}
 	target := filepath.Join(p.cacheDir, name)
-	if _, err := os.Stat(target); err == nil {
-		return target, nil
-	}
 
 	p.buildMu.Lock()
 	defer p.buildMu.Unlock()
-	if _, err := os.Stat(target); err == nil {
-		return target, nil
+	if p.go2csBin != "" {
+		if _, err := os.Stat(p.go2csBin); err == nil {
+			return p.go2csBin, nil
+		}
 	}
 	if err := os.MkdirAll(p.cacheDir, 0o755); err != nil {
 		stage := failedStage("tool", "Build go2cs", err.Error())
 		return target, &stage
 	}
+	// This is the first build for this server process. Discard an executable left by an older
+	// process before invoking `go build`: Go may refuse to overwrite a stale or invalid Windows
+	// executable, and cross-process cache reuse is precisely what this rebuild is intended to avoid.
+	if err := os.Remove(target); err != nil && !os.IsNotExist(err) {
+		stage := failedStage("tool", "Build go2cs", fmt.Sprintf("remove stale converter %q: %v", target, err))
+		return target, &stage
+	}
 
 	stage := p.runStage(ctx, "tool", "Build go2cs", filepath.Join(p.repoRoot, "src", "go2cs"),
 		2*time.Minute, "go", "build", "-o", target, ".")
+	if stage.Status == "passed" {
+		p.go2csBin = target
+	}
 	return target, &stage
 }
 
-func formatTranspileTranscript(output, root, status, runtime string) string {
-	lines := []string{"$ go2cs main.go", "Runtime: " + runtime}
+func formatTranspileTranscript(resolveOutput, output, root, status, runtime string) string {
+	lines := []string{"$ go mod tidy"}
+	if resolveOutput = strings.TrimSpace(resolveOutput); resolveOutput != "" {
+		lines = append(lines, resolveOutput)
+	}
+	lines = append(lines, "$ go2cs -recurse main.go", "Runtime: "+runtime)
 	if output = strings.TrimSpace(output); output != "" {
 		lines = append(lines, output)
 	}
@@ -482,8 +518,14 @@ func failedStage(id, label, output string) stageResult {
 }
 
 func collectCSharp(root string) (string, error) {
+	if _, err := os.Stat(root); err != nil {
+		if os.IsNotExist(err) {
+			return "", errors.New("go2cs did not emit an output project for the submitted app")
+		}
+		return "", err
+	}
+
 	var sourceFiles []string
-	var fallbackFiles []string
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -497,7 +539,6 @@ func collectCSharp(root string) (string, error) {
 		if !strings.HasSuffix(strings.ToLower(entry.Name()), ".cs") {
 			return nil
 		}
-		fallbackFiles = append(fallbackFiles, path)
 		name := strings.ToLower(entry.Name())
 		if name != "package_info.cs" && name != "go2cs_test_host.cs" {
 			sourceFiles = append(sourceFiles, path)
@@ -508,7 +549,7 @@ func collectCSharp(root string) (string, error) {
 		return "", err
 	}
 	if len(sourceFiles) == 0 {
-		sourceFiles = fallbackFiles
+		return "", errors.New("go2cs did not emit C# source for the submitted app")
 	}
 	sort.Strings(sourceFiles)
 

@@ -41,6 +41,7 @@ type Options struct {
 	go2csPath           string
 	convertStdLib       bool
 	recurse             bool
+	recurseOutputRoot   string // -recurse: writable root for generated src\ + pkg\ trees; defaults to go2csPath
 	mainModulePath      string // -recurse: import path of the app (main) module; routes its packages to src\, deps to pkg\
 	nugetRefs           bool   // -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local $(go2csPath) project references
 	targetPlatform      string
@@ -802,6 +803,7 @@ Examples:
   go2cs -stdlib                           # Convert the entire Go standard library (applies -tags purego by default)
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
+  go2cs -recurse module_dir output_root   # Same, with generated src/pkg trees isolated under output_root
   go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
   go2cs -stdlib -comments -tags purego    # Explicit form of the default: the portable Go crypto over the assembly ones
   go2cs -stdlib -tags=                    # Opt OUT of the purego default (reproduce the asm-backed default build)
@@ -914,7 +916,19 @@ Examples:
 		if options.recurse {
 			// Recursive end-user conversion: convert the input module AND every third-party
 			// dependency package in its transitive closure, in dependency order, referencing the
-			// pre-converted standard library. The stdlib is not converted.
+			// pre-converted standard library. The stdlib is not converted. A supplied second
+			// positional is the writable recurse output root; without one, preserve the established
+			// layout under -go2cspath.
+			options.recurseOutputRoot = options.go2csPath
+
+			if len(positionals) > 1 {
+				options.recurseOutputRoot, err = filepath.Abs(outputFilePath)
+
+				if err != nil {
+					log.Fatalf("Failed to get absolute recurse output path %q: %v\n", outputFilePath, err)
+				}
+			}
+
 			converter := NewModuleConverter(options)
 
 			if err := converter.ConvertModule(inputFilePath); err != nil {
@@ -1041,7 +1055,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// Under -recurse, ModuleConverter drives conversion one package at a time and passes the exact
 	// package dir; load only THAT package (never "./...", which would additionally pull in and
 	// re-convert sibling sub-packages — each is already its own convert-set entry, including
-	// read-only module-cache packages that must route to $(go2csPath)pkg individually). Outside
+	// read-only module-cache packages that must route to the recurse-output pkg tree individually). Outside
 	// recurse, a GOPATH input keeps the "./..." subtree behavior unchanged.
 	if !options.recurse && strings.HasPrefix(strings.ToLower(inputFilePath), strings.ToLower(options.goPath)) {
 		pkgs, err = packages.Load(cfg, "./...")

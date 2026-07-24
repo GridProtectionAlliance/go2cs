@@ -19,9 +19,10 @@ import (
 // conversion over a two-module fixture — an `app` main package importing a co-located `lib` module
 // via `replace`, which imports the standard library — and confirms the recurse loop end to end: the
 // closure is partitioned, the lib converts before the app (topological order), each converts into the
-// parallel tree under the deploy root (the app to src\, the dependency lib to pkg\ — keeping the Go
-// source pure), the cross-package call resolves, references wire to the lib ($(go2csPath)pkg) and the
-// stdlib ($(go2csPath)core), and a folder-grouped recurse solution is emitted. Deterministic and network-free.
+// parallel tree under an isolated output root (the app to src\, the dependency lib to pkg\ — keeping
+// the Go source pure), the cross-package call resolves, references wire relatively to the lib and via
+// $(go2csPath) to the stdlib, and a folder-grouped recurse solution is emitted. Deterministic and
+// network-free.
 func TestRecurseSyntheticModule(t *testing.T) {
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
@@ -47,7 +48,8 @@ func TestRecurseSyntheticModule(t *testing.T) {
 	options := Options{
 		goRoot:              goRoot,
 		goPath:              build.Default.GOPATH,
-		go2csPath:           filepath.Join(root, "out"),
+		go2csPath:           filepath.Join(root, "runtime"),
+		recurseOutputRoot:   filepath.Join(root, "out"),
 		recurse:             true,
 		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
 		indentSpaces:        4,
@@ -74,8 +76,8 @@ func TestRecurseSyntheticModule(t *testing.T) {
 
 	// Each package converts into the parallel tree under the deploy root — the app to src\<import>,
 	// the dependency lib to pkg\<import> — leaving the original Go source directories pure.
-	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "main.cs"))
-	greetingCs := readGenerated(t, filepath.Join(options.go2csPath, "pkg", "example.com", "lib", "greeting.cs"))
+	mainCs := readGenerated(t, filepath.Join(options.recurseOutputRoot, "src", "example.com", "app", "main.cs"))
+	greetingCs := readGenerated(t, filepath.Join(options.recurseOutputRoot, "pkg", "example.com", "lib", "greeting.cs"))
 
 	if !strings.Contains(mainCs, "lib.Greeting") {
 		t.Errorf("app main.cs missing the cross-package call lib.Greeting:\n%s", mainCs)
@@ -90,11 +92,19 @@ func TestRecurseSyntheticModule(t *testing.T) {
 		t.Errorf("app Go source dir was polluted with in-place C# output (main.cs)")
 	}
 
-	// The app csproj references the lib via $(go2csPath)pkg and the stdlib fmt via $(go2csPath)core.
-	appCsproj := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.csproj"))
+	// The app csproj references the converted lib relatively within the isolated output tree and
+	// the stdlib fmt via the independently selectable $(go2csPath) runtime root.
+	appProjectDir := filepath.Join(options.recurseOutputRoot, "src", "example.com", "app")
+	libProject := filepath.Join(options.recurseOutputRoot, "pkg", "example.com", "lib", "example.com.lib.csproj")
+	appCsproj := readGenerated(t, filepath.Join(appProjectDir, "example.com.app.csproj"))
+	libReference, err := filepath.Rel(appProjectDir, libProject)
 
-	if !strings.Contains(appCsproj, "$(go2csPath)pkg\\example.com\\lib\\example.com.lib.csproj") {
-		t.Errorf("app csproj missing the lib ProjectReference under $(go2csPath)pkg:\n%s", appCsproj)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.Contains(appCsproj, `<ProjectReference Include="`+libReference+`" />`) {
+		t.Errorf("app csproj missing the relative lib ProjectReference %q:\n%s", libReference, appCsproj)
 	}
 
 	if !strings.Contains(appCsproj, "$(go2csPath)core\\fmt\\fmt.csproj") {
@@ -104,7 +114,7 @@ func TestRecurseSyntheticModule(t *testing.T) {
 	// A per-project solution sits next to the app csproj, over the app + its transitive converted
 	// dependency (lib) + the shared runtime (golib) + the analyzer (go2cs-gen) — no stdlib listed. This
 	// is the build-everything solution for the app; no separate flat deploy-root solution is written.
-	appSlnx := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.slnx"))
+	appSlnx := readGenerated(t, filepath.Join(options.recurseOutputRoot, "src", "example.com", "app", "example.com.app.slnx"))
 
 	for _, want := range []string{"example.com.app.csproj", "example.com.lib.csproj", "golib.csproj", "go2cs-gen.csproj"} {
 		if !strings.Contains(appSlnx, want) {
@@ -135,7 +145,7 @@ func TestRecurseSyntheticModule(t *testing.T) {
 	}
 
 	// The retired flat deploy-root solution must no longer be generated.
-	if _, err := os.Stat(filepath.Join(options.go2csPath, "go2cs-recurse.slnx")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(options.recurseOutputRoot, "go2cs-recurse.slnx")); !os.IsNotExist(err) {
 		t.Errorf("unexpected flat deploy-root solution go2cs-recurse.slnx was written")
 	}
 
@@ -149,8 +159,8 @@ func TestRecurseSyntheticModule(t *testing.T) {
 // but with nugetRefs enabled, and confirms the reference rewrite. The go2cs standard library (fmt),
 // runtime (golib) and analyzer (go2cs-gen) become NuGet PackageReferences (go.fmt / go.lib / go.gen), while
 // the app's own converted dependency (lib) stays a LOCAL ProjectReference; an output-root
-// Directory.Build.props pins $(go2csPath) (so the lib ProjectReference resolves with no deploy-core) and
-// defaults GoStdLibVersion; and the per-project solution drops golib/analyzer and the /core/ folder.
+// Directory.Build.props defaults GoStdLibVersion; and the per-project solution drops golib/analyzer and
+// the /core/ folder.
 // Deterministic and network-free (asserts the emitted .csproj/.props/.slnx text; no dotnet restore).
 func TestRecurseNuGetReferences(t *testing.T) {
 	if testing.Short() {
@@ -177,7 +187,8 @@ func TestRecurseNuGetReferences(t *testing.T) {
 	options := Options{
 		goRoot:              goRoot,
 		goPath:              build.Default.GOPATH,
-		go2csPath:           filepath.Join(root, "out"),
+		go2csPath:           filepath.Join(root, "runtime"),
+		recurseOutputRoot:   filepath.Join(root, "out"),
 		recurse:             true,
 		nugetRefs:           true,
 		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
@@ -194,7 +205,9 @@ func TestRecurseNuGetReferences(t *testing.T) {
 		t.Fatalf("ConvertModule: %v", err)
 	}
 
-	appCsproj := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.csproj"))
+	appProjectDir := filepath.Join(options.recurseOutputRoot, "src", "example.com", "app")
+	libProject := filepath.Join(options.recurseOutputRoot, "pkg", "example.com", "lib", "example.com.lib.csproj")
+	appCsproj := readGenerated(t, filepath.Join(appProjectDir, "example.com.app.csproj"))
 
 	// The go2cs standard library, runtime and analyzer are referenced from NuGet.
 	for _, want := range []string{
@@ -218,17 +231,22 @@ func TestRecurseNuGetReferences(t *testing.T) {
 		}
 	}
 
-	// The app's OWN converted dependency (lib) stays a LOCAL ProjectReference under $(go2csPath)pkg.
-	if !strings.Contains(appCsproj, `<ProjectReference Include="$(go2csPath)pkg\example.com\lib\example.com.lib.csproj" />`) {
-		t.Errorf("app csproj missing the local lib ProjectReference (converted deps must stay project refs):\n%s", appCsproj)
+	// The app's OWN converted dependency stays a relative LOCAL ProjectReference.
+	libReference, err := filepath.Rel(appProjectDir, libProject)
+
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	// The output-root Directory.Build.props pins $(go2csPath) (so the lib ProjectReference resolves without
-	// deploy-core) and defaults GoStdLibVersion to the converter's Go release, floating on the revision.
-	props := readGenerated(t, filepath.Join(options.go2csPath, "Directory.Build.props"))
+	if !strings.Contains(appCsproj, `<ProjectReference Include="`+libReference+`" />`) {
+		t.Errorf("app csproj missing the relative local lib ProjectReference %q:\n%s", libReference, appCsproj)
+	}
 
-	if !strings.Contains(props, `<go2csPath>$(MSBuildThisFileDirectory)</go2csPath>`) {
-		t.Errorf("output-root Directory.Build.props does not pin $(go2csPath):\n%s", props)
+	// The Directory.Build.props is emitted at the isolated output root and defaults GoStdLibVersion.
+	props := readGenerated(t, filepath.Join(options.recurseOutputRoot, "Directory.Build.props"))
+
+	if strings.Contains(props, `<go2csPath>`) {
+		t.Errorf("output-root Directory.Build.props should not couple go2csPath to converted output:\n%s", props)
 	}
 
 	if base := goVersion(); base != "" {
@@ -243,7 +261,7 @@ func TestRecurseNuGetReferences(t *testing.T) {
 
 	// The per-project solution drops golib/analyzer (now NuGet) and the /core/ folder, but still lists the
 	// app (src) and its converted dependency lib (pkg).
-	appSlnx := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.slnx"))
+	appSlnx := readGenerated(t, filepath.Join(options.recurseOutputRoot, "src", "example.com", "app", "example.com.app.slnx"))
 
 	for _, notWant := range []string{"golib.csproj", "go2cs-gen.csproj", `<Folder Name="/core/">`} {
 		if strings.Contains(appSlnx, notWant) {

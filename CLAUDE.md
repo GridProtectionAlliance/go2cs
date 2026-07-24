@@ -86,11 +86,14 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   `go2cs [options] <input_dir> [output_dir]`. Key flags (from `main.go`, authoritative):
   - `-stdlib` — convert the Go stdlib. `-stdlib fmt strings io` — convert only those packages (+filter).
   - `-recurse` — recursively convert an end-user module + its third-party deps (references the pre-converted
-    stdlib via local `$(go2csPath)` project refs). `-recurse=nuget` instead emits NuGet PackageReferences
+    stdlib via local `$(go2csPath)` project refs). A second positional output root isolates the generated
+    `src\` app + `pkg\` dependency trees from that runtime root; converted packages reference one another
+    relatively. Without it, recurse output defaults to `-go2cspath` for backward compatibility.
+    `-recurse=nuget` instead emits NuGet PackageReferences
     (`go.<pkg>`/`go.lib`/`go.gen`, versioned `$(GoStdLibVersion)`) for the go2cs stdlib/runtime/analyzer so a
     converted app restores from nuget.org with no `deploy-core` staging; the app's own converted packages
-    stay project refs, and the converter emits an output-root `Directory.Build.props` pinning `$(go2csPath)`
-    + a floating `GoStdLibVersion` default.
+    stay relative project refs, and the converter emits an output-root `Directory.Build.props` with a
+    floating `GoStdLibVersion` default.
   - `-tests` — also convert the package's eligible `_test.go` suite + emit a runnable test-host project
     (default off; mutually exclusive with `-recurse` — `log.Fatal` on both). Forces `-comments` on (test
     conversions are derivative works), resolves the output path absolute, and self-locates `$(go2csPath)` by
@@ -101,7 +104,9 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
     without reconverting; `compare` (and `all`) diffs the C# host's terminal results vs `go test -json -count=1`.
   - `-test-timeout <dur>` — per converted-test child process (build/run/compare); Go duration syntax,
     default `2m`, must be > 0.
-  - `-go2cspath <dir>` — output root for converted code (default `~/go2cs`; env `GO2CSPATH`).
+  - `-go2cspath <dir>` — runtime/stdlib root and default output root for converted code (default `~/go2cs`;
+    env `GO2CSPATH`). `go2cs -recurse <input> <output>` keeps generated code under the explicit output root
+    while `$(go2csPath)` references continue to resolve against this runtime root.
   - `-goroot` / `-gopath`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
     `-uco` (channel operators, default on), `-comments`, `-cgo`, `-tree`, `-csproj <tmpl>`, `-debug`.
   - Single project/file: `go2cs package_dir` or `go2cs example.go [out.cs]`.

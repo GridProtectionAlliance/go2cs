@@ -38,8 +38,18 @@ func TestCollectCSharpPrefersSourceFiles(t *testing.T) {
 }
 
 func TestGo2CSConvertArgsPreserveComments(t *testing.T) {
-	got := strings.Join(go2csConvertArgs("core", "input", "output"), " ")
-	want := "-comments -go2cspath core input output"
+	runtime := runtimeConfiguration{mode: runtimeCore, converterRoot: "core"}
+	got := strings.Join(go2csConvertArgs(runtime, "input", "output"), " ")
+	want := "-comments -recurse -go2cspath core input output"
+	if got != want {
+		t.Fatalf("go2csConvertArgs = %q, want %q", got, want)
+	}
+}
+
+func TestGo2CSConvertArgsUseNuGetRecursion(t *testing.T) {
+	runtime := runtimeConfiguration{mode: runtimeNuGet, converterRoot: "core"}
+	got := strings.Join(go2csConvertArgs(runtime, "input", "output"), " ")
+	want := "-comments -recurse=nuget -go2cspath core input output"
 	if got != want {
 		t.Fatalf("go2csConvertArgs = %q, want %q", got, want)
 	}
@@ -112,10 +122,30 @@ func TestFormatTranspileTranscriptListsGeneratedFiles(t *testing.T) {
 		}
 	}
 
-	got := formatTranspileTranscript("go2cs diagnostic", root, "passed", "Core source")
-	for _, want := range []string{"$ go2cs main.go", "Runtime: Core source", "go2cs diagnostic", "main.cs", "tour.local.demo.csproj", "Transpile completed."} {
+	got := formatTranspileTranscript("module diagnostic", "go2cs diagnostic", root, "passed", "Core source")
+	for _, want := range []string{"$ go mod tidy", "module diagnostic", "$ go2cs -recurse main.go", "Runtime: Core source", "go2cs diagnostic", "main.cs", "tour.local.demo.csproj", "Transpile completed."} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("transcript missing %q:\n%s", want, got)
 		}
+	}
+}
+
+func TestCollectCSharpRejectsMetadataOnlyOutput(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "package_info.cs"), []byte("metadata"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := collectCSharp(root); err == nil {
+		t.Fatal("metadata-only output was accepted as converted app source")
+	}
+}
+
+func TestTourAppOutputDir(t *testing.T) {
+	root := filepath.FromSlash("C:/temp/output")
+	want := filepath.Join(root, "src", "tour.local", "session")
+
+	if got := tourAppOutputDir(root); got != want {
+		t.Fatalf("tourAppOutputDir = %q, want %q", got, want)
 	}
 }

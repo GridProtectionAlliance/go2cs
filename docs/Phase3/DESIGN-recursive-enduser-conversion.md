@@ -15,6 +15,12 @@
 > implemented, gated, and committed**. The `-recurse` feature works end to end on a real internet DAG
 > (`fatih/color`); the remaining gaps to a *fully compiling* real-world build are per-package **converter**
 > defects (Phase-4 territory), catalogued in the §5 *5b results*.
+>
+> **Update (2026-07-24):** recursive output can now be isolated from the runtime root with
+> `go2cs -recurse <input> <output>`. App/dependency projects are written under that output and reference
+> one another relatively; `-go2cspath` remains the independent stdlib/runtime root. The Tour uses this
+> form after `go mod tidy`, so exercise imports such as `golang.org/x/tour/wc` resolve, convert, build, and
+> run automatically without writing generated projects into the checkout or deployed runtime.
 
 ## 1. What we're validating
 
@@ -137,25 +143,22 @@ on package-level global state — the reason the same file just removed `-parall
 | Set | Output dir | Emitted reference |
 |---|---|---|
 | stdlib | *(not written — pre-converted)* | `$(go2csPath)core\<dotted>\<name>.csproj` |
-| third-party | `$(go2csPath)pkg/<import-path>` | `$(go2csPath)pkg\<dotted>\<name>.csproj` |
-| app | user output dir (or in-place) | project(s) under the output dir |
+| third-party | `<output>/pkg/<import-path>` | relative path within `<output>` |
+| app | `<output>/src/<import-path>` | relative path within `<output>` |
 
 The **core change** is decoupling *source dir* from *converted-output dir* for module-cache deps. Concretely:
 
-- Give `ModuleConverter` an explicit **import-path → output-dir** map (built while partitioning), and
-  route reference resolution through it so a third-party dep resolves to `$(go2csPath)pkg\…` — **not**
-  in-place at the read-only cache. This is the `getLocalModulePackageInfo` correction from §2/#3; it can
-  be a new branch that fires when `meta.Dir` is under `$GOPATH/pkg/mod` (map to `$(go2csPath)pkg`) versus
-  a genuinely co-located `replace` module (keep in-place).
+- Give `ModuleConverter` an explicit writable output root and route every app/dependency package through
+  its version-free import path. `getRecurseDependencyInfo` returns the generated dependency project's
+  absolute path during emission; `writeProjectFile` rewrites it relative to the importer, keeping the
+  converted graph portable and independent of the stdlib/runtime root.
 - Strip the module cache's `@<version>` segment from the output path (single-version assumption for now;
   see open decisions).
 
-**Anchor the whole conversion at the deploy root.** `-recurse` should default `-go2cspath` to
-`%GOPATH%\src\go2cs` — the same root `deploy-core` stages to — and write the app + third-party output
-*under* it (third-party at `pkg\…`; the app at, e.g., `app\<module>\`). The root `Directory.Build.props`
-that `deploy-core` wrote then supplies `$(go2csPath)` to every generated project automatically, so the
-app, the third-party libs, the staged stdlib, and the analyzer all resolve their `$(go2csPath)…`
-references with no per-project property and no machine-specific absolute paths.
+Without a second positional, `-recurse` retains the established layout under `-go2cspath`. With
+`go2cs -recurse <input> <output>`, only the generated `src\` and `pkg\` trees move to `<output>`;
+`$(go2csPath)core\…` and `$(go2csPath)gen\…` continue to resolve against the selected checkout or deployed
+runtime. This separation is what lets disposable hosts such as the Tour isolate each conversion.
 
 ### 3.5 Referencing the pre-converted stdlib
 
@@ -174,9 +177,9 @@ This is the seam the **NuGet stdlib** replaces — now **implemented** as `-recu
 → `go.lib` and the `go2cs-gen` analyzer → `go.gen` (`PrivateAssets="all"`), all versioned
 `$(GoStdLibVersion)`. Keeping the reference indirection through `$(go2csPath)` made the switch a
 reference-rewrite, not a structural change: the app's own converted packages (`src\` + `pkg\`) stay
-`ProjectReference`s, and the converter emits an output-root `Directory.Build.props` in this mode that pins
-`$(go2csPath)` for them and defaults `GoStdLibVersion` to the converter's Go release (floating, e.g.
-`1.23.1.*`), so a converted app restores from nuget.org with **no `deploy-core` staging**.
+relative `ProjectReference`s, and the converter emits an output-root `Directory.Build.props` in this mode
+that defaults `GoStdLibVersion` to the converter's Go release (floating, e.g. `1.23.1.*`), so a converted
+app restores from nuget.org with **no `deploy-core` staging**.
 
 ### 3.6 Solution generation
 

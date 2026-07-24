@@ -231,8 +231,8 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 
 	for _, importPath := range importPaths {
 		// Under -recurse, resolve APP (main-module) and THIRD-PARTY dependency references via the
-		// module-aware go/packages metadata, routing them to the parallel $(go2csPath)src\ and
-		// $(go2csPath)pkg\ trees (version-free). Stdlib falls through to the standard resolver below,
+		// module-aware go/packages metadata, routing them to the parallel recurse-output src\ and
+		// pkg\ trees (version-free). Stdlib falls through to the standard resolver below,
 		// which emits $(go2csPath)core references.
 		if options.recurse {
 			if info, ok := getRecurseDependencyInfo(importPath, options); ok {
@@ -390,11 +390,12 @@ func isMainModulePackage(importPath, mainModulePath string) bool {
 
 // getRecurseDependencyInfo resolves cross-package reference info for an APP (main-module) or
 // THIRD-PARTY import under -recurse, from the module-aware go/packages metadata captured in
-// importPackageDirs. App packages reference $(go2csPath)src\<import-path>; dependencies reference
-// $(go2csPath)pkg\<import-path> — both version-free (the path is derived from the version-free
-// import path, not the possibly-@versioned module-cache source dir), and both via the $(go2csPath)
-// property so writeProjectFile leaves them deploy-root relative rather than rewriting them relative.
-// This matches where ModuleConverter writes each package's output, so reference and output agree.
+// importPackageDirs. App packages live under <recurse-output>\src\<import-path>; dependencies live
+// under <recurse-output>\pkg\<import-path> — both version-free (the path is derived from the
+// version-free import path, not the possibly-@versioned module-cache source dir). The absolute
+// generated-project path is returned so writeProjectFile rewrites it relative to the importing
+// project. That keeps the converted graph portable and leaves $(go2csPath) dedicated to the
+// separately-selectable stdlib/runtime root.
 // Returns ok=false for the standard library (resolved by the default path as $(go2csPath)core refs)
 // and for imports unknown to the loaded graph.
 func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, bool) {
@@ -415,8 +416,14 @@ func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, 
 		root = "src"
 	}
 
+	outputRoot := options.recurseOutputRoot
+
+	if outputRoot == "" {
+		outputRoot = options.go2csPath
+	}
+
 	libProjectName, namespace := getProjectName(meta.Dir, options)
-	targetDir := "$(go2csPath)" + root + "\\" + strings.ReplaceAll(importPath, "/", "\\")
+	targetDir := filepath.Join(outputRoot, root, filepath.FromSlash(importPath))
 	projectReference := filepath.Join(targetDir, libProjectName+".csproj")
 
 	return PackageInfo{
@@ -424,7 +431,7 @@ func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, 
 		PackageName:      packageQualifiedName(namespace, meta.Name),
 		RootPackageName:  meta.Name,
 		SourceDir:        meta.Dir,
-		TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
+		TargetDir:        targetDir,
 		ProjectReference: projectReference,
 	}, true
 }

@@ -67,7 +67,7 @@ func TestPrepareRuntimeProjectUsesNuGetPackages(t *testing.T) {
 		nugetSource:  filepath.Join(root, "packages"),
 		nugetVersion: "1.23.1.1",
 	}
-	if err := prepareRuntimeProject(project, runtime); err != nil {
+	if err := prepareRuntimeProject(project, root, runtime); err != nil {
 		t.Fatal(err)
 	}
 
@@ -90,5 +90,51 @@ func TestPrepareRuntimeProjectUsesNuGetPackages(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(root, "NuGet.config")); err != nil {
 		t.Fatalf("NuGet.config was not generated: %v", err)
+	}
+}
+
+func TestPrepareRuntimeProjectAcceptsRecursiveNuGetOutput(t *testing.T) {
+	root := t.TempDir()
+	projectDir := filepath.Join(root, "src", "tour.local", "session")
+	if err := os.MkdirAll(projectDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	project := filepath.Join(projectDir, "tour.local.session.csproj")
+	content := `<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="go.gen" Version="$(GoStdLibVersion)" PrivateAssets="all" />
+    <PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />
+    <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
+    <ProjectReference Include="..\..\..\pkg\golang.org\x\tour\wc\golang.org.x.tour.wc.csproj" />
+  </ItemGroup>
+</Project>`
+	if err := os.WriteFile(project, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	runtime := runtimeConfiguration{
+		mode:         runtimeNuGet,
+		nugetSource:  filepath.Join(root, "packages"),
+		nugetVersion: "1.23.1.1",
+	}
+	if err := prepareRuntimeProject(project, root, runtime); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "NuGet.config")); err != nil {
+		t.Fatalf("root NuGet.config was not generated: %v", err)
+	}
+}
+
+func TestRuntimeMSBuildArgs(t *testing.T) {
+	local := runtimeConfiguration{mode: runtimeCore, projectRoot: filepath.FromSlash("C:/go2cs")}
+	localArgs := runtimeMSBuildArgs(local)
+	if len(localArgs) != 1 || !strings.HasPrefix(localArgs[0], "-p:go2csPath=") {
+		t.Fatalf("local runtime args = %v", localArgs)
+	}
+
+	nuget := runtimeConfiguration{mode: runtimeNuGet, nugetVersion: "1.23.1.7"}
+	nugetArgs := runtimeMSBuildArgs(nuget)
+	if len(nugetArgs) != 1 || nugetArgs[0] != "-p:GoStdLibVersion=1.23.1.7" {
+		t.Fatalf("NuGet runtime args = %v", nugetArgs)
 	}
 }

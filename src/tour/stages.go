@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"path/filepath"
 )
 
 func (p *pipelineRunner) build(ctx context.Context, request runRequest) (stageResult, error) {
@@ -14,9 +13,7 @@ func (p *pipelineRunner) build(ctx context.Context, request runRequest) (stageRe
 	defer p.release()
 
 	args := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
-	if artifact.runtime.projectRoot != "" {
-		args = append(args, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
-	}
+	args = append(args, runtimeMSBuildArgs(artifact.runtime)...)
 	return p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout, "dotnet", args...), nil
 }
 
@@ -28,9 +25,7 @@ func (p *pipelineRunner) execute(ctx context.Context, request runRequest) (stage
 	defer p.release()
 
 	args := []string{"run", "--no-build", "--project", artifact.project}
-	if artifact.runtime.projectRoot != "" {
-		args = append(args, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
-	}
+	args = append(args, runtimeMSBuildArgs(artifact.runtime)...)
 	return p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout, "dotnet", args...), nil
 }
 

@@ -25,7 +25,8 @@ The interface is deliberately parallel:
 - Go 1.23.1 or later
 - .NET SDK 9.0 or later
 - A local clone of this `go2cs` repository
-- Network access on the first start, only to install the official offline Tour
+- Network access on the first start to install the official offline Tour, and when an exercise first
+  imports a Go module that is not already in the local module cache
 
 The app binds to loopback by default. It executes editor content as local code,
 so it should not be exposed to an untrusted network.
@@ -82,8 +83,9 @@ Useful options:
 - `-no-open`: do not open a browser
 
 `GO_TOUR_BIN` can point to the upstream `tour` executable. `GO2CS_BIN` can point
-to a prebuilt go2cs executable; otherwise the server builds and caches one in
-`src/tour/.cache`.
+to an explicitly managed prebuilt go2cs executable; otherwise each server process builds the
+current checkout once into `src/tour/.cache` and reuses it for that process. Rebuilding on restart
+prevents a converter cached by an older checkout from being used with a newer Tour pipeline.
 
 ## .NET runtime sources
 
@@ -123,10 +125,12 @@ go test ./...
 go vet ./...
 ```
 
-The first conversion can take longer because go2cs is built lazily. Converted
-workspaces are isolated in temporary directories and expire after 30 minutes.
-The request body is limited to 256 KiB, and each normal tool stage has a
-20-second timeout. Aborting the Run request cancels the active build or program.
+The first conversion can take longer because go2cs is built lazily. Each submission gets a temporary
+Go module; the server runs `go mod tidy`, recursively converts imported third-party packages, and keeps
+the generated app/dependency graph isolated from the selected runtime tree. The Code and Project tabs
+still show only the submitted app. Converted workspaces expire after 30 minutes. The request body is
+limited to 256 KiB; normal tool stages have a 20-second timeout and dependency resolution has two minutes
+for an initial download. Aborting the Run request cancels the active build or program.
 
 ## Integration design
 

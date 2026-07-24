@@ -158,7 +158,7 @@ func validRuntimeRoot(root string) bool {
 	return true
 }
 
-func prepareRuntimeProject(project string, runtime runtimeConfiguration) error {
+func prepareRuntimeProject(project, configRoot string, runtime runtimeConfiguration) error {
 	if runtime.mode != runtimeNuGet {
 		return nil
 	}
@@ -183,11 +183,13 @@ func prepareRuntimeProject(project string, runtime runtimeConfiguration) error {
 		return fmt.Sprintf(`%s<PackageReference Include="%s" Version="%s"%s />`,
 			match[1], packageID, runtime.nugetVersion, private)
 	})
-	if converted == string(content) {
+	if converted == string(content) && !strings.Contains(converted, `<PackageReference Include="go.`) {
 		return fmt.Errorf("generated project contained no go2cs project references to convert to NuGet packages")
 	}
-	if err := os.WriteFile(project, []byte(converted), 0o600); err != nil {
-		return err
+	if converted != string(content) {
+		if err := os.WriteFile(project, []byte(converted), 0o600); err != nil {
+			return err
+		}
 	}
 
 	config := fmt.Sprintf(`<configuration>
@@ -198,7 +200,21 @@ func prepareRuntimeProject(project string, runtime runtimeConfiguration) error {
   </packageSources>
 </configuration>
 `, htmlEscape(runtime.nugetSource))
-	return os.WriteFile(filepath.Join(filepath.Dir(project), "NuGet.config"), []byte(config), 0o600)
+	return os.WriteFile(filepath.Join(configRoot, "NuGet.config"), []byte(config), 0o600)
+}
+
+func runtimeMSBuildArgs(runtime runtimeConfiguration) []string {
+	var args []string
+
+	if runtime.projectRoot != "" {
+		args = append(args, "-p:go2csPath="+runtime.projectRoot+string(filepath.Separator))
+	}
+
+	if runtime.mode == runtimeNuGet && runtime.nugetVersion != "" {
+		args = append(args, "-p:GoStdLibVersion="+runtime.nugetVersion)
+	}
+
+	return args
 }
 
 func packageIDForProjectReference(reference string) (string, bool) {

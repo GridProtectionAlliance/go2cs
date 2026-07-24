@@ -109,9 +109,8 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    solution is written.
 	m.generatePerProjectSolutions()
 
-	// 6. Under -recurse=nuget, emit an output-root Directory.Build.props that pins $(go2csPath) to the
-	//    output root (so the converted app's src\ / pkg\ ProjectReferences resolve without a deploy-core
-	//    staging step) and defaults GoStdLibVersion for the go.* NuGet PackageReferences.
+	// 6. Under -recurse=nuget, emit an output-root Directory.Build.props that defaults
+	//    GoStdLibVersion for the go.* NuGet PackageReferences.
 	if m.options.nugetRefs {
 		m.generateNuGetDeployProps()
 	}
@@ -265,12 +264,23 @@ func (m *ModuleConverter) buildEdges(closure map[string]*packages.Package) {
 	}
 }
 
+// recurseRoot returns the writable root for recursively generated app/dependency projects. It falls
+// back to go2csPath for callers constructed programmatically and for the established one-positional
+// CLI form, preserving the original layout.
+func (m *ModuleConverter) recurseRoot() string {
+	if m.options.recurseOutputRoot != "" {
+		return m.options.recurseOutputRoot
+	}
+
+	return m.options.go2csPath
+}
+
 // outputDirFor returns where a convert-set package's C# output is written, in a parallel tree under
-// the deploy root that keeps the original Go source pure (nothing is written in place). The app's own
-// packages (the main module) go to $(go2csPath)src\<import-path>; every dependency — module-cache or
-// a co-located `replace` — goes to $(go2csPath)pkg\<import-path>. The path is built from the
-// version-free import path, so a module-cache dep's @version segment is dropped, and it matches the
-// reference getRecurseDependencyInfo emits, so reference and output agree.
+// the recurse output root that keeps the original Go source pure (nothing is written in place). The
+// app's own packages (the main module) go to <output>\src\<import-path>; every dependency —
+// module-cache or a co-located `replace` — goes to <output>\pkg\<import-path>. The path is built from
+// the version-free import path, so a module-cache dep's @version segment is dropped, and it matches
+// the reference getRecurseDependencyInfo emits, so reference and output agree.
 func (m *ModuleConverter) outputDirFor(pkgPath string) string {
 	root := "pkg"
 
@@ -278,7 +288,7 @@ func (m *ModuleConverter) outputDirFor(pkgPath string) string {
 		root = "src"
 	}
 
-	return filepath.Join(m.options.go2csPath, root, filepath.FromSlash(pkgPath))
+	return filepath.Join(m.recurseRoot(), root, filepath.FromSlash(pkgPath))
 }
 
 // convertAll converts every convert-set package in the sorted (least-dependencies-first) order,
@@ -471,23 +481,17 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 
 // generateNuGetDeployProps writes a Directory.Build.props at the -recurse=nuget output root. It lets a
 // project that consumes the go2cs standard library, runtime and analyzer from NuGet (rather than a
-// deploy-core staged tree) build with no further setup, by supplying two things every generated .csproj
-// below it needs:
+// deploy-core staged tree) build with no further setup by defaulting GoStdLibVersion — the version every
+// emitted go.* PackageReference resolves — to the converter's Go release, floating on the NuGet revision
+// (e.g. 1.23.1.*), so a freshly converted project
 //
-//  1. It pins $(go2csPath) to the output root (this file's directory) so the converted app's own
-//     ProjectReferences to its converted dependencies ($(go2csPath)src\... app packages,
-//     $(go2csPath)pkg\... third-party) still resolve — those stay LOCAL project references; only the go2cs
-//     stdlib/runtime/analyzer move to NuGet. Without it the template default ($(go2csPath) = $(SolutionDir))
-//     would resolve to each per-project .slnx's own folder under src\<import>\, not the output root.
-//  2. It defaults GoStdLibVersion — the version every emitted go.* PackageReference resolves — to the
-//     converter's Go release, floating on the NuGet revision (e.g. 1.23.1.*), so a freshly converted project
-//     restores from nuget.org with no extra configuration. A consumer value (edit this file, a higher
-//     Directory.Build.props, or a -p:GoStdLibVersion global) overrides it via the Condition to pin exactly.
+//	restores from nuget.org with no extra configuration. A consumer value (edit this file, a higher
+//	Directory.Build.props, or a -p:GoStdLibVersion global) overrides it via the Condition to pin exactly.
 //
 // It is written only if the file does not already exist, so a user-authored or deploy-core props is never
-// clobbered. Mirrors deploy-core.ps1's root props idiom ($(MSBuildThisFileDirectory) ends with a separator).
+// clobbered.
 func (m *ModuleConverter) generateNuGetDeployProps() {
-	propsFile := filepath.Join(m.options.go2csPath, "Directory.Build.props")
+	propsFile := filepath.Join(m.recurseRoot(), "Directory.Build.props")
 
 	if _, err := os.Stat(propsFile); err == nil {
 		return // exists — don't clobber a user/deploy-core props
@@ -495,14 +499,6 @@ func (m *ModuleConverter) generateNuGetDeployProps() {
 
 	lines := []string{
 		"<Project>",
-		"",
-		"  <!-- Written by go2cs -recurse=nuget. Pins $(go2csPath) to this output root so the converted app's",
-		"       src\\ and pkg\\ ProjectReferences resolve without a deploy-core staging step; the go2cs standard",
-		"       library, runtime (go.lib) and analyzer (go.gen) come from NuGet. MSBuildThisFileDirectory ends",
-		"       with a separator. A -p:go2csPath / -p:GoStdLibVersion global still overrides these. -->",
-		"  <PropertyGroup>",
-		"    <go2csPath>$(MSBuildThisFileDirectory)</go2csPath>",
-		"  </PropertyGroup>",
 	}
 
 	// Default GoStdLibVersion to the converter's Go release, floating on the NuGet revision. Omitted if the
