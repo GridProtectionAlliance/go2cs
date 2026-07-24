@@ -4,34 +4,200 @@
 // AMD64-specific hardware-assisted CRC32 algorithms. See crc32.go for a
 // description of the interface that each architecture-specific file
 // implements.
+
+// go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted crc32_amd64.go output).
+//
+// Every Go-level declaration below is the converted output verbatim — the triple-buffer split,
+// the CRC(I, ABC) combining identity and the table construction are pure Go logic that converts
+// faithfully. Only two things cannot be a literal conversion:
+//
+//  1. castagnoliSSE42, castagnoliSSE42Triple and ieeeCLMUL have NO Go body: they are declared in
+//     crc32_amd64.go and implemented in crc32_amd64.s. A literal conversion emits a bodyless
+//     `partial` that PartialStubGenerator fills with a NotImplementedException. They are realized
+//     here against System.Runtime.Intrinsics.X86 — the SAME instructions the .s file issues
+//     (CRC32B/W/L/Q from SSE4.2, PCLMULQDQ, and PEXTRD from SSE4.1) — so the arch layer is real
+//     hardware acceleration on .NET, not a stub. Each port is annotated against the .s labels it
+//     transcribes.
+//
+//  2. The capability guards read internal/cpu's `cpu.X86.HasSSE42` / `HasPCLMULQDQ` / `HasSSE41`.
+//     Those flags are GLOBAL: they gate the arch path of every converted package, and the rest of
+//     those arch layers are still PartialStubGenerator stubs. Turning them on centrally would trade
+//     this package's working portable fallback for a NotImplementedException in the others, so the
+//     probe is LOCAL to this file — the `.IsSupported` properties of exactly the instruction sets
+//     used here. That keeps the claim precisely true ("these instructions are available to THIS
+//     code") and leaves internal/cpu untouched. This is the general recipe for realizing an
+//     asm-backed arch layer in managed code; see docs/ConversionStrategies-Reference.md.
+//
+// Where no intrinsic is available (a non-x64 process, or a CPU without SSE4.2 / PCLMULQDQ+SSE4.1),
+// archAvailable* returns false and crc32.go falls back to slicing-by-8 — exactly how Go degrades on
+// an architecture with no arch implementation.
+[module: go.GoManualConversion]
+
 namespace go.hash;
 
-using cpu = @internal.cpu_package;
-using @unsafe = unsafe_package;
-using @internal;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 partial class crc32_package {
 
 // This file contains the code to call the SSE 4.2 version of the Castagnoli
 // and IEEE CRC.
 
-// castagnoliSSE42 is defined in crc32_amd64.s and uses the SSE 4.2 CRC32
-// instruction.
-//
-//go:noescape
-internal static partial uint32 castagnoliSSE42(uint32 crc, slice<byte> p);
+// hasSSE42 replaces cpu.X86.HasSSE42 with the local probe described in the file header. The X64
+// form is required because both Castagnoli ports accumulate through CRC32Q (the 8-byte encoding),
+// matching this file's GOARCH=amd64 origin; a 32-bit process reports false and takes slicing-by-8.
+internal static bool hasSSE42 => Sse42.X64.IsSupported;
 
-// castagnoliSSE42Triple is defined in crc32_amd64.s and uses the SSE 4.2 CRC32
-// instruction.
-//
-//go:noescape
-internal static partial (uint32 retA, uint32 retB, uint32 retC) castagnoliSSE42Triple(uint32 crcA, uint32 crcB, uint32 crcC, slice<byte> a, slice<byte> b, slice<byte> c, uint32 rounds);
+// hasCLMUL replaces cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41 — ieeeCLMUL needs PCLMULQDQ for the
+// folding steps and SSE4.1 for the final PEXTRD.
+internal static bool hasCLMUL => Pclmulqdq.IsSupported && Sse41.IsSupported;
 
-// ieeeCLMUL is defined in crc_amd64.s and uses the PCLMULQDQ
-// instruction as well as SSE 4.1.
+// castagnoliSSE42 updates the (non-inverted) crc with the given buffer, using the SSE 4.2 CRC32
+// instruction. Transcribes crc32_amd64.s ·castagnoliSSE42.
 //
-//go:noescape
-internal static partial uint32 ieeeCLMUL(uint32 crc, slice<byte> p);
+// The .s file first walks the buffer to an 8-byte boundary so its CRC32Q loads are aligned. That
+// step is a hardware micro-optimization, not part of the result: CRC32 is a pure function of the
+// initial value and the byte SEQUENCE, and both forms consume the bytes in the same order. It has
+// no managed counterpart either — a slice's backing array can be moved by the GC, so an address
+// observed here is not an address the loads would keep — so the port simply runs the CRC32Q loop
+// and then the .s file's 4/2/1-byte tail.
+internal static uint32 castagnoliSSE42(uint32 crc, slice<byte> p) {
+    nint length = len(p);
+    if (length == 0) {
+        return crc;
+    }
+    ref byte data = ref MemoryMarshal.GetReference(p.ToSpan());
+    // aligned: CRC32Q over each 8-byte chunk.
+    uint64 acc = crc;
+    nint i = 0;
+    for (; length - i >= 8; i += 8) {
+        acc = Sse42.X64.Crc32(acc, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref data, i)));
+    }
+    // less_than_8: the remaining 0-7 bytes as CRC32L, then CRC32W, then CRC32B — the same order
+    // the .s file derives from the low three bits of the residual length.
+    uint32 c = ((uint32)acc);
+    if (length - i >= 4) {
+        c = Sse42.Crc32(c, Unsafe.ReadUnaligned<uint32>(ref Unsafe.Add(ref data, i)));
+        i += 4;
+    }
+    if (length - i >= 2) {
+        c = Sse42.Crc32(c, Unsafe.ReadUnaligned<uint16>(ref Unsafe.Add(ref data, i)));
+        i += 2;
+    }
+    if (length - i >= 1) {
+        c = Sse42.Crc32(c, Unsafe.Add(ref data, i));
+    }
+    return c;
+}
+
+// castagnoliSSE42Triple updates three (non-inverted) crcs with (24*rounds) bytes from each buffer.
+// Transcribes crc32_amd64.s ·castagnoliSSE42Triple: each round issues three independent CRC32Q
+// chains per buffer so the three dependency chains pipeline against each other.
+//
+// The .s loop is a do-while driven by DECQ/JNZ, so rounds == 0 would wrap; every caller passes
+// K/24 (7 or 56). The managed form is a counted loop, which is identical for all real inputs.
+internal static (uint32 retA, uint32 retB, uint32 retC) castagnoliSSE42Triple(uint32 crcA, uint32 crcB, uint32 crcC, slice<byte> a, slice<byte> b, slice<byte> c, uint32 rounds) {
+    ref byte pa = ref MemoryMarshal.GetReference(a.ToSpan());
+    ref byte pb = ref MemoryMarshal.GetReference(b.ToSpan());
+    ref byte pc = ref MemoryMarshal.GetReference(c.ToSpan());
+    uint64 accA = crcA;
+    uint64 accB = crcB;
+    uint64 accC = crcC;
+    nint off = 0;
+    for (uint32 round = 0; round < rounds; round++) {
+        accA = Sse42.X64.Crc32(accA, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pa, off)));
+        accB = Sse42.X64.Crc32(accB, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pb, off)));
+        accC = Sse42.X64.Crc32(accC, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pc, off)));
+        accA = Sse42.X64.Crc32(accA, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pa, off + 8)));
+        accB = Sse42.X64.Crc32(accB, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pb, off + 8)));
+        accC = Sse42.X64.Crc32(accC, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pc, off + 8)));
+        accA = Sse42.X64.Crc32(accA, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pa, off + 16)));
+        accB = Sse42.X64.Crc32(accB, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pb, off + 16)));
+        accC = Sse42.X64.Crc32(accC, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref pc, off + 16)));
+        off += 24;
+    }
+    return (((uint32)accA), ((uint32)accB), ((uint32)accC));
+}
+
+// CRC32 polynomial data
+//
+// These constants are lifted from the
+// Linux kernel, since they avoid the costly
+// PSHUFB 16 byte reversal proposed in the
+// original Intel paper.
+//
+// A 128-bit load of a crc32_amd64.s DATA pair puts the offset-0 quadword in the LOW half, so
+// Vector128.Create(offset0, offset8) reproduces the .s register image exactly.
+private static readonly Vector128<uint64> s_r2r1 = Vector128.Create(0x154442bd4UL, 0x1c6e41596UL);
+private static readonly Vector128<uint64> s_r4r3 = Vector128.Create(0x1751997d0UL, 0x0ccaa009eUL);
+private static readonly Vector128<uint64> s_rupoly = Vector128.Create(0x1db710641UL, 0x1f7011641UL);
+private static readonly Vector128<uint64> s_r5 = Vector128.Create(0x163cd6124UL, 0UL);
+
+// s_mask32 is the .s file's PCMPEQB X3, X3 followed by PSRLQ $32, X3 — the low 32 bits of each
+// quadword. Only the low quadword is ever consumed.
+private static readonly Vector128<uint64> s_mask32 = Vector128.Create(0x00000000FFFFFFFFUL, 0x00000000FFFFFFFFUL);
+
+// clmulLoad is the .s file's MOVOU (SI) — an unaligned 128-bit load at a byte offset.
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+private static Vector128<uint64> clmulLoad(ref byte data, nint offset) {
+    return Unsafe.ReadUnaligned<Vector128<uint64>>(ref Unsafe.Add(ref data, offset));
+}
+
+// clmulFold advances one 128-bit accumulator by the constant pair k — the .s file's recurring
+// PCLMULQDQ $0 / PCLMULQDQ $0x11 / PXOR triple (low x by low k, high x by high k, combined).
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+private static Vector128<uint64> clmulFold(Vector128<uint64> x, Vector128<uint64> k) {
+    return Sse2.Xor(
+        Pclmulqdq.CarrylessMultiply(x, k, 0x00),
+        Pclmulqdq.CarrylessMultiply(x, k, 0x11));
+}
+
+// ieeeCLMUL folds the buffer with PCLMULQDQ as well as SSE 4.1. Transcribes crc32_amd64.s
+// ·ieeeCLMUL, label for label. len(p) must be at least 64, and must be a multiple of 16 —
+// archUpdateIEEE guarantees both.
+//
+// Based on https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/fast-crc-computation-generic-polynomials-pclmulqdq-paper.pdf
+internal static uint32 ieeeCLMUL(uint32 crc, slice<byte> p) {
+    ref byte data = ref MemoryMarshal.GetReference(p.ToSpan());
+    nint rem = len(p) - 64;
+    nint i = 64;
+    // Prime four accumulators with the first 64 bytes; the initial CRC enters the low dword.
+    var x1 = Sse2.Xor(clmulLoad(ref data, 0), Vector128.CreateScalar(crc).AsUInt64());
+    var x2 = clmulLoad(ref data, 16);
+    var x3 = clmulLoad(ref data, 32);
+    var x4 = clmulLoad(ref data, 48);
+    // loopback64: fold all four by r2r1 and absorb the next 64 bytes.
+    for (; rem >= 64; i += 64, rem -= 64) {
+        x1 = Sse2.Xor(clmulFold(x1, s_r2r1), clmulLoad(ref data, i));
+        x2 = Sse2.Xor(clmulFold(x2, s_r2r1), clmulLoad(ref data, i + 16));
+        x3 = Sse2.Xor(clmulFold(x3, s_r2r1), clmulLoad(ref data, i + 32));
+        x4 = Sse2.Xor(clmulFold(x4, s_r2r1), clmulLoad(ref data, i + 48));
+    }
+    // remain64: collapse the four accumulators into x1, folding by r4r3.
+    x1 = Sse2.Xor(clmulFold(x1, s_r4r3), x2);
+    x1 = Sse2.Xor(clmulFold(x1, s_r4r3), x3);
+    x1 = Sse2.Xor(clmulFold(x1, s_r4r3), x4);
+    // remain16: absorb each remaining 16-byte block.
+    for (; rem >= 16; i += 16, rem -= 16) {
+        x1 = Sse2.Xor(clmulFold(x1, s_r4r3), clmulLoad(ref data, i));
+    }
+    // finish: fold the final 128 bits down to 32 and return them.
+    //
+    // 128 -> 96: multiply the low half by r4 (r4r3's HIGH quadword) and xor in the high half.
+    x1 = Sse2.Xor(Sse2.ShiftRightLogical128BitLane(x1, 8), Pclmulqdq.CarrylessMultiply(s_r4r3, x1, 0x01));
+    // 96 -> 64: multiply the low 32 bits by r5 and xor in the value shifted down by 32.
+    var shifted = Sse2.ShiftRightLogical128BitLane(x1, 4);
+    x1 = Sse2.Xor(Pclmulqdq.CarrylessMultiply(Sse2.And(x1, s_mask32), s_r5, 0x00), shifted);
+    // 64 -> 32: Barrett reduction by rupoly — the quotient mu in the HIGH quadword, the polynomial
+    // in the low one — then take dword 1 (PEXTRD $1).
+    var pending = x1;
+    x1 = Pclmulqdq.CarrylessMultiply(Sse2.And(x1, s_mask32), s_rupoly, 0x10);
+    x1 = Pclmulqdq.CarrylessMultiply(Sse2.And(x1, s_mask32), s_rupoly, 0x00);
+    x1 = Sse2.Xor(x1, pending);
+    return Sse41.Extract(x1.AsUInt32(), 1);
+}
 
 internal static readonly UntypedInt castagnoliK1 = 168;
 
@@ -44,11 +210,11 @@ internal static ж<sse42Table> castagnoliSSE42TableK1;
 internal static ж<sse42Table> castagnoliSSE42TableK2;
 
 internal static bool archAvailableCastagnoli() {
-    return cpu.X86.HasSSE42;
+    return hasSSE42;
 }
 
 internal static void archInitCastagnoli() {
-    if (!cpu.X86.HasSSE42) {
+    if (!hasSSE42) {
         throw panic("arch-specific Castagnoli not available");
     }
     castagnoliSSE42TableK1 = @new<sse42Table>();
@@ -79,7 +245,7 @@ internal static uint32 castagnoliShift(ж<sse42Table> Ꮡtable, uint32 crc) {
 }
 
 internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
-    if (!cpu.X86.HasSSE42) {
+    if (!hasSSE42) {
         throw panic("not available");
     }
     // This method is inspired from the algorithm in Intel's white paper:
@@ -140,16 +306,10 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     // We can compute tables corresponding to the four terms for all 8-bit
     // values.
     crc = ~crc;
-    // If a buffer is long enough to use the optimization, process the first few
-    // bytes to align the buffer to an 8 byte boundary (if necessary).
-    if (len(p) >= castagnoliK1 * 3) {
-        nint delta = (nint)((uintptr)((uintptr)new @unsafe.Pointer(Ꮡ(p, 0)) & 7));
-        if (delta != 0) {
-            delta = 8 - delta;
-            crc = castagnoliSSE42(crc, p[..(int)(delta)]);
-            p = p[(int)(delta)..];
-        }
-    }
+    // Go aligns the buffer to an 8 byte boundary here before entering the K2/K1 loops. The managed
+    // port drops that step: see the castagnoliSSE42 header — it exists to make the CRC32Q loads
+    // aligned, the combining identity below holds for any split of the byte sequence, and a managed
+    // slice has no address stable enough to align against.
     // Process 3*K2 at a time.
     while (len(p) >= castagnoliK2 * 3) {
         // Compute CRC(I, A), CRC(0, B), and CRC(0, C).
@@ -182,13 +342,13 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
 }
 
 internal static bool archAvailableIEEE() {
-    return cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41;
+    return hasCLMUL;
 }
 
 internal static ж<slicing8Table> archIeeeTable8;
 
 internal static void archInitIEEE() {
-    if (!cpu.X86.HasPCLMULQDQ || !cpu.X86.HasSSE41) {
+    if (!hasCLMUL) {
         throw panic("not available");
     }
     // We still use slicing-by-8 for small buffers.
@@ -196,7 +356,7 @@ internal static void archInitIEEE() {
 }
 
 internal static uint32 archUpdateIEEE(uint32 crc, slice<byte> p) {
-    if (!cpu.X86.HasPCLMULQDQ || !cpu.X86.HasSSE41) {
+    if (!hasCLMUL) {
         throw panic("not available");
     }
     if (len(p) >= 64) {
