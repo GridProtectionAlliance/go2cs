@@ -11,10 +11,16 @@
 > the pending receive commit is a per-thread frame STACK, so a select nested in the winning
 > guard's target expression cannot destroy the outer commit; guard `NestedSelectRecvTarget`,
 > §3 amendment below), `64ec36bad` (racy `SendIsReady`/`ReceiveIsReady` probe surface deleted),
-> `8fcfda655` (`channel.Wait` plain timed wait, no per-call SemaphoreSlim). Gates run on the branch: CNR drift = exactly the
-> intended ctor-flip/default-form re-baselines (every line inspected), full behavioral suite
-> 464/464 with Output 434/0 after each unit; corpus + banked-package re-validation results are in
-> the branch report. Coordinator re-gates all-ships-rise at integration before landing on master.
+> `8fcfda655` (`channel.Wait` plain timed wait, no per-call SemaphoreSlim). **Round-2
+> verification:** `bd0b41d79` (CRITICAL emission fix — every select receive-case channel operand
+> hoisted into a select-scoped `selᴛN` temp, evaluated exactly once at select entry per Go's
+> spec; supersedes the "blocking-select goldens byte-identical" property; guard
+> `SelectOperandOnceEval`) and `c7ab16feb` (strand remarks corrected — unbounded absent the new
+> depth-64 cap-and-drop — plus the close-wake recv-bias divergence note in §4). Gates run on the
+> branch after every round: CNR drift = exactly the intended re-baselines (every line inspected,
+> byte-identical once committed), full behavioral suite green (466/466 with Output 436/0 after
+> round 2); corpus reconvert-diff 100%-classified + full 302-package build 0 errors; banked
+> canaries math/rand 43, text/scanner 18, sort 63; results in the branch reports. Coordinator re-gates all-ships-rise at integration before landing on master.
 > Produced 2026-07-24 by an adversarial design panel (three independent design lenses + a critic
 > that verified claims against the real goldens and golib source), synthesized by the campaign
 > coordinator. Companion to
