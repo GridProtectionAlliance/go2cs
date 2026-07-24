@@ -47,6 +47,18 @@
       : preference;
     window.parent.postMessage({ type: "go-tour-theme", theme, preference }, window.location.origin);
   }
+
+  function publishRun() {
+    const instance = editor();
+    window.parent.postMessage({
+      type: "go-tour-run",
+      source: instance ? instance.getValue() : "",
+      title: lessonTitle(),
+      path: currentPath(),
+      reason: "run"
+    }, window.location.origin);
+  }
+
   function attach() {
     const instance = editor();
     if (!instance || instance === currentEditor) return;
@@ -72,6 +84,9 @@
   });
   window.addEventListener("hashchange", inspectNavigation);
   window.addEventListener("popstate", inspectNavigation);
+  document.addEventListener("click", event => {
+    if (event.target instanceof Element && event.target.closest("#run")) publishRun();
+  }, true);
   new MutationObserver(inspectNavigation).observe(document.documentElement, { childList: true, subtree: true });
   new MutationObserver(publishTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", publishTheme);

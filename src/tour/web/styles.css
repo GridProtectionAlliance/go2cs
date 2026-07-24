@@ -259,6 +259,24 @@ button {
   gap: 6px;
 }
 
+.sync-run {
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sync-run input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--go);
+}
+
 .button {
   min-width: 66px;
   height: 30px;
@@ -458,7 +476,7 @@ button {
   display: flex;
   align-items: center;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .output-scroll {

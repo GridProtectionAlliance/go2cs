@@ -15,6 +15,8 @@ The interface is deliberately parallel:
 - **Transpile**, **Build**, and **.NET Run** keep their output separate.
 - Navigating to a Tour page converts it automatically.
 - Editing Go marks the C# stale until **Convert** is selected.
+- **Run with Go** optionally converts, builds, and runs .NET whenever the Go
+  program runs.
 - **Run** builds and executes the current conversion; it becomes **Kill** while
   the process is active.
 

@@ -6,6 +6,7 @@
   const divider = document.querySelector("#column-divider");
   const convertButton = document.querySelector("#convert-button");
   const runButton = document.querySelector("#run-button");
+  const syncRunCheckbox = document.querySelector("#sync-run");
   const codeView = document.querySelector("#code-view code");
   const projectView = document.querySelector("#project-view code");
   const sourceTabs = document.querySelector(".source-tabs");
@@ -31,6 +32,15 @@
   let runController = null;
   let autoConvertTimer = null;
   let activeOutput = "transpile";
+  let synchronizedRunPending = false;
+  let synchronizedRunProcessing = false;
+
+  const syncRunStorageKey = "go2cs-run-with-go";
+  try {
+    syncRunCheckbox.checked = localStorage.getItem(syncRunStorageKey) === "true";
+  } catch {
+    // The option still works for this page when storage is unavailable.
+  }
 
   const outputs = {
     transpile: idleStage("transpile", "Open a Tour page to convert its Go code."),
@@ -76,16 +86,21 @@
       document.documentElement.dataset.theme = event.data.theme === "light" ? "light" : "dark";
       return;
     }
-    if (event.data?.type !== "go-tour-source") return;
+    if (event.data?.type !== "go-tour-source" && event.data?.type !== "go-tour-run") return;
 
-    const nextSource = event.data.source || "";
-    const nextPath = event.data.path || "";
-    const navigation = event.data.reason === "navigation" || (nextPath && nextPath !== pagePath);
+    receiveTourSource(event.data);
+    if (event.data.type === "go-tour-run" && syncRunCheckbox.checked) queueSynchronizedRun();
+  }
+
+  function receiveTourSource(message) {
+    const nextSource = message.source || "";
+    const nextPath = message.path || "";
+    const navigation = message.reason === "navigation" || (nextPath && nextPath !== pagePath);
     const sourceChanged = nextSource !== goSource;
 
     goSource = nextSource;
     pagePath = nextPath;
-    lessonLabel.textContent = event.data.title || "Generated .NET";
+    lessonLabel.textContent = message.title || "Generated .NET";
 
     if (!goSource) {
       conversionStatus.textContent = "This page has no editable Go source";
@@ -113,6 +128,36 @@
     updateButtons();
   }
 
+  function queueSynchronizedRun() {
+    synchronizedRunPending = true;
+    processSynchronizedRun();
+  }
+
+  async function processSynchronizedRun() {
+    if (!synchronizedRunPending || synchronizedRunProcessing || converting || running || !runtimeReady) return;
+
+    synchronizedRunProcessing = true;
+    try {
+      if (!goSource) {
+        synchronizedRunPending = false;
+        return;
+      }
+      if (dirty || !conversionID) {
+        const converted = await convertSource(false);
+        if (!converted) {
+          synchronizedRunPending = false;
+          return;
+        }
+      }
+      if (!synchronizedRunPending || dirty || !conversionID) return;
+      synchronizedRunPending = false;
+      await runDotNet();
+    } finally {
+      synchronizedRunProcessing = false;
+      if (synchronizedRunPending) processSynchronizedRun();
+    }
+  }
+
   function scheduleAutoConvert() {
     if (!runtimeReady) return;
     clearTimeout(autoConvertTimer);
@@ -126,12 +171,13 @@
   }
 
   async function convertSource(automatic = false) {
-    if (!goSource || converting || running) return;
+    if (!goSource || converting || running) return false;
 
     convertController?.abort();
     const controller = new AbortController();
     convertController = controller;
     const sourceAtStart = goSource;
+    let converted = false;
 
     converting = true;
     conversionID = "";
@@ -157,6 +203,7 @@
 
       if (result.successful && !dirty) {
         conversionStatus.textContent = result.projectName ? `Converted  - ${result.projectName}` : "Converted";
+        converted = true;
       } else if (dirty) {
         conversionID = "";
         conversionStatus.textContent = "Go source changed -- convert to refresh";
@@ -173,7 +220,9 @@
       converting = false;
       renderOutputState();
       updateButtons();
+      processSynchronizedRun();
     }
+    return converted;
   }
 
   async function runDotNet() {
@@ -243,6 +292,7 @@
       running = false;
       renderOutputState();
       updateButtons();
+      processSynchronizedRun();
     }
   }
 
@@ -415,6 +465,14 @@
     conversionStatus.textContent = goSource ? "Switching runtime..." : "Waiting for Go source";
     updateButtons();
     if (goSource) scheduleAutoConvert();
+  });
+  syncRunCheckbox.addEventListener("change", () => {
+    if (!syncRunCheckbox.checked) synchronizedRunPending = false;
+    try {
+      localStorage.setItem(syncRunStorageKey, String(syncRunCheckbox.checked));
+    } catch {
+      // Keep the current-page preference when storage is unavailable.
+    }
   });
   convertButton.addEventListener("click", () => convertSource(false));
   runButton.addEventListener("click", runDotNet);
