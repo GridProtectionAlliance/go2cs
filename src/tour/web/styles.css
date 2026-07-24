@@ -233,12 +233,12 @@ button {
 }
 
 .dotnet-title strong {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dotnet-title span {
   color: #d1c8f1;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .cs-badge {
@@ -250,7 +250,7 @@ button {
   border: 1px solid rgba(255, 255, 255, .45);
   border-radius: 4px;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -267,7 +267,7 @@ button {
   border-radius: 3px;
   color: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -414,6 +414,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
 }
 
 .output-tabs button[aria-selected="true"] {
@@ -422,28 +423,32 @@ button {
 }
 
 .output-tabs button.passed::before {
-  content: "\2713  ";
+  content: "\2713";
   color: var(--green);
 }
 
 .output-tabs button.failed::before {
-  content: "\00d7  ";
+  content: "\00d7";
   color: var(--red);
 }
 
 .output-tabs button.running::before {
-  content: "\25cf  ";
+  content: "\25cf";
   color: var(--amber);
 }
 
 .output-tabs button.killed::before {
-  content: "\25a0  ";
+  content: "\25a0";
   color: var(--red);
 }
 
 .output-tabs button.skipped::before {
-  content: "\2013  ";
+  content: "\2013";
   color: var(--muted);
+}
+
+.output-tabs button::before {
+  margin-right: 5px;
 }
 
 #output-timing {
@@ -453,7 +458,7 @@ button {
   display: flex;
   align-items: center;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .output-scroll {
