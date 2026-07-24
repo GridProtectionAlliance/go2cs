@@ -13,9 +13,11 @@ func (p *pipelineRunner) build(ctx context.Context, request runRequest) (stageRe
 	}
 	defer p.release()
 
-	property := "-p:go2csPath=" + filepath.Join(p.repoRoot, "src") + string(filepath.Separator)
-	return p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout,
-		"dotnet", "build", artifact.project, "--nologo", "--verbosity:minimal", property), nil
+	args := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
+	if artifact.runtime.projectRoot != "" {
+		args = append(args, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
+	}
+	return p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout, "dotnet", args...), nil
 }
 
 func (p *pipelineRunner) execute(ctx context.Context, request runRequest) (stageResult, error) {
@@ -25,9 +27,11 @@ func (p *pipelineRunner) execute(ctx context.Context, request runRequest) (stage
 	}
 	defer p.release()
 
-	property := "-p:go2csPath=" + filepath.Join(p.repoRoot, "src") + string(filepath.Separator)
-	return p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout,
-		"dotnet", "run", "--no-build", "--project", artifact.project, property), nil
+	args := []string{"run", "--no-build", "--project", artifact.project}
+	if artifact.runtime.projectRoot != "" {
+		args = append(args, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
+	}
+	return p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout, "dotnet", args...), nil
 }
 
 func (p *pipelineRunner) savedArtifact(ctx context.Context, id string) (*conversionArtifact, error) {

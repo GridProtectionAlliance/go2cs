@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -64,6 +64,14 @@
       <div class="source-tabs" role="tablist" aria-label="Generated files">
         <button id="code-tab" role="tab" type="button" data-view="code" aria-selected="true">Code</button>
         <button id="project-tab" role="tab" type="button" data-view="project" aria-selected="false">Project</button>
+        <label class="runtime-picker" title="Choose the .NET runtime dependency source">
+          <span>Runtime</span>
+          <select id="runtime-mode" aria-label=".NET runtime dependency source">
+            <option value="core">Core source</option>
+            <option value="deployed">Deployed stdlib</option>
+            <option value="nuget">NuGet packages</option>
+          </select>
+        </label>
       </div>
 
       <div class="source-area">

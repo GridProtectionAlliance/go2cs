@@ -35,6 +35,9 @@ func main() {
 	addr := flag.String("addr", "127.0.0.1:4000", "Tour of go2cs address")
 	tourAddr := flag.String("tour-addr", "127.0.0.1:3999", "official Tour of Go address")
 	repoRoot := flag.String("repo", "", "go2cs repository root (auto-detected by default)")
+	deployedRoot := flag.String("deployed-root", "", "deploy-core root for the deployed stdlib runtime")
+	nugetSource := flag.String("nuget-source", "", "NuGet feed or folder containing go2cs packages")
+	nugetVersion := flag.String("nuget-version", "", "version of go2cs NuGet packages")
 	noTour := flag.Bool("no-tour", false, "do not start the official Tour process")
 	noOpen := flag.Bool("no-open", false, "do not open a browser")
 	flag.Parse()
@@ -62,9 +65,13 @@ func main() {
 
 	s := &server{
 		repoRoot: &root,
-		pipeline: newPipelineRunner(root),
-		tour:     tour,
-		static:   http.FileServer(http.FS(staticFS)),
+		pipeline: newPipelineRunner(root, pipelineOptions{
+			deployedRoot: *deployedRoot,
+			nugetSource:  *nugetSource,
+			nugetVersion: *nugetVersion,
+		}),
+		tour:   tour,
+		static: http.FileServer(http.FS(staticFS)),
 	}
 	defer s.pipeline.close()
 
@@ -124,6 +131,7 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		"ok":       true,
 		"tour":     s.tour.available(),
 		"repoRoot": *s.repoRoot,
+		"runtimes": s.pipeline.runtimeOptions(),
 	})
 }
 

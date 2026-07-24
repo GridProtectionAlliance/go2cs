@@ -10,6 +10,7 @@
   const projectView = document.querySelector("#project-view code");
   const sourceTabs = document.querySelector(".source-tabs");
   const outputTabs = document.querySelector(".output-tabs");
+  const runtimeSelect = document.querySelector("#runtime-mode");
   const outputScroll = document.querySelector("#output-scroll");
   const outputView = document.querySelector("#output-view");
   const outputTiming = document.querySelector("#output-timing");
@@ -19,6 +20,7 @@
   const connectionLabel = document.querySelector("#connection-label");
 
   let goSource = "";
+  let runtimeMode = runtimeSelect.value;
   let pagePath = "";
   let conversionID = "";
   let dirty = false;
@@ -49,6 +51,12 @@
       const response = await fetch("/api/health");
       const health = await response.json();
       setConnection(health.tour, health.tour ? "Tour of Go connected" : "Tour of Go offline");
+      for (const option of runtimeSelect.options) {
+        const runtime = health.runtimes?.find(candidate => candidate.value === option.value);
+        if (!runtime) continue;
+        option.disabled = !runtime.available;
+        option.title = runtime.detail || runtime.label;
+      }
     } catch {
       setConnection(false, "Local server disconnected");
     }
@@ -56,6 +64,10 @@
 
   function receiveTourMessage(event) {
     if (event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
+    if (event.data?.type === "go-tour-theme") {
+      document.documentElement.dataset.theme = event.data.theme === "light" ? "light" : "dark";
+      return;
+    }
     if (event.data?.type !== "go-tour-source") return;
 
     const nextSource = event.data.source || "";
@@ -123,7 +135,7 @@
       const response = await fetch("/api/convert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: sourceAtStart, name: lessonLabel.textContent }),
+        body: JSON.stringify({ source: sourceAtStart, name: lessonLabel.textContent, runtime: runtimeMode }),
         signal: controller.signal
       });
       const result = await response.json();
@@ -236,6 +248,7 @@
     runButton.disabled = !running && (!conversionID || dirty || converting);
     runButton.textContent = running ? "Kill" : "Run";
     runButton.classList.toggle("kill", running);
+    runtimeSelect.disabled = converting || running;
   }
 
   function renderGeneratedFiles(csharp, project) {
@@ -368,6 +381,16 @@
   outputTabs.addEventListener("click", event => {
     const button = event.target.closest("[data-output]");
     if (button) selectOutput(button.dataset.output);
+  });
+  runtimeSelect.addEventListener("change", () => {
+    runtimeMode = runtimeSelect.value;
+    conversionID = "";
+    dirty = Boolean(goSource);
+    outputs.build = idleStage("build", "Run the converted project to see build output.");
+    outputs.run = idleStage("run", "Run the converted project to see .NET output.");
+    conversionStatus.textContent = goSource ? "Switching runtime..." : "Waiting for Go source";
+    updateButtons();
+    if (goSource) scheduleAutoConvert();
   });
   convertButton.addEventListener("click", () => convertSource(false));
   runButton.addEventListener("click", runDotNet);

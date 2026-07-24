@@ -164,7 +164,12 @@ func (t *tourProxy) modifyResponse(response *http.Response) error {
 	}
 	_ = response.Body.Close()
 	html := string(body)
-	html = strings.Replace(html, "</head>", `<link rel="stylesheet" href="/bridge.css"></head>`, 1)
+	// Dark is the Tour of go2cs default. The Tour's cookie bootstrap still
+	// overrides this when the user has explicitly selected light or auto.
+	html = strings.Replace(html, `data-theme="auto"`, `data-theme="dark"`, 1)
+	html = strings.Replace(html, "</head>", `<script>
+try { if (localStorage.getItem("syntax") === null) localStorage.setItem("syntax", "true"); } catch (_) {}
+</script><link rel="stylesheet" href="/bridge.css"></head>`, 1)
 	html = strings.Replace(html, "</body>", `<script src="/bridge.js"></script></body>`, 1)
 	body = []byte(html)
 	response.Body = io.NopCloser(bytes.NewReader(body))

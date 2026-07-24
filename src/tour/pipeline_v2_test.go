@@ -88,8 +88,8 @@ func TestFormatTranspileTranscriptListsGeneratedFiles(t *testing.T) {
 		}
 	}
 
-	got := formatTranspileTranscript("go2cs diagnostic", root, "passed")
-	for _, want := range []string{"$ go2cs main.go", "go2cs diagnostic", "main.cs", "tour.local.demo.csproj", "Transpile completed."} {
+	got := formatTranspileTranscript("go2cs diagnostic", root, "passed", "Core source")
+	for _, want := range []string{"$ go2cs main.go", "Runtime: Core source", "go2cs diagnostic", "main.cs", "tour.local.demo.csproj", "Transpile completed."} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("transcript missing %q:\n%s", want, got)
 		}

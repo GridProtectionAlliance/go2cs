@@ -26,8 +26,9 @@ const (
 )
 
 type convertRequest struct {
-	Source string `json:"source"`
-	Name   string `json:"name,omitempty"`
+	Source  string `json:"source"`
+	Name    string `json:"name,omitempty"`
+	Runtime string `json:"runtime,omitempty"`
 }
 
 type runRequest struct {
@@ -40,6 +41,7 @@ type convertResult struct {
 	Project      string      `json:"project,omitempty"`
 	ProjectName  string      `json:"projectName,omitempty"`
 	Successful   bool        `json:"successful"`
+	Runtime      string      `json:"runtime"`
 	Stage        stageResult `json:"stage"`
 }
 
@@ -61,24 +63,36 @@ type conversionArtifact struct {
 	workDir   string
 	outputDir string
 	project   string
+	runtime   runtimeConfiguration
 	createdAt time.Time
 }
 
 type pipelineRunner struct {
-	repoRoot string
-	cacheDir string
-	slots    chan struct{}
-	buildMu  sync.Mutex
-	mu       sync.Mutex
-	saved    map[string]*conversionArtifact
+	repoRoot     string
+	cacheDir     string
+	slots        chan struct{}
+	buildMu      sync.Mutex
+	mu           sync.Mutex
+	saved        map[string]*conversionArtifact
+	deployedRoot string
+	nugetSource  string
+	nugetVersion string
 }
 
-func newPipelineRunner(repoRoot string) *pipelineRunner {
+func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRunner {
+	options := pipelineOptions{}
+	if len(supplied) > 0 {
+		options = supplied[0]
+	}
+	options = resolvePipelineOptions(repoRoot, options)
 	return &pipelineRunner{
-		repoRoot: repoRoot,
-		cacheDir: filepath.Join(repoRoot, "src", "tour", ".cache"),
-		slots:    make(chan struct{}, 2),
-		saved:    make(map[string]*conversionArtifact),
+		repoRoot:     repoRoot,
+		cacheDir:     filepath.Join(repoRoot, "src", "tour", ".cache"),
+		slots:        make(chan struct{}, 2),
+		saved:        make(map[string]*conversionArtifact),
+		deployedRoot: options.deployedRoot,
+		nugetSource:  options.nugetSource,
+		nugetVersion: options.nugetVersion,
 	}
 }
 
@@ -89,6 +103,10 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	}
 	if len(source) > maxSourceBytes {
 		return convertResult{}, validationError("source exceeds the 256 KiB local limit")
+	}
+	runtime, err := p.resolveRuntime(request.Runtime)
+	if err != nil {
+		return convertResult{}, err
 	}
 
 	if err := p.acquire(ctx); err != nil {
@@ -128,7 +146,7 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	}
 
 	transpile := p.runStage(ctx, "transpile", "Transpile", p.repoRoot, commandTimeout,
-		go2csBin, "-go2cspath", filepath.Join(p.repoRoot, "src"), inputDir, outputDir)
+		go2csBin, "-go2cspath", runtime.converterRoot, inputDir, outputDir)
 	if toolStage != nil {
 		transpile.DurationMS += toolStage.DurationMS
 		if toolStage.Output != "" {
@@ -136,10 +154,14 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 		}
 	}
 
-	result := convertResult{Stage: transpile}
+	result := convertResult{Runtime: runtime.mode, Stage: transpile}
 	result.CSharp, _ = collectCSharp(outputDir)
 	project, _ := findProject(outputDir)
 	if project != "" {
+		if err := prepareRuntimeProject(project, runtime); err != nil {
+			result.Stage.Status = "failed"
+			result.Stage.Output = appendOutputLine(result.Stage.Output, err.Error())
+		}
 		projectBytes, readErr := os.ReadFile(project)
 		if readErr == nil {
 			result.Project = string(projectBytes)
@@ -151,7 +173,7 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 		result.Stage.Status = "failed"
 		result.Stage.Output = appendOutputLine(result.Stage.Output, "go2cs did not emit a .csproj file.")
 	}
-	result.Stage.Output = formatTranspileTranscript(result.Stage.Output, outputDir, result.Stage.Status)
+	result.Stage.Output = formatTranspileTranscript(result.Stage.Output, outputDir, result.Stage.Status, runtime.label)
 	if result.Stage.Status != "passed" || project == "" {
 		return result, nil
 	}
@@ -165,6 +187,7 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 		workDir:   workDir,
 		outputDir: outputDir,
 		project:   project,
+		runtime:   runtime,
 		createdAt: time.Now(),
 	}
 	p.mu.Lock()
@@ -194,17 +217,22 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 		return runResult{}, conversionNotFoundError("that conversion has expired; convert the current Go source again")
 	}
 
-	property := "-p:go2csPath=" + filepath.Join(p.repoRoot, "src") + string(filepath.Separator)
-	build := p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout,
-		"dotnet", "build", artifact.project, "--nologo", "--verbosity:minimal", property)
+	buildArgs := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
+	if artifact.runtime.projectRoot != "" {
+		buildArgs = append(buildArgs, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
+	}
+	build := p.runStage(ctx, "build", "Build", artifact.outputDir, commandTimeout, "dotnet", buildArgs...)
 	result := runResult{Stages: []stageResult{build}}
 	if build.Status != "passed" {
 		result.Stages = append(result.Stages, skippedStage("run", ".NET Run"))
 		return result, nil
 	}
 
-	run := p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout,
-		"dotnet", "run", "--no-build", "--project", artifact.project, property)
+	runArgs := []string{"run", "--no-build", "--project", artifact.project}
+	if artifact.runtime.projectRoot != "" {
+		runArgs = append(runArgs, "-p:go2csPath="+artifact.runtime.projectRoot+string(filepath.Separator))
+	}
+	run := p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout, "dotnet", runArgs...)
 	result.Stages = append(result.Stages, run)
 	result.Successful = run.Status == "passed"
 	return result, nil
@@ -257,8 +285,8 @@ func (p *pipelineRunner) ensureGo2CS(ctx context.Context) (string, *stageResult)
 	return target, &stage
 }
 
-func formatTranspileTranscript(output, root, status string) string {
-	lines := []string{"$ go2cs main.go"}
+func formatTranspileTranscript(output, root, status, runtime string) string {
+	lines := []string{"$ go2cs main.go", "Runtime: " + runtime}
 	if output = strings.TrimSpace(output); output != "" {
 		lines = append(lines, output)
 	}

@@ -10,6 +10,8 @@ The interface is deliberately parallel:
 - The original Tour occupies the left two-thirds of the window.
 - Generated C# occupies the right third, with a draggable divider.
 - **Code** and **Project** tabs show the matching `.cs` and `.csproj`.
+- The **Runtime** selector chooses live source, a deployed stdlib, or NuGet
+  packages without changing the Go lesson.
 - **Transpile**, **Build**, and **.NET Run** keep their output separate.
 - Navigating to a Tour page converts it automatically.
 - Editing Go marks the C# stale until **Convert** is selected.
@@ -64,12 +66,37 @@ Useful options:
 - `-addr=127.0.0.1:4000`: address for Tour of go2cs
 - `-tour-addr=127.0.0.1:3999`: private address for the upstream Tour
 - `-repo=/path/to/go2cs`: explicit repository root
+- `-deployed-root=/path/to/go2cs`: root created by `deploy-core.ps1 stdlib`
+- `-nuget-source=/path/or/feed`: folder or feed containing go2cs packages
+- `-nuget-version=1.23.1.1`: package version to restore
 - `-no-tour`: do not launch the upstream Tour process
 - `-no-open`: do not open a browser
 
 `GO_TOUR_BIN` can point to the upstream `tour` executable. `GO2CS_BIN` can point
 to a prebuilt go2cs executable; otherwise the server builds and caches one in
 `src/tour/.cache`.
+
+## .NET runtime sources
+
+**Core source** is the default. It converts and builds against the current
+checkout's `src/core`, `src/gen`, and converted package projects, which is the
+best mode while developing go2cs itself.
+
+**Deployed stdlib** uses the compiled/full standard-library tree produced by:
+
+```powershell
+.\src\deploy-core.ps1 stdlib
+```
+
+The server discovers this at `$GOPATH/src/go2cs`. Override it with
+`-deployed-root` or `GO2CS_DEPLOYED_ROOT`.
+
+**NuGet packages** rewrites the generated project references to `go.gen`,
+`go.lib`, and the required `go.*` packages. The server prefers the local
+`src/artifacts/nupkg` feed when packages exist, then falls back to nuget.org.
+The version comes from `src/version.props`. Override either value with
+`-nuget-source` / `GO2CS_NUGET_SOURCE` and
+`-nuget-version` / `GO2CS_NUGET_VERSION`.
 
 ## Keyboard controls
 
