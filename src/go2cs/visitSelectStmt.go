@@ -37,6 +37,52 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		comClauses = append(comClauses, defaultClause)
 	}
 
+	// Go evaluates every case's channel operand exactly ONCE, at select entry. The emitted form
+	// otherwise evaluates a RECEIVE case's operand twice — once in the registration call and
+	// again as the winning guard's receiver — so a non-referentially-stable operand
+	// (`case <-time.After(d):`, a fresh-channel factory, or even a bare identifier that the
+	// guard's out-target expression reassigns before the struct receiver is read) re-evaluates
+	// to a DIFFERENT channel, and the select runtime's pending-frame core match (correctly)
+	// refuses to deliver the committed value. Hoist every receive-case operand into a
+	// select-scoped temp evaluated once before registration and used by BOTH the registration
+	// and the guard. Uniform — bare identifiers too: the out-target expression runs before a
+	// struct method call reads its receiver, so ANY operand can change under the guard
+	// (stability analysis of the out-target is a losing game), and channel<T> struct copies
+	// share one core, so the temp preserves identity. A SEND case needs no hoist: its operand
+	// and value are captured exactly once at registration into the SelectOp, and its winning
+	// label (`case N:`) carries no guard, so nothing re-evaluates.
+	recvTemps := make(map[int]string)
+
+	for i, comClause := range comClauses {
+		if comClause.Comm == nil {
+			continue
+		}
+
+		var chanExpr ast.Expr
+
+		if assignStmt, ok := comClause.Comm.(*ast.AssignStmt); ok {
+			if (len(assignStmt.Lhs) == 1 || len(assignStmt.Lhs) == 2) && len(assignStmt.Rhs) == 1 {
+				if unaryExpr, ok := assignStmt.Rhs[0].(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
+					chanExpr = unaryExpr.X
+				}
+			}
+		} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
+			if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
+				chanExpr = unaryExpr.X
+			}
+		}
+
+		if chanExpr == nil {
+			continue
+		}
+
+		tempName := getGlobalTempVarName("sel")
+		recvTemps[i] = tempName
+
+		v.targetFile.WriteString(v.newline)
+		v.writeOutput("var %s = %s;", tempName, v.convExpr(chanExpr, nil))
+	}
+
 	v.targetFile.WriteString(v.newline)
 
 	v.writeOutput("switch (")
@@ -57,7 +103,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	{
 		regIndex := 0
 
-		for _, comClause := range comClauses {
+		for i, comClause := range comClauses {
 			// The default clause (appended last) registers nothing.
 			if comClause.Comm == nil {
 				continue
@@ -87,12 +133,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 								// (see namedChanElemTypeArg).
 								v.targetFile.WriteString(v.namedChanElemTypeArg(unaryExpr.X))
 								v.targetFile.WriteRune('(')
-								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+								v.targetFile.WriteString(recvTemps[i])
 								v.targetFile.WriteString(", ")
 								v.targetFile.WriteString(EllipsisOperator)
 								v.targetFile.WriteRune(')')
 							} else {
-								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+								v.targetFile.WriteString(recvTemps[i])
 								v.targetFile.WriteString(".Receiving")
 							}
 							handled = true
@@ -133,12 +179,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 							// (see namedChanElemTypeArg).
 							v.targetFile.WriteString(v.namedChanElemTypeArg(unaryExpr.X))
 							v.targetFile.WriteRune('(')
-							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteString(recvTemps[i])
 							v.targetFile.WriteString(", ")
 							v.targetFile.WriteString(EllipsisOperator)
 							v.targetFile.WriteRune(')')
 						} else {
-							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteString(recvTemps[i])
 							v.targetFile.WriteString(".Receiving")
 						}
 						handled = true
@@ -190,7 +236,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 						if unaryExpr, ok := rhs.(*ast.UnaryExpr); ok {
 							if unaryExpr.Op == token.ARROW {
 								v.targetFile.WriteString(" when ")
-								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+								v.targetFile.WriteString(recvTemps[i])
 								v.targetFile.WriteRune('.')
 
 								if v.options.useChannelOperators {
@@ -252,7 +298,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 					if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {
 							v.targetFile.WriteString(" when ")
-							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteString(recvTemps[i])
 							v.targetFile.WriteRune('.')
 
 							if v.options.useChannelOperators {

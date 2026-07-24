@@ -1120,6 +1120,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectOperandOnceEval() => CheckTarget("SelectOperandOnceEval");
+
+    [TestMethod]
     public void CheckSelectRandomFairness() => CheckTarget("SelectRandomFairness");
 
     [TestMethod]

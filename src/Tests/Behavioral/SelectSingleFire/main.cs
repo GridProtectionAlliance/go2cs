@@ -16,11 +16,13 @@ internal static void Main() {
     }}
     fmt.Println("delivered:", len(a) + len(b));
     nint got = default!;
-    switch (select(ᐸꟷ(a, ꓸꓸꓸ), ᐸꟷ(b, ꓸꓸꓸ))) {
-    case 0 when a.ꟷᐳ(out got): {
+    var selᴛ1 = a;
+    var selᴛ2 = b;
+    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out got): {
         break;
     }
-    case 1 when b.ꟷᐳ(out got): {
+    case 1 when selᴛ2.ꟷᐳ(out got): {
         break;
     }}
     fmt.Println("got:", got, "remaining:", len(a) + len(b));

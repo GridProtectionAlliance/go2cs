@@ -6,8 +6,9 @@ partial class main_package {
 
 internal static void Main() {
     channel<nint> nilRecv = default!;
-    switch (trySelect(ᐸꟷ(nilRecv, ꓸꓸꓸ))) {
-    case 0 when nilRecv.ꟷᐳ(out var v): {
+    var selᴛ1 = nilRecv;
+    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out var v): {
         fmt.Println("nil recv took case", v);
         break;
     }
@@ -16,8 +17,9 @@ internal static void Main() {
         break;
     }}
     fmt.Println("nil len:", len(nilRecv), "nil cap:", cap(nilRecv));
-    switch (trySelect(ᐸꟷ(nilRecv, ꓸꓸꓸ))) {
-    case 0 when nilRecv.ꟷᐳ(out var v, out var ok): {
+    var selᴛ2 = nilRecv;
+    switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when selᴛ2.ꟷᐳ(out var v, out var ok): {
         fmt.Println("nil comma-ok took case", v, ok);
         break;
     }
@@ -26,8 +28,9 @@ internal static void Main() {
         break;
     }}
     var ready = new channel<nint>(1);
-    switch (trySelect(ᐸꟷ(ready, ꓸꓸꓸ))) {
-    case 0 when ready.ꟷᐳ(out var v): {
+    var selᴛ3 = ready;
+    switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+    case 0 when selᴛ3.ꟷᐳ(out var v): {
         fmt.Println("real recv took case", v);
         break;
     }
@@ -36,8 +39,9 @@ internal static void Main() {
         break;
     }}
     ready.ᐸꟷ(7);
-    switch (trySelect(ᐸꟷ(ready, ꓸꓸꓸ))) {
-    case 0 when ready.ꟷᐳ(out var v): {
+    var selᴛ4 = ready;
+    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+    case 0 when selᴛ4.ꟷᐳ(out var v): {
         fmt.Println("real recv", v);
         break;
     }
@@ -46,12 +50,14 @@ internal static void Main() {
         break;
     }}
     ready.ᐸꟷ(9);
-    switch (select(ᐸꟷ(nilRecv, ꓸꓸꓸ), ᐸꟷ(ready, ꓸꓸꓸ))) {
-    case 0 when nilRecv.ꟷᐳ(out var v): {
+    var selᴛ5 = nilRecv;
+    var selᴛ6 = ready;
+    switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+    case 0 when selᴛ5.ꟷᐳ(out var v): {
         fmt.Println("mixed took nil", v);
         break;
     }
-    case 1 when ready.ꟷᐳ(out var v): {
+    case 1 when selᴛ6.ꟷᐳ(out var v): {
         fmt.Println("mixed took real", v);
         break;
     }}

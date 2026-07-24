@@ -1120,6 +1120,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectOperandOnceEval() => CheckTarget("SelectOperandOnceEval");
+
+    [TestMethod]
     public void CheckSelectRandomFairness() => CheckTarget("SelectRandomFairness");
 
     [TestMethod]

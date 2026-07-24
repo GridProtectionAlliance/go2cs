@@ -128,12 +128,13 @@ internal static void neitherReady() {
     var full = new channel<nint>(1);
     full.ᐸꟷ(1);
     var empty = new channel<nint>(1);
-    switch (trySelect(full.ᐸꟷ(2, ꓸꓸꓸ), ᐸꟷ(empty, ꓸꓸꓸ))) {
+    var selᴛ1 = empty;
+    switch (trySelect(full.ᐸꟷ(2, ꓸꓸꓸ), ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0: {
         fmt.Println("neither ready: sent");
         break;
     }
-    case 1 when empty.ꟷᐳ(out var v): {
+    case 1 when selᴛ1.ꟷᐳ(out var v): {
         fmt.Println("neither ready: received", v);
         break;
     }

@@ -634,7 +634,9 @@ Go — see the [channel runtime](ConversionStrategies-Reference.md#real-channel-
 section of the reference.
 
 A goroutine over a `select` — the concurrency core — lowers to `goǃ(...)` and a `switch` over `select(...)`,
-with `ᐸꟷ` marking a receive-case and `ꟷᐳ` performing the receive:
+with `ᐸꟷ` marking a receive-case and `ꟷᐳ` performing the receive. Every receive case's channel
+operand is hoisted into a select-scoped temp (`selᴛN`) evaluated exactly once at select entry —
+Go's evaluation rule — and used by both the registration and the winning case's guard:
 
 ```go
 go func() {                     // context/context.go
@@ -647,12 +649,14 @@ go func() {                     // context/context.go
 ```
 ```csharp
 goǃ(() => {                     // context/context.cs
-    switch (select(ᐸꟷ(parent.Done(), ꓸꓸꓸ), ᐸꟷ(child.Done(), ꓸꓸꓸ))) {
-    case 0 when parent.Done().ꟷᐳ(out _): {
+    var selᴛ1 = parent.Done();
+    var selᴛ2 = child.Done();
+    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out _): {
         child.cancel(false, parent.Err(), Cause(parent));
         break;
     }
-    case 1 when child.Done().ꟷᐳ(out _): { break; }}
+    case 1 when selᴛ2.ꟷᐳ(out _): { break; }}
 });
 ```
 

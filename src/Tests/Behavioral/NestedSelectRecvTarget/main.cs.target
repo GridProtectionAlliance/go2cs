@@ -9,8 +9,9 @@ internal static array<nint> a = new(4);
 internal static channel<nint> innerCh = new channel<nint>(1);
 
 internal static nint idxDefault(nint i) {
-    switch (trySelect(ᐸꟷ(innerCh, ꓸꓸꓸ))) {
-    case 0 when innerCh.ꟷᐳ(out var v): {
+    var selᴛ1 = innerCh;
+    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out var v): {
         fmt.Println("  inner recv:", v);
         break;
     }
@@ -27,8 +28,9 @@ internal static nint idxBlocking(nint i) {
     goǃ(() => {
         readyʗ1.ᐸꟷ(100 + i);
     });
-    switch (select(ᐸꟷ(ready, ꓸꓸꓸ))) {
-    case 0 when ready.ꟷᐳ(out var v): {
+    var selᴛ2 = ready;
+    switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when selᴛ2.ꟷᐳ(out var v): {
         fmt.Println("  inner blocking recv:", v);
         break;
     }}
@@ -38,34 +40,39 @@ internal static nint idxBlocking(nint i) {
 internal static void Main() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(42);
-    switch (select(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out a[idxDefault(0)]): {
+    var selᴛ3 = ch;
+    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+    case 0 when selᴛ3.ꟷᐳ(out a[idxDefault(0)]): {
         fmt.Println("outer fired: a[0] =", a[0], "len(ch) =", len(ch));
         break;
     }}
     ch.ᐸꟷ(43);
     innerCh.ᐸꟷ(7);
-    switch (select(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out a[idxDefault(1)]): {
+    var selᴛ4 = ch;
+    switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+    case 0 when selᴛ4.ꟷᐳ(out a[idxDefault(1)]): {
         fmt.Println("outer fired: a[1] =", a[1], "len(ch) =", len(ch));
         break;
     }}
     ch.ᐸꟷ(44);
     ch.ᐸꟷ(45);
-    switch (select(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out a[idxDefault(2)]): {
+    var selᴛ5 = ch;
+    switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+    case 0 when selᴛ5.ꟷᐳ(out a[idxDefault(2)]): {
         fmt.Println("outer fired: a[2] =", a[2], "len(ch) =", len(ch), "next =", ᐸꟷ(ch));
         break;
     }}
     ch.ᐸꟷ(46);
-    switch (select(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out a[idxBlocking(3)]): {
+    var selᴛ6 = ch;
+    switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+    case 0 when selᴛ6.ꟷᐳ(out a[idxBlocking(3)]): {
         fmt.Println("outer fired: a[3] =", a[3], "len(ch) =", len(ch));
         break;
     }}
     ch.ᐸꟷ(47);
-    switch (trySelect(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out a[idxDefault(0)]): {
+    var selᴛ7 = ch;
+    switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+    case 0 when selᴛ7.ꟷᐳ(out a[idxDefault(0)]): {
         fmt.Println("outer default-form fired: a[0] =", a[0], "len(ch) =", len(ch));
         break;
     }

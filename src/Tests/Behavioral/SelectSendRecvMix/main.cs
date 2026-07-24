@@ -13,8 +13,9 @@ internal static void Main() {
     nint rounds = 0;
     while (len(data) > 0 || len(@out) == 0) {
         rounds++;
-        switch (select(ᐸꟷ(data, ꓸꓸꓸ), @out.ᐸꟷ(7, ꓸꓸꓸ))) {
-        case 0 when data.ꟷᐳ(out var v): {
+        var selᴛ1 = data;
+        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), @out.ᐸꟷ(7, ꓸꓸꓸ))) {
+        case 0 when selᴛ1.ꟷᐳ(out var v): {
             recvGot = v;
             break;
         }
@@ -27,20 +28,22 @@ internal static void Main() {
     var ch = new channel<nint>(1);
     ch.ᐸꟷ(3);
     nint took = 0;
-    switch (select(ch.ᐸꟷ(8, ꓸꓸꓸ), ᐸꟷ(ch, ꓸꓸꓸ))) {
+    var selᴛ2 = ch;
+    switch (select(ch.ᐸꟷ(8, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0: {
         fmt.Println("send fired on full channel (wrong)");
         break;
     }
-    case 1 when ch.ꟷᐳ(out took): {
+    case 1 when selᴛ2.ꟷᐳ(out took): {
         break;
     }}
     fmt.Println("took:", took, "len:", len(ch));
-    switch (select(ch.ᐸꟷ(8, ꓸꓸꓸ), ᐸꟷ(ch, ꓸꓸꓸ))) {
+    var selᴛ3 = ch;
+    switch (select(ch.ᐸꟷ(8, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0: {
         break;
     }
-    case 1 when ch.ꟷᐳ(out took): {
+    case 1 when selᴛ3.ꟷᐳ(out took): {
         fmt.Println("recv fired on empty channel (wrong)");
         break;
     }}

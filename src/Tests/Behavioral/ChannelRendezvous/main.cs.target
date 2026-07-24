@@ -16,8 +16,9 @@ internal static void Main() {
         fmt.Println("send: not ready (no receiver)");
         break;
     }}
-    switch (trySelect(ᐸꟷ(ch, ꓸꓸꓸ))) {
-    case 0 when ch.ꟷᐳ(out var v): {
+    var selᴛ1 = ch;
+    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out var v): {
         fmt.Println("recv: ready (wrong):", v);
         break;
     }

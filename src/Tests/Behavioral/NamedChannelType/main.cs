@@ -48,8 +48,9 @@ internal static void Main() {
     fmt.Println(sum);
     var sel = new intQueue(1);
     sel.ᐸꟷ(42);
-    switch (select(ᐸꟷ<nint>(sel, ꓸꓸꓸ))) {
-    case 0 when sel.ꟷᐳ(out var y): {
+    var selᴛ1 = sel;
+    switch (select(ᐸꟷ<nint>(selᴛ1, ꓸꓸꓸ))) {
+    case 0 when selᴛ1.ꟷᐳ(out var y): {
         fmt.Println(y);
         break;
     }}

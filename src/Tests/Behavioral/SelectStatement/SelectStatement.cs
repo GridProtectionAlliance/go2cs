@@ -26,12 +26,13 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     while (ᐧ) {
-        switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(quit, ꓸꓸꓸ))) {
+        var selᴛ1 = quit;
+        switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
         case 0: {
             (x, y) = (y, x + y);
             break;
         }
-        case 1 when quit.ꟷᐳ(out _): {
+        case 1 when selᴛ1.ꟷᐳ(out _): {
             fmt.Println("quit");
             return;
         }}
@@ -102,44 +103,52 @@ internal static void Main() {
     goǃ(g1, ch3);
     goǃ(g2, ch4);
     for (nint i = 0; i < 4; i++) {
-        switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
-        case 0 when ch1.ꟷᐳ(out var v1): {
+        var selᴛ2 = ch1;
+        var selᴛ3 = ch2;
+        var selᴛ4 = ch3;
+        var selᴛ5 = ch4;
+        switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+        case 0 when selᴛ2.ꟷᐳ(out var v1): {
             fmt.Println("Got: ", v1);
             break;
         }
-        case 1 when ch2.ꟷᐳ(out var v1): {
+        case 1 when selᴛ3.ꟷᐳ(out var v1): {
             fmt.Println("Got: ", v1);
             break;
         }
-        case 2 when ch3.ꟷᐳ(out var v1, out var okΔ1): {
+        case 2 when selᴛ4.ꟷᐳ(out var v1, out var okΔ1): {
             fmt.Println("OK: ", okΔ1, " -- got: ", v1);
             break;
         }
-        case 3 when ch4.ꟷᐳ(out a[f()]): {
+        case 3 when selᴛ5.ꟷᐳ(out a[f()]): {
             fmt.Println("Got: ", a[f()]);
             break;
         }}
     }
     ch1 = default!;
     close(ch2);
-    switch (select(ch1.ᐸꟷ(1, ꓸꓸꓸ), ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
+    var selᴛ6 = ch1;
+    var selᴛ7 = ch2;
+    var selᴛ8 = ch3;
+    var selᴛ9 = ch4;
+    switch (select(ch1.ᐸꟷ(1, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
     case 0: {
         fmt.Println("unexpected send to nil channel");
         break;
     }
-    case 1 when ch1.ꟷᐳ(out var v1): {
+    case 1 when selᴛ6.ꟷᐳ(out var v1): {
         fmt.Println("unexpected received from nil channel: ", v1);
         break;
     }
-    case 2 when ch2.ꟷᐳ(out var v1): {
+    case 2 when selᴛ7.ꟷᐳ(out var v1): {
         fmt.Println("closed channel 2 selected immediately: ", v1);
         break;
     }
-    case 3 when ch3.ꟷᐳ(out var v1, out var okΔ2): {
+    case 3 when selᴛ8.ꟷᐳ(out var v1, out var okΔ2): {
         fmt.Println("unexpected: OK: ", okΔ2, " -- got: ", v1);
         break;
     }
-    case 4 when ch4.ꟷᐳ(out a[f()]): {
+    case 4 when selᴛ9.ꟷᐳ(out a[f()]): {
         fmt.Println("unexpected: ", a[f()]);
         break;
     }}
@@ -184,19 +193,22 @@ internal static void Main() {
 }
 
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
-    switch (select(ᐸꟷ(a, ꓸꓸꓸ), ᐸꟷ(b, ꓸꓸꓸ))) {
-    case 0 when a.ꟷᐳ(out var m): {
+    var selᴛ10 = a;
+    var selᴛ11 = b;
+    switch (select(ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+    case 0 when selᴛ10.ꟷᐳ(out var m): {
         return "a:"u8 + m;
     }
-    case 1 when b.ꟷᐳ(out var m): {
+    case 1 when selᴛ11.ꟷᐳ(out var m): {
         return "b:"u8 + m;
     }}
     return default!;
 }
 
 internal static @string poll(channel<EmptyStruct> done) {
-    switch (trySelect(ᐸꟷ(done, ꓸꓸꓸ))) {
-    case 0 when done.ꟷᐳ(out _): {
+    var selᴛ12 = done;
+    switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
+    case 0 when selᴛ12.ꟷᐳ(out _): {
         return "done"u8;
     }
     default: {
@@ -217,11 +229,12 @@ internal static (raceResult, bool) raceSend() {
     var doneʗ1 = done;
     var resultsʗ1 = results;
     var racer = (bool primaryΔ1) => {
-        switch (select(resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ), ᐸꟷ(doneʗ1, ꓸꓸꓸ))) {
+        var selᴛ13 = doneʗ1;
+        switch (select(resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
         case 0: {
             break;
         }
-        case 1 when doneʗ1.ꟷᐳ(out _): {
+        case 1 when selᴛ13.ꟷᐳ(out _): {
             break;
         }}
     };

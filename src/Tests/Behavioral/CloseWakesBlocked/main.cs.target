@@ -51,12 +51,14 @@ internal static void Main() {
     var otherʗ1 = other;
     var res3ʗ1 = res3;
     goǃ(() => {
-        switch (select(ᐸꟷ(ch3ʗ1, ꓸꓸꓸ), ᐸꟷ(otherʗ1, ꓸꓸꓸ))) {
-        case 0 when ch3ʗ1.ꟷᐳ(out var v, out var ok): {
+        var selᴛ1 = ch3ʗ1;
+        var selᴛ2 = otherʗ1;
+        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when selᴛ1.ꟷᐳ(out var v, out var ok): {
             res3ʗ1.ᐸꟷ(fmt.Sprintf("select recv %d %t"u8, v, ok));
             break;
         }
-        case 1 when otherʗ1.ꟷᐳ(out var v): {
+        case 1 when selᴛ2.ꟷᐳ(out var v): {
             res3ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
             break;
         }}
@@ -78,12 +80,13 @@ internal static void Main() {
                 }
             }
         });
-        switch (select(ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ), ᐸꟷ(other2ʗ1, ꓸꓸꓸ))) {
+        var selᴛ3 = other2ʗ1;
+        switch (select(ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0: {
             res4ʗ1.ᐸꟷ("select send completed (wrong)"u8);
             break;
         }
-        case 1 when other2ʗ1.ꟷᐳ(out var v): {
+        case 1 when selᴛ3.ꟷᐳ(out var v): {
             res4ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
             break;
         }}

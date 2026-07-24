@@ -1049,6 +1049,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
 
     [TestMethod]
+    public void CheckSelectOperandOnceEval() => CheckTarget("SelectOperandOnceEval");
+
+    [TestMethod]
     public void CheckSelectRandomFairness() => CheckTarget("SelectRandomFairness");
 
     [TestMethod]
