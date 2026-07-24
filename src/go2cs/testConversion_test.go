@@ -102,6 +102,50 @@ func TestSkipParityCountsAsMatched(t *testing.T) {
 	}
 }
 
+// Address-pairing guards (X5, reflection-bridge chip): one-sided rows whose names differ only
+// by run-varying 0x-hex address tokens pair onto a shared key; ambiguity or collision with an
+// exact name leaves rows one-sided (fail loud, never mask); exact-matched names — including
+// deterministic hex literals used as names — are never touched.
+func TestPairAddressVariantNames(t *testing.T) {
+	goResults := map[string]string{
+		"TestAsValidation/*string(0xc0000f46b0)": "pass",   // pairs 1:1
+		"TestHex/0x1234":                         "pass",   // exact-matched hex literal — untouched
+		"TestAmbiguous/p(0xaaa)":                 "pass",   // ambiguous on the C# side — untouched
+		"TestPlain":                              "pass",
+	}
+	csResults := map[string]string{
+		"TestAsValidation/*string(0x10d6126)": "pass",
+		"TestHex/0x1234":                      "pass",
+		"TestAmbiguous/p(0xbbb)":              "fail",
+		"TestAmbiguous/p(0xccc)":              "pass",
+		"TestPlain":                           "pass",
+	}
+	csOutputs := map[string]string{
+		"TestAsValidation/*string(0x10d6126)": "captured output",
+	}
+
+	pairAddressVariantNames(goResults, csResults, csOutputs)
+
+	if _, ok := goResults["TestAsValidation/*string(0x?)"]; !ok {
+		t.Fatalf("go side not re-keyed: %#v", goResults)
+	}
+	if status, ok := csResults["TestAsValidation/*string(0x?)"]; !ok || status != "pass" {
+		t.Fatalf("cs side not re-keyed: %#v", csResults)
+	}
+	if output := csOutputs["TestAsValidation/*string(0x?)"]; output != "captured output" {
+		t.Fatalf("csOutputs did not follow the rename: %#v", csOutputs)
+	}
+	if _, ok := goResults["TestHex/0x1234"]; !ok {
+		t.Fatal("exact-matched deterministic hex name was collapsed")
+	}
+	if _, ok := goResults["TestAmbiguous/p(0xaaa)"]; !ok {
+		t.Fatalf("ambiguous row was re-keyed instead of staying one-sided: %#v", goResults)
+	}
+	if _, ok := csResults["TestAmbiguous/p(0xbbb)"]; !ok {
+		t.Fatalf("ambiguous cs rows must keep their originals: %#v", csResults)
+	}
+}
+
 // Disclosure-oracle guards: a hand-disclosed Go=pass/C#=fail divergence whose captured C#
 // failure output carries the pinned signature is reclassified disclosed-divergent, NOT a
 // mismatch; the SAME test failing with any other output is still a mismatch (the signature pin

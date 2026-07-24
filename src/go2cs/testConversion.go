@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"runtime/debug"
 	"sort"
@@ -2602,6 +2603,65 @@ func loadTestDisclosures(outputPath string) (map[string]testDisclosure, error) {
 // test name AND the pinned signature present in the captured C# failure output — is returned
 // as disclosed-divergent instead of a mismatch; any other failure shape of a disclosed test
 // (different signature, different status pair, a subtest) remains a strict mismatch.
+// addressTokenPattern matches a 0x-hex token in a subtest name — a pointer ADDRESS embedded via
+// %v/%p, run-varying on BOTH sides by construction (Go's own reruns disagree with themselves).
+var addressTokenPattern = regexp.MustCompile(`0x[0-9a-fA-F]+`)
+
+// pairAddressVariantNames re-keys the ONE-SIDED rows of the two result maps whose names differ
+// only by embedded 0x-hex address tokens onto a shared normalized key, so the status match
+// compares them as one row (errors' TestAsValidation/*string(0xc…) names). This is the SECOND
+// phase of matching — exact names already paired stay untouched, so a deterministic hex literal
+// used as a subtest name is never collapsed. Only UNAMBIGUOUS 1:1 pairs are re-keyed: a
+// normalized key claimed by multiple names on either side, or colliding with an existing exact
+// name, keeps all originals — the rows stay one-sided and the comparison fails loud, never
+// masking. csOutputs follows the C# rename so disclosure-signature matching keeps its text.
+func pairAddressVariantNames(goResults, csResults, csOutputs map[string]string) {
+	goOnly := make(map[string][]string)
+	csOnly := make(map[string][]string)
+
+	for name := range goResults {
+		if _, matched := csResults[name]; !matched {
+			if key := addressTokenPattern.ReplaceAllString(name, "0x?"); key != name {
+				goOnly[key] = append(goOnly[key], name)
+			}
+		}
+	}
+
+	for name := range csResults {
+		if _, matched := goResults[name]; !matched {
+			if key := addressTokenPattern.ReplaceAllString(name, "0x?"); key != name {
+				csOnly[key] = append(csOnly[key], name)
+			}
+		}
+	}
+
+	for key, goNames := range goOnly {
+		csNames := csOnly[key]
+
+		if len(goNames) != 1 || len(csNames) != 1 {
+			continue
+		}
+
+		if _, exists := goResults[key]; exists {
+			continue
+		}
+
+		if _, exists := csResults[key]; exists {
+			continue
+		}
+
+		goResults[key] = goResults[goNames[0]]
+		delete(goResults, goNames[0])
+		csResults[key] = csResults[csNames[0]]
+		delete(csResults, csNames[0])
+
+		if output, ok := csOutputs[csNames[0]]; ok {
+			csOutputs[key] = output
+			delete(csOutputs, csNames[0])
+		}
+	}
+}
+
 func matchTerminalStatuses(names []string, goResults, csResults map[string]string, disclosures map[string]testDisclosure, csOutputs map[string]string) (mismatches, skipped, disclosed []string) {
 	for _, name := range names {
 		goStatus, goOK := goResults[name]
@@ -2703,6 +2763,8 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			csResults = eligibleTerminalTestResults(csResults, manifest)
 		}
 	}
+	pairAddressVariantNames(goResults, csResults, csOutputs)
+
 	names := make([]string, 0, len(goResults)+len(csResults))
 	seen := HashSet[string]{}
 	for name := range goResults {
