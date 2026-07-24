@@ -30,6 +30,14 @@ func TestCollectCSharpPrefersSourceFiles(t *testing.T) {
 	}
 }
 
+func TestGo2CSConvertArgsPreserveComments(t *testing.T) {
+	got := strings.Join(go2csConvertArgs("core", "input", "output"), " ")
+	want := "-comments -go2cspath core input output"
+	if got != want {
+		t.Fatalf("go2csConvertArgs = %q, want %q", got, want)
+	}
+}
+
 func TestRunStageReportsKilledContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

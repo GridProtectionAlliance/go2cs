@@ -148,7 +148,7 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	}
 
 	transpile := p.runStage(ctx, "transpile", "Transpile", p.repoRoot, commandTimeout,
-		go2csBin, "-go2cspath", runtime.converterRoot, inputDir, outputDir)
+		go2csBin, go2csConvertArgs(runtime.converterRoot, inputDir, outputDir)...)
 	if toolStage != nil {
 		transpile.DurationMS += toolStage.DurationMS
 		if toolStage.Output != "" {
@@ -200,6 +200,10 @@ func (p *pipelineRunner) convert(ctx context.Context, request convertRequest) (c
 	result.ConversionID = id
 	result.Successful = true
 	return result, nil
+}
+
+func go2csConvertArgs(converterRoot, inputDir, outputDir string) []string {
+	return []string{"-comments", "-go2cspath", converterRoot, inputDir, outputDir}
 }
 
 func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult, error) {
