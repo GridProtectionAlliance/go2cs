@@ -414,6 +414,13 @@ Hard-won during this campaign. Read these before touching the relevant area.
   <class>, owned/pending"). Compiling ≠ correct; validating-via-hack ≠ validated. Never claim a
   package validates when it does not.
 - **Cadence.** Keep a fast pace using parallel options for continuous progress. Don't spin on a genuinely
-  blocked package — record the blocker, surface any needed ruling, move to the next viable one. **Push
-  is a deliberate, user-initiated ceremony** — land gpg-signed commits to local master and let the user
-  initiate `git push`. Pause/end only when when a major cross-section of viable packages validate or when blocked solely on user input. At push ceremony, pause with summary of progress.
+  blocked package — record the blocker, surface any needed ruling, move to the next viable one.
+- **Push policy (amended by user 2026-07-24).** The coordinator is authorized to `git push origin master`
+  at **gated clean points**: master states the coordinator judges safe and improved over the existing
+  stdlib corpus for running both the real-world example (main README.md) and the Tour of go2cs — i.e.
+  the full §5 gates for every change class landed, no known regression to those two consumer paths.
+  Rationale: with frequent machine reboots, code should end in the cloud more often than not. Landing
+  stays gpg-signed to local master first; push follows once the point qualifies. **The user's ritual
+  moves to the README.md update**: main README.md is updated only for notable/major corpus milestones,
+  and that update remains user-owned per [[go2cs-doc-update-cadence]]. Pause/end only when a major
+  cross-section of viable packages validates or when blocked solely on user input.
