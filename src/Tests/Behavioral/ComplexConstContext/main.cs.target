@@ -17,6 +17,9 @@ internal static void Main() {
     var e = complex(7 / 2, 0D);
     fmt.Println(q, real(e), imag(e));
     fmt.Println(gHalfPi / 2D);
+    float64 rf = 1.5D;
+    var r = complex(rf, 0D);
+    fmt.Println(real(r), imag(r));
 }
 
 } // end main_package

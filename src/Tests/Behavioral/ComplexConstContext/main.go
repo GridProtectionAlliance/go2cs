@@ -32,4 +32,13 @@ func main() {
 
 	// A FLOAT-kind operand keeps float division (gHalfPi is UntypedFloat): gHalfPi / 2 = 0.785...
 	fmt.Println(gHalfPi / 2)
+
+	// (4) The mirror of (2): an IMAGINARY literal whose imaginary part is ZERO (`0i`) may convert to
+	// a REAL float argument. With a TYPED first argument (`rf` is float64), complex()'s signature is
+	// complex(float64, float64), so go/types records `0i` as float64 — it must emit its real part
+	// (0D), not `.i()` (a Complex the float overload rejects, CS1503). This is exactly internal/
+	// fmtsort's `complex(math.NaN(), 0i)` shape. Guards convBasicLit's token.IMAG float-context arm.
+	var rf float64 = 1.5
+	r := complex(rf, 0i)
+	fmt.Println(real(r), imag(r))
 }

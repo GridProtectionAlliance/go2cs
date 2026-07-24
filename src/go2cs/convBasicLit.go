@@ -548,20 +548,37 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		// negative-zero real part.
 		isComplex64 := false
 
+		// An imaginary literal whose RESOLVED type is a REAL float (not complex): Go permits an
+		// untyped complex constant with a ZERO imaginary part (`0i`, value 0) to convert to a float
+		// parameter — `complex(math.NaN(), 0i)`, where complex()'s second parameter is float64
+		// (internal/fmtsort's sort_test.go). go/types records the literal's type as that float, and
+		// its REAL part (0) is what must be emitted: a `.i()` imaginary would be a compile error
+		// (CS1503, Complex not assignable to the float parameter). Only `0i` can reach this arm — a
+		// nonzero imaginary constant is not representable as a real float, so go/types never records
+		// one with a float type — but the emission is driven off the resolved type, not that fact.
+		resolvedFloat := false
+		resolvedFloat32 := false
+
 		// The mantissa's own value — the folded constant is COMPLEX (`0x1p-2i` → 0+0.25i), so the
 		// text handed to goFloatLiteralText must be matched against its IMAGINARY part, not the
-		// whole complex value.
+		// whole complex value. In the real-context arm it is matched against the REAL part instead.
 		var mantissaVal constant.Value
+		var realVal constant.Value
 
 		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
 			if tv.Value != nil {
 				mantissaVal = constant.Imag(tv.Value)
+				realVal = constant.Real(tv.Value)
 			}
 
 			if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
-				if basic.Kind() == types.Complex64 {
+				switch {
+				case basic.Kind() == types.Complex64:
 					isComplex64 = true
-				} else if basic.Info()&types.IsUntyped != 0 {
+				case basic.Info()&types.IsFloat != 0:
+					resolvedFloat = true
+					resolvedFloat32 = basic.Kind() == types.Float32
+				case basic.Info()&types.IsUntyped != 0:
 					if constContext := v.untypedConstContext(basicLit); constContext != nil {
 						switch constContext.Kind() {
 						case types.Complex64, types.Float32:
@@ -574,6 +591,12 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 
 		if !endsWith_i {
 			result.WriteString(value)
+		} else if resolvedFloat && resolvedFloat32 {
+			result.WriteString(goFloatLiteralText(value, realVal, true))
+			result.WriteRune('F')
+		} else if resolvedFloat {
+			result.WriteString(goFloatLiteralText(value, realVal, false))
+			result.WriteRune('D')
 		} else if isComplex64 {
 			result.WriteString(fmt.Sprintf("%sF.i()", goFloatLiteralText(value, mantissaVal, true)))
 		} else {
