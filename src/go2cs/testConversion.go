@@ -1682,7 +1682,21 @@ func aliasReferenceImports(infoFiles []string, productionPkgPath string, directD
 			target = strings.TrimSuffix(strings.TrimSpace(target), ";")
 
 			for token, paths := range tokens {
-				if strings.Contains(target, token+".") || strings.HasSuffix(target, token) {
+				// Three match shapes for a multi-segment package's alias target:
+				//   Contains(target, token+".")  — token is a leading/middle namespace segment.
+				//   HasSuffix(target, token)      — target ends with the fully-ROOTED token,
+				//                                    e.g. `go.os.exec_package` or `global::go.os.exec_package`
+				//                                    (math/rand's default_test.cs, emitted from namespace go.math).
+				//   HasSuffix(token, "."+target)  — target is the UNROOTED tail of the rooted token,
+				//                                    e.g. `os.exec_package` matching token `go.os.exec_package`.
+				//                                    A test emitted inside a namespace that SHADOWS the root
+				//                                    `go` (go/doc/comment's std_test.cs in namespace go.go.doc,
+				//                                    internal/abi's abi_test.cs in go.@internal) emits the alias
+				//                                    unrooted and relies on C# outward lookup; the single-segment
+				//                                    bareTokens path below never covers a multi-segment tail.
+				//                                    Anchored on the leading "." so `os.exec_package` cannot
+				//                                    match an unrelated `go.xos.exec_package`.
+				if strings.Contains(target, token+".") || strings.HasSuffix(target, token) || strings.HasSuffix(token, "."+target) {
 					sort.Strings(paths)
 					found.Add(paths[0])
 				}
