@@ -223,8 +223,10 @@ func (v *Visitor) movedInitOrdinal(obj types.Object) (int, bool) {
 }
 
 // packageInitMethodName composes the per-file init method name for a relocated var — the
-// TempVarMarker keeps it collision-free (no Go identifier can contain it), and a keyword-escaped
-// var name (`@base`) drops its escape (the composed name is not a keyword).
+// TempVarMarker makes a collision practically unreachable (ᴛ, U+1D1B, is an exotic glyph no
+// real Go code uses — but it IS a Unicode letter, so a pathological Go identifier CAN contain
+// it; see the marker-shape exposure note in ConversionStrategies-Reference.md), and a
+// keyword-escaped var name (`@base`) drops its escape (the composed name is not a keyword).
 func packageInitMethodName(csIDName string) string {
 	return "init" + TempVarMarker + strings.TrimPrefix(csIDName, "@")
 }
