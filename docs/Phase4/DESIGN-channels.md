@@ -6,7 +6,12 @@
 > unbuffered-make converter flip + gen-template de-clamp + ThreadPool floor + the 7 new behavioral
 > guards), **Unit 2** = `4281074fc` (default-form `trySelect` ordinal
 > lowering + the 5 default-form golden re-baselines + these doc updates). Unit 3 (waiter pooling /
-> lock tuning) remains deferred until profiled. Gates run on the branch: CNR drift = exactly the
+> lock tuning) remains deferred until profiled. **Adversarial verification round (post-gating):**
+> semantics skeptic clean; protocol skeptic findings fixed on the branch — `e9b9d80ab` (MAJOR:
+> the pending receive commit is a per-thread frame STACK, so a select nested in the winning
+> guard's target expression cannot destroy the outer commit; guard `NestedSelectRecvTarget`,
+> §3 amendment below), `64ec36bad` (racy `SendIsReady`/`ReceiveIsReady` probe surface deleted),
+> `8fcfda655` (`channel.Wait` plain timed wait, no per-call SemaphoreSlim). Gates run on the branch: CNR drift = exactly the
 > intended ctor-flip/default-form re-baselines (every line inspected), full behavioral suite
 > 464/464 with Output 434/0 after each unit; corpus + banked-package re-validation results are in
 > the branch report. Coordinator re-gates all-ships-rise at integration before landing on master.
