@@ -649,14 +649,14 @@ go func() {                     // context/context.go
 ```
 ```csharp
 goǃ(() => {                     // context/context.cs
-    var selᴛ1 = parent.Done();
-    var selᴛ2 = child.Done();
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var selᴛ2 = parent.Done();
+    var selᴛ3 = child.Done();
+    switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+    case 0 when selᴛ2.ꟷᐳ(out _): {
         child.cancel(false, parent.Err(), Cause(parent));
         break;
     }
-    case 1 when selᴛ2.ꟷᐳ(out _): { break; }}
+    case 1 when selᴛ3.ꟷᐳ(out _): { break; }}
 });
 ```
 
