@@ -434,6 +434,139 @@ func TestSelectTestProjectModelGatesOnBlackBoxOnly(t *testing.T) {
 	}
 }
 
+// loadTestVariantsForDir loads a throwaway module's production, internal-test, and external-test
+// variants for exercising the go/types-driven file-exclusion predicate. Either variant may be nil
+// (an internal-only or black-box-only suite).
+func loadTestVariantsForDir(t *testing.T, dir string) (internal, external *packages.Package) {
+	t.Helper()
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: dir, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	production := findProductionPackage(loaded, dir)
+	if production == nil {
+		t.Fatal("production package was not loaded")
+	}
+	return findTestVariants(loaded, production)
+}
+
+// excludedBaseNames reduces the cleaned-path exclusion set to a basename set for readable asserts.
+func excludedBaseNames(excluded map[string]bool) map[string]bool {
+	names := make(map[string]bool, len(excluded))
+	for path := range excluded {
+		names[filepath.Base(path)] = true
+	}
+	return names
+}
+
+// Phase-4D file-exclusion positive path (option-a ruling): an EXTERNAL Example-only file and an
+// INTERNAL Benchmark-only file are both dropped from the compile set (nothing they declare reaches
+// the run registry), while a file carrying a real Test function is retained. This is the go/token
+// shape — example_test.go (package token_test, one Example) + position_bench_test.go (one
+// Benchmark) — the CS0012 whitebox+blackbox unblock. The predicate is pure go/ast+go/types: a
+// text scan would miss that example_test.go's only TOP-LEVEL declaration is the Example (its
+// var/const/type/func tokens live inside a raw-string literal).
+func TestSelectCompileExcludedTestFilesDropsExampleAndBenchmarkOnly(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/exclude\n\ngo 1.23\n",
+		"lib.go": "package exclude\n\nfunc Search(n int) int { return n }\n",
+		"lib_test.go": "package exclude\n\nimport \"testing\"\n\n" +
+			"func TestSearch(t *testing.T) {\n\tif Search(2) != 2 {\n\t\tt.Fatal(\"bad\")\n\t}\n}\n",
+		"bench_test.go": "package exclude\n\nimport \"testing\"\n\n" +
+			"func BenchmarkSearch(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t\tSearch(i)\n\t}\n}\n",
+		"example_test.go": "package exclude_test\n\nimport (\n\t\"fmt\"\n\n\t\"example/exclude\"\n)\n\n" +
+			"func ExampleSearch() {\n\tfmt.Println(exclude.Search(1))\n\t// Output: 1\n}\n",
+	})
+
+	internal, external := loadTestVariantsForDir(t, dir)
+	if internal == nil || external == nil {
+		t.Fatalf("expected both internal and external test variants, got internal=%v external=%v", internal, external)
+	}
+
+	got := excludedBaseNames(selectCompileExcludedTestFiles(internal, external))
+	want := map[string]bool{"bench_test.go": true, "example_test.go": true}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("excluded files = %v, want %v", got, want)
+	}
+}
+
+// Condition (1) negative: an Example-only-LOOKING file that also declares a top-level var/const/type
+// is NOT excluded — imports do not count, but any non-Example/Benchmark declaration disqualifies the
+// whole file (conservative by design), so its Example still compiles alongside the disqualifying
+// declaration.
+func TestSelectCompileExcludedTestFilesKeepsExampleWithTopLevelVar(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/keepvar\n\ngo 1.23\n",
+		"lib.go": "package keepvar\n",
+		"lib_test.go": "package keepvar\n\nimport \"testing\"\n\n" +
+			"func TestPresent(t *testing.T) {}\n",
+		"example_test.go": "package keepvar_test\n\nimport \"fmt\"\n\n" +
+			"var greeting = \"hi\"\n\n" +
+			"func ExampleGreeting() {\n\tfmt.Println(greeting)\n\t// Output: hi\n}\n",
+	})
+
+	internal, external := loadTestVariantsForDir(t, dir)
+	got := excludedBaseNames(selectCompileExcludedTestFiles(internal, external))
+	if got["example_test.go"] {
+		t.Fatalf("a file with a top-level var must not be excluded; got %v", got)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected no exclusions, got %v", got)
+	}
+}
+
+// Condition (2) negative + the promotion fixpoint: an Example-only file whose Example symbol a
+// RETAINED test references must stay compiled — dropping it would leave the reference undefined.
+// wired_test.go qualifies under condition (1) but registry_test.go (a real Test) takes ExampleWired
+// as a value, so object identity (not text) pulls wired_test.go back into the compile set.
+func TestSelectCompileExcludedTestFilesKeepsReferencedExample(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/referenced\n\ngo 1.23\n",
+		"lib.go": "package referenced\n",
+		"wired_test.go": "package referenced\n\nimport \"fmt\"\n\n" +
+			"func ExampleWired() {\n\tfmt.Println(\"wired\")\n\t// Output: wired\n}\n",
+		"registry_test.go": "package referenced\n\nimport \"testing\"\n\n" +
+			"var examples = []func(){ExampleWired}\n\n" +
+			"func TestRun(t *testing.T) {\n\tfor _, e := range examples {\n\t\te()\n\t}\n}\n",
+	})
+
+	internal, external := loadTestVariantsForDir(t, dir)
+	got := excludedBaseNames(selectCompileExcludedTestFiles(internal, external))
+	if got["wired_test.go"] {
+		t.Fatalf("an Example referenced by a retained test must not be excluded; got %v", got)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected no exclusions, got %v", got)
+	}
+}
+
+// A TestMain or Fuzz function keeps a file compiled even though both are Phase-4D-deferred at the
+// run registry: the ruling scopes the FILE predicate to Example/Benchmark only, so neither a
+// TestMain-only nor a Fuzz-only file qualifies (conservative by design — they still compile).
+func TestSelectCompileExcludedTestFilesKeepsTestMainAndFuzzOnly(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/nonexcluded\n\ngo 1.23\n",
+		"lib.go": "package nonexcluded\n",
+		"lib_test.go": "package nonexcluded\n\nimport \"testing\"\n\n" +
+			"func TestPresent(t *testing.T) {}\n",
+		"main_test.go": "package nonexcluded\n\nimport (\n\t\"os\"\n\t\"testing\"\n)\n\n" +
+			"func TestMain(m *testing.M) {\n\tos.Exit(m.Run())\n}\n",
+		"fuzz_test.go": "package nonexcluded\n\nimport \"testing\"\n\n" +
+			"func FuzzThing(f *testing.F) {\n\tf.Fuzz(func(t *testing.T, b []byte) {})\n}\n",
+	})
+
+	internal, external := loadTestVariantsForDir(t, dir)
+	got := excludedBaseNames(selectCompileExcludedTestFiles(internal, external))
+	if len(got) != 0 {
+		t.Fatalf("TestMain-only and Fuzz-only files must not be excluded, got %v", got)
+	}
+}
+
 // Change C fallback gate: a reference-model conversion must fall back to the recompile model
 // exactly when the external variant's records demand a PRODUCTION anchor — a partial/adapter
 // merged into a production type declaration, impossible across an assembly boundary. Records

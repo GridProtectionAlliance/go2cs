@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"io/fs"
 	"os"
@@ -312,12 +313,17 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		return writeNoTestsManifest(production, inputPath, outputPath, targetParts, options)
 	}
 
+	// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the
+	// compile set (both models honor it below). Computed once from both variants — a cross-variant
+	// reference keeps a file compiled — and reused across the reference→recompile fallback.
+	compileExcluded := selectCompileExcludedTestFiles(internal, external)
+
 	projectName, projectNamespace := getProjectName(inputPath, options)
 	supported := NewHashSet(supportedTestCapabilities())
 	testInfoPath := filepath.Join(outputPath, testPackageInfoFileName)
 
 	model := selectTestProjectModel(internal, external)
-	conversion, err := convertTestVariants(model, production, internal, external, inputPath, outputPath, projectNamespace, supported, options)
+	conversion, err := convertTestVariants(model, production, internal, external, compileExcluded, inputPath, outputPath, projectNamespace, supported, options)
 
 	if errors.Is(err, errProductionAnchoredRecords) {
 		// The black-box suite records metadata that must anchor to production types — only a
@@ -325,7 +331,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		// is deterministic and the expensive go/packages load above is reused, so the fallback
 		// costs one extra emission pass.
 		model = testProjectRecompile
-		conversion, err = convertTestVariants(model, production, internal, external, inputPath, outputPath, projectNamespace, supported, options)
+		conversion, err = convertTestVariants(model, production, internal, external, compileExcluded, inputPath, outputPath, projectNamespace, supported, options)
 	}
 
 	if err != nil {
@@ -399,7 +405,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		return err
 	}
 
-	sources, err := classifyTestSources(inputPath, includedSources, external)
+	sources, err := classifyTestSources(inputPath, includedSources, compileExcluded, external)
 	if err != nil {
 		return err
 	}
@@ -460,7 +466,7 @@ type testVariantConversionResult struct {
 // errProductionAnchoredRecords when the external variant's records demand a production anchor —
 // the caller then re-runs the whole pass under testProjectRecompile (deterministic; the
 // go/packages load is shared, so the fallback costs only a second emission pass).
-func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, inputPath, outputPath, projectNamespace string, supported HashSet[string], options Options) (testVariantConversionResult, error) {
+func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, compileExcluded map[string]bool, inputPath, outputPath, projectNamespace string, supported HashSet[string], options Options) (testVariantConversionResult, error) {
 	result := testVariantConversionResult{
 		declarations:         make([]testDeclaration, 0),
 		outputFiles:          make([]string, 0),
@@ -543,6 +549,18 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 			result.includedSources.Add(filepath.Clean(entry.filePath))
 		}
 
+		// DISCOVERY runs over EVERY test file (below), so an excluded file's Example/Benchmark
+		// declarations still reach the manifest under their disclosed-unsupported status. EMISSION
+		// runs over the non-excluded files only — the excluded file's C# is never written and it is
+		// never a csproj compile item (Phase-4D file-exclusion ruling, selectCompileExcludedTestFiles).
+		emitEntries := make([]FileEntry, 0, len(entries))
+		for _, entry := range entries {
+			if compileExcluded[filepath.Clean(entry.filePath)] {
+				continue
+			}
+			emitEntries = append(emitEntries, entry)
+		}
+
 		capabilities := analyzeTestingCapabilities(variant)
 		found, foundMain := discoverTestDeclarations(variant, entries, inputPath, capabilities, supported)
 		result.declarations = append(result.declarations, found...)
@@ -564,7 +582,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 			result.requiredCapabilities.UnionWith(foundMain.RequiredCapabilities)
 		}
 
-		variantOutputs, imports, err := convertTestVariant(variant, entries, outputPath, projectNamespace, options)
+		variantOutputs, imports, err := convertTestVariant(variant, emitEntries, outputPath, projectNamespace, options)
 		if err != nil {
 			return result, err
 		}
@@ -764,6 +782,194 @@ func testFileEntries(pkg *packages.Package) []FileEntry {
 	}
 
 	return entries
+}
+
+// The manifest TestSources status/reason for a _test.go file dropped from the compile set by the
+// Phase-4D Example/Benchmark-only file-exclusion policy (selectCompileExcludedTestFiles). Distinct
+// from "platform-excluded" (a file build-constraints deselect): this file WAS selected for the
+// target but declares nothing the run registry admits, so its compilation is deferred alongside
+// its declarations' execution.
+const (
+	compileExcludedSourceStatus = "example-benchmark-only"
+	compileExcludedSourceReason = "file declares only Phase-4D-deferred Example/Benchmark functions; its compilation is deferred to Phase 4D along with their execution"
+)
+
+// isPhase4DExcludedTestFunc reports whether a top-level function declaration is a Phase-4D-deferred
+// Example or Benchmark — the EXACT classification discoverTestDeclarations applies for its
+// "example"/"benchmark" (status "unsupported") cases: no receiver, no results, no type params, and
+// either a zero-parameter func Example* or a single-*testing.B-parameter func Benchmark*. A
+// Test/TestMain/Fuzz func, a method, or a mis-signatured Example/Benchmark returns false. TestMain
+// and Fuzz are DELIBERATELY not treated as excluded here — the ruling scopes the file predicate to
+// Example/Benchmark (conservative by design), so a file declaring either stays in the compile set.
+func isPhase4DExcludedTestFunc(fn *ast.FuncDecl, info *types.Info) bool {
+	if fn.Recv != nil || fn.Name == nil {
+		return false
+	}
+
+	obj, ok := info.Defs[fn.Name].(*types.Func)
+	if !ok {
+		return false
+	}
+
+	sig, ok := obj.Type().(*types.Signature)
+	if !ok || sig.TypeParams().Len() != 0 || sig.Results().Len() != 0 {
+		return false
+	}
+
+	name := fn.Name.Name
+
+	if sig.Params().Len() == 0 {
+		return isGoTestName(name, "Example")
+	}
+
+	return sig.Params().Len() == 1 && isGoTestName(name, "Benchmark") && isTestingPointer(sig.Params().At(0).Type(), "B")
+}
+
+// testFileExclusionInfo holds the go/types facts the Phase-4D file-exclusion predicate needs for
+// one _test.go file: whether every top-level declaration it contributes is a Phase-4D-deferred
+// Example/Benchmark function (condition 1), the objects it declares (the reference targets of
+// condition 2), and every object it references (so a candidate promoted back to RETAINED can, in
+// turn, pull a file IT references back into the compile set — the condition-2 fixpoint).
+type testFileExclusionInfo struct {
+	path      string
+	qualifies bool                  // condition (1): declares only Example/Benchmark functions
+	declared  []types.Object        // top-level objects the file declares
+	used      map[types.Object]bool // objects the file references (go/types Uses)
+}
+
+// classifyTestFileForExclusion evaluates condition (1) for one test file and captures the go/types
+// objects condition (2) needs. A file qualifies when it declares at least one Phase-4D-deferred
+// Example/Benchmark function and NOTHING else at top level (import declarations aside).
+func classifyTestFileForExclusion(file *ast.File, info *types.Info, path string) *testFileExclusionInfo {
+	result := &testFileExclusionInfo{path: path, used: make(map[types.Object]bool)}
+
+	qualifies := true
+	hasExcludedFunc := false
+
+	for _, decl := range file.Decls {
+		switch typed := decl.(type) {
+		case *ast.GenDecl:
+			if typed.Tok == token.IMPORT {
+				continue // imports are not declarations for this predicate
+			}
+			qualifies = false // a top-level var/const/type disqualifies the file
+		case *ast.FuncDecl:
+			if isPhase4DExcludedTestFunc(typed, info) {
+				hasExcludedFunc = true
+				if typed.Name != nil {
+					if object := info.Defs[typed.Name]; object != nil {
+						result.declared = append(result.declared, object)
+					}
+				}
+			} else {
+				qualifies = false // a Test/TestMain/Fuzz func, a method, or a helper disqualifies
+			}
+		default:
+			qualifies = false
+		}
+	}
+
+	result.qualifies = qualifies && hasExcludedFunc
+
+	// Every referenced object, for the condition-(2) fixpoint. Collected for ALL files: a retained
+	// file's references are the exclusion driver, and a candidate's are needed once it is promoted.
+	// Defining idents resolve through Defs (not Uses) and are skipped, so a file's own Example name
+	// does not count as a reference to itself.
+	ast.Inspect(file, func(node ast.Node) bool {
+		if ident, ok := node.(*ast.Ident); ok {
+			if object := info.Uses[ident]; object != nil {
+				result.used[object] = true
+			}
+		}
+		return true
+	})
+
+	return result
+}
+
+// selectCompileExcludedTestFiles applies the user-approved Phase-4D file-exclusion ruling
+// ("option a", 2026-07-24): a _test.go file is dropped from the -tests conversion/compile set iff
+//   (1) every top-level declaration it contributes is a Phase-4D-deferred declaration — the file's
+//       declarations are EXCLUSIVELY func Example* / func Benchmark* (imports do not count as
+//       declarations; any var/const/type, or any other func — a Test/TestMain/Fuzz func, a method,
+//       or a mis-signatured Example/Benchmark — disqualifies the file, conservative by design), AND
+//   (2) no RETAINED test file references any object the file declares (resolved by go/types object
+//       identity across the loaded variant set, never by filename or text).
+//
+// Phase-4D already excludes Example/Benchmark DECLARATIONS from the run registry uniformly, so a
+// file that contributes nothing to the run contributes nothing to the compile. This unblocks the
+// compile-poisoning external Example-only files (go/token's example_test.go, whose whitebox+blackbox
+// recompile drags cross-assembly type identity into CS0012) WITHOUT touching the differential
+// oracle: discovery is left intact, so the excluded file's declarations still appear in the manifest
+// under their existing disclosed-unsupported status — the F6 census gate stays truthful and every
+// already-filtered Example/Benchmark stays filtered. Only the file's EMISSION and csproj
+// compile-membership are dropped. Returns the set of cleaned file paths to exclude.
+func selectCompileExcludedTestFiles(variants ...*packages.Package) map[string]bool {
+	infos := make([]*testFileExclusionInfo, 0)
+	byPath := make(map[string]*testFileExclusionInfo)
+
+	for _, variant := range variants {
+		if variant == nil {
+			continue
+		}
+
+		for i, file := range variant.Syntax {
+			if i >= len(variant.CompiledGoFiles) {
+				break
+			}
+
+			path := variant.CompiledGoFiles[i]
+			if !strings.HasSuffix(strings.ToLower(filepath.Base(path)), "_test.go") {
+				continue
+			}
+
+			cleaned := filepath.Clean(path)
+			if _, seen := byPath[cleaned]; seen {
+				continue
+			}
+
+			info := classifyTestFileForExclusion(file, variant.TypesInfo, cleaned)
+			infos = append(infos, info)
+			byPath[cleaned] = info
+		}
+	}
+
+	// Seed the excluded set with every condition-(1) qualifier, then relax it: a qualifier a
+	// RETAINED file references must stay compiled (condition 2). Promotion is a fixpoint — a
+	// newly-retained file's own references can pull further qualifiers back in — over a set that
+	// only ever shrinks, so it converges.
+	excluded := make(map[string]bool)
+	for _, info := range infos {
+		if info.qualifies {
+			excluded[info.path] = true
+		}
+	}
+
+	for changed := true; changed; {
+		changed = false
+
+		usedByRetained := make(map[types.Object]bool)
+		for _, info := range infos {
+			if excluded[info.path] {
+				continue
+			}
+			for object := range info.used {
+				usedByRetained[object] = true
+			}
+		}
+
+		for path := range excluded {
+			for _, object := range byPath[path].declared {
+				if usedByRetained[object] {
+					delete(excluded, path)
+					changed = true
+					break
+				}
+			}
+		}
+	}
+
+	return excluded
 }
 
 // convertTestVariant converts one test package variant's _test.go files into C# in outputPath.
@@ -1956,7 +2162,7 @@ func copyTestFixtures(inputPath, outputPath string) ([]string, error) {
 	return fixtures, nil
 }
 
-func classifyTestSources(inputPath string, included HashSet[string], external *packages.Package) ([]testSource, error) {
+func classifyTestSources(inputPath string, included HashSet[string], compileExcluded map[string]bool, external *packages.Package) ([]testSource, error) {
 	matches, err := filepath.Glob(filepath.Join(inputPath, "*_test.go"))
 	if err != nil {
 		return nil, err
@@ -1972,8 +2178,14 @@ func classifyTestSources(inputPath string, included HashSet[string], external *p
 				}
 			}
 		}
+		// compile-excluded is checked BEFORE included: a Phase-4D Example/Benchmark-only file was
+		// platform-SELECTED (so it is not platform-excluded) yet is deliberately not compiled, and
+		// its distinct status keeps the manifest truthful about why.
 		status, reason := "included", ""
-		if !included.Contains(filepath.Clean(path)) {
+		switch {
+		case compileExcluded[filepath.Clean(path)]:
+			status, reason = compileExcludedSourceStatus, compileExcludedSourceReason
+		case !included.Contains(filepath.Clean(path)):
 			status, reason = "platform-excluded", "not selected by go/packages for the requested GOOS/GOARCH and build constraints"
 		}
 		result = append(result, testSource{Path: filepath.ToSlash(filepath.Base(path)), Kind: kind, Status: status, Reason: reason})
