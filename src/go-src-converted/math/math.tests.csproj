@@ -82,7 +82,6 @@
     <Compile Include="dim_asm.cs" />
     <Compile Include="erf.cs" />
     <Compile Include="erfinv.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="exp.cs" />
     <Compile Include="exp2_noasm.cs" />
     <Compile Include="exp_amd64.cs" />
