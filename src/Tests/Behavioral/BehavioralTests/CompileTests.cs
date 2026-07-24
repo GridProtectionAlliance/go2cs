@@ -892,6 +892,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
+    public void CheckNestedSelectRecvTarget() => CheckTarget("NestedSelectRecvTarget");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

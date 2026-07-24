@@ -836,6 +836,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
 
     [TestMethod]
+    public void CheckNestedSelectRecvTarget() => CheckTarget("NestedSelectRecvTarget");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

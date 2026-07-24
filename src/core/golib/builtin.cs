@@ -457,8 +457,9 @@ public static class builtin
     /// <returns>Ordinal of the single case that fired.</returns>
     /// <remarks>
     /// A committed receive's value is handed to the winning case's guard
-    /// (<c>case N when ch.ꟷᐳ(out v):</c>) through a per-thread pending slot the guard consumes.
-    /// Nil-channel cases are never ready; a send case on a closed channel panics.
+    /// (<c>case N when ch.ꟷᐳ(out v):</c>) through a per-thread pending-frame stack the guard pops
+    /// (a stack so a select nested in the guard's target expression cannot destroy the outer
+    /// commit). Nil-channel cases are never ready; a send case on a closed channel panics.
     /// </remarks>
     public static int select(params SelectOp[] ops)
     {
@@ -476,8 +477,8 @@ public static class builtin
     /// <remarks>
     /// Shares <see cref="select"/>'s poll pass (same locking and pollorder) but never parks. A
     /// committed receive's value crosses to the winning case's guard through the same per-thread
-    /// pending slot; a send case on a closed channel panics even though a default exists (Go
-    /// semantics).
+    /// pending-frame stack; a send case on a closed channel panics even though a default exists
+    /// (Go semantics).
     /// </remarks>
     public static int trySelect(params SelectOp[] ops)
     {

@@ -86,7 +86,15 @@ case; on wake re-lock, unregister losers. The committed recv value crosses to th
 `case N when ch.ꟷᐳ(out v):` guard via a `[ThreadStatic]` pending slot, **hardened**: stash ONLY
 recv commits, explicitly clear on send-case wins (a select can have send and recv cases on the SAME
 channel — `SelectStatement` does), guards consume unconditionally, debug-assert the slot is empty on
-`select()` entry.
+`select()` entry. **[Amended by the adversarial verification round:** the slot is a per-thread
+pending-frame STACK popped by channel-core match — the guard's out-argument target expression is
+evaluated BEFORE the guard call, and legal Go can run another select there
+(`case a[f()] = <-ch:` where `f()` selects), which destroyed a single slot (outer value lost or the
+next buffered value stolen). Frames push/pop balanced across nesting, so the clear-on-send-win and
+assert-empty-on-entry hardenings above are superseded (both are destructive in a nested context);
+the accepted bounded residual — an exception unwinding between commit and consume strands an inert
+frame — is documented in `SelectPending` with a Debug-only depth-growth warning. Guard:
+`NestedSelectRecvTarget`.**]**
 
 **Emission/generator footprint (the entire visible change):**
 - Converter: `convCallExpr.go` unbuffered-make default literal `"1"` → `"0"` (covers plain and named

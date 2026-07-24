@@ -2764,7 +2764,7 @@ ReaderFrom;`. (This is one root among several in the io test suite, which remain
 
 ### Select statement lowering (terminating and empty clauses)
 
-A `select` lowers to a C# `switch` over a golib runtime call that commits exactly ONE case and returns its ordinal: the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` (selectgo — commits a uniformly-random ready case or parks), and the default form `switch (trySelect(…))` (the same poll pass, returning -1 so the C# `default:` label runs when no case is ready). Receive cases keep a `case N when ch.ꟷᐳ(out v):` guard that consumes the committed value; send cases are performed by the runtime commit and get a bare `case N:` label. The registration calls (`ᐸꟷ(ch, ꓸꓸꓸ)` receive, `ch.ᐸꟷ(v, ꓸꓸꓸ)` send) return `SelectOp` case descriptors and `select(params SelectOp[])` runs a faithful selectgo (see the channel-runtime section below): it commits exactly ONE ready case — chosen uniformly at random — or parks until one becomes ready. A committed receive's value crosses to the winning case's unchanged guard (`case N when ch.ꟷᐳ(out v):`) through a per-thread pending slot the guard consumes, so the emitted select text is identical to the pre-redesign form. Two structural completions (io pipe.go's `read`):
+A `select` lowers to a C# `switch` over a golib runtime call that commits exactly ONE case and returns its ordinal: the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` (selectgo — commits a uniformly-random ready case or parks), and the default form `switch (trySelect(…))` (the same poll pass, returning -1 so the C# `default:` label runs when no case is ready). Receive cases keep a `case N when ch.ꟷᐳ(out v):` guard that consumes the committed value; send cases are performed by the runtime commit and get a bare `case N:` label. The registration calls (`ᐸꟷ(ch, ꓸꓸꓸ)` receive, `ch.ᐸꟷ(v, ꓸꓸꓸ)` send) return `SelectOp` case descriptors and `select(params SelectOp[])` runs a faithful selectgo (see the channel-runtime section below): it commits exactly ONE ready case — chosen uniformly at random — or parks until one becomes ready. A committed receive's value crosses to the winning case's unchanged guard (`case N when ch.ꟷᐳ(out v):`) through a per-thread pending-frame stack the guard pops (a stack, so a select nested in the guard's target expression cannot destroy the outer commit — see the channel-runtime section), so the emitted select text is identical to the pre-redesign form. Two structural completions (io pipe.go's `read`):
 
 * **An EMPTY clause body still needs its jump.** C# requires every switch section to end in a jump statement (CS8070 on a final `default:`, CS0163 otherwise); the emitted `break;` was suppressed when the *previous* clause ended in a terminal `return` (the was-return flag is reset per statement, and an empty body has none). The flag resets per *clause* now — a bare Go `default:` emits `default: { break; }`.
 * **A terminating blocking select gets an unreachable trailing `return default!;`.** Go's spec makes a select with no `default:` whose every comm-clause body ends in a terminating statement itself terminating, so a value-returning function may end with it. The lowered form's guarded `case N when <recv>:` labels cannot prove exhaustiveness to C# (CS0161). Mirroring the switch guarded-terminal-default rule, the emission appends `return default!;` after the closing brace — gated on: no default, every clause terminating (`isTerminatingStmtList`, conservative), no select-targeting `break`, a value-returning signature, and not named-return-defer mode (void wrapper).
@@ -2833,7 +2833,7 @@ default: {
 Send cases get a bare `case N:` label in BOTH forms — the runtime call performed the winning send
 itself, so a guard would either send the value a second time or fail and silently skip the chosen
 clause body. Receive cases keep their `case N when ch.ꟷᐳ(out v):` guard, which consumes the
-committed value from the runtime's per-thread pending slot. Go's remaining rules live in the
+committed value from the runtime's per-thread pending-frame stack. Go's remaining rules live in the
 runtime: a **closed** channel's send case panics (Go panics even when a `default:` exists — the
 poll pass checks `closed` before readiness, so a closed FULL channel panics rather than taking the
 default), and a **nil** channel's case is never ready, so it is never chosen. golib's non-blocking
@@ -2889,11 +2889,19 @@ legacy `Sending` path):
   `SelectState`-linked waiter per case, where a single `winner` CAS is the single-fire authority
   every waker — plain send, plain receive, another select's commit, AND close — must win before
   touching a waiter. Publish-before-signal ordering and park-outside-the-lock discipline throughout.
-* **The committed receive value crosses to the guard via a per-thread pending slot**, consumed
-  unconditionally by `Received`/`ꟷᐳ`; only receive commits are stashed, a send-case win explicitly
-  clears the slot (a select may have send and receive cases on the SAME channel), and `select()`
-  debug-asserts the slot is empty on entry. When no pending commit exists the same guards are the
-  non-blocking probes of the `default:` form, unchanged.
+* **The committed receive value crosses to the guard via a per-thread pending-frame STACK** (not a
+  single slot): `select`/`trySelect` push a frame (channel core, value, ok) on a receive commit,
+  and the winning guard (`Received`/`ꟷᐳ`) pops exactly the frame whose core matches its own
+  channel. A stack because the guard's out-argument TARGET expression is evaluated BEFORE the
+  guard call, and legal Go can run another select there (`case a[f()] = <-ch:` where `f()`
+  selects) — the inner select pushes and pops its own frames, so the outer commit survives; a
+  single slot was destroyed by the inner select's entry (outer value lost, or the next buffered
+  value stolen — found by the adversarial verification round). Only receive commits push frames; a
+  send-case win touches nothing (a select may have send and receive cases on the SAME channel, and
+  clearing would destroy an outer frame mid-nest). Known bounded residual: an exception unwinding
+  between commit and consume strands a frame — inert (later guards match the top frame by core),
+  signaled by a Debug-only depth-growth warning, never a process-killing assert. With no matching
+  frame the same guards are non-blocking probes, unchanged.
 * **Close/panic semantics are Go's**: send on closed panics (even from within a select, and even
   when a `default:` exists); close of closed and close of nil panic; a parked select-send woken by
   close panics on its own thread; parked receivers (plain and select) wake with `(zero, false)`;

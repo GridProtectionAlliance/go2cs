@@ -527,46 +527,84 @@ internal sealed class ChanCore<T> : ChanCore
 }
 
 /// <summary>
-/// Per-thread hand-off slot carrying a blocking select's committed RECEIVE result from
-/// <c>builtin.select</c> to the winning case's guard (<c>case N when ch.ꟷᐳ(out v):</c>), which
-/// consumes it. Hardened per the channels redesign: ONLY receive commits are stashed, a send-case
-/// win explicitly clears the slot (a select may have send and receive cases on the SAME channel),
-/// guards consume unconditionally, and select() debug-asserts the slot is empty on entry.
+/// Per-thread STACK of pending receive commits carrying each select's committed RECEIVE result
+/// from <c>builtin.select</c>/<c>trySelect</c> to the winning case's guard
+/// (<c>case N when ch.ꟷᐳ(out v):</c>), which pops its own frame. A stack — not a single slot —
+/// because the guard's out-argument TARGET expression is evaluated BEFORE the guard call, and
+/// legal Go can run another select there (<c>case a[f()] = &lt;-ch:</c> where <c>f()</c> selects):
+/// the inner select pushes and pops its own frame, so the outer select's committed value survives.
+/// ONLY receive commits push frames (a send-case win pushes nothing — and must not touch the
+/// stack, or it would destroy an outer frame mid-nest); the winning guard pops exactly the frame
+/// whose channel core matches its own, so frames cannot be delivered to the wrong channel.
 /// </summary>
+/// <remarks>
+/// Known bounded residual (accepted, per the channels-redesign verification round): a panic or
+/// exception unwinding between a select's commit (frame pushed) and the winning guard's consume
+/// (frame popped) strands the frame on this thread's stack. A stranded frame is inert — later
+/// guards match by channel core against the TOP frame only, and every well-formed select pushes
+/// its winner's frame above any strand — so the failure is a bounded per-thread leak, not value
+/// corruption; the same unwind loses the committed value in Go terms (the panic abandoned the
+/// communication's result). Debug builds emit a depth-growth warning (never a process-killing
+/// assert) when the stack keeps growing, which is the observable signature of stranding.
+/// </remarks>
 internal static class SelectPending
 {
-    [ThreadStatic] private static bool t_hasValue;
-    [ThreadStatic] private static object? t_value;
-    [ThreadStatic] private static bool t_ok;
-
-    internal static bool HasValue => t_hasValue;
-
-    internal static void Set(object? value, bool ok)
+    private struct Frame
     {
-        t_value = value;
-        t_ok = ok;
-        t_hasValue = true;
+        internal ChanCore Core;
+        internal object? Value;
+        internal bool Ok;
     }
 
-    internal static void Clear()
+    private const int DepthWarnThreshold = 8;
+
+    [ThreadStatic] private static Stack<Frame>? t_frames;
+
+    /// <summary>Pushes a committed receive (called by the select runtime, exactly once per recv win).</summary>
+    internal static void Push(ChanCore core, object? value, bool ok)
     {
-        t_hasValue = false;
-        t_value = null;
-        t_ok = false;
+        Stack<Frame> frames = t_frames ??= new Stack<Frame>();
+
+        frames.Push(new Frame { Core = core, Value = value, Ok = ok });
+
+        // Debug-only growth warning (power-of-two gate to avoid spam): legitimate nesting depth is
+        // the number of selects currently mid-guard on this thread — reaching 8+ almost certainly
+        // means frames are being stranded by exceptions between commit and consume (see remarks).
+        if (frames.Count >= DepthWarnThreshold && (frames.Count & (frames.Count - 1)) == 0)
+            Debug.WriteLine($"go2cs WARNING: select pending-frame depth reached {frames.Count} on thread {Environment.CurrentManagedThreadId} — frames may have been stranded by exceptions unwinding between a select commit and its winning guard");
     }
 
-    internal static bool TryConsume(out object? value, out bool ok)
+    /// <summary>
+    /// Pops the pending receive for the winning guard's channel: consumes the TOP frame iff its
+    /// core matches <paramref name="core"/> — an inner select's frames are balanced (pushed and
+    /// popped within the guard's target-expression evaluation), so the matching frame is always on
+    /// top when the winning guard runs. A mismatched top is a select-discipline violation
+    /// (debug-asserted); in release the guard falls back to its non-blocking probe.
+    /// </summary>
+    internal static bool TryConsume(ChanCore? core, out object? value, out bool ok)
     {
-        if (!t_hasValue)
+        Stack<Frame>? frames = t_frames;
+
+        if (core is null || frames is null || frames.Count == 0)
         {
             value = null;
             ok = false;
             return false;
         }
 
-        value = t_value;
-        ok = t_ok;
-        Clear();
+        Frame top = frames.Peek();
+
+        if (!ReferenceEquals(top.Core, core))
+        {
+            Debug.Assert(false, "select pending frame does not match the winning guard's channel");
+            value = null;
+            ok = false;
+            return false;
+        }
+
+        frames.Pop();
+        value = top.Value;
+        ok = top.Ok;
         return true;
     }
 }
@@ -582,9 +620,6 @@ internal static class SelectRuntime
     /// <summary>Blocking select: returns the ordinal of the single case that fired.</summary>
     internal static int Run(SelectOp[] ops)
     {
-        Debug.Assert(!SelectPending.HasValue, "select entered with an unconsumed pending receive commit");
-        SelectPending.Clear();
-
         int liveCount = CountLive(ops);
 
         if (liveCount == 0)
@@ -659,14 +694,15 @@ internal static class SelectRuntime
 
         if (won.IsSend)
         {
-            SelectPending.Clear();
-
+            // A send-case win pushes no pending frame — and must not touch the stack: an OUTER
+            // select's committed frame may be in flight when this select runs nested inside the
+            // outer guard's target expression.
             if (!won.Ok)
                 throw new PanicException("send on closed channel");
         }
         else
         {
-            SelectPending.Set(won.Elem, won.Ok);
+            SelectPending.Push(ops[winner].Core!, won.Elem, won.Ok);
         }
 
         return winner;
@@ -679,9 +715,6 @@ internal static class SelectRuntime
     /// </summary>
     internal static int TryRun(SelectOp[] ops)
     {
-        Debug.Assert(!SelectPending.HasValue, "select entered with an unconsumed pending receive commit");
-        SelectPending.Clear();
-
         int liveCount = CountLive(ops);
 
         if (liveCount == 0)
@@ -722,15 +755,14 @@ internal static class SelectRuntime
                 if (core.TryCommitSendLocked(op.SendValue))
                 {
                     UnlockAll(lockOrder);
-                    SelectPending.Clear(); // a send-case win never leaves a receive commit behind
-                    return i;
+                    return i; // a send-case win pushes no pending frame (and must not touch the stack)
                 }
             }
             else
             {
                 if (core.TryCommitRecvLocked(out object? value, out bool ok))
                 {
-                    SelectPending.Set(value, ok);
+                    SelectPending.Push(core, value, ok);
                     UnlockAll(lockOrder);
                     return i;
                 }
@@ -1100,15 +1132,15 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// <param name="value">Output parameter for received value.</param>
     /// <returns><c>true</c> if a value was received; otherwise, <c>false</c>.</returns>
     /// <remarks>
-    /// When a blocking <c>select</c> committed a receive on this thread, the pending commit is
-    /// consumed here (unconditionally — the winning case's guard is the next expression the emitted
-    /// switch evaluates). Otherwise this is the non-blocking probe used by the <c>default:</c> form:
-    /// an OPEN empty channel is NOT ready (the default must be taken), while a CLOSED drained
-    /// channel IS ready with the zero value (Go semantics).
+    /// When a <c>select</c>/<c>trySelect</c> committed a receive on this channel on this thread,
+    /// the pending frame is popped here (matched by channel core — an inner select nested in the
+    /// guard's target expression pushes and pops its own frames, so this channel's frame is on top
+    /// when the winning guard runs). Otherwise this is a non-blocking probe: an OPEN empty channel
+    /// is NOT ready, while a CLOSED drained channel IS ready with the zero value (Go semantics).
     /// </remarks>
     public bool Received(out T value)
     {
-        if (SelectPending.TryConsume(out object? pending, out _))
+        if (SelectPending.TryConsume(m_core, out object? pending, out _))
         {
             value = pending is null ? default! : (T)pending;
             return true;
@@ -1135,7 +1167,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// <returns><c>true</c> if a receive committed; otherwise, <c>false</c>.</returns>
     public bool Received(out T value, out bool ok)
     {
-        if (SelectPending.TryConsume(out object? pending, out ok))
+        if (SelectPending.TryConsume(m_core, out object? pending, out ok))
         {
             value = pending is null ? default! : (T)pending;
             return true;
