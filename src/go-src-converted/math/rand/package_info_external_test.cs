@@ -17,7 +17,6 @@ using static go.math.rand_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 

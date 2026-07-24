@@ -67,7 +67,6 @@
   <ItemGroup>
     <Compile Include="auto_test.cs" />
     <Compile Include="default_test.cs" />
-    <Compile Include="example_test.cs" />
     <Compile Include="exp.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
@@ -121,7 +120,6 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\atomic\sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\sync.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\testing\iotest\testing.iotest.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\text\tabwriter\text.tabwriter.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
     <ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
